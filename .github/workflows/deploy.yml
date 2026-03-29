@@ -1,0 +1,71 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate index.html
+        run: |
+          cat > index.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html lang="zh-TW">
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>AI Blogs</title>
+            <style>
+              body { font-family: system-ui, sans-serif; max-width: 800px; margin: 60px auto; padding: 0 24px; color: #1a1a1a; }
+              h1 { font-size: 2rem; margin-bottom: 8px; }
+              p.subtitle { color: #666; margin-bottom: 40px; }
+              ul { list-style: none; padding: 0; }
+              li { border-bottom: 1px solid #eee; }
+              li:last-child { border-bottom: none; }
+              a { display: block; padding: 16px 0; text-decoration: none; color: #0070f3; font-size: 1.05rem; }
+              a:hover { color: #0051a8; text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <h1>AI Blogs</h1>
+            <p class="subtitle">文章列表</p>
+            <ul>
+          HTMLEOF
+
+          for f in *.html; do
+            [ "$f" = "index.html" ] && continue
+            label="${f%.html}"
+            echo "      <li><a href=\"$f\">$label</a></li>" >> index.html
+          done
+
+          cat >> index.html << 'HTMLEOF'
+            </ul>
+          </body>
+          </html>
+          HTMLEOF
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - uses: actions/deploy-pages@v4
+        id: deployment
