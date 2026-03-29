@@ -1,0 +1,18 @@
+{
+  "claude-skills-guide_1": {
+    "title": "Claude Skills 使用指南",
+    "description": "介紹如何使用 Claude Code 的 Skills 功能，打造更高效的 AI 工作流程。"
+  },
+  "claude-skills-guide-branded": {
+    "title": "Claude Skills 使用指南（品牌版）",
+    "description": "介紹如何使用 Claude Code 的 Skills 功能，打造更高效的 AI 工作流程。"
+  },
+  "vk-security-report_1": {
+    "title": "VK 安全報告",
+    "description": "針對 VK 平台的安全性分析報告，涵蓋潛在風險與建議對策。"
+  },
+  "vk-security-report-branded": {
+    "title": "VK 安全報告（品牌版）",
+    "description": "針對 VK 平台的安全性分析報告，涵蓋潛在風險與建議對策。"
+  }
+}

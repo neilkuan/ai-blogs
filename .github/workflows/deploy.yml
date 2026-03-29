@@ -25,41 +25,101 @@ jobs:
 
       - name: Generate index.html
         run: |
-          cat > index.html << 'HTMLEOF'
-          <!DOCTYPE html>
+          python3 << 'PYEOF'
+          import json, os, pathlib
+
+          meta = {}
+          if os.path.exists("metadata.json"):
+              with open("metadata.json") as f:
+                  meta = json.load(f)
+
+          files = sorted(
+              p.name for p in pathlib.Path(".").glob("*.html")
+              if p.name != "index.html"
+          )
+
+          items = []
+          for fname in files:
+              slug = fname.removesuffix(".html")
+              info = meta.get(slug, {})
+              title = info.get("title", slug)
+              desc  = info.get("description", "")
+              desc_html = f'<p class="desc">{desc}</p>' if desc else ""
+              items.append(
+                  f'<li><a href="{fname}"><span class="title">{title}</span>'
+                  f'{desc_html}</a></li>'
+              )
+
+          items_html = "\n".join(items)
+
+          html = f"""<!DOCTYPE html>
           <html lang="zh-TW">
           <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <title>AI Blogs</title>
             <style>
-              body { font-family: system-ui, sans-serif; max-width: 800px; margin: 60px auto; padding: 0 24px; color: #1a1a1a; }
-              h1 { font-size: 2rem; margin-bottom: 8px; }
-              p.subtitle { color: #666; margin-bottom: 40px; }
-              ul { list-style: none; padding: 0; }
-              li { border-bottom: 1px solid #eee; }
-              li:last-child { border-bottom: none; }
-              a { display: block; padding: 16px 0; text-decoration: none; color: #0070f3; font-size: 1.05rem; }
-              a:hover { color: #0051a8; text-decoration: underline; }
+              :root {{
+                --bg: #ffffff; --text: #1a1a1a; --sub: #666;
+                --border: #eee; --link: #0070f3; --link-hover: #0051a8;
+                --card-hover: #f7f9fc;
+              }}
+              [data-theme=dark] {{
+                --bg: #0f0f0f; --text: #e5e5e5; --sub: #999;
+                --border: #2a2a2a; --link: #58a6ff; --link-hover: #79b8ff;
+                --card-hover: #1a1a1a;
+              }}
+              * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+              body {{ font-family: system-ui, sans-serif; max-width: 800px; margin: 60px auto; padding: 0 24px; color: var(--text); background: var(--bg); transition: background .2s, color .2s; }}
+              header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }}
+              h1 {{ font-size: 2rem; }}
+              p.subtitle {{ color: var(--sub); margin-bottom: 40px; }}
+              ul {{ list-style: none; }}
+              li {{ border-bottom: 1px solid var(--border); }}
+              li:last-child {{ border-bottom: none; }}
+              a {{ display: block; padding: 18px 0; text-decoration: none; border-radius: 6px; }}
+              a:hover {{ background: var(--card-hover); padding-left: 8px; }}
+              .title {{ display: block; color: var(--link); font-size: 1.05rem; font-weight: 500; margin-bottom: 4px; }}
+              a:hover .title {{ color: var(--link-hover); }}
+              .desc {{ color: var(--sub); font-size: 0.9rem; line-height: 1.5; }}
+              button#toggle {{
+                background: none; border: 1px solid var(--border); color: var(--text);
+                padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.85rem;
+                transition: border-color .2s;
+              }}
+              button#toggle:hover {{ border-color: var(--link); }}
             </style>
           </head>
           <body>
-            <h1>AI Blogs</h1>
+            <header>
+              <h1>AI Blogs</h1>
+              <button id="toggle" onclick="toggleTheme()">🌙 深色</button>
+            </header>
             <p class="subtitle">文章列表</p>
             <ul>
-          HTMLEOF
-
-          for f in *.html; do
-            [ "$f" = "index.html" ] && continue
-            label="${f%.html}"
-            echo "      <li><a href=\"$f\">$label</a></li>" >> index.html
-          done
-
-          cat >> index.html << 'HTMLEOF'
+          {items_html}
             </ul>
+            <script>
+              const btn = document.getElementById('toggle');
+              const saved = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+              setTheme(saved);
+              function setTheme(t) {{
+                document.documentElement.dataset.theme = t;
+                btn.textContent = t === 'dark' ? '☀️ 淺色' : '🌙 深色';
+                localStorage.setItem('theme', t);
+              }}
+              function toggleTheme() {{
+                setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+              }}
+            </script>
           </body>
-          </html>
-          HTMLEOF
+          </html>"""
+
+          with open("index.html", "w") as f:
+              f.write(html)
+
+          print("Generated index.html with", len(files), "articles")
+          PYEOF
 
       - uses: actions/configure-pages@v6
 
