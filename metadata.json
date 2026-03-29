@@ -14,5 +14,9 @@
   "vk-security-report-branded": {
     "title": "VK 安全報告（品牌版）",
     "description": "針對 VK 平台的安全性分析報告，涵蓋潛在風險與建議對策。"
+  },
+  "kiro-team-vs-claude-code-agent-teams": {
+    "title": "Kiro CLI vs Claude Code：多 Agent 協作架構深度比較",
+    "description": "比較 kiro-team（Hub-and-Spoke）與 Claude Code Agent Teams（Peer-to-peer）兩大多 Agent 協作方案，含架構分析、選擇建議與 TeammateTool 發現史。"
   }
 }

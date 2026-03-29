@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="dark scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>kiro-team vs Claude Code Agent Teams — 多代理架構深度比較</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: '#6366f1',
+        accent: '#22d3ee',
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+        lightbg: '#f8fafc',
+        lightcard: '#ffffff',
+      },
+      fontFamily: {
+        heading: ['Poppins', 'system-ui', 'sans-serif'],
+        body: ['system-ui', '-apple-system', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Reading progress bar */
+  #progress-bar { transition: width 0.1s linear; }
+
+  /* Smooth animations */
+  .collapse-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, opacity 0.3s ease; opacity: 0; }
+  .collapse-content.open { max-height: 3000px; opacity: 1; transition: max-height 0.6s ease-in, opacity 0.3s ease; }
+
+  /* Tab animations */
+  .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+  .tab-panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Architecture diagram animations */
+  .hub-spoke .spoke { animation: spokeAppear 0.6s ease forwards; opacity: 0; }
+  .hub-spoke .spoke:nth-child(1) { animation-delay: 0.1s; }
+  .hub-spoke .spoke:nth-child(2) { animation-delay: 0.2s; }
+  .hub-spoke .spoke:nth-child(3) { animation-delay: 0.3s; }
+  .hub-spoke .spoke:nth-child(4) { animation-delay: 0.4s; }
+  @keyframes spokeAppear { to { opacity: 1; } }
+
+  .peer-node { animation: nodeFloat 3s ease-in-out infinite; }
+  .peer-node:nth-child(2) { animation-delay: 0.5s; }
+  .peer-node:nth-child(3) { animation-delay: 1s; }
+  .peer-node:nth-child(4) { animation-delay: 1.5s; }
+  @keyframes nodeFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* Pulse animation for hub */
+  .pulse-ring { animation: pulseRing 2s ease-out infinite; }
+  @keyframes pulseRing {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
+
+  /* Data flow animation */
+  .data-flow { animation: flowDash 1.5s linear infinite; }
+  @keyframes flowDash { to { stroke-dashoffset: -20; } }
+
+  /* Sidebar */
+  .sidebar-link.active { color: #6366f1; border-left-color: #6366f1; }
+  .dark .sidebar-link.active { color: #818cf8; border-left-color: #818cf8; }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  .dark ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  .light ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+  /* Code block */
+  .code-block { position: relative; }
+  .copy-btn { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity 0.2s; }
+  .code-block:hover .copy-btn { opacity: 1; }
+
+  /* Decision tree */
+  .decision-node { transition: all 0.3s ease; }
+  .decision-node:hover { transform: scale(1.03); }
+
+  /* Light mode overrides */
+  html:not(.dark) body { background: #f8fafc; color: #1e293b; }
+</style>
+</head>
+<body class="bg-darkbg text-gray-200 font-body">
+
+<!-- Reading Progress Bar -->
+<div id="progress-bar" class="fixed top-0 left-0 h-1 bg-gradient-to-r from-primary to-accent z-[100]" style="width:0%"></div>
+
+<!-- Dark/Light Toggle -->
+<button id="theme-toggle" class="fixed top-4 right-4 z-50 p-2.5 rounded-full bg-cardbg dark:bg-cardbg border border-gray-700 dark:border-gray-600 shadow-lg hover:scale-110 transition-transform" onclick="toggleTheme()" aria-label="Toggle theme">
+  <svg id="icon-moon" class="w-5 h-5 text-yellow-300 hidden dark:block" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+  <svg id="icon-sun" class="w-5 h-5 text-yellow-500 block dark:hidden" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+</button>
+
+<!-- Mobile TOC Toggle -->
+<button id="toc-toggle" class="fixed top-4 left-4 z-50 p-2.5 rounded-full bg-cardbg dark:bg-cardbg border border-gray-700 shadow-lg lg:hidden hover:scale-110 transition-transform" onclick="toggleSidebar()">
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+</button>
+
+<!-- Sidebar TOC -->
+<nav id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-gray-900/95 dark:bg-gray-900/95 backdrop-blur border-r border-gray-800 z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 overflow-y-auto pt-16 pb-8 px-4">
+  <div class="mb-6">
+    <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">目錄</span>
+  </div>
+  <ul class="space-y-1 text-sm">
+    <li><a href="#hero" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors">首頁</a></li>
+    <li><a href="#kiro-team" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors">kiro-team</a></li>
+    <li><a href="#kiro-arch" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors pl-6">架構設計</a></li>
+    <li><a href="#kiro-roles" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors pl-6">角色權限</a></li>
+    <li><a href="#kiro-workflow" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors pl-6">工作流程</a></li>
+    <li><a href="#kiro-proscons" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors pl-6">優缺點</a></li>
+    <li><a href="#claude-teams" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors">Agent Teams</a></li>
+    <li><a href="#claude-discovery" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors pl-6">發現故事</a></li>
+    <li><a href="#claude-ops" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors pl-6">13 種操作</a></li>
+    <li><a href="#claude-limits" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors pl-6">限制</a></li>
+    <li><a href="#comparison" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors">比較分析</a></li>
+    <li><a href="#decision" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors">選擇指南</a></li>
+    <li><a href="#subagent-vs-teams" class="sidebar-link block py-1.5 px-3 border-l-2 border-transparent text-gray-400 hover:text-primary transition-colors">Subagent vs Teams</a></li>
+  </ul>
+</nav>
+
+<!-- Main Content -->
+<main class="lg:ml-64 transition-all duration-300">
+
+  <!-- Hero Section -->
+  <section id="hero" class="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-darkbg to-accent/10 dark:from-primary/20 dark:via-darkbg dark:to-accent/10"></div>
+    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 1px 1px, rgba(99,102,241,0.3) 1px, transparent 0); background-size: 40px 40px;"></div>
+    <div class="relative z-10 text-center px-6 max-w-4xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30 text-primary text-sm mb-6">
+        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        多代理架構深度比較
+      </div>
+      <h1 class="font-heading font-extrabold text-4xl sm:text-5xl md:text-6xl mb-6 bg-gradient-to-r from-white via-gray-200 to-accent bg-clip-text text-transparent leading-tight">
+        kiro-team<br>
+        <span class="text-3xl sm:text-4xl md:text-5xl">vs</span><br>
+        Claude Code Agent Teams
+      </h1>
+      <p class="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+        從 Hub-and-Spoke 到 Peer-to-Peer，兩大 AI 多代理框架的架構哲學、能力邊界與實戰選擇
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="#kiro-team" class="px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold transition-all hover:scale-105 shadow-lg shadow-primary/25">探索 kiro-team</a>
+        <a href="#claude-teams" class="px-6 py-3 rounded-xl bg-cardbg hover:bg-gray-700 border border-gray-600 font-semibold transition-all hover:scale-105">探索 Agent Teams</a>
+      </div>
+    </div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+    </div>
+  </section>
+
+  <!-- PART 1: kiro-team -->
+  <section id="kiro-team" class="px-4 sm:px-8 py-20 max-w-5xl mx-auto">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">Part 1</span>
+    </div>
+    <h2 class="font-heading font-bold text-3xl sm:text-4xl mb-4 text-white dark:text-white">kiro-team</h2>
+    <p class="text-gray-400 text-lg mb-12">Hub-and-Spoke 架構 — Team Lead 作為中央協調者的多代理系統</p>
+
+    <!-- Architecture -->
+    <div id="kiro-arch" class="mb-16 scroll-mt-20">
+      <h3 class="font-heading font-semibold text-2xl mb-6 text-white flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        </span>
+        架構設計：Hub-and-Spoke
+      </h3>
+
+      <!-- Animated Architecture Diagram -->
+      <div class="bg-cardbg dark:bg-cardbg rounded-2xl border border-gray-800 p-8 mb-8">
+        <div class="hub-spoke flex flex-col items-center">
+          <svg viewBox="0 0 400 300" class="w-full max-w-md mx-auto" xmlns="http://www.w3.org/2000/svg">
+            <!-- Connection lines -->
+            <line x1="200" y1="130" x2="80" y2="240" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 4" class="data-flow"/>
+            <line x1="200" y1="130" x2="170" y2="250" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 4" class="data-flow"/>
+            <line x1="200" y1="130" x2="260" y2="250" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 4" class="data-flow"/>
+            <line x1="200" y1="130" x2="340" y2="240" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 4" class="data-flow"/>
+            <!-- Hub: Team Lead -->
+            <circle cx="200" cy="120" r="45" fill="#1e293b" stroke="#6366f1" stroke-width="2.5"/>
+            <circle cx="200" cy="120" r="52" fill="none" stroke="#6366f1" stroke-width="1" class="pulse-ring"/>
+            <text x="200" y="115" text-anchor="middle" fill="#c7d2fe" font-size="12" font-weight="600">Team Lead</text>
+            <text x="200" y="132" text-anchor="middle" fill="#94a3b8" font-size="10">中央協調者</text>
+            <!-- Spokes -->
+            <g class="spoke">
+              <circle cx="80" cy="248" r="32" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+              <text x="80" y="245" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="500">Builder</text>
+              <text x="80" y="260" text-anchor="middle" fill="#94a3b8" font-size="9">建構者</text>
+            </g>
+            <g class="spoke">
+              <circle cx="170" cy="258" r="32" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+              <text x="170" y="255" text-anchor="middle" fill="#fcd34d" font-size="11" font-weight="500">Validator</text>
+              <text x="170" y="270" text-anchor="middle" fill="#94a3b8" font-size="9">驗證者</text>
+            </g>
+            <g class="spoke">
+              <circle cx="260" cy="258" r="32" fill="#1e293b" stroke="#ec4899" stroke-width="2"/>
+              <text x="260" y="255" text-anchor="middle" fill="#f9a8d4" font-size="11" font-weight="500">Documenter</text>
+              <text x="260" y="270" text-anchor="middle" fill="#94a3b8" font-size="9">文件撰寫</text>
+            </g>
+            <g class="spoke">
+              <circle cx="340" cy="248" r="32" fill="#1e293b" stroke="#8b5cf6" stroke-width="2"/>
+              <text x="340" y="245" text-anchor="middle" fill="#c4b5fd" font-size="11" font-weight="500">Sub-agent</text>
+              <text x="340" y="260" text-anchor="middle" fill="#94a3b8" font-size="9">可擴充</text>
+            </g>
+            <!-- Arrow label -->
+            <text x="200" y="26" text-anchor="middle" fill="#64748b" font-size="11">所有溝通必須經過 Team Lead</text>
+          </svg>
+        </div>
+        <p class="text-center text-gray-500 text-sm mt-4">Hub-and-Spoke 模型 — 所有 sub-agent 只能透過 Team Lead 進行溝通</p>
+      </div>
+    </div>
+
+    <!-- Roles & Permissions -->
+    <div id="kiro-roles" class="mb-16 scroll-mt-20">
+      <h3 class="font-heading font-semibold text-2xl mb-6 text-white flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </span>
+        4 種角色 — 最小權限原則
+      </h3>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <!-- Team Lead -->
+        <div class="bg-cardbg rounded-xl border border-gray-800 p-5 hover:border-primary/50 transition-colors">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-xl">👑</span>
+            <div>
+              <h4 class="font-semibold text-white">Team Lead</h4>
+              <span class="text-xs text-gray-500">中央協調者</span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-300">read</span>
+            <span class="px-2 py-0.5 rounded text-xs bg-purple-500/20 text-purple-300">subagent</span>
+            <span class="px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-300">todo</span>
+          </div>
+        </div>
+        <!-- Builder -->
+        <div class="bg-cardbg rounded-xl border border-gray-800 p-5 hover:border-emerald-500/50 transition-colors">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center text-xl">🔨</span>
+            <div>
+              <h4 class="font-semibold text-white">Builder</h4>
+              <span class="text-xs text-gray-500">建構者</span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-300">read</span>
+            <span class="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-300">write</span>
+            <span class="px-2 py-0.5 rounded text-xs bg-orange-500/20 text-orange-300">shell</span>
+          </div>
+        </div>
+        <!-- Validator -->
+        <div class="bg-cardbg rounded-xl border border-gray-800 p-5 hover:border-amber-500/50 transition-colors">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center text-xl">✅</span>
+            <div>
+              <h4 class="font-semibold text-white">Validator</h4>
+              <span class="text-xs text-gray-500">驗證者</span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-300">read</span>
+            <span class="px-2 py-0.5 rounded text-xs bg-orange-500/20 text-orange-300">shell <span class="text-gray-500">(readonly)</span></span>
+          </div>
+        </div>
+        <!-- Documenter -->
+        <div class="bg-cardbg rounded-xl border border-gray-800 p-5 hover:border-pink-500/50 transition-colors">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center text-xl">📝</span>
+            <div>
+              <h4 class="font-semibold text-white">Documenter</h4>
+              <span class="text-xs text-gray-500">文件撰寫者</span>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-300">read</span>
+            <span class="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-300">write</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workflow -->
+    <div id="kiro-workflow" class="mb-16 scroll-mt-20">
+      <h3 class="font-heading font-semibold text-2xl mb-6 text-white flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </span>
+        三階段工作流程
+      </h3>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1 bg-cardbg rounded-xl border border-gray-800 p-6 relative">
+          <div class="absolute -top-3 left-4 px-3 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-semibold">Phase 1</div>
+          <h4 class="font-semibold text-white text-lg mt-2 mb-2">📋 Plan</h4>
+          <p class="text-gray-400 text-sm">Team Lead 分析任務、拆分子任務、建立 todo list、分配給各 sub-agent</p>
+        </div>
+        <div class="hidden sm:flex items-center text-gray-600">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </div>
+        <div class="flex-1 bg-cardbg rounded-xl border border-gray-800 p-6 relative">
+          <div class="absolute -top-3 left-4 px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-semibold">Phase 2</div>
+          <h4 class="font-semibold text-white text-lg mt-2 mb-2">⚙️ Execute</h4>
+          <p class="text-gray-400 text-sm">Sub-agents 在 git worktree 隔離環境中並行執行（最多 4 個並行）</p>
+        </div>
+        <div class="hidden sm:flex items-center text-gray-600">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </div>
+        <div class="flex-1 bg-cardbg rounded-xl border border-gray-800 p-6 relative">
+          <div class="absolute -top-3 left-4 px-3 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-xs font-semibold">Phase 3</div>
+          <h4 class="font-semibold text-white text-lg mt-2 mb-2">✨ Complete</h4>
+          <p class="text-gray-400 text-sm">Team Lead 合併結果、驗證輸出、整合 worktree 變更回主分支</p>
+        </div>
+      </div>
+
+      <!-- Config structure collapsible -->
+      <div class="mt-8">
+        <button onclick="toggleCollapse('kiro-config')" class="w-full flex items-center justify-between bg-cardbg rounded-xl border border-gray-800 px-6 py-4 hover:border-gray-600 transition-colors">
+          <span class="font-semibold text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+            設定檔結構：<code class="text-accent">.kiro/</code> 目錄
+          </span>
+          <svg id="kiro-config-arrow" class="w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div id="kiro-config" class="collapse-content">
+          <div class="code-block bg-gray-950 rounded-b-xl border border-t-0 border-gray-800 p-5 font-mono text-sm overflow-x-auto">
+            <button class="copy-btn px-2 py-1 rounded bg-gray-700 text-gray-300 text-xs hover:bg-gray-600" onclick="copyCode(this)">複製</button>
+<pre class="text-gray-300"><span class="text-emerald-400">.kiro/</span>
+├── <span class="text-blue-400">agents/</span>
+│   ├── team-lead.md
+│   ├── builder.md
+│   ├── validator.md
+│   └── documenter.md
+├── <span class="text-yellow-400">prompts/</span>
+│   ├── plan.md
+│   ├── execute.md
+│   └── complete.md
+└── <span class="text-pink-400">scripts/</span>
+    ├── create-worktree.sh
+    └── merge-worktree.sh</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Platform limitations collapsible -->
+      <div class="mt-4">
+        <button onclick="toggleCollapse('kiro-limits')" class="w-full flex items-center justify-between bg-cardbg rounded-xl border border-gray-800 px-6 py-4 hover:border-gray-600 transition-colors">
+          <span class="font-semibold text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+            平台限制
+          </span>
+          <svg id="kiro-limits-arrow" class="w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div id="kiro-limits" class="collapse-content">
+          <div class="bg-amber-950/30 rounded-b-xl border border-t-0 border-amber-900/40 p-5">
+            <p class="text-amber-200/80 text-sm mb-3">Sub-agents 無法使用以下工具：</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-2.5 py-1 rounded bg-red-500/15 text-red-400 text-xs font-mono">todo</span>
+              <span class="px-2.5 py-1 rounded bg-red-500/15 text-red-400 text-xs font-mono">grep</span>
+              <span class="px-2.5 py-1 rounded bg-red-500/15 text-red-400 text-xs font-mono">glob</span>
+              <span class="px-2.5 py-1 rounded bg-red-500/15 text-red-400 text-xs font-mono">web_search</span>
+              <span class="px-2.5 py-1 rounded bg-red-500/15 text-red-400 text-xs font-mono">thinking</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pros/Cons -->
+    <div id="kiro-proscons" class="scroll-mt-20">
+      <h3 class="font-heading font-semibold text-2xl mb-6 text-white flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </span>
+        優缺點分析
+      </h3>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="bg-emerald-950/30 rounded-xl border border-emerald-900/40 p-5">
+          <h4 class="text-emerald-400 font-semibold mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            優勢
+          </h4>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">●</span>零依賴，純設定檔</li>
+            <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">●</span>最小權限原則設計</li>
+            <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">●</span>Git worktree 隔離環境</li>
+            <li class="flex items-start gap-2"><span class="text-emerald-400 mt-0.5">●</span>最多 4 個 sub-agent 並行</li>
+          </ul>
+        </div>
+        <div class="bg-red-950/30 rounded-xl border border-red-900/40 p-5">
+          <h4 class="text-red-400 font-semibold mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            劣勢
+          </h4>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">●</span>Sub-agents 無法使用 grep/glob</li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">●</span>沒有共享任務看板</li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">●</span>早期階段（僅 4 commits）</li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-0.5">●</span>僅支援 Kiro CLI 平台</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Divider -->
+  <div class="max-w-5xl mx-auto px-8">
+    <div class="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+  </div>
+
+  <!-- PART 2: Claude Code Agent Teams -->
+  <section id="claude-teams" class="px-4 sm:px-8 py-20 max-w-5xl mx-auto">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-semibold uppercase tracking-wider">Part 2</span>
+    </div>
+    <h2 class="font-heading font-bold text-3xl sm:text-4xl mb-4 text-white">Claude Code Agent Teams</h2>
+    <p class="text-gray-400 text-lg mb-12">真正的 Peer-to-Peer 協作 — TeammateTool 驅動的對等式多代理架構</p>
+
+    <!-- Architecture Diagram -->
+    <div class="bg-cardbg rounded-2xl border border-gray-800 p-8 mb-12">
+      <svg viewBox="0 0 400 280" class="w-full max-w-md mx-auto" xmlns="http://www.w3.org/2000/svg">
+        <!-- Peer connections (mesh) -->
+        <line x1="120" y1="100" x2="280" y2="100" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6 4" class="data-flow"/>
+        <line x1="120" y1="100" x2="120" y2="220" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6 4" class="data-flow"/>
+        <line x1="120" y1="100" x2="280" y2="220" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6 4" class="data-flow"/>
+        <line x1="280" y1="100" x2="120" y2="220" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6 4" class="data-flow"/>
+        <line x1="280" y1="100" x2="280" y2="220" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6 4" class="data-flow"/>
+        <line x1="120" y1="220" x2="280" y2="220" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6 4" class="data-flow"/>
+        <!-- Peer nodes -->
+        <g class="peer-node">
+          <circle cx="120" cy="100" r="35" fill="#1e293b" stroke="#22d3ee" stroke-width="2"/>
+          <text x="120" y="97" text-anchor="middle" fill="#a5f3fc" font-size="11" font-weight="500">Agent A</text>
+          <text x="120" y="112" text-anchor="middle" fill="#94a3b8" font-size="9">對等節點</text>
+        </g>
+        <g class="peer-node">
+          <circle cx="280" cy="100" r="35" fill="#1e293b" stroke="#22d3ee" stroke-width="2"/>
+          <text x="280" y="97" text-anchor="middle" fill="#a5f3fc" font-size="11" font-weight="500">Agent B</text>
+          <text x="280" y="112" text-anchor="middle" fill="#94a3b8" font-size="9">對等節點</text>
+        </g>
+        <g class="peer-node">
+          <circle cx="120" cy="220" r="35" fill="#1e293b" stroke="#22d3ee" stroke-width="2"/>
+          <text x="120" y="217" text-anchor="middle" fill="#a5f3fc" font-size="11" font-weight="500">Agent C</text>
+          <text x="120" y="232" text-anchor="middle" fill="#94a3b8" font-size="9">對等節點</text>
+        </g>
+        <g class="peer-node">
+          <circle cx="280" cy="220" r="35" fill="#1e293b" stroke="#22d3ee" stroke-width="2"/>
+          <text x="280" y="217" text-anchor="middle" fill="#a5f3fc" font-size="11" font-weight="500">Agent D</text>
+          <text x="280" y="232" text-anchor="middle" fill="#94a3b8" font-size="9">對等節點</text>
+        </g>
+        <!-- Shared Task Board -->
+        <rect x="155" y="140" width="90" height="40" rx="8" fill="#6366f1" fill-opacity="0.2" stroke="#6366f1" stroke-width="1.5"/>
+        <text x="200" y="157" text-anchor="middle" fill="#c7d2fe" font-size="10" font-weight="600">Task Board</text>
+        <text x="200" y="170" text-anchor="middle" fill="#94a3b8" font-size="9">共享任務</text>
+        <!-- Label -->
+        <text x="200" y="26" text-anchor="middle" fill="#64748b" font-size="11">所有 Agent 對等溝通 + 共享任務看板</text>
+      </svg>
+      <p class="text-center text-gray-500 text-sm mt-4">Peer-to-Peer 模型 — 每個 Agent 都能直接溝通，共享 Task Board</p>
+    </div>
+
+    <!-- Discovery Story -->
+    <div id="claude-discovery" class="mb-12 scroll-mt-20">
+      <h3 class="font-heading font-semibold text-2xl mb-6 text-white flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </span>
+        發現故事
+      </h3>
+      <div class="relative">
+        <!-- Timeline -->
+        <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-700"></div>
+        <div class="space-y-8 pl-12">
+          <div class="relative">
+            <div class="absolute -left-[2.35rem] w-4 h-4 rounded-full bg-primary border-4 border-darkbg"></div>
+            <div class="bg-cardbg rounded-xl border border-gray-800 p-5">
+              <span class="text-xs text-primary font-semibold">2025 年 12 月</span>
+              <h4 class="font-semibold text-white mt-1 mb-2">被社群發現</h4>
+              <p class="text-gray-400 text-sm">有人用 <code class="px-1.5 py-0.5 rounded bg-gray-800 text-accent text-xs">strings</code> 命令讀取 Claude Code 的二進位檔，發現了隱藏的 TeammateTool 功能</p>
+              <div class="code-block mt-3 bg-gray-950 rounded-lg p-3 font-mono text-xs overflow-x-auto">
+                <button class="copy-btn px-2 py-1 rounded bg-gray-700 text-gray-300 text-xs hover:bg-gray-600" onclick="copyCode(this)">複製</button>
+                <pre class="text-gray-300">strings claude-code-binary | grep -i "teammate"</pre>
+              </div>
+            </div>
+          </div>
+          <div class="relative">
+            <div class="absolute -left-[2.35rem] w-4 h-4 rounded-full bg-accent border-4 border-darkbg"></div>
+            <div class="bg-cardbg rounded-xl border border-gray-800 p-5">
+              <span class="text-xs text-accent font-semibold">2026 年 1 月</span>
+              <h4 class="font-semibold text-white mt-1 mb-2">社群補丁</h4>
+              <p class="text-gray-400 text-sm">社群開始修補、實驗，並分享使用心得與 workaround</p>
+            </div>
+          </div>
+          <div class="relative">
+            <div class="absolute -left-[2.35rem] w-4 h-4 rounded-full bg-emerald-500 border-4 border-darkbg"></div>
+            <div class="bg-cardbg rounded-xl border border-gray-800 p-5">
+              <span class="text-xs text-emerald-400 font-semibold">2026 年 2 月</span>
+              <h4 class="font-semibold text-white mt-1 mb-2">官方發布</h4>
+              <p class="text-gray-400 text-sm">隨 Opus 4.6 正式發布，成為 Anthropic 官方支援的功能</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enable command -->
+    <div class="bg-cardbg rounded-xl border border-gray-800 p-6 mb-12">
+      <h4 class="font-semibold text-white mb-3 flex items-center gap-2">
+        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        啟用方式
+      </h4>
+      <div class="code-block bg-gray-950 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+        <button class="copy-btn px-2 py-1 rounded bg-gray-700 text-gray-300 text-xs hover:bg-gray-600" onclick="copyCode(this)">複製</button>
+        <pre class="text-emerald-400">CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</pre>
+      </div>
+      <p class="text-gray-500 text-sm mt-3">切換隊友快捷鍵：<kbd class="px-2 py-0.5 rounded bg-gray-800 text-gray-300 text-xs font-mono">Shift + ↓</kbd></p>
+    </div>
+
+    <!-- 13 Operations -->
+    <div id="claude-ops" class="mb-12 scroll-mt-20">
+      <h3 class="font-heading font-semibold text-2xl mb-6 text-white flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        </span>
+        13 種操作
+      </h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Team Management -->
+        <div class="col-span-full mb-1"><span class="text-xs uppercase tracking-wider text-gray-500 font-semibold">團隊管理</span></div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-primary/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center text-primary text-xs font-bold">1</span>
+          <div><code class="text-accent text-sm">spawnTeam</code><p class="text-gray-500 text-xs">建立團隊</p></div>
+        </div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-primary/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center text-primary text-xs font-bold">2</span>
+          <div><code class="text-accent text-sm">discoverTeams</code><p class="text-gray-500 text-xs">探索團隊</p></div>
+        </div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-primary/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center text-primary text-xs font-bold">3</span>
+          <div><code class="text-accent text-sm">disbandTeam</code><p class="text-gray-500 text-xs">解散團隊</p></div>
+        </div>
+        <!-- Membership -->
+        <div class="col-span-full mb-1 mt-3"><span class="text-xs uppercase tracking-wider text-gray-500 font-semibold">成員管理</span></div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-accent/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-accent/20 flex items-center justify-center text-accent text-xs font-bold">4</span>
+          <div><code class="text-accent text-sm">requestJoin</code><p class="text-gray-500 text-xs">請求加入</p></div>
+        </div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-accent/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-accent/20 flex items-center justify-center text-accent text-xs font-bold">5</span>
+          <div><code class="text-accent text-sm">approveJoin</code><p class="text-gray-500 text-xs">批准加入</p></div>
+        </div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-accent/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-accent/20 flex items-center justify-center text-accent text-xs font-bold">6</span>
+          <div><code class="text-accent text-sm">rejectJoin</code><p class="text-gray-500 text-xs">拒絕加入</p></div>
+        </div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-accent/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-accent/20 flex items-center justify-center text-accent text-xs font-bold">7</span>
+          <div><code class="text-accent text-sm">leaveTeam</code><p class="text-gray-500 text-xs">離開團隊</p></div>
+        </div>
+        <!-- Communication -->
+        <div class="col-span-full mb-1 mt-3"><span class="text-xs uppercase tracking-wider text-gray-500 font-semibold">通訊</span></div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-emerald-500/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">8</span>
+          <div><code class="text-accent text-sm">broadcastMessage</code><p class="text-gray-500 text-xs">廣播訊息</p></div>
+        </div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-emerald-500/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">9</span>
+          <div><code class="text-accent text-sm">sendMessage</code><p class="text-gray-500 text-xs">點對點訊息</p></div>
+        </div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-emerald-500/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs font-bold">10</span>
+          <div><code class="text-accent text-sm">readMessages</code><p class="text-gray-500 text-xs">讀取訊息</p></div>
+        </div>
+        <!-- Task Management -->
+        <div class="col-span-full mb-1 mt-3"><span class="text-xs uppercase tracking-wider text-gray-500 font-semibold">任務管理</span></div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-amber-500/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-amber-500/20 flex items-center justify-center text-amber-400 text-xs font-bold">11</span>
+          <div><code class="text-accent text-sm">updateTask</code><p class="text-gray-500 text-xs">更新任務</p></div>
+        </div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-amber-500/40 transition-colors">
+          <span class="w-8 h-8 rounded bg-amber-500/20 flex items-center justify-center text-amber-400 text-xs font-bold">12</span>
+          <div><code class="text-accent text-sm">claimTask</code><p class="text-gray-500 text-xs">認領任務</p></div>
+        </div>
+        <div class="bg-cardbg rounded-lg border border-gray-800 px-4 py-3 flex items-center gap-3 hover:border-amber-500/40 transition-colors opacity-50">
+          <span class="w-8 h-8 rounded bg-gray-700/50 flex items-center justify-center text-gray-400 text-xs font-bold">13</span>
+          <div><span class="text-gray-500 text-sm italic">共享 Task Board</span><p class="text-gray-600 text-xs">所有 Agent 可讀寫</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Limitations -->
+    <div id="claude-limits" class="scroll-mt-20">
+      <h3 class="font-heading font-semibold text-2xl mb-6 text-white flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+        </span>
+        已知限制
+      </h3>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="bg-cardbg rounded-xl border border-gray-800 p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-red-400">&#x2715;</span>
+            <span class="font-semibold text-white text-sm">不支援巢狀隊友</span>
+          </div>
+          <p class="text-gray-500 text-sm">Teammate 無法再生成 Teammate</p>
+        </div>
+        <div class="bg-cardbg rounded-xl border border-gray-800 p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-red-400">&#x2715;</span>
+            <span class="font-semibold text-white text-sm">Session 恢復問題</span>
+          </div>
+          <p class="text-gray-500 text-sm">中斷後可能無法完美恢復狀態</p>
+        </div>
+        <div class="bg-cardbg rounded-xl border border-gray-800 p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-amber-400">⚠</span>
+            <span class="font-semibold text-white text-sm">高 Token 消耗</span>
+          </div>
+          <p class="text-gray-500 text-sm">多 Agent 通訊大幅增加 token 用量</p>
+        </div>
+        <div class="bg-cardbg rounded-xl border border-gray-800 p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-amber-400">⚠</span>
+            <span class="font-semibold text-white text-sm">實驗性質</span>
+          </div>
+          <p class="text-gray-500 text-sm">功能持續演進中，API 可能變動</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Divider -->
+  <div class="max-w-5xl mx-auto px-8">
+    <div class="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+  </div>
+
+  <!-- PART 3: Comparison -->
+  <section id="comparison" class="px-4 sm:px-8 py-20 max-w-5xl mx-auto scroll-mt-20">
+    <div class="flex items-center gap-3 mb-2">
+      <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-semibold uppercase tracking-wider">Part 3</span>
+    </div>
+    <h2 class="font-heading font-bold text-3xl sm:text-4xl mb-4 text-white">比較分析</h2>
+    <p class="text-gray-400 text-lg mb-10">並排比較兩大多代理架構的核心差異</p>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 mb-6 bg-cardbg rounded-xl p-1 border border-gray-800 overflow-x-auto">
+      <button onclick="switchTab('side-by-side')" id="tab-side-by-side" class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-primary text-white">並排比較</button>
+      <button onclick="switchTab('kiro-detail')" id="tab-kiro-detail" class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-lg text-sm font-semibold transition-all text-gray-400 hover:text-gray-200">kiro-team</button>
+      <button onclick="switchTab('claude-detail')" id="tab-claude-detail" class="tab-btn flex-1 min-w-[120px] px-4 py-2.5 rounded-lg text-sm font-semibold transition-all text-gray-400 hover:text-gray-200">Agent Teams</button>
+    </div>
+
+    <!-- Side by Side -->
+    <div id="panel-side-by-side" class="tab-panel active">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-700">
+              <th class="text-left py-3 px-4 text-gray-400 font-semibold">維度</th>
+              <th class="text-left py-3 px-4 text-emerald-400 font-semibold">kiro-team</th>
+              <th class="text-left py-3 px-4 text-primary font-semibold">Agent Teams</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-800">
+            <tr class="hover:bg-gray-800/30 transition-colors"><td class="py-3 px-4 text-gray-300 font-medium">平台</td><td class="py-3 px-4 text-gray-400">Kiro CLI only</td><td class="py-3 px-4 text-gray-400">Claude Code only</td></tr>
+            <tr class="hover:bg-gray-800/30 transition-colors"><td class="py-3 px-4 text-gray-300 font-medium">安裝</td><td class="py-3 px-4 text-gray-400">複製資料夾</td><td class="py-3 px-4 text-gray-400">一個環境變數</td></tr>
+            <tr class="hover:bg-gray-800/30 transition-colors"><td class="py-3 px-4 text-gray-300 font-medium">通訊模式</td><td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-xs">僅透過 Team Lead</span></td><td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-primary/15 text-primary text-xs">Peer-to-Peer</span></td></tr>
+            <tr class="hover:bg-gray-800/30 transition-colors"><td class="py-3 px-4 text-gray-300 font-medium">共享任務看板</td><td class="py-3 px-4 text-gray-400">僅 Team Lead</td><td class="py-3 px-4 text-gray-400">所有 Agent</td></tr>
+            <tr class="hover:bg-gray-800/30 transition-colors"><td class="py-3 px-4 text-gray-300 font-medium">並行能力</td><td class="py-3 px-4 text-gray-400">最多 4 個</td><td class="py-3 px-4 text-gray-400">原生支援</td></tr>
+            <tr class="hover:bg-gray-800/30 transition-colors"><td class="py-3 px-4 text-gray-300 font-medium">Git Worktree</td><td class="py-3 px-4 text-gray-400">內建腳本</td><td class="py-3 px-4 text-gray-400">手動設定</td></tr>
+            <tr class="hover:bg-gray-800/30 transition-colors"><td class="py-3 px-4 text-gray-300 font-medium">官方支援</td><td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-gray-700 text-gray-400 text-xs">社群 (MIT)</span></td><td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-primary/15 text-primary text-xs">Anthropic 官方</span></td></tr>
+            <tr class="hover:bg-gray-800/30 transition-colors"><td class="py-3 px-4 text-gray-300 font-medium">依賴</td><td class="py-3 px-4 text-gray-400">零依賴</td><td class="py-3 px-4 text-gray-400">零依賴（內建）</td></tr>
+            <tr class="hover:bg-gray-800/30 transition-colors"><td class="py-3 px-4 text-gray-300 font-medium">穩定度</td><td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 text-xs">早期 (4 commits)</span></td><td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 text-xs">實驗中，趨穩</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- kiro-team detail -->
+    <div id="panel-kiro-detail" class="tab-panel">
+      <div class="bg-cardbg rounded-2xl border border-gray-800 p-6 sm:p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-2xl">🌐</span>
+          <div>
+            <h3 class="font-heading font-bold text-xl text-white">kiro-team</h3>
+            <span class="text-gray-500 text-sm">Hub-and-Spoke 多代理框架</span>
+          </div>
+        </div>
+        <div class="space-y-4 text-sm text-gray-300">
+          <p><strong class="text-white">架構：</strong>Team Lead 作為中央控制器，所有 sub-agent 只能透過 Team Lead 溝通。這確保了清晰的指揮鏈和可預測的行為模式。</p>
+          <p><strong class="text-white">權限模型：</strong>嚴格的最小權限原則。Builder 能讀寫和使用 shell，Validator 只能讀取和 readonly shell，Documenter 只能讀寫。</p>
+          <p><strong class="text-white">隔離：</strong>每個 sub-agent 在獨立的 git worktree 中工作，完成後由 Team Lead 合併回主分支。</p>
+          <p><strong class="text-white">適合場景：</strong>Kiro CLI 使用者、需要嚴格權限控制的專案、偏好中央化管理的團隊。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Claude Code Agent Teams detail -->
+    <div id="panel-claude-detail" class="tab-panel">
+      <div class="bg-cardbg rounded-2xl border border-gray-800 p-6 sm:p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <span class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-2xl">🤝</span>
+          <div>
+            <h3 class="font-heading font-bold text-xl text-white">Claude Code Agent Teams</h3>
+            <span class="text-gray-500 text-sm">Peer-to-Peer 協作框架</span>
+          </div>
+        </div>
+        <div class="space-y-4 text-sm text-gray-300">
+          <p><strong class="text-white">架構：</strong>真正的對等協作，沒有中央控制器。每個 Agent 都能直接與任何其他 Agent 溝通，透過共享的 Task Board 協調工作。</p>
+          <p><strong class="text-white">操作豐富度：</strong>13 種操作涵蓋團隊管理、成員管理、通訊和任務管理，提供完整的協作工具鏈。</p>
+          <p><strong class="text-white">整合度：</strong>作為 Claude Code 的內建功能，啟用只需一個環境變數。支援 <kbd class="px-1 py-0.5 rounded bg-gray-800 text-xs">Shift+↓</kbd> 快捷切換隊友。</p>
+          <p><strong class="text-white">適合場景：</strong>Claude Code 使用者、需要 Agent 間直接協作的複雜任務、偏好去中心化管理的工作流。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Divider -->
+  <div class="max-w-5xl mx-auto px-8">
+    <div class="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+  </div>
+
+  <!-- Decision Guide -->
+  <section id="decision" class="px-4 sm:px-8 py-20 max-w-5xl mx-auto scroll-mt-20">
+    <h2 class="font-heading font-bold text-3xl sm:text-4xl mb-4 text-white">選擇指南</h2>
+    <p class="text-gray-400 text-lg mb-10">根據你的情境選擇最適合的多代理方案</p>
+
+    <!-- Decision Flowchart -->
+    <div class="space-y-4 max-w-2xl mx-auto">
+      <!-- Node 1 -->
+      <div class="decision-node bg-cardbg rounded-2xl border border-gray-800 p-6 hover:border-primary/50 transition-all cursor-default">
+        <div class="flex items-start gap-4">
+          <span class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">1</span>
+          <div>
+            <h4 class="font-semibold text-white mb-1">使用 Kiro CLI + 需要快速多代理？</h4>
+            <div class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span class="text-emerald-400 font-semibold text-sm">kiro-team</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+      </div>
+
+      <!-- Node 2 -->
+      <div class="decision-node bg-cardbg rounded-2xl border border-gray-800 p-6 hover:border-primary/50 transition-all cursor-default">
+        <div class="flex items-start gap-4">
+          <span class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">2</span>
+          <div>
+            <h4 class="font-semibold text-white mb-1">使用 Claude Code + 需要 Agent 間協調？</h4>
+            <div class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/15 border border-primary/30">
+              <span class="w-2 h-2 rounded-full bg-primary"></span>
+              <span class="text-primary font-semibold text-sm">Agent Teams</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+      </div>
+
+      <!-- Node 3 -->
+      <div class="decision-node bg-cardbg rounded-2xl border border-gray-800 p-6 hover:border-primary/50 transition-all cursor-default">
+        <div class="flex items-start gap-4">
+          <span class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">3</span>
+          <div>
+            <h4 class="font-semibold text-white mb-1">使用 Claude Code + 任務獨立不需溝通？</h4>
+            <div class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <span class="text-cyan-400 font-semibold text-sm">Subagent</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+      </div>
+
+      <!-- Node 4 -->
+      <div class="decision-node bg-cardbg rounded-2xl border border-gray-800 p-6 hover:border-primary/50 transition-all cursor-default">
+        <div class="flex items-start gap-4">
+          <span class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">4</span>
+          <div>
+            <h4 class="font-semibold text-white mb-1">多平台 CLI（Kiro + Claude + Gemini）？</h4>
+            <div class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/15 border border-orange-500/30">
+              <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+              <span class="text-orange-400 font-semibold text-sm">AWS CLI Orchestrator</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+      </div>
+
+      <!-- Node 5 -->
+      <div class="decision-node bg-cardbg rounded-2xl border border-gray-800 p-6 hover:border-primary/50 transition-all cursor-default">
+        <div class="flex items-start gap-4">
+          <span class="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">5</span>
+          <div>
+            <h4 class="font-semibold text-white mb-1">需要完整客製化？</h4>
+            <div class="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-500/15 border border-pink-500/30">
+              <span class="w-2 h-2 rounded-full bg-pink-400"></span>
+              <span class="text-pink-400 font-semibold text-sm">CrewAI / LangGraph</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Divider -->
+  <div class="max-w-5xl mx-auto px-8">
+    <div class="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
+  </div>
+
+  <!-- Subagent vs Agent Teams -->
+  <section id="subagent-vs-teams" class="px-4 sm:px-8 py-20 max-w-5xl mx-auto scroll-mt-20">
+    <h2 class="font-heading font-bold text-3xl sm:text-4xl mb-4 text-white">Subagent vs Agent Teams</h2>
+    <p class="text-gray-400 text-lg mb-10">理解兩種截然不同的協作模式</p>
+
+    <div class="grid sm:grid-cols-2 gap-6">
+      <!-- Subagent -->
+      <div class="bg-cardbg rounded-2xl border border-gray-800 p-6 sm:p-8 hover:border-cyan-500/40 transition-all">
+        <div class="text-center mb-6">
+          <span class="text-5xl">🧑‍🎓</span>
+          <h3 class="font-heading font-bold text-xl text-white mt-3">Subagent</h3>
+          <p class="text-cyan-400 text-sm mt-1">像派出一個實習生</p>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div class="flex items-start gap-3 text-gray-300">
+            <span class="text-cyan-400 mt-0.5">→</span>
+            <span>單向溝通：派出去、回報結果</span>
+          </div>
+          <div class="flex items-start gap-3 text-gray-300">
+            <span class="text-cyan-400 mt-0.5">→</span>
+            <span>無法與其他 Agent 溝通</span>
+          </div>
+          <div class="flex items-start gap-3 text-gray-300">
+            <span class="text-cyan-400 mt-0.5">→</span>
+            <span>適合獨立、明確的子任務</span>
+          </div>
+          <div class="flex items-start gap-3 text-gray-300">
+            <span class="text-cyan-400 mt-0.5">→</span>
+            <span>低 token 消耗</span>
+          </div>
+        </div>
+        <div class="mt-6 p-4 bg-cyan-950/30 rounded-xl border border-cyan-900/30">
+          <p class="text-xs text-cyan-300/80 italic">「去把這份報告整理好，做完回來給我。」</p>
+        </div>
+      </div>
+
+      <!-- Agent Teams -->
+      <div class="bg-cardbg rounded-2xl border border-gray-800 p-6 sm:p-8 hover:border-primary/40 transition-all">
+        <div class="text-center mb-6">
+          <span class="text-5xl">👥</span>
+          <h3 class="font-heading font-bold text-xl text-white mt-3">Agent Teams</h3>
+          <p class="text-primary text-sm mt-1">像組成一個專案團隊</p>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div class="flex items-start gap-3 text-gray-300">
+            <span class="text-primary mt-0.5">→</span>
+            <span>雙向溝通：對等協作</span>
+          </div>
+          <div class="flex items-start gap-3 text-gray-300">
+            <span class="text-primary mt-0.5">→</span>
+            <span>共享 Task Board，即時同步</span>
+          </div>
+          <div class="flex items-start gap-3 text-gray-300">
+            <span class="text-primary mt-0.5">→</span>
+            <span>適合需要協調的複雜任務</span>
+          </div>
+          <div class="flex items-start gap-3 text-gray-300">
+            <span class="text-primary mt-0.5">→</span>
+            <span>較高 token 消耗</span>
+          </div>
+        </div>
+        <div class="mt-6 p-4 bg-primary/10 rounded-xl border border-primary/20">
+          <p class="text-xs text-indigo-300/80 italic">「我們一起處理這個專案，隨時討論進度。」</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="px-4 sm:px-8 py-12 max-w-5xl mx-auto border-t border-gray-800">
+    <div class="text-center">
+      <p class="text-gray-500 text-sm">Multi-Agent Architecture Comparison &mdash; 2026</p>
+      <p class="text-gray-600 text-xs mt-2">Built with Tailwind CSS</p>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+// --- Reading Progress Bar ---
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+});
+
+// --- Dark/Light Toggle ---
+function toggleTheme() {
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
+  document.body.style.background = isDark ? '#0f172a' : '#f8fafc';
+  document.body.style.color = isDark ? '#e2e8f0' : '#1e293b';
+  // Update sidebar bg
+  const sidebar = document.getElementById('sidebar');
+  sidebar.style.background = isDark ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.95)';
+  sidebar.style.borderColor = isDark ? '#1e293b' : '#e2e8f0';
+  // Update cards
+  document.querySelectorAll('.bg-cardbg').forEach(el => {
+    el.style.background = isDark ? '#1e293b' : '#ffffff';
+  });
+}
+
+// --- Collapsible Sections ---
+function toggleCollapse(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+  const arrow = document.getElementById(id + '-arrow');
+  if (arrow) arrow.style.transform = el.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0)';
+}
+
+// --- Tabs ---
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('bg-primary', 'text-white'); b.classList.add('text-gray-400'); });
+  document.getElementById('panel-' + name).classList.add('active');
+  const btn = document.getElementById('tab-' + name);
+  btn.classList.add('bg-primary', 'text-white');
+  btn.classList.remove('text-gray-400');
+}
+
+// --- Copy to Clipboard ---
+function copyCode(btn) {
+  const pre = btn.parentElement.querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = '已複製!';
+    setTimeout(() => btn.textContent = '複製', 1500);
+  });
+}
+
+// --- Sidebar Toggle (mobile) ---
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('-translate-x-full');
+}
+
+// --- Active Sidebar Link on Scroll ---
+const sections = document.querySelectorAll('section[id], div[id]');
+const sidebarLinks = document.querySelectorAll('.sidebar-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      sidebarLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.sidebar-link[href="#${entry.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+
+// Close sidebar on link click (mobile)
+sidebarLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth < 1024) {
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+    }
+  });
+});
+</script>
+</body>
+</html>
