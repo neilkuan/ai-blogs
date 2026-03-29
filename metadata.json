@@ -18,5 +18,9 @@
   "kiro-team-vs-claude-code-agent-teams": {
     "title": "Kiro CLI vs Claude Code：多 Agent 協作架構深度比較",
     "description": "比較 kiro-team（Hub-and-Spoke）與 Claude Code Agent Teams（Peer-to-peer）兩大多 Agent 協作方案，含架構分析、選擇建議與 TeammateTool 發現史。"
+  },
+  "claude-code-env-vars-guide": {
+    "title": "Claude Code 環境變數完整指南",
+    "description": "所有 Claude Code 環境變數的分類說明、使用情境與常用配方組合，含即時搜尋與互動式卡片。"
   }
 }

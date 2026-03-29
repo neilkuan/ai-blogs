@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 環境變數完全指南</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: '#6366f1',
+        accent: '#22d3ee',
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      },
+      fontFamily: {
+        poppins: ['Poppins', 'sans-serif'],
+        noto: ['Noto Sans TC', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Noto Sans TC', sans-serif; }
+  h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', 'Noto Sans TC', sans-serif; }
+  .card-expand { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease; }
+  .card-expand.open { max-height: 600px; padding-top: 0.75rem; }
+  .category-pill { transition: all 0.2s ease; }
+  .category-pill.active { transform: scale(1.05); }
+  .var-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .var-card:hover { transform: translateY(-2px); }
+  .copy-btn { transition: all 0.15s ease; }
+  .copy-btn:active { transform: scale(0.92); }
+  .toast { animation: toastIn 0.3s ease, toastOut 0.3s ease 1.2s forwards; }
+  @keyframes toastIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+  @keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+  .badge { font-size: 0.65rem; padding: 1px 6px; border-radius: 9999px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+  .progress-bar { transition: width 0.1s linear; }
+  #search:focus { box-shadow: 0 0 0 3px rgba(99,102,241,0.4); }
+  .recipe-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .recipe-card:hover { transform: translateY(-2px); }
+  .fade-in { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+</style>
+</head>
+<body class="dark:bg-darkbg bg-gray-50 dark:text-gray-100 text-gray-900 min-h-screen transition-colors duration-300">
+
+<!-- Progress Bar -->
+<div id="progressBar" class="fixed top-0 left-0 h-1 bg-gradient-to-r from-primary to-accent z-[100] progress-bar" style="width:0%"></div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+<!-- Header -->
+<header class="sticky top-0 z-50 backdrop-blur-xl dark:bg-darkbg/80 bg-white/80 border-b dark:border-gray-800 border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-primary/20">C</div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-poppins font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Claude Code Env Vars</h1>
+          <p class="text-xs dark:text-gray-400 text-gray-500">環境變數完全指南</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="statsCounter" class="text-xs dark:text-gray-400 text-gray-500 hidden sm:block"></span>
+        <button id="themeToggle" class="w-9 h-9 rounded-lg dark:bg-gray-800 bg-gray-200 flex items-center justify-center hover:ring-2 ring-primary transition-all" title="切換主題">
+          <span class="dark:hidden">&#127769;</span>
+          <span class="hidden dark:inline">&#9728;&#65039;</span>
+        </button>
+      </div>
+    </div>
+    <!-- Search -->
+    <div class="relative">
+      <input id="search" type="text" placeholder="搜尋環境變數... (按 / 聚焦)" class="w-full px-4 py-2.5 pl-10 rounded-xl dark:bg-gray-800/80 bg-white border dark:border-gray-700 border-gray-300 dark:text-gray-100 text-gray-900 placeholder-gray-500 text-sm focus:outline-none transition-all" />
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <kbd class="absolute right-3 top-1/2 -translate-y-1/2 text-xs dark:text-gray-600 text-gray-400 dark:bg-gray-700 bg-gray-100 px-1.5 py-0.5 rounded border dark:border-gray-600 border-gray-300 font-mono">/</kbd>
+    </div>
+    <!-- Category Pills -->
+    <div id="categoryPills" class="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-none" style="-ms-overflow-style:none;scrollbar-width:none;">
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+  <!-- Variables Section -->
+  <div id="varsContainer"></div>
+
+  <!-- Recipes Section -->
+  <div id="recipesSection" class="mt-12">
+    <h2 class="text-2xl font-poppins font-bold mb-6 flex items-center gap-2">
+      <span class="text-2xl">&#128221;</span> 常用配方組合
+    </h2>
+    <div id="recipesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="mt-16 border-t dark:border-gray-800 border-gray-200 py-8 text-center dark:text-gray-500 text-gray-400 text-sm">
+  <p>Claude Code 環境變數完全指南 &mdash; 最後更新 2025-07</p>
+</footer>
+
+<script>
+// ======================== DATA ========================
+const categories = [
+  { id: 'auth', name: 'API 認證與路由', icon: '&#128273;', count: 17 },
+  { id: 'model', name: '模型設定', icon: '&#129302;', count: 14 },
+  { id: 'perf', name: '效能與 Token 控制', icon: '&#9889;', count: 8 },
+  { id: 'bash', name: 'Bash 工具設定', icon: '&#128187;', count: 9 },
+  { id: 'feature', name: '功能開關', icon: '&#128268;', count: 15 },
+  { id: 'mcp', name: 'MCP 設定', icon: '&#128279;', count: 7 },
+  { id: 'network', name: '網路與 Proxy', icon: '&#127760;', count: 7 },
+  { id: 'telemetry', name: '遙測與更新', icon: '&#128225;', count: 11 },
+  { id: 'misc', name: '其他', icon: '&#128736;', count: 12 },
+];
+
+const vars = [
+  // ===== AUTH (17) =====
+  { name: 'ANTHROPIC_API_KEY', cat: 'auth', desc: 'API key（覆蓋訂閱）', detail: '用自己的 API key 而非 Pro/Max 訂閱。設定後計費走你的 API 帳戶。', example: 'sk-ant-api03-xxxx', values: '字串', tags: [] },
+  { name: 'ANTHROPIC_AUTH_TOKEN', cat: 'auth', desc: '自訂 Authorization header', detail: '企業代理認證場景，將此值作為 Authorization header 傳送。', example: 'Bearer my-corp-token', values: '字串', tags: [] },
+  { name: 'ANTHROPIC_BASE_URL', cat: 'auth', desc: '覆蓋 API endpoint', detail: '讓 Claude Code 走 proxy 或 gateway，而非直連 Anthropic。', example: 'https://proxy.corp.com/v1', values: 'URL', tags: [] },
+  { name: 'ANTHROPIC_CUSTOM_HEADERS', cat: 'auth', desc: '自訂 request headers', detail: '加入追蹤 header 或企業必要 header，格式為 JSON 物件字串。', example: '{"x-trace-id":"abc123"}', values: 'JSON 字串', tags: [] },
+  { name: 'ANTHROPIC_FOUNDRY_API_KEY', cat: 'auth', desc: 'Microsoft Foundry 認證', detail: 'Azure AI Foundry 的 API key。', example: 'foundry-key-xxxx', values: '字串', tags: [] },
+  { name: 'ANTHROPIC_FOUNDRY_BASE_URL', cat: 'auth', desc: 'Foundry resource URL', detail: 'Azure AI Foundry 的 base URL。', example: 'https://my-resource.services.ai.azure.com', values: 'URL', tags: [] },
+  { name: 'ANTHROPIC_FOUNDRY_RESOURCE', cat: 'auth', desc: 'Foundry resource name', detail: 'Azure AI Foundry 的 resource 名稱。', example: 'my-foundry-resource', values: '字串', tags: [] },
+  { name: 'AWS_BEARER_TOKEN_BEDROCK', cat: 'auth', desc: 'Bedrock API key', detail: '用於 AWS Bedrock 的 Bearer token 認證。', example: 'bedrock-token-xxxx', values: '字串', tags: [] },
+  { name: 'CLAUDE_CODE_USE_BEDROCK', cat: 'auth', desc: '啟用 Amazon Bedrock', detail: '設為 1 啟用 Bedrock 作為 API 後端。需搭配 AWS 認證。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_USE_FOUNDRY', cat: 'auth', desc: '啟用 Microsoft Foundry', detail: '設為 1 啟用 Azure AI Foundry 後端。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_USE_VERTEX', cat: 'auth', desc: '啟用 Vertex AI', detail: '設為 1 啟用 Google Vertex AI 後端。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_SKIP_BEDROCK_AUTH', cat: 'auth', desc: '跳過 AWS 認證', detail: '當使用 LLM gateway 時，跳過 AWS SDK 認證流程。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_SKIP_FOUNDRY_AUTH', cat: 'auth', desc: '跳過 Azure 認證', detail: '當使用 LLM gateway 時，跳過 Azure 認證流程。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_SKIP_VERTEX_AUTH', cat: 'auth', desc: '跳過 Google 認證', detail: '當使用 LLM gateway 時，跳過 Google Cloud 認證流程。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_CLIENT_CERT', cat: 'auth', desc: 'mTLS 客戶端憑證', detail: '提供 mTLS 客戶端憑證路徑，用於雙向 TLS 認證。', example: '/path/to/client.crt', values: '檔案路徑', tags: [] },
+  { name: 'CLAUDE_CODE_CLIENT_KEY', cat: 'auth', desc: 'mTLS 私鑰', detail: '提供 mTLS 客戶端私鑰路徑。', example: '/path/to/client.key', values: '檔案路徑', tags: [] },
+  { name: 'CLAUDE_CODE_CLIENT_KEY_PASSPHRASE', cat: 'auth', desc: '私鑰密碼', detail: 'mTLS 私鑰的密碼（如有加密）。', example: 'my-passphrase', values: '字串', tags: [] },
+
+  // ===== MODEL (14) =====
+  { name: 'ANTHROPIC_MODEL', cat: 'model', desc: '指定模型', detail: '覆蓋預設模型，指定 Claude Code 使用的模型 ID。', example: 'claude-sonnet-4-20250514', values: '模型 ID 字串', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_OPUS_MODEL', cat: 'model', desc: '預設 Opus 模型 ID', detail: '覆蓋預設的 Opus 模型 ID。', example: 'claude-opus-4-20250514', values: '模型 ID', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_OPUS_MODEL_NAME', cat: 'model', desc: 'Opus 模型顯示名稱', detail: '在 UI 中顯示的 Opus 模型名稱。', example: 'Claude Opus 4', values: '字串', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_OPUS_MODEL_DESCRIPTION', cat: 'model', desc: 'Opus 模型描述', detail: '在 UI 中顯示的 Opus 模型描述。', example: 'Most capable model', values: '字串', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES', cat: 'model', desc: 'Opus 支援能力', detail: '指定 Opus 模型支援的能力列表。', example: 'thinking,tool_use', values: '逗號分隔字串', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_SONNET_MODEL', cat: 'model', desc: '預設 Sonnet 模型 ID', detail: '覆蓋預設的 Sonnet 模型 ID。', example: 'claude-sonnet-4-20250514', values: '模型 ID', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_SONNET_MODEL_NAME', cat: 'model', desc: 'Sonnet 模型顯示名稱', detail: '在 UI 中顯示的 Sonnet 模型名稱。', example: 'Claude Sonnet 4', values: '字串', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_SONNET_MODEL_DESCRIPTION', cat: 'model', desc: 'Sonnet 模型描述', detail: '在 UI 中顯示的 Sonnet 模型描述文字。', example: 'Balanced model', values: '字串', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES', cat: 'model', desc: 'Sonnet 支援能力', detail: '指定 Sonnet 模型支援的能力列表。', example: 'thinking,tool_use', values: '逗號分隔字串', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_HAIKU_MODEL', cat: 'model', desc: '預設 Haiku 模型 ID', detail: '覆蓋預設的 Haiku 模型 ID。', example: 'claude-haiku-4-20250514', values: '模型 ID', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME', cat: 'model', desc: 'Haiku 模型顯示名稱', detail: '在 UI 中顯示的 Haiku 模型名稱。', example: 'Claude Haiku 4', values: '字串', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_HAIKU_MODEL_DESCRIPTION', cat: 'model', desc: 'Haiku 模型描述', detail: '在 UI 中顯示的 Haiku 模型描述。', example: 'Fast and efficient', values: '字串', tags: [] },
+  { name: 'ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES', cat: 'model', desc: 'Haiku 支援能力', detail: '指定 Haiku 模型支援的能力列表。', example: 'thinking,tool_use', values: '逗號分隔字串', tags: [] },
+  { name: 'ANTHROPIC_CUSTOM_MODEL_OPTION', cat: 'model', desc: '自訂模型選項 ID', detail: '在模型選擇器中加入自訂模型選項。', example: 'my-finetuned-model', values: '模型 ID', tags: [] },
+  { name: 'ANTHROPIC_CUSTOM_MODEL_OPTION_NAME', cat: 'model', desc: '自訂模型顯示名稱', detail: '自訂模型在 UI 中顯示的名稱。', example: 'My Custom Model', values: '字串', tags: [] },
+  { name: 'ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION', cat: 'model', desc: '自訂模型描述', detail: '自訂模型在 UI 中顯示的描述。', example: 'Fine-tuned for our codebase', values: '字串', tags: [] },
+  { name: 'CLAUDE_CODE_SUBAGENT_MODEL', cat: 'model', desc: '子 agent 模型', detail: '指定子 agent（Agent tool 呼叫）使用的模型。', example: 'claude-sonnet-4-20250514', values: '模型 ID', tags: [] },
+  { name: 'ANTHROPIC_SMALL_FAST_MODEL', cat: 'model', desc: '小型快速模型（已棄用）', detail: '已棄用。請改用 ANTHROPIC_DEFAULT_HAIKU_MODEL。', example: 'claude-haiku-4-20250514', values: '模型 ID', tags: ['deprecated'] },
+  { name: 'ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION', cat: 'model', desc: '小型模型 AWS 區域', detail: '指定小型快速模型在 Bedrock 上的 AWS 區域。', example: 'us-east-1', values: 'AWS Region', tags: [] },
+  { name: 'VERTEX_REGION_CLAUDE_3_5_SONNET', cat: 'model', desc: 'Vertex 區域 (Sonnet 3.5)', detail: '指定 Claude 3.5 Sonnet 在 Vertex AI 的部署區域。', example: 'us-east5', values: 'GCP Region', tags: [] },
+  { name: 'VERTEX_REGION_CLAUDE_3_5_HAIKU', cat: 'model', desc: 'Vertex 區域 (Haiku 3.5)', detail: '指定 Claude 3.5 Haiku 在 Vertex AI 的部署區域。', example: 'us-east5', values: 'GCP Region', tags: [] },
+  { name: 'VERTEX_REGION_CLAUDE_3_7_SONNET', cat: 'model', desc: 'Vertex 區域 (Sonnet 3.7)', detail: '指定 Claude 3.7 Sonnet 在 Vertex AI 的部署區域。', example: 'us-east5', values: 'GCP Region', tags: [] },
+  { name: 'VERTEX_REGION_CLAUDE_4_OPUS', cat: 'model', desc: 'Vertex 區域 (Opus 4)', detail: '指定 Claude 4 Opus 在 Vertex AI 的部署區域。', example: 'us-east5', values: 'GCP Region', tags: [] },
+  { name: 'VERTEX_REGION_CLAUDE_4_SONNET', cat: 'model', desc: 'Vertex 區域 (Sonnet 4)', detail: '指定 Claude 4 Sonnet 在 Vertex AI 的部署區域。', example: 'us-east5', values: 'GCP Region', tags: [] },
+
+  // ===== PERF (8) =====
+  { name: 'CLAUDE_CODE_EFFORT_LEVEL', cat: 'perf', desc: '推理努力程度', detail: '控制模型推理的深度。low 最快但可能不精確，max 最深入。auto 讓模型自行判斷。', example: 'high', values: 'low | medium | high | max | auto', tags: [] },
+  { name: 'MAX_THINKING_TOKENS', cat: 'perf', desc: 'thinking token 上限', detail: '限制 extended thinking 使用的 token 數。設為 0 關閉 thinking。', example: '10000', values: '數字（0=關閉）', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING', cat: 'perf', desc: '關閉自適應推理', detail: '關閉 adaptive thinking budget 功能，使用固定的 thinking token 數量。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_MAX_OUTPUT_TOKENS', cat: 'perf', desc: '最大輸出 token', detail: '限制模型單次回覆的最大 token 數。', example: '16000', values: '數字', tags: [] },
+  { name: 'CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS', cat: 'perf', desc: '檔案讀取 token 上限', detail: '限制 Read tool 讀取檔案時消耗的最大 token 數。', example: '8000', values: '數字', tags: [] },
+  { name: 'CLAUDE_AUTOCOMPACT_PCT_OVERRIDE', cat: 'perf', desc: '自動壓縮觸發百分比', detail: '當 context window 使用率達到此百分比時，觸發自動壓縮。', example: '80', values: '1-100', tags: [] },
+  { name: 'CLAUDE_CODE_AUTO_COMPACT_WINDOW', cat: 'perf', desc: '壓縮計算用 context window', detail: '自動壓縮功能計算使用率時參考的 context window 大小。', example: '200000', values: '數字', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_1M_CONTEXT', cat: 'perf', desc: '關閉 1M context', detail: '關閉 1M token 的 context window，回退到較小的 window。', example: '1', values: '0 | 1', tags: [] },
+
+  // ===== BASH (9) =====
+  { name: 'BASH_DEFAULT_TIMEOUT_MS', cat: 'bash', desc: '預設 Bash 逾時（毫秒）', detail: 'Bash 工具執行指令的預設逾時時間。', example: '120000', values: '毫秒數', tags: [] },
+  { name: 'BASH_MAX_TIMEOUT_MS', cat: 'bash', desc: '最大 Bash 逾時（毫秒）', detail: 'Bash 工具允許的最大逾時時間。', example: '600000', values: '毫秒數', tags: [] },
+  { name: 'BASH_MAX_OUTPUT_LENGTH', cat: 'bash', desc: 'Bash 最大輸出長度', detail: '限制 Bash 工具回傳的最大輸出字元數。', example: '100000', values: '字元數', tags: [] },
+  { name: 'CLAUDE_CODE_SHELL', cat: 'bash', desc: '覆蓋 shell 偵測', detail: '手動指定 Claude Code 使用的 shell，覆蓋自動偵測。', example: '/bin/zsh', values: 'shell 路徑', tags: [] },
+  { name: 'CLAUDE_CODE_SHELL_PREFIX', cat: 'bash', desc: '指令前綴', detail: '在每個 Bash 指令前加入前綴，可用於 logging 或 auditing。', example: 'audit-wrapper', values: '字串', tags: [] },
+  { name: 'CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR', cat: 'bash', desc: '每次回原目錄', detail: '設為 1 時，每次 Bash 執行完畢後自動回到專案根目錄。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDECODE', cat: 'bash', desc: 'Claude 生成的 shell 標記', detail: '在 Claude Code 產生的 shell 中自動設為 1，讓腳本偵測是否在 Claude 環境中。', example: '1', values: '1（自動設定）', tags: [] },
+  { name: 'CLAUDE_ENV_FILE', cat: 'bash', desc: 'Bash 前 source 的腳本', detail: '指定一個腳本路徑，Bash 工具在每次執行前會 source 它。可用來載入環境變數。', example: '/path/to/.env.sh', values: '檔案路徑', tags: [] },
+  { name: 'CLAUDE_CODE_SUBPROCESS_ENV_SCRUB', cat: 'bash', desc: '子進程清除憑證', detail: '在子進程中清除敏感憑證環境變數，提高安全性。', example: '1', values: '0 | 1', tags: [] },
+
+  // ===== FEATURE (15) =====
+  { name: 'CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS', cat: 'feature', desc: '啟用 Agent Teams', detail: '啟用實驗性的 Agent Teams 功能，允許多個 agent 協作。', example: '1', values: '0 | 1', tags: ['experimental'] },
+  { name: 'CLAUDE_CODE_ENABLE_TASKS', cat: 'feature', desc: '非互動啟用 task tracking', detail: '在非互動模式中啟用 task 追蹤功能。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_AUTO_MEMORY', cat: 'feature', desc: '關閉 auto memory', detail: '關閉自動記憶功能，不再自動將對話資訊寫入 CLAUDE.md。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_FAST_MODE', cat: 'feature', desc: '關閉 fast mode', detail: '關閉 fast mode（較快但較不精確的回覆模式）。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_BACKGROUND_TASKS', cat: 'feature', desc: '關閉背景任務', detail: '關閉背景任務功能。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_CRON', cat: 'feature', desc: '關閉 cron 排程', detail: '關閉 cron 排程功能。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS', cat: 'feature', desc: '關閉 git 指引', detail: '關閉自動注入的 git 相關指引。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_TERMINAL_TITLE', cat: 'feature', desc: '關閉終端標題', detail: '不讓 Claude Code 修改終端視窗標題。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION', cat: 'feature', desc: '提示建議', detail: '設為 false 關閉提示建議功能。', example: 'false', values: 'true | false', tags: [] },
+  { name: 'CLAUDE_CODE_USE_POWERSHELL_TOOL', cat: 'feature', desc: 'Windows PowerShell', detail: '在 Windows 上使用 PowerShell 工具替代 Bash 工具。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_SIMPLE', cat: 'feature', desc: 'Bare mode', detail: '啟用極簡模式，減少 UI 元素，適合 CI/CD 或自動化場景。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_NEW_INIT', cat: 'feature', desc: '互動式 /init', detail: '啟用新的互動式 /init 流程。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD', cat: 'feature', desc: '額外 CLAUDE.md 目錄', detail: '指定額外的目錄路徑來讀取 CLAUDE.md 檔案，用逗號分隔。', example: '/shared/configs,/team/standards', values: '逗號分隔路徑', tags: [] },
+  { name: 'IS_DEMO', cat: 'feature', desc: 'Demo mode', detail: '啟用示範模式，限制某些功能以確保安全。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_SKIP_FAST_MODE_NETWORK_ERRORS', cat: 'feature', desc: '跳過 fast mode 網路錯誤', detail: '當 fast mode 遇到網路錯誤時直接跳過而非回退。', example: '1', values: '0 | 1', tags: [] },
+
+  // ===== MCP (7) =====
+  { name: 'MCP_TIMEOUT', cat: 'mcp', desc: 'MCP 連線逾時', detail: 'MCP server 連線的逾時時間（毫秒）。', example: '30000', values: '毫秒數', tags: [] },
+  { name: 'MCP_TOOL_TIMEOUT', cat: 'mcp', desc: 'MCP 工具逾時', detail: 'MCP tool 呼叫的逾時時間（毫秒）。', example: '60000', values: '毫秒數', tags: [] },
+  { name: 'MAX_MCP_OUTPUT_TOKENS', cat: 'mcp', desc: 'MCP 最大輸出 token', detail: '限制 MCP tool 回傳的最大 token 數。', example: '25000', values: '數字', tags: [] },
+  { name: 'MCP_CLIENT_SECRET', cat: 'mcp', desc: 'MCP OAuth client secret', detail: 'MCP OAuth 認證用的 client secret。', example: 'secret-xxxx', values: '字串', tags: [] },
+  { name: 'MCP_OAUTH_CALLBACK_PORT', cat: 'mcp', desc: 'OAuth callback port', detail: 'MCP OAuth callback 使用的本機 port。', example: '8080', values: 'port 數字', tags: [] },
+  { name: 'ENABLE_TOOL_SEARCH', cat: 'mcp', desc: '工具搜尋模式', detail: '控制 tool search（deferred tools）行為。true=全啟用，auto=自動載入前 N 個，false=關閉。', example: 'auto:10', values: 'true | auto | auto:N | false', tags: [] },
+  { name: 'ENABLE_CLAUDEAI_MCP_SERVERS', cat: 'mcp', desc: '啟用 Claude.ai MCP servers', detail: '啟用從 Claude.ai 同步的 MCP server 設定。', example: '1', values: '0 | 1', tags: [] },
+
+  // ===== NETWORK (7) =====
+  { name: 'HTTP_PROXY', cat: 'network', desc: 'HTTP Proxy', detail: '設定 HTTP 代理伺服器。', example: 'http://proxy.corp.com:8080', values: 'URL', tags: [] },
+  { name: 'HTTPS_PROXY', cat: 'network', desc: 'HTTPS Proxy', detail: '設定 HTTPS 代理伺服器。', example: 'http://proxy.corp.com:8443', values: 'URL', tags: [] },
+  { name: 'NO_PROXY', cat: 'network', desc: '不走 Proxy 的網域', detail: '設定不經過代理的網域/IP 列表，逗號分隔。', example: 'localhost,127.0.0.1,.internal.corp', values: '逗號分隔', tags: [] },
+  { name: 'CLAUDE_CODE_PROXY_RESOLVES_HOSTS', cat: 'network', desc: 'Proxy 解析主機名', detail: '讓 proxy 負責 DNS 解析而非本機。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_STREAM_IDLE_TIMEOUT_MS', cat: 'network', desc: 'Stream idle 逾時', detail: 'SSE stream 閒置逾時，預設 90 秒。', example: '90000', values: '毫秒數（預設 90000）', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK', cat: 'network', desc: '關閉非串流回退', detail: '關閉在 streaming 失敗時回退到非 streaming 模式的行為。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS', cat: 'network', desc: '關閉實驗性 beta 功能', detail: '關閉所有實驗性 beta API 功能。', example: '1', values: '0 | 1', tags: [] },
+
+  // ===== TELEMETRY (11) =====
+  { name: 'DISABLE_TELEMETRY', cat: 'telemetry', desc: '關閉遙測', detail: '關閉所有遙測資料收集。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'DISABLE_ERROR_REPORTING', cat: 'telemetry', desc: '關閉錯誤回報', detail: '關閉自動錯誤回報功能。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'DISABLE_AUTOUPDATER', cat: 'telemetry', desc: '關閉自動更新', detail: '關閉 Claude Code 自動更新。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'DISABLE_COST_WARNINGS', cat: 'telemetry', desc: '關閉費用警告', detail: '關閉 API 費用相關的警告訊息。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'DISABLE_FEEDBACK_COMMAND', cat: 'telemetry', desc: '關閉 feedback 指令', detail: '關閉 /feedback 指令。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY', cat: 'telemetry', desc: '關閉意見調查', detail: '關閉 Claude Code 的意見調查彈窗。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC', cat: 'telemetry', desc: '關閉非必要流量', detail: '關閉所有非必要的網路流量（遙測、更新檢查等）。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_ENABLE_TELEMETRY', cat: 'telemetry', desc: '啟用 OpenTelemetry', detail: '啟用 OpenTelemetry 格式的遙測輸出，可接入企業監控。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'DISABLE_PROMPT_CACHING', cat: 'telemetry', desc: '關閉 prompt caching', detail: '關閉 prompt caching 功能。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'DISABLE_PROMPT_CACHING_BEDROCK', cat: 'telemetry', desc: '關閉 Bedrock prompt caching', detail: '僅關閉 Bedrock 上的 prompt caching。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'DISABLE_PROMPT_CACHING_VERTEX', cat: 'telemetry', desc: '關閉 Vertex prompt caching', detail: '僅關閉 Vertex AI 上的 prompt caching。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'FORCE_AUTOUPDATE_PLUGINS', cat: 'telemetry', desc: '強制更新 plugins', detail: '強制自動更新所有 plugins。', example: '1', values: '0 | 1', tags: [] },
+
+  // ===== MISC (12) =====
+  { name: 'CLAUDE_CONFIG_DIR', cat: 'misc', desc: '設定檔目錄', detail: '覆蓋 Claude Code 設定檔目錄路徑（預設 ~/.claude）。', example: '/custom/config/dir', values: '目錄路徑', tags: [] },
+  { name: 'CLAUDE_CODE_TMPDIR', cat: 'misc', desc: '暫存目錄', detail: '覆蓋 Claude Code 暫存檔目錄。', example: '/tmp/claude', values: '目錄路徑', tags: [] },
+  { name: 'CLAUDE_CODE_TASK_LIST_ID', cat: 'misc', desc: '跨 session 共享 task list', detail: '指定 task list ID，讓多個 session 共享同一份 task 列表。', example: 'task-list-abc123', values: '字串', tags: [] },
+  { name: 'CLAUDE_CODE_EXIT_AFTER_STOP_DELAY', cat: 'misc', desc: '停止後延遲退出', detail: '收到停止信號後，等待指定毫秒後再退出。', example: '5000', values: '毫秒數', tags: [] },
+  { name: 'CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL', cat: 'misc', desc: '跳過 IDE 自動安裝', detail: '跳過 IDE 擴展的自動安裝流程。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS', cat: 'misc', desc: 'Plugin git 逾時', detail: 'Plugin git 操作的逾時時間。', example: '30000', values: '毫秒數', tags: [] },
+  { name: 'CLAUDE_CODE_PLUGIN_SEED_DIR', cat: 'misc', desc: 'Plugin 種子目錄', detail: '指定 plugin 種子檔案的目錄。', example: '/path/to/seeds', values: '目錄路徑', tags: [] },
+  { name: 'CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS', cat: 'misc', desc: 'Session 結束 hooks 逾時', detail: 'Session 結束時執行 hooks 的逾時時間。', example: '10000', values: '毫秒數', tags: [] },
+  { name: 'USE_BUILTIN_RIPGREP', cat: 'misc', desc: '使用內建 ripgrep', detail: '強制使用 Claude Code 內建的 ripgrep 而非系統安裝的版本。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'SLASH_COMMAND_TOOL_CHAR_BUDGET', cat: 'misc', desc: 'Slash command 字元預算', detail: '限制 slash command tool 的字元預算。', example: '50000', values: '字元數', tags: [] },
+  { name: 'DISABLE_INSTALLATION_CHECKS', cat: 'misc', desc: '關閉安裝檢查', detail: '跳過啟動時的安裝完整性檢查。', example: '1', values: '0 | 1', tags: [] },
+  { name: 'CLAUDE_CODE_ACCOUNT', cat: 'misc', desc: 'Account UUID', detail: 'Claude Code 帳戶的 UUID 識別碼。', example: 'uuid-xxxx', values: 'UUID', tags: [] },
+  { name: 'CLAUDE_CODE_ORGANIZATION', cat: 'misc', desc: 'Organization UUID', detail: '組織的 UUID 識別碼。', example: 'uuid-xxxx', values: 'UUID', tags: [] },
+  { name: 'CLAUDE_CODE_USER_EMAIL', cat: 'misc', desc: '使用者 Email', detail: '使用者的 email 識別。', example: 'user@corp.com', values: 'Email', tags: [] },
+];
+
+const recipes = [
+  {
+    title: '省 Token 配方',
+    icon: '&#128176;',
+    desc: '最大化節省 API token 消耗',
+    vars: [
+      { name: 'CLAUDE_CODE_EFFORT_LEVEL', val: 'low' },
+      { name: 'MAX_THINKING_TOKENS', val: '0' },
+      { name: 'CLAUDE_CODE_MAX_OUTPUT_TOKENS', val: '4000' },
+      { name: 'CLAUDE_CODE_DISABLE_1M_CONTEXT', val: '1' },
+      { name: 'CLAUDE_AUTOCOMPACT_PCT_OVERRIDE', val: '50' },
+    ]
+  },
+  {
+    title: '企業 Proxy 配方',
+    icon: '&#127970;',
+    desc: '在企業網路環境中使用 Claude Code',
+    vars: [
+      { name: 'HTTPS_PROXY', val: 'http://proxy.corp.com:8443' },
+      { name: 'NO_PROXY', val: 'localhost,127.0.0.1' },
+      { name: 'ANTHROPIC_BASE_URL', val: 'https://gateway.corp.com/v1' },
+      { name: 'ANTHROPIC_CUSTOM_HEADERS', val: '{"x-corp-auth":"token"}' },
+      { name: 'CLAUDE_CODE_PROXY_RESOLVES_HOSTS', val: '1' },
+    ]
+  },
+  {
+    title: '多 Agent 配方',
+    icon: '&#129309;',
+    desc: '啟用多 agent 協作模式',
+    vars: [
+      { name: 'CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS', val: '1' },
+      { name: 'CLAUDE_CODE_SUBAGENT_MODEL', val: 'claude-sonnet-4-20250514' },
+      { name: 'CLAUDE_CODE_ENABLE_TASKS', val: '1' },
+      { name: 'CLAUDE_CODE_TASK_LIST_ID', val: 'shared-tasks-001' },
+    ]
+  },
+  {
+    title: 'Demo 模式配方',
+    icon: '&#127916;',
+    desc: '安全的展示環境',
+    vars: [
+      { name: 'IS_DEMO', val: '1' },
+      { name: 'CLAUDE_CODE_SIMPLE', val: '1' },
+      { name: 'DISABLE_TELEMETRY', val: '1' },
+      { name: 'DISABLE_COST_WARNINGS', val: '1' },
+    ]
+  },
+  {
+    title: 'AWS Bedrock 配方',
+    icon: '&#9729;&#65039;',
+    desc: '使用 AWS Bedrock 作為後端',
+    vars: [
+      { name: 'CLAUDE_CODE_USE_BEDROCK', val: '1' },
+      { name: 'ANTHROPIC_MODEL', val: 'us.anthropic.claude-sonnet-4-20250514-v1:0' },
+      { name: 'ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION', val: 'us-east-1' },
+    ]
+  },
+  {
+    title: '偵測 Claude 環境',
+    icon: '&#128269;',
+    desc: '在腳本中偵測是否在 Claude Code 環境執行',
+    vars: [
+      { name: 'CLAUDECODE', val: '1 (自動設定，唯讀)' },
+      { name: 'CLAUDE_ENV_FILE', val: '/path/to/.env.sh' },
+    ]
+  },
+];
+
+// ======================== STATE ========================
+let activeCategory = 'all';
+let searchQuery = '';
+let expandedCards = new Set();
+
+// ======================== RENDER ========================
+function renderPills() {
+  const c = document.getElementById('categoryPills');
+  const allCount = vars.length;
+  let html = `<button data-cat="all" class="category-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${activeCategory === 'all' ? 'bg-primary text-white active shadow-lg shadow-primary/30' : 'dark:bg-gray-800 bg-gray-200 dark:text-gray-300 text-gray-600 hover:bg-primary/20'}">全部 (${allCount})</button>`;
+  categories.forEach(cat => {
+    const isActive = activeCategory === cat.id;
+    html += `<button data-cat="${cat.id}" class="category-pill flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${isActive ? 'bg-primary text-white active shadow-lg shadow-primary/30' : 'dark:bg-gray-800 bg-gray-200 dark:text-gray-300 text-gray-600 hover:bg-primary/20'}">${cat.icon} ${cat.name}</button>`;
+  });
+  c.innerHTML = html;
+  c.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.dataset.cat;
+      renderPills();
+      renderVars();
+    });
+  });
+}
+
+function getFiltered() {
+  let filtered = vars;
+  if (activeCategory !== 'all') filtered = filtered.filter(v => v.cat === activeCategory);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(v =>
+      v.name.toLowerCase().includes(q) ||
+      v.desc.toLowerCase().includes(q) ||
+      v.detail.toLowerCase().includes(q) ||
+      v.cat.toLowerCase().includes(q)
+    );
+  }
+  return filtered;
+}
+
+function renderVars() {
+  const filtered = getFiltered();
+  const container = document.getElementById('varsContainer');
+  document.getElementById('statsCounter').textContent = `${filtered.length} / ${vars.length} 個變數`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="text-center py-20 dark:text-gray-500 text-gray-400"><p class="text-5xl mb-4">&#128270;</p><p class="text-lg">沒有找到匹配的環境變數</p><p class="text-sm mt-1">試試其他搜尋關鍵字</p></div>`;
+    return;
+  }
+
+  // Group by category
+  const grouped = {};
+  filtered.forEach(v => {
+    if (!grouped[v.cat]) grouped[v.cat] = [];
+    grouped[v.cat].push(v);
+  });
+
+  let html = '';
+  const catOrder = categories.map(c => c.id);
+  catOrder.forEach(catId => {
+    if (!grouped[catId]) return;
+    const cat = categories.find(c => c.id === catId);
+    html += `<div class="mb-8 fade-in">`;
+    html += `<h3 class="text-lg font-poppins font-semibold mb-3 flex items-center gap-2 dark:text-gray-200 text-gray-800"><span class="text-xl">${cat.icon}</span> ${cat.name} <span class="text-xs dark:text-gray-500 text-gray-400 font-normal">(${grouped[catId].length})</span></h3>`;
+    html += `<div class="grid grid-cols-1 gap-2">`;
+    grouped[catId].forEach(v => {
+      const isOpen = expandedCards.has(v.name);
+      const badges = v.tags.map(t => {
+        if (t === 'deprecated') return `<span class="badge bg-red-500/20 text-red-400 border border-red-500/30">DEPRECATED</span>`;
+        if (t === 'experimental') return `<span class="badge bg-amber-500/20 text-amber-400 border border-amber-500/30">EXPERIMENTAL</span>`;
+        return '';
+      }).join('');
+      html += `
+        <div class="var-card dark:bg-cardbg bg-white rounded-xl border dark:border-gray-700/50 border-gray-200 dark:hover:border-primary/40 hover:border-primary/40 dark:hover:shadow-lg dark:hover:shadow-primary/5 hover:shadow-md cursor-pointer" data-name="${v.name}">
+          <div class="card-header flex items-center justify-between px-4 py-3" data-toggle="${v.name}">
+            <div class="flex items-center gap-3 min-w-0">
+              <code class="text-sm font-mono font-semibold text-primary flex-shrink-0 truncate max-w-[260px] sm:max-w-none">${v.name}</code>
+              ${badges}
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <span class="text-xs dark:text-gray-400 text-gray-500 hidden sm:block max-w-[200px] truncate">${v.desc}</span>
+              <button class="copy-btn w-7 h-7 rounded-lg dark:bg-gray-700 bg-gray-100 flex items-center justify-center dark:hover:bg-gray-600 hover:bg-gray-200 text-xs" data-copy="${v.name}" title="複製變數名">&#128203;</button>
+              <svg class="w-4 h-4 dark:text-gray-500 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}" data-chevron="${v.name}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+          </div>
+          <div class="card-expand ${isOpen ? 'open' : ''}" data-body="${v.name}">
+            <div class="px-4 pb-3 border-t dark:border-gray-700/50 border-gray-200 pt-3">
+              <p class="text-sm dark:text-gray-300 text-gray-600 mb-3">${v.detail}</p>
+              <div class="flex flex-wrap gap-3 text-xs">
+                <div class="dark:bg-gray-800 bg-gray-50 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <span class="dark:text-gray-500 text-gray-400">可用值:</span>
+                  <code class="dark:text-accent text-cyan-600">${v.values}</code>
+                </div>
+                <div class="dark:bg-gray-800 bg-gray-50 rounded-lg px-3 py-2 flex items-center gap-2">
+                  <span class="dark:text-gray-500 text-gray-400">範例:</span>
+                  <code class="dark:text-green-400 text-green-600">${v.example}</code>
+                  <button class="copy-btn w-6 h-6 rounded dark:bg-gray-700 bg-gray-200 flex items-center justify-center dark:hover:bg-gray-600 hover:bg-gray-300 text-[10px]" data-copy="${v.name}=${v.example}" title="複製範例">&#128203;</button>
+                </div>
+              </div>
+              <div class="mt-2">
+                <button class="copy-btn text-xs dark:text-gray-400 text-gray-500 dark:hover:text-accent hover:text-cyan-600 transition-colors" data-copy="export ${v.name}=${v.example}">&#128203; 複製 export 指令</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+    html += `</div></div>`;
+  });
+  container.innerHTML = html;
+  attachCardEvents();
+}
+
+function renderRecipes() {
+  const grid = document.getElementById('recipesGrid');
+  let html = '';
+  recipes.forEach((r, i) => {
+    const varsHtml = r.vars.map(v => `<div class="flex items-center gap-2 text-xs"><code class="dark:text-primary text-indigo-600 font-mono">${v.name}</code><span class="dark:text-gray-600 text-gray-300">=</span><code class="dark:text-green-400 text-green-600">${v.val}</code></div>`).join('');
+    const copyText = r.vars.map(v => `export ${v.name}="${v.val}"`).join('\n');
+    html += `
+      <div class="recipe-card dark:bg-cardbg bg-white rounded-xl border dark:border-gray-700/50 border-gray-200 p-5 dark:hover:border-accent/30 hover:border-cyan-400/30 dark:hover:shadow-lg dark:hover:shadow-accent/5 hover:shadow-md">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="font-poppins font-semibold flex items-center gap-2"><span class="text-xl">${r.icon}</span> ${r.title}</h4>
+          <button class="copy-btn px-2 py-1 rounded-lg dark:bg-gray-700 bg-gray-100 dark:hover:bg-gray-600 hover:bg-gray-200 text-xs" data-copy="${copyText.replace(/"/g, '&quot;')}" title="複製全部">&#128203; 複製全部</button>
+        </div>
+        <p class="text-xs dark:text-gray-400 text-gray-500 mb-3">${r.desc}</p>
+        <div class="space-y-1.5">${varsHtml}</div>
+      </div>`;
+  });
+  grid.innerHTML = html;
+  attachCopyEvents(grid);
+}
+
+// ======================== EVENTS ========================
+function attachCardEvents() {
+  document.querySelectorAll('[data-toggle]').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target.closest('.copy-btn')) return;
+      const name = el.dataset.toggle;
+      const body = document.querySelector(`[data-body="${name}"]`);
+      const chevron = document.querySelector(`[data-chevron="${name}"]`);
+      if (expandedCards.has(name)) {
+        expandedCards.delete(name);
+        body.classList.remove('open');
+        chevron.classList.remove('rotate-180');
+      } else {
+        expandedCards.add(name);
+        body.classList.add('open');
+        chevron.classList.add('rotate-180');
+      }
+    });
+  });
+  attachCopyEvents(document.getElementById('varsContainer'));
+}
+
+function attachCopyEvents(container) {
+  container.querySelectorAll('.copy-btn[data-copy]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const text = btn.dataset.copy;
+      navigator.clipboard.writeText(text).then(() => showToast(`已複製: ${text.substring(0, 50)}${text.length > 50 ? '...' : ''}`));
+    });
+  });
+}
+
+function showToast(msg) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast px-4 py-2 rounded-xl dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-200 text-sm shadow-xl dark:text-gray-200 text-gray-700 max-w-xs truncate';
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 1600);
+}
+
+// Search
+const searchInput = document.getElementById('search');
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value.trim();
+  renderVars();
+});
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== searchInput) {
+    e.preventDefault();
+    searchInput.focus();
+  }
+  if (e.key === 'Escape') searchInput.blur();
+});
+
+// Theme toggle
+const toggle = document.getElementById('themeToggle');
+toggle.addEventListener('click', () => {
+  document.documentElement.classList.toggle('dark');
+});
+
+// Progress bar
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = h > 0 ? (window.scrollY / h) * 100 : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+});
+
+// ======================== INIT ========================
+renderPills();
+renderVars();
+renderRecipes();
+</script>
+</body>
+</html>
