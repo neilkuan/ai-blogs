@@ -101,7 +101,7 @@ jobs:
             </ul>
             <script>
               const btn = document.getElementById('toggle');
-              const saved = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+              const saved = localStorage.getItem('theme') || 'light';
               setTheme(saved);
               function setTheme(t) {{
                 document.documentElement.dataset.theme = t;
