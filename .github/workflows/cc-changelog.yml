@@ -111,6 +111,7 @@ jobs:
             --arg chat_id "${TELEGRAM_CHAT_ID}" \
             --arg text "${MSG}" \
             '{chat_id: $chat_id, text: $text}' \
-          | curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          | curl -s -o /dev/null -w "Telegram HTTP %{http_code}\n" \
+              -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
               -H 'Content-Type: application/json' \
               -d @-

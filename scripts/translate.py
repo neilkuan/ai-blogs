@@ -8,6 +8,7 @@ import json
 import os
 import re
 import sys
+import time
 from pathlib import Path
 
 import anthropic
@@ -51,12 +52,16 @@ def extract_versions_between(changelog_text: str, latest_tag: str, last_tag: str
             if last_ver and version == last_ver:
                 break
             result_sections.append(content)
+            # If no last_ver (first run), only take the latest version
+            if not last_ver:
+                break
 
     if not result_sections:
         # Fallback: just grab the first section (latest)
         if sections:
             result_sections = [sections[0][1]]
 
+    print(f"   Found {len(result_sections)} version(s) to translate")
     return "\n\n".join(result_sections)
 
 
@@ -101,13 +106,32 @@ def markdown_to_html_content(md_text: str) -> str:
     html_lines = []
     in_list = False
 
-    def _inline_markup(text: str) -> str:
-        """Apply inline code and bold markup on already-escaped text safely."""
-        # Extract backtick content, escape it, then wrap in <code>
-        def _code_repl(m):
-            return f'<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">{html_mod.escape(m.group(1))}</code>'
-        text = re.sub(r'`([^`]+)`', _code_repl, text)
-        text = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', text)
+    def _inline_markup(raw: str) -> str:
+        """Apply inline code and bold markup safely with proper escaping."""
+        # Preserve backtick content before escaping
+        code_blocks = {}
+        counter = [0]
+        def _save_code(m):
+            key = f"\x00CODE{counter[0]}\x00"
+            code_blocks[key] = f'<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">{html_mod.escape(m.group(1))}</code>'
+            counter[0] += 1
+            return key
+        text = re.sub(r'`([^`]+)`', _save_code, raw)
+        # Preserve bold content before escaping
+        bold_blocks = {}
+        def _save_bold(m):
+            key = f"\x00BOLD{counter[0]}\x00"
+            bold_blocks[key] = f'<strong>{html_mod.escape(m.group(1))}</strong>'
+            counter[0] += 1
+            return key
+        text = re.sub(r'\*\*([^*]+)\*\*', _save_bold, text)
+        # Escape everything else
+        text = html_mod.escape(text)
+        # Restore preserved blocks
+        for key, val in code_blocks.items():
+            text = text.replace(key, val)
+        for key, val in bold_blocks.items():
+            text = text.replace(key, val)
         return text
 
     for line in lines:
@@ -125,19 +149,19 @@ def markdown_to_html_content(md_text: str) -> str:
         # Headings
         if stripped.startswith("### "):
             text = html_mod.escape(stripped[4:])
-            html_lines.append(f'<h3 class="text-lg font-semibold mt-6 mb-2 text-indigo-300">{text}</h3>')
+            html_lines.append(f'<h3 class="text-lg font-semibold mt-6 mb-2 text-indigo-700 dark:text-indigo-300">{text}</h3>')
         elif stripped.startswith("## "):
             text = html_mod.escape(stripped[3:])
-            html_lines.append(f'<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-200 border-b border-gray-700 pb-2">{text}</h2>')
+            html_lines.append(f'<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">{text}</h2>')
         elif stripped.startswith("- "):
             if not in_list:
-                html_lines.append('<ul class="list-disc list-inside space-y-1 text-gray-300">')
+                html_lines.append('<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">')
                 in_list = True
             item = _inline_markup(stripped[2:])
             html_lines.append(f"<li>{item}</li>")
         else:
             text = _inline_markup(stripped)
-            html_lines.append(f'<p class="text-gray-300 leading-relaxed">{text}</p>')
+            html_lines.append(f'<p class="text-gray-700 dark:text-gray-300 leading-relaxed">{text}</p>')
 
     if in_list:
         html_lines.append("</ul>")
@@ -145,7 +169,47 @@ def markdown_to_html_content(md_text: str) -> str:
     return "\n".join(html_lines)
 
 
-def generate_version_html_pages(translated: str, target_tag: str):
+THEME_SCRIPT = (
+    "  <script>\n"
+    "    const btn = document.getElementById('themeToggle');\n"
+    "    const saved = localStorage.getItem('theme') || 'light';\n"
+    "    applyTheme(saved);\n"
+    "    function applyTheme(t) {\n"
+    "      document.documentElement.classList.toggle('dark', t === 'dark');\n"
+    "      btn.textContent = t === 'dark' ? '\\u2600\\uFE0F 淺色' : '\\uD83C\\uDF19 深色';\n"
+    "      localStorage.setItem('theme', t);\n"
+    "    }\n"
+    "    function toggleTheme() {\n"
+    "      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');\n"
+    "    }\n"
+    "  </script>\n"
+)
+
+PAGE_STYLE = (
+    '<script src="https://cdn.tailwindcss.com"></script>\n'
+    '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
+    '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">\n'
+    "<script>\n"
+    "tailwind.config = {\n"
+    "  darkMode: 'class',\n"
+    "  theme: {\n"
+    "    extend: {\n"
+    "      colors: {\n"
+    "        darkbg: '#0f172a',\n"
+    "        cardbg: '#1e293b',\n"
+    "      }\n"
+    "    }\n"
+    "  }\n"
+    "}\n"
+    "</script>\n"
+    "<style>\n"
+    "  body { font-family: 'Noto Sans TC', sans-serif; }\n"
+    "</style>\n"
+)
+
+
+def generate_version_html_pages(translated: str):
     """Generate individual HTML pages for each translated version and update metadata.json."""
     import html as html_mod
 
@@ -166,80 +230,119 @@ def generate_version_html_pages(translated: str, target_tag: str):
         print("⚠️ No version sections found for HTML generation")
         return
 
-    # Load existing metadata
-    meta_path = Path("metadata.json")
-    if meta_path.exists():
-        meta = json.loads(meta_path.read_text(encoding="utf-8"))
-    else:
-        meta = {}
+    cc_dir = Path("cc")
+    cc_dir.mkdir(exist_ok=True)
 
     for version, content in sections:
         slug = f"claude-code-changelog-{version}"
         html_content = markdown_to_html_content(content)
-        escaped_version = html_mod.escape(version)
+        ev = html_mod.escape(version)
 
         page = f"""<!DOCTYPE html>
-<html lang="zh-TW" class="dark">
+<html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claude Code {escaped_version} 更新日誌</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-<script>
-tailwind.config = {{
-  darkMode: 'class',
-  theme: {{
-    extend: {{
-      colors: {{
-        darkbg: '#0f172a',
-        cardbg: '#1e293b',
-      }}
-    }}
-  }}
-}}
-</script>
-<style>
-  body {{ font-family: 'Noto Sans TC', sans-serif; }}
-</style>
+<title>Claude Code {ev} 更新日誌</title>
+{PAGE_STYLE}
 </head>
-<body class="dark:bg-darkbg bg-gray-50 dark:text-gray-100 text-gray-900 min-h-screen">
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
   <div class="max-w-3xl mx-auto px-4 py-12">
-    <nav class="mb-8">
-      <a href="../index.html" class="text-indigo-400 hover:text-indigo-300 text-sm">&larr; 返回文章列表</a>
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
     </nav>
     <header class="mb-8">
-      <h1 class="text-3xl font-bold text-white mb-2">Claude Code {escaped_version} 更新日誌</h1>
-      <p class="text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code {ev} 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
     </header>
-    <article class="bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
 {html_content}
     </article>
-    <footer class="mt-12 text-center text-gray-500 text-xs">
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
       此頁面由自動化流程產生，僅供參考。
     </footer>
   </div>
+{THEME_SCRIPT}
 </body>
 </html>"""
 
-        cc_dir = Path("cc")
-        cc_dir.mkdir(exist_ok=True)
         html_path = cc_dir / f"{slug}.html"
         html_path.write_text(page, encoding="utf-8")
         print(f"📄 Generated {html_path}")
 
-        # Update metadata
-        meta[slug] = {
-            "title": f"Claude Code {version} 更新日誌",
-            "description": f"Claude Code {version} 版本更新內容（繁體中文翻譯）。",
-        }
+    # Generate cc/index.html listing all versions
+    generate_cc_index(cc_dir)
 
-    meta_path.write_text(
-        json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    print(f"📝 Updated metadata.json with {len(sections)} version(s)")
+    # Ensure metadata.json has one entry for cc index
+    meta_path = Path("metadata.json")
+    meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+    # Remove old per-version entries
+    meta = {k: v for k, v in meta.items() if not k.startswith("claude-code-changelog-")}
+    meta["cc"] = {
+        "title": "Claude Code 更新日誌",
+        "description": "Claude Code 各版本更新內容（繁體中文翻譯）。",
+    }
+    meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"📝 Updated metadata.json")
+
+
+def generate_cc_index(cc_dir: Path):
+    """Generate cc/index.html that lists all changelog versions."""
+    import html as html_mod
+
+    # Find all changelog HTML files, sorted by version descending
+    def _version_key(p):
+        v = p.stem.replace("claude-code-changelog-", "")
+        try:
+            return tuple(int(x) for x in v.split("."))
+        except ValueError:
+            return (0,)
+    files = sorted(cc_dir.glob("claude-code-changelog-*.html"), key=_version_key, reverse=True)
+    items = []
+    for f in files:
+        version = f.stem.replace("claude-code-changelog-", "")
+        ev = html_mod.escape(version)
+        items.append(
+            f'<li class="border-b border-gray-200 dark:border-gray-700 last:border-b-0">'
+            f'<a href="{html_mod.escape(f.name)}" class="block px-2 py-4 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">'
+            f'<span class="text-indigo-600 dark:text-indigo-400 font-medium">v{ev}</span>'
+            f'</a></li>'
+        )
+    items_html = "\n".join(items)
+
+    page = f"""<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 更新日誌</title>
+{PAGE_STYLE}
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="../index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 返回文章列表</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">各版本更新內容（繁體中文翻譯）</p>
+    </header>
+    <ul class="bg-white dark:bg-cardbg rounded-2xl p-4 shadow-lg">
+{items_html}
+    </ul>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+{THEME_SCRIPT}
+</body>
+</html>"""
+
+    index_path = cc_dir / "index.html"
+    index_path.write_text(page, encoding="utf-8")
+    print(f"📄 Generated {index_path}")
 
 
 def main():
@@ -249,9 +352,13 @@ def main():
     # Read upstream changelog
     upstream = Path("upstream_changelog.md").read_text(encoding="utf-8")
 
+    total_start = time.time()
+
     # Extract relevant sections
+    t0 = time.time()
     print(f"📋 Extracting changelog: {target_tag} (since: {last_tag})")
     new_content = extract_versions_between(upstream, target_tag, last_tag)
+    print(f"   ⏱ Extract: {time.time() - t0:.1f}s")
 
     if not new_content.strip():
         print("⚠️ No new content found, skipping.")
@@ -260,10 +367,13 @@ def main():
     print(f"📝 Content to translate ({len(new_content)} chars):\n{new_content[:300]}...")
 
     # Translate
-    print("🤖 Translating via Claude API...")
+    t0 = time.time()
+    print("🤖 Translating via Bedrock...")
     translated = translate_changelog(new_content)
+    print(f"   ⏱ Translate: {time.time() - t0:.1f}s")
 
     # Append to existing translated changelog (prepend new content after header)
+    t0 = time.time()
     output_path = Path("CHANGELOG_zh-TW.md")
     header = "# Claude Code 更新日誌（繁體中文）\n\n> 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)\n\n"
 
@@ -277,13 +387,17 @@ def main():
 
     output_path.write_text(final, encoding="utf-8")
     print(f"✅ Wrote translated changelog to {output_path}")
+    print(f"   ⏱ Write markdown: {time.time() - t0:.1f}s")
 
     # Generate per-version HTML pages
-    generate_version_html_pages(translated, target_tag)
+    t0 = time.time()
+    generate_version_html_pages(translated)
+    print(f"   ⏱ Generate HTML: {time.time() - t0:.1f}s")
 
     # Update state file
     Path(".last_processed_version").write_text(target_tag, encoding="utf-8")
     print(f"📌 Updated state: {target_tag}")
+    print(f"🏁 Total: {time.time() - total_start:.1f}s")
 
 
 if __name__ == "__main__":
