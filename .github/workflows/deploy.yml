@@ -134,7 +134,7 @@ jobs:
           with open("index.html", "w") as f:
               f.write(html)
 
-          print("Generated index.html with", len(files), "articles")
+          print("Generated index.html with", len(root_files) + len(cc_files), "articles")
           PYEOF
 
       - uses: actions/configure-pages@v6
