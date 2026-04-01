@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.89 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.89 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.89</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">&quot;defer&quot;</code> 權限決策到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">PreToolUse</code> hooks — 無頭工作階段可以在工具呼叫時暫停，使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">-p --resume</code> 繼續執行時讓 hook 重新評估</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_NO_FLICKER=1</code> 環境變數來選擇無閃爍的 alt-screen 渲染及虛擬化滾軸</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">PermissionDenied</code> hook，在自動模式分類器拒絕後觸發 — 回傳 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">{retry: true}</code> 告訴模型它可以重試</li>
+<li>新增具名子代理到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@</code> mention 類型提前建議</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">MCP_CONNECTION_NONBLOCKING=true</code> for <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">-p</code> 模式以完全跳過 MCP 連線等待，並將 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--mcp-config</code> 伺服器連線限制在 5 秒而不是阻塞最慢的伺服器</li>
+<li>自動模式：被拒絕的指令現在會顯示通知並出現在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/permissions</code> → Recent 標籤中，您可以使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">r</code> 重試</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Edit(//path/**)</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Read(//path/**)</code> 允許規則以檢查已解析的 symlink 目標而非只檢查請求的路徑</li>
+<li>修復某些修飾鍵組合的語音推送說話功能未啟動，以及 Windows 上的語音模式因 &quot;WebSocket upgrade rejected with HTTP 101&quot; 失敗</li>
+<li>修復 Edit/Write 工具在 Windows 上將 CRLF 翻倍並移除 Markdown 硬換行符號（兩個尾部空格）</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">StructuredOutput</code> schema cache bug，使用多個 schemas 時導致約 50% 的失敗率</li>
+<li>修復記憶洩漏，其中大型 JSON 輸入在長時間執行的工作階段中被保留為 LRU cache 金鑰</li>
+<li>修復從非常大的工作階段檔案（超過 50MB）移除訊息時的崩潰</li>
+<li>修復 LSP 伺服器崩潰後的殭屍狀態 — 伺服器現在在下一次請求時重新啟動而不是持續失敗直到工作階段重新啟動</li>
+<li>修復包含 CJK 或 emoji 的提示歷史記錄項目在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/history.jsonl</code> 中的 4KB 邊界上落下時被無聲丟棄</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/stats</code> 因排除子代理使用而少計代幣，以及統計快取格式變更時超過 30 天的歷史資料遺失</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">-p --resume</code> 當延遲工具輸入超過 64KB 或不存在延遲標記時掛起，以及 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">-p --continue</code> 不繼續延遲工具</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude-cli://</code> 深層連結在 macOS 上未打開</li>
+<li>修復 MCP 工具錯誤在伺服器回傳多元素錯誤內容時僅截斷為第一個內容區塊</li>
+<li>修復透過 SDK 傳送包含圖片的訊息時技能提醒和其他系統上下文被丟棄</li>
+<li>修復 PreToolUse/PostToolUse hooks 對 Write/Edit/Read 工具接收 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">file_path</code> 為絕對路徑，符合文檔行為</li>
+<li>修復自動壓縮抖動迴圈 — 現在檢測到連續壓縮三次後內容立即補滿限制時停止並顯示可操作的錯誤，而非浪費 API 呼叫</li>
+<li>修復長工作階段中由於工具 schema 位元組在工作階段中期變更導致的 prompt cache 未命中</li>
+<li>修復長工作階段中讀取許多檔案時嵌套 CLAUDE.md 檔案被重複注入數十次</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 當文字記錄包含來自較舊 CLI 版本或中斷的寫入的工具結果時崩潰</li>
+<li>修復在 API 回傳權限錯誤時的誤導性 &quot;Rate limit reached&quot; 訊息 — 現在顯示實際錯誤並提供可操作的提示</li>
+<li>修復 hooks <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">if</code> 條件篩選不匹配複合指令（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ls &amp;&amp; git push</code>）或具有環境變數前綴的指令（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">FOO=bar git push</code>）</li>
+<li>修復折疊搜尋/讀取群組徽章在重型平行工具使用期間在終端滾軸中重複</li>
+<li>修復通知 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">invalidates</code> 未立即清除目前顯示的通知</li>
+<li>修復提交後訊息背景輸入在處理期間到達時 prompt 短暫消失</li>
+<li>修復天城文及其他複合標記文字在助手輸出中被截斷</li>
+<li>修復主屏幕終端中版面轉換後的渲染瑕疵</li>
+<li>修復語音模式在 macOS Apple Silicon 上無法請求麥克風權限</li>
+<li>修復 Shift+Enter 在 Windows Terminal Preview 1.25 上提交而非插入換行符號</li>
+<li>修復在 tmux 內執行的 iTerm2 串流期間的定期 UI 抖動</li>
+<li>修復 PowerShell 工具在 Windows PowerShell 5.1 上 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">git push</code> 等指令將進度寫入 stderr 時不正確地報告失敗</li>
+<li>修復在非常大的檔案（&gt;1 GiB）上使用 Edit 工具時的潛在記憶不足崩潰</li>
+<li>改進折疊工具摘要為 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ls</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tree</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">du</code> 顯示 &quot;Listed N directories&quot; 而非 &quot;Read N files&quot;</li>
+<li>改進 Bash 工具在格式化工具/linter 指令修改您之前讀過的檔案時發出警告，防止過時編輯錯誤</li>
+<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@</code>-mention 類型提前建議以在 MCP 資源上排列相似名稱的源檔案</li>
+<li>改進 PowerShell 工具提示具有版本適當的語法指導（5.1 vs 7+）</li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Edit</code> 以在透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Bash</code> 使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">sed -n</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cat</code> 查看的檔案上運作，無需先進行單獨的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Read</code> 呼叫</li>
+<li>變更超過 50K 字元的 hook 輸出以保存到磁碟並顯示檔案路徑 + 預覽而非直接注入上下文</li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> 中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cleanupPeriodDays: 0</code> 以被拒絕並出現驗證錯誤 — 它之前無聲地禁用文字記錄持久化</li>
+<li>變更思考摘要以不再在互動工作階段中預設生成 — 在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> 中設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">showThinkingSummaries: true</code> 以恢復</li>
+<li>文檔化 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">TaskCreated</code> hook 事件及其阻塞行為</li>
+<li>使用 Ctrl+B 在背景執行命令時保留工作通知</li>
+<li>Windows 上的 PowerShell 工具：包含雙引號和空格的外部命令引數現在提示而非自動允許（PS 5.1 引數分割強化）</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/env</code> 現在應用於 PowerShell 工具指令（之前僅影響 Bash）</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code> 現在為 Pro 和 Enterprise 方案隱藏冗餘的 &quot;Current week (Sonnet only)&quot; 列</li>
+<li>影像貼上不再插入尾部空格</li>
+<li>在空白 prompt 中貼上 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">!command</code> 現在進入 bash 模式，符合輸入 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">!</code> 行為</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/buddy</code> 是 4 月 1 日的驚喜 — 孵化一隻小生物來看著您編程</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>

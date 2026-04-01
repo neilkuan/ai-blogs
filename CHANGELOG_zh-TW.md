@@ -1,0 +1,57 @@
+# Claude Code 更新日誌（繁體中文）
+
+> 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
+
+## 2.1.89
+- 新增 `"defer"` 權限決策到 `PreToolUse` hooks — 無頭工作階段可以在工具呼叫時暫停，使用 `-p --resume` 繼續執行時讓 hook 重新評估
+- 新增 `CLAUDE_CODE_NO_FLICKER=1` 環境變數來選擇無閃爍的 alt-screen 渲染及虛擬化滾軸
+- 新增 `PermissionDenied` hook，在自動模式分類器拒絕後觸發 — 回傳 `{retry: true}` 告訴模型它可以重試
+- 新增具名子代理到 `@` mention 類型提前建議
+- 新增 `MCP_CONNECTION_NONBLOCKING=true` for `-p` 模式以完全跳過 MCP 連線等待，並將 `--mcp-config` 伺服器連線限制在 5 秒而不是阻塞最慢的伺服器
+- 自動模式：被拒絕的指令現在會顯示通知並出現在 `/permissions` → Recent 標籤中，您可以使用 `r` 重試
+- 修復 `Edit(//path/**)` 和 `Read(//path/**)` 允許規則以檢查已解析的 symlink 目標而非只檢查請求的路徑
+- 修復某些修飾鍵組合的語音推送說話功能未啟動，以及 Windows 上的語音模式因 "WebSocket upgrade rejected with HTTP 101" 失敗
+- 修復 Edit/Write 工具在 Windows 上將 CRLF 翻倍並移除 Markdown 硬換行符號（兩個尾部空格）
+- 修復 `StructuredOutput` schema cache bug，使用多個 schemas 時導致約 50% 的失敗率
+- 修復記憶洩漏，其中大型 JSON 輸入在長時間執行的工作階段中被保留為 LRU cache 金鑰
+- 修復從非常大的工作階段檔案（超過 50MB）移除訊息時的崩潰
+- 修復 LSP 伺服器崩潰後的殭屍狀態 — 伺服器現在在下一次請求時重新啟動而不是持續失敗直到工作階段重新啟動
+- 修復包含 CJK 或 emoji 的提示歷史記錄項目在 `~/.claude/history.jsonl` 中的 4KB 邊界上落下時被無聲丟棄
+- 修復 `/stats` 因排除子代理使用而少計代幣，以及統計快取格式變更時超過 30 天的歷史資料遺失
+- 修復 `-p --resume` 當延遲工具輸入超過 64KB 或不存在延遲標記時掛起，以及 `-p --continue` 不繼續延遲工具
+- 修復 `claude-cli://` 深層連結在 macOS 上未打開
+- 修復 MCP 工具錯誤在伺服器回傳多元素錯誤內容時僅截斷為第一個內容區塊
+- 修復透過 SDK 傳送包含圖片的訊息時技能提醒和其他系統上下文被丟棄
+- 修復 PreToolUse/PostToolUse hooks 對 Write/Edit/Read 工具接收 `file_path` 為絕對路徑，符合文檔行為
+- 修復自動壓縮抖動迴圈 — 現在檢測到連續壓縮三次後內容立即補滿限制時停止並顯示可操作的錯誤，而非浪費 API 呼叫
+- 修復長工作階段中由於工具 schema 位元組在工作階段中期變更導致的 prompt cache 未命中
+- 修復長工作階段中讀取許多檔案時嵌套 CLAUDE.md 檔案被重複注入數十次
+- 修復 `--resume` 當文字記錄包含來自較舊 CLI 版本或中斷的寫入的工具結果時崩潰
+- 修復在 API 回傳權限錯誤時的誤導性 "Rate limit reached" 訊息 — 現在顯示實際錯誤並提供可操作的提示
+- 修復 hooks `if` 條件篩選不匹配複合指令（`ls && git push`）或具有環境變數前綴的指令（`FOO=bar git push`）
+- 修復折疊搜尋/讀取群組徽章在重型平行工具使用期間在終端滾軸中重複
+- 修復通知 `invalidates` 未立即清除目前顯示的通知
+- 修復提交後訊息背景輸入在處理期間到達時 prompt 短暫消失
+- 修復天城文及其他複合標記文字在助手輸出中被截斷
+- 修復主屏幕終端中版面轉換後的渲染瑕疵
+- 修復語音模式在 macOS Apple Silicon 上無法請求麥克風權限
+- 修復 Shift+Enter 在 Windows Terminal Preview 1.25 上提交而非插入換行符號
+- 修復在 tmux 內執行的 iTerm2 串流期間的定期 UI 抖動
+- 修復 PowerShell 工具在 Windows PowerShell 5.1 上 `git push` 等指令將進度寫入 stderr 時不正確地報告失敗
+- 修復在非常大的檔案（>1 GiB）上使用 Edit 工具時的潛在記憶不足崩潰
+- 改進折疊工具摘要為 `ls`/`tree`/`du` 顯示 "Listed N directories" 而非 "Read N files"
+- 改進 Bash 工具在格式化工具/linter 指令修改您之前讀過的檔案時發出警告，防止過時編輯錯誤
+- 改進 `@`-mention 類型提前建議以在 MCP 資源上排列相似名稱的源檔案
+- 改進 PowerShell 工具提示具有版本適當的語法指導（5.1 vs 7+）
+- 變更 `Edit` 以在透過 `Bash` 使用 `sed -n` 或 `cat` 查看的檔案上運作，無需先進行單獨的 `Read` 呼叫
+- 變更超過 50K 字元的 hook 輸出以保存到磁碟並顯示檔案路徑 + 預覽而非直接注入上下文
+- 變更 `settings.json` 中的 `cleanupPeriodDays: 0` 以被拒絕並出現驗證錯誤 — 它之前無聲地禁用文字記錄持久化
+- 變更思考摘要以不再在互動工作階段中預設生成 — 在 `settings.json` 中設定 `showThinkingSummaries: true` 以恢復
+- 文檔化 `TaskCreated` hook 事件及其阻塞行為
+- 使用 Ctrl+B 在背景執行命令時保留工作通知
+- Windows 上的 PowerShell 工具：包含雙引號和空格的外部命令引數現在提示而非自動允許（PS 5.1 引數分割強化）
+- `/env` 現在應用於 PowerShell 工具指令（之前僅影響 Bash）
+- `/usage` 現在為 Pro 和 Enterprise 方案隱藏冗餘的 "Current week (Sonnet only)" 列
+- 影像貼上不再插入尾部空格
+- 在空白 prompt 中貼上 `!command` 現在進入 bash 模式，符合輸入 `!` 行為
+- `/buddy` 是 4 月 1 日的驚喜 — 孵化一隻小生物來看著您編程
