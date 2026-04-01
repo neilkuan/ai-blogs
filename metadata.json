@@ -22,21 +22,5 @@
   "claude-code-env-vars-guide": {
     "title": "Claude Code 環境變數完整指南",
     "description": "所有 Claude Code 環境變數的分類說明、使用情境與常用配方組合，含即時搜尋與互動式卡片。"
-  },
-  "claude-code-changelog-2.1.87": {
-    "title": "Claude Code 2.1.87 更新日誌",
-    "description": "Claude Code 2.1.87 版本更新內容（繁體中文翻譯）。"
-  },
-  "claude-code-changelog-2.1.86": {
-    "title": "Claude Code 2.1.86 更新日誌",
-    "description": "Claude Code 2.1.86 版本更新內容（繁體中文翻譯）。"
-  },
-  "claude-code-changelog-2.1.85": {
-    "title": "Claude Code 2.1.85 更新日誌",
-    "description": "Claude Code 2.1.85 版本更新內容（繁體中文翻譯）。"
-  },
-  "claude-code-changelog-2.1.84": {
-    "title": "Claude Code 2.1.84 更新日誌",
-    "description": "Claude Code 2.1.84 版本更新內容（繁體中文翻譯）。"
   }
 }
