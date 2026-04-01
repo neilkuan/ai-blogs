@@ -65,17 +65,27 @@ jobs:
             echo "🆕 New version detected: ${LATEST_TAG} (was: ${LAST_VERSION})"
           fi
 
-      - name: Download upstream CHANGELOG
+      - name: Download upstream CHANGELOG (diff only)
         if: steps.check.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
+          LAST_TAG: ${{ steps.check.outputs.last_version }}
+          LATEST_TAG: ${{ steps.check.outputs.latest_tag }}
         run: |
-          TAG="${{ steps.check.outputs.latest_tag }}"
-          curl -sL \
-            -H "Authorization: Bearer ${GH_TOKEN}" \
-            -H "Accept: application/vnd.github.raw+json" \
-            "https://api.github.com/repos/${UPSTREAM_REPO}/contents/${CHANGELOG_PATH}?ref=${TAG}" \
-            -o upstream_changelog.md
+          if [ "${LAST_TAG}" != "none" ]; then
+            echo "📦 Fetching diff between ${LAST_TAG}...${LATEST_TAG}"
+            # Use compare API to get only new additions to CHANGELOG.md
+            python3 scripts/fetch_changelog_diff.py
+          else
+            echo "📦 First run — fetching partial CHANGELOG (top 100KB)"
+            curl -sfL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github.raw+json" \
+              -H "Range: bytes=0-102400" \
+              "https://api.github.com/repos/${UPSTREAM_REPO}/contents/${CHANGELOG_PATH}?ref=${LATEST_TAG}" \
+              -o upstream_changelog.md
+          fi
+          wc -c upstream_changelog.md
 
       - name: Extract & Translate
         if: steps.check.outputs.skip == 'false'
