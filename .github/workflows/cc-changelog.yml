@@ -1,0 +1,116 @@
+name: Translate Claude Code Changelog
+
+on:
+  schedule:
+    - cron: '16 * * * *'
+  workflow_dispatch: # 手動觸發
+
+permissions:
+  contents: write
+  id-token: write
+
+env:
+  UPSTREAM_REPO: anthropics/claude-code
+  CHANGELOG_PATH: CHANGELOG.md
+  STATE_FILE: .last_processed_version
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.GG_ROLE_ARN }}      # <= (must have) parameterized role ARN
+          aws-region: us-west-2
+          role-session-name: github-open-id
+
+      - name: Fetch latest upstream tag
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LATEST_TAG=$(curl -sf \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/repos/${UPSTREAM_REPO}/tags?per_page=1" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['name'])")
+
+          echo "latest_tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
+
+          # 讀取上次處理的版本
+          if [ -f "${STATE_FILE}" ]; then
+            LAST_VERSION=$(cat "${STATE_FILE}")
+          else
+            LAST_VERSION="none"
+          fi
+
+          echo "last_version=${LAST_VERSION}" >> "$GITHUB_OUTPUT"
+
+          if [ "${LATEST_TAG}" = "${LAST_VERSION}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "ℹ️ No new version. Latest: ${LATEST_TAG}"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "🆕 New version detected: ${LATEST_TAG} (was: ${LAST_VERSION})"
+          fi
+
+      - name: Download upstream CHANGELOG
+        if: steps.check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.check.outputs.latest_tag }}"
+          curl -sL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github.raw+json" \
+            "https://api.github.com/repos/${UPSTREAM_REPO}/contents/${CHANGELOG_PATH}?ref=${TAG}" \
+            -o upstream_changelog.md
+
+      - name: Extract & Translate
+        if: steps.check.outputs.skip == 'false'
+        env:
+          TARGET_TAG: ${{ steps.check.outputs.latest_tag }}
+          LAST_TAG: ${{ steps.check.outputs.last_version }}
+          BEDROCK_REGION: us-west-2
+          BEDROCK_MODEL_ID: us.anthropic.claude-haiku-4-5-20251001-v1:0
+        run: python3 scripts/translate.py
+
+      - name: Commit & Push
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          TAG="${{ steps.check.outputs.latest_tag }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG_zh-TW.md "${STATE_FILE}" metadata.json cc/
+          git commit -m "chore: translate changelog for ${TAG}" || exit 0
+          git push
+
+      - name: Notify Telegram
+        if: steps.check.outputs.skip == 'false'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          TAG="${{ steps.check.outputs.latest_tag }}"
+          VERSION="${TAG#v}"
+          PAGES_URL="https://neilkuan.github.io/ai-blogs"
+          PAGE_LINK="${PAGES_URL}/cc/claude-code-changelog-${VERSION}.html"
+          MSG="🆕 Claude Code ${TAG} 更新：${PAGE_LINK}"
+          jq -n \
+            --arg chat_id "${TELEGRAM_CHAT_ID}" \
+            --arg text "${MSG}" \
+            '{chat_id: $chat_id, text: $text}' \
+          | curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -H 'Content-Type: application/json' \
+              -d @-

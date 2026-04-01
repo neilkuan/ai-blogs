@@ -26,6 +26,7 @@ jobs:
       - name: Generate index.html
         run: |
           python3 << 'PYEOF'
+          import html as html_mod
           import json, os, pathlib
 
           meta = {}
@@ -33,20 +34,35 @@ jobs:
               with open("metadata.json") as f:
                   meta = json.load(f)
 
-          files = sorted(
+          # Collect root HTML files
+          root_files = sorted(
               p.name for p in pathlib.Path(".").glob("*.html")
               if p.name != "index.html"
           )
+          # Collect cc/ subdirectory HTML files
+          cc_files = sorted(
+              str(p) for p in pathlib.Path("cc").glob("*.html")
+          ) if pathlib.Path("cc").is_dir() else []
 
           items = []
-          for fname in files:
+          for fname in root_files:
               slug = fname.removesuffix(".html")
               info = meta.get(slug, {})
-              title = info.get("title", slug)
-              desc  = info.get("description", "")
+              title = html_mod.escape(info.get("title", slug))
+              desc  = html_mod.escape(info.get("description", ""))
               desc_html = f'<p class="desc">{desc}</p>' if desc else ""
               items.append(
-                  f'<li><a href="{fname}"><span class="title">{title}</span>'
+                  f'<li><a href="{html_mod.escape(fname)}"><span class="title">{title}</span>'
+                  f'{desc_html}</a></li>'
+              )
+          for fpath in cc_files:
+              slug = pathlib.Path(fpath).stem
+              info = meta.get(slug, {})
+              title = html_mod.escape(info.get("title", slug))
+              desc  = html_mod.escape(info.get("description", ""))
+              desc_html = f'<p class="desc">{desc}</p>' if desc else ""
+              items.append(
+                  f'<li><a href="{html_mod.escape(fpath)}"><span class="title">{title}</span>'
                   f'{desc_html}</a></li>'
               )
 
