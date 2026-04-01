@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.84 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+</head>
+<body class="dark:bg-darkbg bg-gray-50 dark:text-gray-100 text-gray-900 min-h-screen">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8">
+      <a href="../index.html" class="text-indigo-400 hover:text-indigo-300 text-sm">&larr; 返回文章列表</a>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-white mb-2">Claude Code 2.1.84 更新日誌</h1>
+      <p class="text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-200 border-b border-gray-700 pb-2">2.1.84</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-300">
+<li>新增 PowerShell 工具作為 Windows 上的自願預覽。在 https://code.claude.com/docs/en/tools-reference#powershell-tool 深入瞭解</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL_SUPPORTS</code> env vars 以覆蓋 3p 的努力/思考能力偵測（Bedrock、Vertex、Foundry），以及 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">_MODEL_NAME</code>/<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">_DESCRIPTION</code> 以自訂 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/model</code> 選擇器標籤</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">CLAUDE_STREAM_IDLE_TIMEOUT_MS</code> env var 以設定串流閒置監視狗臾值（預設 90 秒）</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">TaskCreated</code> hook，當透過 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">TaskCreate</code> 建立任務時觸發</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">WorktreeCreate</code> hook 對 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">type: &quot;http&quot;</code> 的支援 — 透過回應 JSON 中的 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">hookSpecificOutput.worktreePath</code> 返回建立的 worktree 路徑</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">allowedChannelPlugins</code> 團隊/企業管理員的受控設定以定義通道外掛允許清單</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">x-client-request-id</code> 標頭至 API 請求以供除錯逾時</li>
+<li>新增閒置返回提示，當使用者在 75+ 分鐘後返回時輕推至 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/clear</code>，減少不必要的令牌重新快取在過時會話上</li>
+<li>深層連結（<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">claude-cli://</code>）現在在您偏好的終端中開啟而非恰好第一個檢測到的終端</li>
+<li>規則和技能 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">paths:</code> 前言現在接受 YAML globs 清單</li>
+<li>MCP 工具描述和伺服器指令現在限制在 2KB 以防止 OpenAPI 生成的伺服器膨脹上下文</li>
+<li>本地和透過 claude.ai 連接器配置的 MCP 伺服器現在被去重 — 本地設定獲勝</li>
+<li>卡在互動式提示上的背景 bash 任務現在在約 45 秒後浮出通知</li>
+<li>令牌計數 ≥1M 現在顯示為「1.5m」而非「1512.6k」</li>
+<li>全域系統提示快取現在在啟用 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">ToolSearch</code> 時運作，包括為配置 MCP 工具的使用者</li>
+<li>修正語音推送說話：保持語音鍵不再洩漏字元至文字輸入，文字記錄現在在正確位置插入</li>
+<li>修正上/下箭頭鍵在頁尾項目聚焦時無回應</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">Ctrl+U</code>（kill-to-line-start）在多行輸入中的行邊界上為無操作，所以重複的 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">Ctrl+U</code> 現在跨行清除</li>
+<li>修正空綁定預設弦綁定（例如 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">&quot;ctrl+x ctrl+k&quot;: null</code>）仍進入弦等待模式而非釋放前綴鍵</li>
+<li>修正滑鼠事件將文字「mouse」插入文字記錄搜尋輸入</li>
+<li>修正工作流子代理在外部會話使用 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">--json-schema</code> 且子代理也指定 schema 時以 API 400 失敗</li>
+<li>修正某些終端上使用者訊息氣泡後面某些 emoji 的缺失背景色</li>
+<li>修正「allow Claude to edit its own settings for this session」權限選項不粘有 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">Edit(.claude)</code> 允許規則的使用者</li>
+<li>修正在為大型編輯檔案生成附件片段時的掛起</li>
+<li>修正伺服器重新連線時的 MCP 工具/資源快取洩漏</li>
+<li>修正啟動效能問題，其中部分複製儲存庫（Scalar/GVFS）觸發大量 blob 下載</li>
+<li>修正原生終端遊標不追蹤文字輸入插入點，使 IME 合成（CJK 輸入）現在內嵌渲染且螢幕閱讀器可以跟隨輸入位置</li>
+<li>修正 macOS 上的虛假「Not logged in」錯誤，由於瞬間 keychain 讀取失敗</li>
+<li>修正冷啟動競爭，其中核心工具可被延遲而無其旁路啟用，導致 Edit/Write 以 InputValidationError 在類型參數上失敗</li>
+<li>改進自動壓縮抖動迴圈 — 現在檢測當連續三次壓縮後內容立即重填至限制的時機，並停止並帶可操作的錯誤而非燒毀 API 呼叫</li>
+<li>改進長會話中的提示快取未命中，由工具 schema 位元組在會話中途變更所導致</li>
+<li>改進嵌套 CLAUDE.md 檔案在長會話中讀取許多檔案時被重複注入</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">--resume</code> 當文字記錄包含來自較舊 CLI 版本的工具結果或中斷的寫入時當機</li>
+<li>修正誤導性「Rate limit reached」訊息，當 API 返回權利錯誤時 — 現在顯示實際錯誤並帶可操作的提示</li>
+<li>修正 hooks <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">if</code> 條件過濾不符合複合指令（<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">ls &amp;&amp; git push</code>）或具有環境變數前綴的指令（<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">FOO=bar git push</code>）</li>
+<li>修正折疊搜尋/讀取群組徽章在重型平行工具使用期間在終端捲軸中重複</li>
+<li>修正通知 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">invalidates</code> 不清除目前顯示的通知</li>
+<li>修正背景訊息到達處理期間提示簡要消失</li>
+<li>修正 Devanagari 和其他合併標記文字在助手輸出中被截斷</li>
+<li>修正版面配置移位後主屏幕終端上的渲染偽影</li>
+<li>修正語音模式在 macOS Apple Silicon 上無法要求麥克風權限</li>
+<li>修正 Windows Terminal Preview 1.25 上的 Shift+Enter 提交而非插入換行符</li>
+<li>修正在 tmux 內執行 iTerm2 時的定期 UI 抖動</li>
+<li>修正 PowerShell 工具在 Windows PowerShell 5.1 上不正確地報告失敗，當指令像 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">git push</code> 向 stderr 寫入進度時</li>
+<li>修正 Edit 工具用於非常大檔案（>1 GiB）時的潛在記憶體不足當機</li>
+<li>改進折疊工具摘要以針對 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">ls</code>/<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">tree</code>/<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">du</code> 顯示「Listed N directories」而非「Read N files」</li>
+<li>改進 Bash 工具以警告當格式化程式/linter 指令修改您先前讀取的檔案，防止過時編輯錯誤</li>
+<li>改進 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">@</code>-mention 預輸入以將原始檔案排列在具有相似名稱的 MCP 資源之上</li>
+<li>改進 PowerShell 工具提示，具有版本適當的語法指導（5.1 vs 7+）</li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">Edit</code> 以在透過 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">Bash</code> 使用 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">sed -n</code> 或 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">cat</code> 檢視的檔案上運作，無需先要求單獨的 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">Read</code> 呼叫</li>
+<li>變更超過 50K 字元的 hook 輸出以保存至磁碟，帶檔案路徑 + 預覽，而非直接注入上下文</li>
+<li>變更在 settings.json 中的 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">cleanupPeriodDays: 0</code> 以被驗證錯誤拒絕 — 之前無聲停用文字記錄持久化</li>
+<li>變更思考摘要以在互動式會話中預設不再生成 — 在 settings.json 中設定 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">showThinkingSummaries: true</code> 以恢復</li>
+<li>已記錄 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">TaskCreated</code> hook 事件及其阻塞行為</li>
+<li>保留任務通知，當使用 Ctrl+B 背景執行指令時</li>
+<li>Windows 上的 PowerShell 工具：包含雙引號和空白符的外部指令引數現在提示而非自動允許（PS 5.1 引數分割強化）</li>
+<li><code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/env</code> 現在適用於 PowerShell 工具指令（之前僅影響 Bash）</li>
+<li><code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/usage</code> 現在針對 Pro 和 Enterprise 計劃隱藏冗餘的「Current week (Sonnet only)」列</li>
+<li>影像貼上不再插入尾部空格</li>
+<li>將 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">!command</code> 貼到空提示現在進入 bash 模式，符合類型 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">!</code> 行為</li>
+<li><code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/buddy</code> 在 4 月 1 日推出 — 孵化一隻小生物觀看您編碼</li>
+</ul>
+
+<p class="text-gray-300 leading-relaxed">（由於文字限制，后续版本更新内容已略裁。完整版本請參考英文原文。）</p>
+    </article>
+    <footer class="mt-12 text-center text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+</body>
+</html>

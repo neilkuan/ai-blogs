@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.86 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+</head>
+<body class="dark:bg-darkbg bg-gray-50 dark:text-gray-100 text-gray-900 min-h-screen">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8">
+      <a href="../index.html" class="text-indigo-400 hover:text-indigo-300 text-sm">&larr; 返回文章列表</a>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-white mb-2">Claude Code 2.1.86 更新日誌</h1>
+      <p class="text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-200 border-b border-gray-700 pb-2">2.1.86</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-300">
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">X-Claude-Code-Session-Id</code> 標頭至 API 請求，使代理可以按會話聚合請求而無需解析本體</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">.jj</code> 和 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">.sl</code> 至 VCS 目錄排除清單，使 Grep 和檔案自動完成不下降至 Jujutsu 或 Sapling 中繼資料</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">--resume</code> 在會話建立於 v2.1.85 之前時失敗「tool_use ids were found without tool_result blocks」</li>
+<li>修正配置條件技能或規則時，Write/Edit/Read 在專案根目錄外的檔案上失敗（例如 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">~/.claude/CLAUDE.md</code>）</li>
+<li>修正可能在每次技能呼叫時造成效能問題和 Windows 上設定損毀的不必要設定磁碟寫入</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/feedback</code> 在非常長會話中包含大型文字記錄檔案時的潛在記憶體不足當機</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">--bare</code> 模式在互動式會話中丟棄 MCP 工具並無聲丟棄中途排隊的訊息</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">c</code> 快速鍵僅複製約 20 個 OAuth 登入 URL 字元而非完整 URL</li>
+<li>修正掩蔽輸入（例如 OAuth 代碼貼上）在狹窄終端上多行換行時洩漏令牌開始</li>
+<li>修正官方市場外掛指令在 v2.1.83 以來的 macOS/Linux 上失敗「Permission denied」</li>
+<li>修正執行多個 Claude Code 實例且在其中一個使用 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/model</code> 時狀態列顯示另一會話的模型</li>
+<li>修正長對話中滾輪滾動或點擊選取後捲軸未跟隨新訊息</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/plugin</code> 卸載對話：按 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">n</code> 現在正確卸載外掛而保留其資料目錄</li>
+<li>修正按下 Enter 後點擊可能留下文字記錄空白直到回應到達的迴歸</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">ultrathink</code> 提示在刪除關鍵字後逗留</li>
+<li>修正長會話中的記憶體增長，來自保留完整內容字串的 markdown/highlight 渲染快取</li>
+<li>減少當許多 claude.ai MCP 連接器配置時的啟動事件迴圈停滯（macOS keychain 快取從 5 秒延長至 30 秒）</li>
+<li>減少提及具有 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">@</code> 的檔案時的令牌開銷 — 原始字串內容不再進行 JSON 轉義</li>
+<li>透過從工具描述移除動態內容改進 Bedrock、Vertex 和 Foundry 使用者的提示快取命中率</li>
+<li>記憶體檔名在「Saved N memories」通知中現在在懸停時突出顯示，並在點擊時開啟</li>
+<li><code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/skills</code> 清單中的技能描述現在限制在 250 個字元以減少上下文使用</li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/skills</code> 功能表以按字母順序排序以便更輕鬆的掃描</li>
+<li>當由計劃限制停用時，自動模式現在顯示「unavailable for your plan」（之前是「temporarily unavailable」）</li>
+<li>[VSCode] 修正延長執行操作期間擴充功能不正確地顯示「Not responding」</li>
+<li>[VSCode] 修正擴充功能在 OAuth 令牌刷新後將 Max 計劃使用者預設為 Sonnet（登入後 8 小時）</li>
+<li>讀取工具現在使用緊湊的行號格式並去重複未變更的重新讀取，減少令牌使用</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+</body>
+</html>

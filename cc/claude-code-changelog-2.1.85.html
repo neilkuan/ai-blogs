@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.85 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+</head>
+<body class="dark:bg-darkbg bg-gray-50 dark:text-gray-100 text-gray-900 min-h-screen">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8">
+      <a href="../index.html" class="text-indigo-400 hover:text-indigo-300 text-sm">&larr; 返回文章列表</a>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-white mb-2">Claude Code 2.1.85 更新日誌</h1>
+      <p class="text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-200 border-b border-gray-700 pb-2">2.1.85</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-300">
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">CLAUDE_CODE_MCP_SERVER_NAME</code> 和 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">CLAUDE_CODE_MCP_SERVER_URL</code> 環境變數至 MCP <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">headersHelper</code> 指令碼，允許一個幫助程式服務多個伺服器</li>
+<li>新增條件 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">if</code> 欄位供 hooks 使用權限規則語法（例如 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">Bash(git *)</code>），以過濾何時執行並減少行程生成開銷</li>
+<li>新增時間戳記標記至文字記錄，當排定的任務（<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/loop</code>、<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">CronCreate</code>）觸發時</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">[Image #N]</code> 預留位置後尾部空格（貼上影像時）</li>
+<li>深層連結查詢（<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">claude-cli://open?q=…</code>）現在支援最多 5,000 個字元，長預填提示時帶「scroll to review」警告</li>
+<li>MCP OAuth 現在遵循 RFC 9728 Protected Resource Metadata 探索以尋找授權伺服器</li>
+<li>組織政策（<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">managed-settings.json</code>）阻止的外掛無法再被安裝或啟用，並在市場檢視中隱藏</li>
+<li>PreToolUse hooks 現在可以藉由返回 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">updatedInput</code> 與 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">permissionDecision: &quot;allow&quot;</code> 滿足 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">AskUserQuestion</code>，啟用無頭整合以透過其自身 UI 收集答案</li>
+<li>OpenTelemetry tool_result 事件中的 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">tool_parameters</code> 現在限於 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">OTEL_LOG_TOOL_DETAILS=1</code> 後面</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/compact</code> 當對話成長太大以至於緊湊請求本身無法容納時失敗「context exceeded」</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/plugin enable</code> 和 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">/plugin disable</code> 當外掛安裝位置與在設定中聲明的位置不同時失敗</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">--worktree</code> 在非 git 儲存庫中以錯誤結束，<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">WorktreeCreate</code> hook 可執行之前</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">deniedMcpServers</code> 設定不阻止 claude.ai MCP 伺服器</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">switch_display</code> 在多監視器設定上在電腦使用工具中返回「not available in this session」</li>
+<li>修正當 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">OTEL_LOGS_EXPORTER</code>、<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">OTEL_METRICS_EXPORTER</code> 或 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">OTEL_TRACES_EXPORTER</code> 設定為 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">none</code> 時當機</li>
+<li>修正非原生組建中的 diff 語法突出顯示無法運作</li>
+<li>修正 MCP 提升授權在刷新令牌存在時失敗 — 透過 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">403 insufficient_scope</code> 要求提升範圍的伺服器現在正確觸發重新授權流程</li>
+<li>修正遠端會話中的記憶體洩漏，當串流回應被中斷時</li>
+<li>修正邊界連線流失期間的持續 ECONNRESET 錯誤，透過重試時使用新鮮 TCP 連線</li>
+<li>修正提示在執行某些斜杠指令後被卡在佇列中，上箭頭無法檢索</li>
+<li>修正 Python Agent SDK：<code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">type:&#x27;sdk&#x27;</code> MCP 伺服器透過 <code class="px-1.5 py-0.5 bg-gray-800 rounded text-indigo-300 text-sm">--mcp-config</code> 傳遞在啟動期間被丟棄</li>
+<li>修正在 SSH 上或 VS Code 整合終端中執行時在提示中洩漏的原始金鑰序列</li>
+<li>修正遠端控制會話狀態在權限解決後保持卡在「Requires Action」</li>
+<li>修正 shift+enter 和 meta+enter 被預輸入建議攔截而非插入換行符</li>
+<li>修正串流期間捲軸向上時舊內容滲漏</li>
+<li>修正終端在 Ghostty、Kitty、WezTerm 和其他支援 Kitty 鍵盤協議的終端中的退出後保留在增強鍵盤模式 — Ctrl+C 和 Ctrl+D 現在在退出後正確運作</li>
+<li>改進 @-mention 檔案自動完成在大型儲存庫上的效能</li>
+<li>改進 PowerShell 危險指令偵測</li>
+<li>改進捲軸效能，具有大型文字記錄，透過以純 TypeScript 實現替換 WASM yoga-layout</li>
+<li>減少自動壓縮在大型會話上觸發時的 UI 卡頓</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+</body>
+</html>
