@@ -2,6 +2,27 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.90
+- 新增 `/powerup` — 互動式課程，透過動畫演示教你使用 Claude Code 的功能
+- 新增 `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE` 環境變數，在 `git pull` 失敗時保留既有的 marketplace 快取，對離線環境很有幫助
+- 新增 `.husky` 至受保護目錄清單（acceptEdits 模式）
+- 修正無限迴圈問題：達到用量限制後，速率限制選項對話框會反覆自動彈出，最終導致工作階段當機
+- 修正 `--resume` 導致具有延遲工具、MCP 伺服器或自訂代理的使用者在首次請求時出現完整 prompt-cache miss 的問題（v2.1.69 以來的迴歸）
+- 修正當 PostToolUse 格式化保存 hook 在連續編輯之間改寫檔案時，`Edit`/`Write` 失敗並顯示「檔案內容已變更」的問題
+- 修正發出 JSON 至 stdout 且以代碼 2 結束的 `PreToolUse` hook 無法正確阻止工具呼叫的問題
+- 修正當 CLAUDE.md 檔案在工具呼叫期間自動載入時，摺疊的搜尋/讀取摘要徽章在全螢幕回滾中重複出現的問題
+- 修正自動模式不尊重明確使用者邊界（「別推進」、「在 X 之前等待 Y」）的問題，即使該動作原本會被允許
+- 修正點擊展開懸停文字在淺色終端主題上幾乎看不見的問題
+- 修正格式錯誤的工具輸入到達權限對話框時的 UI 當機
+- 修正在滾動 `/model`、`/config` 及其他選擇畫面時標題消失的問題
+- 強化 PowerShell 工具權限檢查：修正了後綴 `&` 背景工作繞過、`-ErrorAction Break` 偵錯工具掛起、壓縮檔案提取 TOCTOU 及解析失敗後備拒絕規則降級的問題
+- 效能改進：在快取鍵查詢時消除了逐回合的 MCP 工具 schema JSON.stringify
+- 效能改進：SSE 傳輸現在以線性時間處理大型串流幀（原本是二次方）
+- 效能改進：具有長對話的 SDK 工作階段不再在逐字稿寫入時出現二次方級的效能下降
+- 改進 `/resume` 全專案檢視，以平行載入專案工作階段，改善擁有許多專案的使用者的載入時間
+- 變更 `--resume` 選擇器，不再顯示由 `claude -p` 或 SDK 呼叫建立的工作階段
+- 從自動允許清單中移除 `Get-DnsClientCache` 和 `ipconfig /displaydns`（DNS 快取隱私）
+
 ## 2.1.89
 - 新增 `"defer"` 權限決策到 `PreToolUse` hooks — 無頭工作階段可以在工具呼叫時暫停，使用 `-p --resume` 繼續執行時讓 hook 重新評估
 - 新增 `CLAUDE_CODE_NO_FLICKER=1` 環境變數來選擇無閃爍的 alt-screen 渲染及虛擬化滾軸
