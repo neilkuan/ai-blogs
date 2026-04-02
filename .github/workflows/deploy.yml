@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+  workflow_run:
+    workflows: ["Translate Claude Code Changelog"]
+    types:
+      - completed
   workflow_dispatch:
 
 permissions:
