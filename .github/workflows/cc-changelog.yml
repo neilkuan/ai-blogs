@@ -105,6 +105,11 @@ jobs:
           git add CHANGELOG_zh-TW.md "${STATE_FILE}" metadata.json cc/
           git commit -m "chore: translate changelog for ${TAG}" || exit 0
           git push
+      - name: Deploy Website
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+            gh workflow run deploy.yml 
 
       - name: Notify Telegram
         if: steps.check.outputs.skip == 'false'
