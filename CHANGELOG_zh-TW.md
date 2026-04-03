@@ -2,6 +2,21 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.91
+- 新增透過 `_meta["anthropic/maxResultSizeChars"]` 註解進行 MCP 工具結果持久性覆寫功能（最高 500K），允許資料庫 schema 等較大結果通過而無需截斷
+- 新增 `disableSkillShellExecution` 設定，用於停用 skill、自訂 slash 指令和 plugin 指令中的內嵌 shell 執行功能
+- 新增支援 `claude-cli://open?q=` deep link 中的多行提示（編碼換行符 `%0A` 不再被拒絕）
+- Plugin 現在可在 `bin/` 下提供執行檔，並從 Bash tool 將其作為簡單指令呼叫
+- 修復 `--resume` 時的 transcript chain 中斷問題，該問題在非同步 transcript 寫入以隱默方式失敗時會導致對話歷史遺失
+- 修復 `cmd+delete` 在 iTerm2、kitty、WezTerm、Ghostty 和 Windows Terminal 上未能刪除到行首的問題
+- 修復遠端工作階段中計畫模式在容器重新啟動後無法追蹤計畫檔案的問題，這導致編輯計畫時出現權限提示和空白計畫核准視窗
+- 修復設定檔中 `permissions.defaultMode: "auto"` 的 JSON schema 驗證
+- 修復 Windows 版本清理未保護作用中版本的回復副本的問題
+- `/feedback` 現在會解釋其不可用的原因，而不是從 slash 菜單中消失
+- 改進 `/claude-api` skill 指導，包括 agent 設計模式、工具表面決策、上下文管理和快取策略等方面
+- 效能改進：透過路由到 `Bun.stripANSI` 來加快 Bun 上的 `stripAnsi` 速度
+- 編輯工具現使用較短的 `old_string` anchor，減少輸出 token
+
 ## 2.1.90
 - 新增 `/powerup` — 互動式課程，透過動畫演示教你使用 Claude Code 的功能
 - 新增 `CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE` 環境變數，在 `git pull` 失敗時保留既有的 marketplace 快取，對離線環境很有幫助
