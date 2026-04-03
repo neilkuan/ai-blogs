@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Prompting Best Practices — 完整最佳實踐指南</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: '#d97706',
+        accent: '#f59e0b',
+        surface: { dark: '#111827', card: '#1f2937', light: '#f9fafb', cardlight: '#ffffff' },
+      },
+      fontFamily: {
+        inter: ['Inter', 'Noto Sans TC', 'sans-serif'],
+        noto: ['Noto Sans TC', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Noto Sans TC', 'Inter', sans-serif; }
+  h1,h2,h3,h4,h5,h6 { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+  code, pre { font-family: 'JetBrains Mono', monospace; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+
+  /* Accordion */
+  .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
+  .accordion-body.open { max-height: 20000px; }
+  .accordion-chevron { transition: transform 0.3s ease; }
+  .accordion-chevron.rotated { transform: rotate(180deg); }
+
+  /* TOC */
+  .toc-link { transition: all 0.2s ease; border-left: 2px solid transparent; }
+  .toc-link:hover, .toc-link.active { border-left-color: #d97706; color: #d97706; background: rgba(217,119,6,0.06); }
+
+  /* Code block */
+  .code-block { position: relative; }
+  .copy-btn { position: absolute; top: 8px; right: 8px; opacity: 0; transition: opacity 0.2s ease; }
+  .code-block:hover .copy-btn { opacity: 1; }
+
+  /* Search highlight */
+  mark.search-hl { background: rgba(245,158,11,0.35); color: inherit; border-radius: 2px; padding: 0 2px; }
+
+  /* Toast */
+  .toast { animation: toastSlide 0.3s ease, toastFade 0.3s ease 1.5s forwards; }
+  @keyframes toastSlide { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes toastFade { to { opacity:0; transform:translateY(-4px); } }
+
+  /* Back to top */
+  #backToTop { transition: opacity 0.3s ease, transform 0.3s ease; }
+
+  /* Tag pill */
+  .tag-pill { transition: all 0.15s ease; cursor: pointer; }
+  .tag-pill:hover { transform: translateY(-1px); }
+  .tag-pill.active { ring: 2px; }
+
+  /* Progress */
+  #readingProgress { transition: width 0.1s linear; }
+
+  /* Sidebar */
+  #sidebar { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+
+  /* Tip box */
+  .tip-box { border-left: 3px solid #d97706; }
+  .warn-box { border-left: 3px solid #ef4444; }
+  .info-box { border-left: 3px solid #3b82f6; }
+
+  /* Print */
+  @media print { .no-print { display: none !important; } .accordion-body { max-height: none !important; } }
+</style>
+</head>
+<body class="dark:bg-surface-dark bg-surface-light dark:text-gray-100 text-gray-800 min-h-screen transition-colors duration-300">
+
+<!-- Reading Progress -->
+<div id="readingProgress" class="fixed top-0 left-0 h-0.5 bg-gradient-to-r from-primary to-yellow-400 z-[100]" style="width:0%"></div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed bottom-6 right-6 z-[90] flex flex-col gap-2"></div>
+
+<!-- Mobile TOC Overlay -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar / TOC -->
+<aside id="sidebar" class="fixed top-0 left-0 h-full w-72 z-40 dark:bg-gray-900 bg-white border-r dark:border-gray-800 border-gray-200 overflow-y-auto -translate-x-full lg:translate-x-0 no-print">
+  <div class="p-5">
+    <div class="flex items-center gap-2 mb-6">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-yellow-400 flex items-center justify-center text-white text-sm font-bold">P</div>
+      <span class="font-inter font-bold text-sm bg-gradient-to-r from-primary to-yellow-500 bg-clip-text text-transparent">目錄導航</span>
+      <button class="lg:hidden ml-auto p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700" onclick="toggleSidebar()">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <nav id="tocNav" class="flex flex-col gap-0.5 text-sm">
+      <a href="#sec-general" class="toc-link px-3 py-2 rounded-r-md dark:text-gray-300 text-gray-600" data-section="sec-general">1. General Principles</a>
+      <a href="#sec-output" class="toc-link px-3 py-2 rounded-r-md dark:text-gray-300 text-gray-600" data-section="sec-output">2. Output &amp; Formatting</a>
+      <a href="#sec-tools" class="toc-link px-3 py-2 rounded-r-md dark:text-gray-300 text-gray-600" data-section="sec-tools">3. Tool Use</a>
+      <a href="#sec-thinking" class="toc-link px-3 py-2 rounded-r-md dark:text-gray-300 text-gray-600" data-section="sec-thinking">4. Thinking &amp; Reasoning</a>
+      <a href="#sec-agentic" class="toc-link px-3 py-2 rounded-r-md dark:text-gray-300 text-gray-600" data-section="sec-agentic">5. Agentic Systems</a>
+      <a href="#sec-capability" class="toc-link px-3 py-2 rounded-r-md dark:text-gray-300 text-gray-600" data-section="sec-capability">6. Capability Tips</a>
+      <a href="#sec-migration" class="toc-link px-3 py-2 rounded-r-md dark:text-gray-300 text-gray-600" data-section="sec-migration">7. Migration</a>
+    </nav>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<div class="lg:ml-72">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-20 backdrop-blur-xl dark:bg-surface-dark/85 bg-surface-light/85 border-b dark:border-gray-800 border-gray-200 no-print">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <button id="menuBtn" class="lg:hidden p-2 rounded-lg dark:bg-gray-800 bg-gray-200 hover:ring-2 ring-primary" onclick="toggleSidebar()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div>
+          <h1 class="text-base sm:text-lg font-inter font-bold bg-gradient-to-r from-primary to-yellow-500 bg-clip-text text-transparent leading-tight">Claude Prompting Best Practices</h1>
+          <p class="text-xs dark:text-gray-400 text-gray-500">完整最佳實踐指南 — 2026 最新版</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Search -->
+        <div class="relative">
+          <input id="searchInput" type="text" placeholder="搜尋..." class="w-36 sm:w-48 px-3 py-1.5 text-sm rounded-lg dark:bg-gray-800 bg-gray-100 border dark:border-gray-700 border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" oninput="handleSearch(this.value)">
+          <svg class="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 dark:text-gray-500 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <!-- Expand / Collapse all -->
+        <button id="toggleAllBtn" onclick="toggleAllSections()" class="p-2 rounded-lg dark:bg-gray-800 bg-gray-200 hover:ring-2 ring-primary transition-all text-xs font-medium" title="展開/收合全部">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+        </button>
+        <!-- Theme toggle -->
+        <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-lg dark:bg-gray-800 bg-gray-200 hover:ring-2 ring-primary transition-all" title="切換深色/淺色模式">
+          <svg id="sunIcon" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="moonIcon" class="w-4 h-4 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+      </div>
+    </div>
+    <!-- Tag filters -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 pb-2 flex flex-wrap gap-1.5">
+      <button class="tag-pill text-xs px-2.5 py-1 rounded-full dark:bg-primary/20 bg-primary/10 dark:text-primary text-primary font-medium active" data-tag="all" onclick="filterByTag('all')">全部</button>
+      <button class="tag-pill text-xs px-2.5 py-1 rounded-full dark:bg-gray-800 bg-gray-200 dark:text-gray-300 text-gray-600 font-medium" data-tag="basic" onclick="filterByTag('basic')">基礎</button>
+      <button class="tag-pill text-xs px-2.5 py-1 rounded-full dark:bg-gray-800 bg-gray-200 dark:text-gray-300 text-gray-600 font-medium" data-tag="output" onclick="filterByTag('output')">輸出</button>
+      <button class="tag-pill text-xs px-2.5 py-1 rounded-full dark:bg-gray-800 bg-gray-200 dark:text-gray-300 text-gray-600 font-medium" data-tag="tools" onclick="filterByTag('tools')">工具</button>
+      <button class="tag-pill text-xs px-2.5 py-1 rounded-full dark:bg-gray-800 bg-gray-200 dark:text-gray-300 text-gray-600 font-medium" data-tag="thinking" onclick="filterByTag('thinking')">思考</button>
+      <button class="tag-pill text-xs px-2.5 py-1 rounded-full dark:bg-gray-800 bg-gray-200 dark:text-gray-300 text-gray-600 font-medium" data-tag="agent" onclick="filterByTag('agent')">Agent</button>
+      <button class="tag-pill text-xs px-2.5 py-1 rounded-full dark:bg-gray-800 bg-gray-200 dark:text-gray-300 text-gray-600 font-medium" data-tag="vision" onclick="filterByTag('vision')">視覺</button>
+      <button class="tag-pill text-xs px-2.5 py-1 rounded-full dark:bg-gray-800 bg-gray-200 dark:text-gray-300 text-gray-600 font-medium" data-tag="migration" onclick="filterByTag('migration')">遷移</button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-8">
+    <div class="rounded-2xl p-6 sm:p-10 dark:bg-gradient-to-br dark:from-gray-800/50 dark:to-gray-900/50 bg-gradient-to-br from-orange-50 to-yellow-50 border dark:border-gray-700/50 border-orange-200/50">
+      <h2 class="text-2xl sm:text-3xl font-inter font-extrabold mb-3 bg-gradient-to-r from-primary to-yellow-500 bg-clip-text text-transparent">Claude Prompting Best Practices</h2>
+      <p class="dark:text-gray-300 text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+        這是 Claude 最新模型（Opus 4.6 / Sonnet 4.6）的 Prompt Engineering 完整最佳實踐指南。涵蓋通用原則、輸出格式、工具使用、思考推理、Agent 系統、特定能力技巧以及遷移注意事項共七大章節。每個章節包含實際的 prompt 範例和程式碼片段，幫助你寫出更好的 prompts。
+      </p>
+      <div class="flex flex-wrap gap-3 text-xs dark:text-gray-400 text-gray-500">
+        <span class="flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> 2026-04-03</span>
+        <span class="flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg> 7 章節</span>
+        <span class="flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> 約 30 分鐘閱讀</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sections Container -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 pb-20 space-y-4">
+
+    <!-- ==================== Section 1: General Principles ==================== -->
+    <section id="sec-general" class="accordion-section rounded-xl border dark:border-gray-700/50 border-gray-200 dark:bg-surface-card bg-surface-cardlight overflow-hidden" data-tags="basic">
+      <button class="accordion-header w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onclick="toggleAccordion(this)">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary text-sm font-bold">1</span>
+          <div>
+            <h3 class="font-inter font-bold text-base sm:text-lg">General Principles — 通用原則</h3>
+            <p class="text-xs dark:text-gray-400 text-gray-500 mt-0.5">清楚直接、背景脈絡、few-shot、XML 標籤、角色設定</p>
+          </div>
+        </div>
+        <svg class="accordion-chevron w-5 h-5 dark:text-gray-400 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="accordion-body">
+        <div class="px-5 pb-6 space-y-6">
+
+          <!-- 1.1 清楚直接 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              清楚且直接（Be Clear and Direct）
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              把 Claude 當作一位聰明但缺乏脈絡的新員工。就像你不會給新員工模糊的指示一樣，你也不應該給 Claude 模糊的 prompt。
+            </p>
+            <div class="tip-box dark:bg-yellow-500/5 bg-yellow-50 rounded-lg p-4 mb-3">
+              <p class="text-sm dark:text-gray-300 text-gray-700 leading-relaxed">
+                <strong class="text-primary">黃金法則：</strong>把你的 prompt 給一個缺乏脈絡的同事看，如果他們看了會困惑，Claude 也會困惑。
+              </p>
+            </div>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Claude 會嚴格遵照字面意思回應。如果你要求它「列出要考慮的因素」，它會列出但不會執行分析。如果你要求它做分析，就直接說：「分析以下數據並提供建議。」
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>不好 vs 好的範例</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// 不好：模糊
+"告訴我關於效能優化的事"
+
+// 好：清楚直接
+"分析以下 Python 函式的效能瓶頸，
+ 並提供 3 個具體的優化建議，
+ 每個建議包含修改前後的程式碼對比。"</code></pre>
+            </div>
+          </div>
+
+          <!-- 1.2 背景脈絡 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              加入背景脈絡（Provide Context）
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              解釋「為什麼」比僅僅告訴「做什麼」更重要。Claude 會從你的解釋中泛化（generalize），理解你真正想要什麼。就像跟實習生解釋工作目的可以幫助他們做更好的決策。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>提供脈絡範例</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// 沒有脈絡
+"把這段文字翻譯成日文"
+
+// 有脈絡
+"把這段文字翻譯成日文。
+ 這是一篇技術部落格的摘要，
+ 目標讀者是日本的軟體工程師，
+ 請使用正式但不過於生硬的語氣，
+ 技術術語保留英文原文並加上日文解釋。"</code></pre>
+            </div>
+          </div>
+
+          <!-- 1.3 Few-shot Examples -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+              有效使用範例（Use Examples Effectively）
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              提供 3-5 個 few-shot examples 是最有效的方式之一。範例應該具備三個特性：<strong>相關（Relevant）</strong>、<strong>多樣（Diverse）</strong>、<strong>結構化（Structured）</strong>。使用 <code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">&lt;example&gt;</code> 標籤包裝。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>XML + Few-shot Example</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">&lt;examples&gt;
+  &lt;example&gt;
+    &lt;input&gt;使用者問：「我的訂單在哪裡？」&lt;/input&gt;
+    &lt;output&gt;
+      分類：物流查詢
+      優先級：中
+      建議回覆：感謝您的詢問！請提供您的訂單編號，
+      我會立即為您查詢最新的物流狀態。
+    &lt;/output&gt;
+  &lt;/example&gt;
+  &lt;example&gt;
+    &lt;input&gt;使用者問：「這個產品有沒有紅色的？」&lt;/input&gt;
+    &lt;output&gt;
+      分類：產品諮詢
+      優先級：低
+      建議回覆：感謝您的興趣！讓我為您確認這款產品
+      的可用顏色選項。
+    &lt;/output&gt;
+  &lt;/example&gt;
+&lt;/examples&gt;</code></pre>
+            </div>
+          </div>
+
+          <!-- 1.4 XML 標籤 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+              XML 標籤結構化（Use XML Tags）
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              XML 標籤幫助 Claude 區分 prompt 的不同部分：指令、脈絡、輸入資料、輸出格式。常用標籤包括 <code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">&lt;instructions&gt;</code>、<code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">&lt;context&gt;</code>、<code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">&lt;input&gt;</code>、<code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">&lt;output_format&gt;</code>。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>結構化 Prompt 範例</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">&lt;instructions&gt;
+你是一位資深程式碼審查員。請審查以下程式碼，
+找出潛在的安全漏洞和效能問題。
+&lt;/instructions&gt;
+
+&lt;context&gt;
+這是一個 Node.js Express API 的認證中間件，
+部署在生產環境中。
+&lt;/context&gt;
+
+&lt;input&gt;
+{{code_to_review}}
+&lt;/input&gt;
+
+&lt;output_format&gt;
+以 JSON 格式輸出：
+{
+  "severity": "high|medium|low",
+  "issues": [...],
+  "recommendations": [...]
+}
+&lt;/output_format&gt;</code></pre>
+            </div>
+          </div>
+
+          <!-- 1.5 角色設定 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+              賦予角色（Assign a Role）
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              在 system prompt 中設定角色是最簡單卻最有效的技巧之一。一句話就能讓 Claude 的回應方式完全不同。角色設定會影響 Claude 的語氣、專業程度、回應格式和思考方式。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>System Prompt 角色設定</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// System prompt
+"你是一位有 15 年經驗的 Kubernetes 架構師，
+ 專精於大規模微服務部署和效能調優。
+ 你傾向實用主義而非過度工程化，
+ 會先確認問題再提供解決方案。"</code></pre>
+            </div>
+          </div>
+
+          <!-- 1.6 長文脈絡 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              長文脈絡處理（Long Context）
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              當你有大量文件要給 Claude 處理時，把長文放在 prompt 的<strong>上方</strong>可以提升回應品質（可提升約 30%）。用 XML 標籤包裝文件，並要求 Claude 引用原文來佐證其回答。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>長文處理技巧</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">&lt;documents&gt;
+  &lt;document id="1" title="架構設計文件"&gt;
+    {{architecture_doc}}
+  &lt;/document&gt;
+  &lt;document id="2" title="API 規格"&gt;
+    {{api_spec}}
+  &lt;/document&gt;
+&lt;/documents&gt;
+
+&lt;instructions&gt;
+根據以上文件回答問題。
+回答時請引用文件中的相關段落作為佐證，
+格式為 [Doc X, Section Y]。
+如果文件中沒有足夠的資訊，請明確說明。
+&lt;/instructions&gt;
+
+&lt;question&gt;{{user_question}}&lt;/question&gt;</code></pre>
+            </div>
+          </div>
+
+          <!-- 1.7 模型自我認知 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-primary">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              模型自我認知（Model Self-Identification）
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              你可以在 system prompt 中指定 Claude 如何識別自己。如果你是在建構一個產品，可以告訴 Claude 正確的模型名稱字串，讓使用者知道他們在跟哪個模型互動。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>模型識別範例</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// System prompt 中加入模型識別
+"You are powered by the model named Opus 4.6.
+ The exact model ID is claude-opus-4-6.
+ When users ask which model they are talking to,
+ respond with this information."</code></pre>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Section 2: Output & Formatting ==================== -->
+    <section id="sec-output" class="accordion-section rounded-xl border dark:border-gray-700/50 border-gray-200 dark:bg-surface-card bg-surface-cardlight overflow-hidden" data-tags="output">
+      <button class="accordion-header w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onclick="toggleAccordion(this)">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 text-sm font-bold">2</span>
+          <div>
+            <h3 class="font-inter font-bold text-base sm:text-lg">Output &amp; Formatting — 輸出與格式</h3>
+            <p class="text-xs dark:text-gray-400 text-gray-500 mt-0.5">格式控制、LaTeX、文件建立、Prefilled responses</p>
+          </div>
+        </div>
+        <svg class="accordion-chevron w-5 h-5 dark:text-gray-400 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="accordion-body">
+        <div class="px-5 pb-6 space-y-6">
+
+          <!-- 2.1 更簡潔直接 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-blue-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+              Claude 4.6 的輸出特性
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Claude 4.6 的輸出風格更加簡潔、直接、口語化。它不會像舊版本那樣冗長或過度禮貌。如果你發現回應太短，可以明確要求更詳細的回答。
+            </p>
+            <div class="info-box dark:bg-blue-500/5 bg-blue-50 rounded-lg p-4 mb-3">
+              <p class="text-sm dark:text-gray-300 text-gray-700 leading-relaxed">
+                <strong class="text-blue-500">提示：</strong>如果你從舊版模型遷移過來，可能需要調整你對輸出長度的期望。4.6 傾向用更少的詞說更多的事。
+              </p>
+            </div>
+          </div>
+
+          <!-- 2.2 控制格式的 4 種方式 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-blue-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+              控制輸出格式的 4 種方式
+            </h4>
+            <div class="space-y-3">
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-1">1. 正面描述（Positive Description）</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 mb-2">告訴 Claude 你要什麼格式，而不是不要什麼。</p>
+                <div class="code-block rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-1.5 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                    <span>範例</span>
+                    <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+                  </div>
+                  <pre class="p-3 text-xs dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"回覆時使用簡短段落，每段不超過 3 句話。
+ 使用項目符號列出具體步驟。
+ 技術術語首次出現時附上簡短解釋。"</code></pre>
+                </div>
+              </div>
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-1">2. XML Format Indicators</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 mb-2">用 XML 標籤指定輸出結構。</p>
+                <div class="code-block rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-1.5 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                    <span>範例</span>
+                    <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+                  </div>
+                  <pre class="p-3 text-xs dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"請用以下格式回覆：
+&lt;analysis&gt;
+  &lt;summary&gt;一句話摘要&lt;/summary&gt;
+  &lt;findings&gt;詳細發現&lt;/findings&gt;
+  &lt;action_items&gt;建議行動&lt;/action_items&gt;
+&lt;/analysis&gt;"</code></pre>
+                </div>
+              </div>
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-1">3. 匹配風格（Match Style）</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500">提供一個你想要的輸出範例，Claude 會匹配那個風格和格式。</p>
+              </div>
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-1">4. 詳細格式指引（Detailed Format Instructions）</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500">在 system prompt 中放入非常具體的格式規則。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2.3 LaTeX -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-blue-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              LaTeX 控制
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Opus 4.6 預設在數學相關內容中使用 LaTeX 格式。如果你的應用不支援 LaTeX 渲染，可以明確要求 Claude 使用純文字。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>切換 LaTeX 為純文字</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// System prompt 加入
+"Do not use LaTeX formatting for mathematical expressions.
+ Use plain text Unicode symbols instead.
+ For example, use x² instead of $x^2$,
+ and use √ instead of $\sqrt{}$."</code></pre>
+            </div>
+          </div>
+
+          <!-- 2.4 文件建立 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-blue-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+              文件建立能力
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Claude 擅長建立各類文件：簡報（HTML slides）、動畫（SVG/CSS animations）、視覺化文件（圖表、流程圖）。特別是在 Artifacts 或程式碼輸出模式下，可以產出完整的互動式文件。
+            </p>
+          </div>
+
+          <!-- 2.5 Prefilled responses -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-blue-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              Prefilled Responses（已棄用）
+            </h4>
+            <div class="warn-box dark:bg-red-500/5 bg-red-50 rounded-lg p-4">
+              <p class="text-sm dark:text-gray-300 text-gray-700 leading-relaxed">
+                <strong class="text-red-500">注意：</strong>從 Claude 4.6 開始，Prefilled responses（在 assistant turn 中預填內容）已被棄用。這個技巧在舊版本中用來控制輸出格式的開頭，但在新版中不再支援。請使用上述的格式控制方式替代。
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Section 3: Tool Use ==================== -->
+    <section id="sec-tools" class="accordion-section rounded-xl border dark:border-gray-700/50 border-gray-200 dark:bg-surface-card bg-surface-cardlight overflow-hidden" data-tags="tools">
+      <button class="accordion-header w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onclick="toggleAccordion(this)">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-green-500/10 text-green-500 text-sm font-bold">3</span>
+          <div>
+            <h3 class="font-inter font-bold text-base sm:text-lg">Tool Use — 工具使用</h3>
+            <p class="text-xs dark:text-gray-400 text-gray-500 mt-0.5">行動導向、default_to_action、system prompt 敏感度、平行呼叫</p>
+          </div>
+        </div>
+        <svg class="accordion-chevron w-5 h-5 dark:text-gray-400 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="accordion-body">
+        <div class="px-5 pb-6 space-y-6">
+
+          <!-- 3.1 行動導向 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-green-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              明確叫 Claude 行動，不只建議
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              當 Claude 有工具可用時，你需要明確告訴它去使用工具，而不是只描述該怎麼做。一個常見的問題是：Claude 會告訴你「你可以使用 X 工具來做這件事」而不是直接使用它。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>行動導向的 prompt</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// 不好：Claude 可能只描述步驟
+"幫我查一下這個問題"
+
+// 好：明確要求行動
+"使用 search 工具搜尋相關文件，
+ 然後使用 read_file 工具閱讀找到的檔案，
+ 最後給我分析結果。"</code></pre>
+            </div>
+          </div>
+
+          <!-- 3.2 default_to_action -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-green-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              default_to_action vs do_not_act_before_instructions
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              這兩個 XML 標籤用來控制 Claude 的主動性等級：
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-2 text-green-500">&lt;default_to_action&gt;</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 mb-2">讓 Claude 預設直接執行，不先詢問。適合已知任務流程。</p>
+                <div class="code-block rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-1.5 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                    <span>範例</span>
+                    <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+                  </div>
+                  <pre class="p-3 text-xs dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">&lt;default_to_action&gt;
+When the user asks to fix a bug,
+immediately use the tools to
+investigate and fix it.
+Do not ask for permission first.
+&lt;/default_to_action&gt;</code></pre>
+                </div>
+              </div>
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-2 text-red-400">&lt;do_not_act_before_instructions&gt;</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 mb-2">讓 Claude 先確認意圖再行動。適合有風險的操作。</p>
+                <div class="code-block rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-1.5 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                    <span>範例</span>
+                    <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+                  </div>
+                  <pre class="p-3 text-xs dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">&lt;do_not_act_before_instructions&gt;
+Before deleting any files or making
+destructive changes, always explain
+what you plan to do and wait for
+explicit user confirmation.
+&lt;/do_not_act_before_instructions&gt;</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3.3 System prompt 敏感度 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-green-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              Opus 4.5/4.6 對 System Prompt 更敏感
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Opus 4.5 和 4.6 對 system prompt 的指令更加敏感和遵從。這意味著你在 system prompt 中放的規則會被更嚴格地執行。好處是行為更可控，但也意味著模糊或矛盾的指令會造成更大的問題。
+            </p>
+            <div class="tip-box dark:bg-yellow-500/5 bg-yellow-50 rounded-lg p-4">
+              <p class="text-sm dark:text-gray-300 text-gray-700 leading-relaxed">
+                <strong class="text-primary">建議：</strong>花更多時間打磨你的 system prompt。移除模糊、重複或矛盾的指令。4.6 會比舊版本更認真地對待 system prompt 中的每一句話。
+              </p>
+            </div>
+          </div>
+
+          <!-- 3.4 平行 Tool Calling -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-green-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              平行 Tool Calling
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              當多個 tool calls 之間沒有依賴關係時，Claude 可以同時發出多個 tool calls，大幅提升效率。你可以在 system prompt 中提示 Claude 利用這個能力。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>平行呼叫提示</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"When multiple tool calls are independent
+ of each other, make them in parallel
+ within the same response.
+
+ For example, if you need to read 3 files
+ that don't depend on each other,
+ issue all 3 read_file calls at once
+ instead of sequentially."</code></pre>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Section 4: Thinking & Reasoning ==================== -->
+    <section id="sec-thinking" class="accordion-section rounded-xl border dark:border-gray-700/50 border-gray-200 dark:bg-surface-card bg-surface-cardlight overflow-hidden" data-tags="thinking">
+      <button class="accordion-header w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onclick="toggleAccordion(this)">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-500/10 text-purple-500 text-sm font-bold">4</span>
+          <div>
+            <h3 class="font-inter font-bold text-base sm:text-lg">Thinking &amp; Reasoning — 思考與推理</h3>
+            <p class="text-xs dark:text-gray-400 text-gray-500 mt-0.5">Adaptive thinking、effort 參數、減少過度思考</p>
+          </div>
+        </div>
+        <svg class="accordion-chevron w-5 h-5 dark:text-gray-400 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="accordion-body">
+        <div class="px-5 pb-6 space-y-6">
+
+          <!-- 4.1 前期探索 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-purple-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              Opus 4.6 的前期探索
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Opus 4.6 在回答之前會做更多的前期探索（upfront exploration）。它會先思考問題的各個面向，然後再給出回答。這讓它的回答通常更全面、更有深度，但也意味著回應時間可能更長。
+            </p>
+          </div>
+
+          <!-- 4.2 Adaptive Thinking -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-purple-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              Adaptive Thinking 取代 Extended Thinking
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              在 Claude 4.6 中，<strong>Adaptive thinking</strong> 取代了之前的 Extended thinking。主要差異在於：Adaptive thinking 會根據問題的複雜度自動調整思考的深度和長度，不再需要固定的 budget token。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>Adaptive Thinking API 範例</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// 使用 Adaptive thinking
+const response = await anthropic.messages.create({
+  model: "claude-opus-4-6",
+  max_tokens: 16000,
+  thinking: {
+    type: "enabled",
+    // 不再需要 budget_tokens
+    // 模型會自動調整思考深度
+  },
+  messages: [{
+    role: "user",
+    content: "分析這段程式碼的時間複雜度..."
+  }]
+});</code></pre>
+            </div>
+          </div>
+
+          <!-- 4.3 effort 參數 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-purple-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+              effort 參數控制思考深度
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              <code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">effort</code> 參數讓你控制 Claude 投入多少思考在一個問題上。這在批量處理或延遲敏感的場景中特別有用。
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-3 text-center">
+                <p class="text-lg font-bold text-green-500 mb-1">low</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500">簡單任務、分類<br>快速回應優先</p>
+              </div>
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-3 text-center">
+                <p class="text-lg font-bold text-yellow-500 mb-1">medium</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500">一般任務<br>平衡品質和速度</p>
+              </div>
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-3 text-center">
+                <p class="text-lg font-bold text-red-500 mb-1">high</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500">複雜推理、數學<br>品質優先</p>
+              </div>
+            </div>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>effort 參數使用範例</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// 低 effort — 簡單分類任務
+const response = await anthropic.messages.create({
+  model: "claude-sonnet-4-6",
+  max_tokens: 256,
+  thinking: {
+    type: "enabled",
+    effort: "low"  // 快速回應
+  },
+  messages: [{ role: "user", content: "這封 email 是垃圾郵件嗎？" }]
+});
+
+// 高 effort — 複雜推理任務
+const response = await anthropic.messages.create({
+  model: "claude-opus-4-6",
+  max_tokens: 16000,
+  thinking: {
+    type: "enabled",
+    effort: "high"  // 深度思考
+  },
+  messages: [{ role: "user", content: "證明這個演算法的正確性..." }]
+});</code></pre>
+            </div>
+          </div>
+
+          <!-- 4.4 減少過度思考 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-purple-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+              減少過度思考
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              有時 Claude 會過度思考簡單的問題。以下是一些減少過度思考的技巧：
+            </p>
+            <ul class="text-sm dark:text-gray-300 text-gray-600 space-y-2 list-disc list-inside mb-3">
+              <li>使用低 <code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">effort</code> 參數</li>
+              <li>在 prompt 中明確說「直接回答，不需要解釋推理過程」</li>
+              <li>給出明確的輸出格式，減少 Claude 思考要如何呈現的時間</li>
+              <li>對於是/否問題，要求只回答「是」或「否」加一句簡短理由</li>
+            </ul>
+            <div class="code-block rounded-lg overflow-hidden">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>減少過度思考的 prompt</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"Answer directly and concisely.
+ Do not over-explain or hedge.
+ If the answer is simple, keep it simple.
+ Only elaborate if the question genuinely
+ requires detailed analysis."</code></pre>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Section 5: Agentic Systems ==================== -->
+    <section id="sec-agentic" class="accordion-section rounded-xl border dark:border-gray-700/50 border-gray-200 dark:bg-surface-card bg-surface-cardlight overflow-hidden" data-tags="agent">
+      <button class="accordion-header w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onclick="toggleAccordion(this)">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-red-500/10 text-red-500 text-sm font-bold">5</span>
+          <div>
+            <h3 class="font-inter font-bold text-base sm:text-lg">Agentic Systems — Agent 系統</h3>
+            <p class="text-xs dark:text-gray-400 text-gray-500 mt-0.5">長期推理、狀態管理、安全性、Subagent、Prompt chaining</p>
+          </div>
+        </div>
+        <svg class="accordion-chevron w-5 h-5 dark:text-gray-400 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="accordion-body">
+        <div class="px-5 pb-6 space-y-6">
+
+          <!-- 5.1 Long-horizon Reasoning -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-red-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+              Long-horizon Reasoning 與狀態追蹤
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              在 agentic 場景中，Claude 需要跨越多個步驟維持推理連貫性。關鍵是幫助 Claude 追蹤它在長任務中的進度和狀態。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>狀態追蹤的 System Prompt</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"Before each action, briefly summarize:
+ 1. What you've done so far
+ 2. What you're about to do and why
+ 3. What remains after this step
+
+ This helps maintain coherence across
+ long multi-step tasks."</code></pre>
+            </div>
+          </div>
+
+          <!-- 5.2 Context Awareness -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-red-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              Context Awareness 與 Multi-window Workflows
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              在多視窗工作流程中（例如同時處理多個檔案或多個對話），確保 Claude 清楚知道目前的脈絡。使用明確的標記來區分不同的工作區。
+            </p>
+          </div>
+
+          <!-- 5.3 狀態管理 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-red-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+              狀態管理最佳實踐
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              對於長期運行的 agent 任務，使用持久化的狀態管理：
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-2">JSON 狀態檔</p>
+                <div class="code-block rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-1.5 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                    <span>state.json</span>
+                    <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+                  </div>
+                  <pre class="p-3 text-xs dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">{
+  "task": "migrate-database",
+  "current_step": 3,
+  "total_steps": 7,
+  "completed": [
+    "backup_created",
+    "schema_updated",
+    "data_migrated"
+  ],
+  "remaining": [
+    "verify_data",
+    "update_indexes",
+    "test_queries",
+    "switch_traffic"
+  ]
+}</code></pre>
+                </div>
+              </div>
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-2">Git-based 狀態追蹤</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 mb-2">用 git commits 作為 checkpoint，每完成一個步驟就 commit，方便回溯。</p>
+                <div class="code-block rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-1.5 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                    <span>Git checkpoint</span>
+                    <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+                  </div>
+                  <pre class="p-3 text-xs dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"After completing each major step,
+ create a git commit with a
+ descriptive message. This serves
+ as a checkpoint you can revert
+ to if something goes wrong."</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5.4 安全性平衡 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-red-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              平衡自主性和安全性
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              在 agentic 系統中，你需要在自主性（讓 Claude 獨立完成任務）和安全性（防止破壞性操作）之間取得平衡。建議的方法是：
+            </p>
+            <ul class="text-sm dark:text-gray-300 text-gray-600 space-y-2 list-disc list-inside mb-3">
+              <li><strong>讀取操作</strong>：完全自主（搜尋、讀檔、查詢）</li>
+              <li><strong>寫入操作</strong>：自主但會通知（建立檔案、編輯程式碼）</li>
+              <li><strong>破壞性操作</strong>：必須等待確認（刪除檔案、git force push、修改生產環境）</li>
+              <li><strong>外部操作</strong>：必須等待確認（傳送訊息、建立 PR、部署）</li>
+            </ul>
+          </div>
+
+          <!-- 5.5 研究與資訊收集 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-red-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              研究與資訊收集
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Agent 系統最強大的能力之一是研究和資訊收集。指導 Claude 使用廣度優先的搜尋策略，先廣泛搜尋再深入。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>研究策略 Prompt</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"When investigating a problem:
+ 1. Start broad: search for the error message,
+    check related files, look at recent changes
+ 2. Form hypotheses based on initial findings
+ 3. Test hypotheses one at a time
+ 4. Document your findings as you go
+ 5. If stuck, try a completely different angle
+
+ Do NOT tunnel-vision on the first hypothesis."</code></pre>
+            </div>
+          </div>
+
+          <!-- 5.6 Subagent Orchestration -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-red-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+              Subagent Orchestration
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Claude 4.6 原生支援 subagent orchestration（產生子 agent 來處理子任務）。但要注意：<strong>4.6 可能會過度使用 subagent</strong>，在不需要的情況下也產生子 agent。
+            </p>
+            <div class="warn-box dark:bg-red-500/5 bg-red-50 rounded-lg p-4 mb-3">
+              <p class="text-sm dark:text-gray-300 text-gray-700 leading-relaxed">
+                <strong class="text-red-500">注意：</strong>如果你發現 Claude 在簡單任務上也產生 subagent，可以在 system prompt 中加入限制：「Only use subagents for tasks that genuinely require parallel execution or specialized expertise. For simple sequential tasks, handle them directly.」
+              </p>
+            </div>
+          </div>
+
+          <!-- 5.7 Prompt Chaining -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-red-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+              Prompt Chaining（自我修正模式）
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Prompt chaining 是將一個大任務拆解成多個步驟，每一步的輸出成為下一步的輸入。自我修正模式是一種特殊的 chaining，讓 Claude 檢查自己的輸出並修正錯誤。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>自我修正 Chaining 範例</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// Step 1: 生成程式碼
+const codeResponse = await generateCode(task);
+
+// Step 2: 自我審查
+const reviewResponse = await anthropic.messages.create({
+  model: "claude-opus-4-6",
+  system: `Review the following code for bugs,
+    security issues, and edge cases.
+    Be critical and thorough.`,
+  messages: [{
+    role: "user",
+    content: `Review this code:\n${codeResponse}`
+  }]
+});
+
+// Step 3: 根據審查修正
+const fixedCode = await anthropic.messages.create({
+  model: "claude-opus-4-6",
+  messages: [{
+    role: "user",
+    content: `Original code:\n${codeResponse}\n\n
+     Review feedback:\n${reviewResponse}\n\n
+     Fix all identified issues.`
+  }]
+});</code></pre>
+            </div>
+          </div>
+
+          <!-- 5.8 避免問題 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-red-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              常見問題與解決方法
+            </h4>
+            <div class="space-y-3">
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-1">減少不必要的檔案建立</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 mb-2">Claude 有時會傾向建立新檔案而非修改現有檔案。</p>
+                <div class="code-block rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-1.5 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                    <span>Prompt</span>
+                    <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+                  </div>
+                  <pre class="p-3 text-xs dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"ALWAYS prefer editing existing files.
+ NEVER create new files unless absolutely
+ necessary. Before creating a file,
+ check if an existing file can be modified."</code></pre>
+                </div>
+              </div>
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-1">防止過度工程化</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 mb-2">Claude 有時會把簡單的任務做得過度複雜。</p>
+                <div class="code-block rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-1.5 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                    <span>Prompt</span>
+                    <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+                  </div>
+                  <pre class="p-3 text-xs dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"Prefer simple, pragmatic solutions.
+ Do not over-engineer or add unnecessary
+ abstractions. Solve the problem at hand,
+ not hypothetical future problems."</code></pre>
+                </div>
+              </div>
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-1">避免硬編碼 (Hardcoding)</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 mb-2">提醒 Claude 使用設定檔或環境變數而非硬編碼。</p>
+                <div class="code-block rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-1.5 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                    <span>Prompt</span>
+                    <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+                  </div>
+                  <pre class="p-3 text-xs dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"Never hardcode values like URLs, API keys,
+ file paths, or configuration values.
+ Use environment variables, config files,
+ or constants defined at the top of the file."</code></pre>
+                </div>
+              </div>
+              <div class="rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <p class="text-sm font-medium mb-1">減少幻覺 (Hallucination)</p>
+                <p class="text-xs dark:text-gray-400 text-gray-500 mb-2">讓 Claude 在不確定時明確說明。</p>
+                <div class="code-block rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-3 py-1.5 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                    <span>Prompt</span>
+                    <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+                  </div>
+                  <pre class="p-3 text-xs dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">"If you are unsure about something,
+ say so explicitly. Do not guess or
+ fabricate information. It's better to
+ say 'I'm not certain about X' than to
+ provide incorrect information."</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Section 6: Capability-specific Tips ==================== -->
+    <section id="sec-capability" class="accordion-section rounded-xl border dark:border-gray-700/50 border-gray-200 dark:bg-surface-card bg-surface-cardlight overflow-hidden" data-tags="vision">
+      <button class="accordion-header w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onclick="toggleAccordion(this)">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-teal-500/10 text-teal-500 text-sm font-bold">6</span>
+          <div>
+            <h3 class="font-inter font-bold text-base sm:text-lg">Capability-specific Tips — 特定能力技巧</h3>
+            <p class="text-xs dark:text-gray-400 text-gray-500 mt-0.5">Vision 提升、Frontend design、避免 AI slop</p>
+          </div>
+        </div>
+        <svg class="accordion-chevron w-5 h-5 dark:text-gray-400 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="accordion-body">
+        <div class="px-5 pb-6 space-y-6">
+
+          <!-- 6.1 Vision -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-teal-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              Vision 能力提升
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Claude 4.6 的視覺理解能力顯著提升。它可以更準確地理解圖表、截圖、UI mockups。一個實用的技巧是使用 <strong>crop tool</strong>：當圖片很大或細節很多時，裁切出你關注的區域可以顯著提升辨識準確度。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>Vision 使用技巧</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// 提升 Vision 準確度的技巧：
+// 1. 提供明確的圖片描述上下文
+"這是一張 Grafana dashboard 的截圖，
+ 顯示過去 24 小時的 CPU 使用率。
+ 請分析趨勢並指出異常時段。"
+
+// 2. 使用裁切聚焦
+"我已裁切出圖表中 14:00-18:00 的區段，
+ 請仔細分析這段時間的 spike 原因。"
+
+// 3. 多圖比較
+"以下兩張截圖分別是部署前後的效能指標，
+ 請比較差異並評估部署影響。"</code></pre>
+            </div>
+          </div>
+
+          <!-- 6.2 Frontend Design -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-teal-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+              Frontend Design — 避免 AI Slop
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              Claude 可以生成完整的前端程式碼，但預設的美學傾向可能產出「AI slop」風格（過度使用漸層、圓角、emoji、千篇一律的設計）。使用 <code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">&lt;frontend_aesthetics&gt;</code> 標籤來指定設計風格。
+            </p>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>frontend_aesthetics 標籤範例</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">&lt;frontend_aesthetics&gt;
+Design style: Clean, minimal, professional.
+Do NOT use:
+- Excessive gradients or shadows
+- Rounded corners everywhere
+- Generic stock-photo aesthetics
+- Emojis as decorative elements
+- Purple/blue gradient backgrounds
+
+DO use:
+- Clear typography hierarchy
+- Adequate whitespace
+- Subtle, purposeful animations
+- A cohesive, restrained color palette
+- Real content, not "Lorem ipsum"
+&lt;/frontend_aesthetics&gt;</code></pre>
+            </div>
+            <div class="tip-box dark:bg-yellow-500/5 bg-yellow-50 rounded-lg p-4">
+              <p class="text-sm dark:text-gray-300 text-gray-700 leading-relaxed">
+                <strong class="text-primary">提示：</strong>提供你喜歡的設計參考（網站截圖或 URL）比文字描述更有效。Claude 4.6 的 vision 能力可以直接理解設計風格。
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== Section 7: Migration Considerations ==================== -->
+    <section id="sec-migration" class="accordion-section rounded-xl border dark:border-gray-700/50 border-gray-200 dark:bg-surface-card bg-surface-cardlight overflow-hidden" data-tags="migration">
+      <button class="accordion-header w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onclick="toggleAccordion(this)">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 text-sm font-bold">7</span>
+          <div>
+            <h3 class="font-inter font-bold text-base sm:text-lg">Migration Considerations — 遷移注意事項</h3>
+            <p class="text-xs dark:text-gray-400 text-gray-500 mt-0.5">遷移重點、Sonnet 4.5 to 4.6、Extended to Adaptive thinking</p>
+          </div>
+        </div>
+        <svg class="accordion-chevron w-5 h-5 dark:text-gray-400 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div class="accordion-body">
+        <div class="px-5 pb-6 space-y-6">
+
+          <!-- 7.1 六大遷移重點 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-indigo-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+              遷移到 4.6 的 6 個重點
+            </h4>
+            <div class="space-y-3">
+              <div class="flex gap-3 items-start rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-500 flex items-center justify-center text-xs font-bold">1</span>
+                <div>
+                  <p class="text-sm font-medium">Prefilled responses 已棄用</p>
+                  <p class="text-xs dark:text-gray-400 text-gray-500">不再支援在 assistant turn 預填內容。改用 XML format indicators 或 system prompt 格式指引。</p>
+                </div>
+              </div>
+              <div class="flex gap-3 items-start rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-500 flex items-center justify-center text-xs font-bold">2</span>
+                <div>
+                  <p class="text-sm font-medium">System prompt 敏感度提高</p>
+                  <p class="text-xs dark:text-gray-400 text-gray-500">4.6 對 system prompt 更加遵從。檢查是否有模糊或矛盾的指令需要修正。</p>
+                </div>
+              </div>
+              <div class="flex gap-3 items-start rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-500 flex items-center justify-center text-xs font-bold">3</span>
+                <div>
+                  <p class="text-sm font-medium">輸出風格更簡潔</p>
+                  <p class="text-xs dark:text-gray-400 text-gray-500">如果你依賴舊版本的冗長輸出，可能需要明確要求更詳細的回答。</p>
+                </div>
+              </div>
+              <div class="flex gap-3 items-start rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-500 flex items-center justify-center text-xs font-bold">4</span>
+                <div>
+                  <p class="text-sm font-medium">Adaptive thinking 取代 Extended thinking</p>
+                  <p class="text-xs dark:text-gray-400 text-gray-500">不再需要設定 budget_tokens，模型自動調整思考深度。使用 effort 參數控制。</p>
+                </div>
+              </div>
+              <div class="flex gap-3 items-start rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-500 flex items-center justify-center text-xs font-bold">5</span>
+                <div>
+                  <p class="text-sm font-medium">Subagent 行為可能過度使用</p>
+                  <p class="text-xs dark:text-gray-400 text-gray-500">監控 agent 行為，必要時加入限制 subagent 使用的指令。</p>
+                </div>
+              </div>
+              <div class="flex gap-3 items-start rounded-lg dark:bg-gray-800/50 bg-gray-50 p-4">
+                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-500 flex items-center justify-center text-xs font-bold">6</span>
+                <div>
+                  <p class="text-sm font-medium">LaTeX 預設行為</p>
+                  <p class="text-xs dark:text-gray-400 text-gray-500">如果你的應用不支援 LaTeX 渲染，記得在 system prompt 中關閉。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7.2 Sonnet 4.5 → 4.6 -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-indigo-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+              Sonnet 4.5 → Sonnet 4.6 遷移指南
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              從 Sonnet 4.5 遷移到 4.6 時的關鍵調整：
+            </p>
+            <div class="overflow-x-auto mb-3">
+              <table class="w-full text-sm border-collapse">
+                <thead>
+                  <tr class="dark:bg-gray-800/50 bg-gray-100">
+                    <th class="text-left px-4 py-2 font-medium dark:border-gray-700 border-gray-200 border-b">項目</th>
+                    <th class="text-left px-4 py-2 font-medium dark:border-gray-700 border-gray-200 border-b">Sonnet 4.5</th>
+                    <th class="text-left px-4 py-2 font-medium dark:border-gray-700 border-gray-200 border-b">Sonnet 4.6</th>
+                  </tr>
+                </thead>
+                <tbody class="dark:text-gray-300 text-gray-600">
+                  <tr class="dark:border-gray-800 border-gray-200 border-b">
+                    <td class="px-4 py-2">Thinking</td>
+                    <td class="px-4 py-2">Extended (budget_tokens)</td>
+                    <td class="px-4 py-2">Adaptive (effort param)</td>
+                  </tr>
+                  <tr class="dark:border-gray-800 border-gray-200 border-b">
+                    <td class="px-4 py-2">Prefill</td>
+                    <td class="px-4 py-2">支援</td>
+                    <td class="px-4 py-2">棄用</td>
+                  </tr>
+                  <tr class="dark:border-gray-800 border-gray-200 border-b">
+                    <td class="px-4 py-2">輸出風格</td>
+                    <td class="px-4 py-2">較冗長</td>
+                    <td class="px-4 py-2">簡潔直接</td>
+                  </tr>
+                  <tr class="dark:border-gray-800 border-gray-200 border-b">
+                    <td class="px-4 py-2">System prompt</td>
+                    <td class="px-4 py-2">中等遵從度</td>
+                    <td class="px-4 py-2">高遵從度</td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-2">effort 預設</td>
+                    <td class="px-4 py-2">N/A</td>
+                    <td class="px-4 py-2">medium（建議依任務調整）</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="code-block rounded-lg overflow-hidden mb-3">
+              <div class="flex items-center justify-between px-4 py-2 dark:bg-gray-900 bg-gray-100 text-xs dark:text-gray-400 text-gray-500">
+                <span>遷移程式碼範例</span>
+                <button class="copy-btn px-2 py-1 rounded dark:bg-gray-700 bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-xs" onclick="copyCode(this)">複製</button>
+              </div>
+              <pre class="p-4 text-sm dark:bg-gray-950 bg-gray-50 overflow-x-auto"><code class="dark:text-gray-300 text-gray-700">// Sonnet 4.5（舊）
+const response = await anthropic.messages.create({
+  model: "claude-sonnet-4-5-20250514",
+  max_tokens: 16000,
+  thinking: {
+    type: "enabled",
+    budget_tokens: 10000  // 固定 budget
+  },
+  messages: [...]
+});
+
+// Sonnet 4.6（新）
+const response = await anthropic.messages.create({
+  model: "claude-sonnet-4-6",
+  max_tokens: 16000,
+  thinking: {
+    type: "enabled",
+    effort: "medium"  // 使用 effort 參數
+  },
+  messages: [...]
+});</code></pre>
+            </div>
+          </div>
+
+          <!-- 7.3 Extended → Adaptive Thinking -->
+          <div>
+            <h4 class="font-inter font-bold text-sm mb-2 flex items-center gap-2 text-indigo-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Extended Thinking → Adaptive Thinking 遷移
+            </h4>
+            <p class="text-sm dark:text-gray-300 text-gray-600 leading-relaxed mb-3">
+              遷移步驟：
+            </p>
+            <ol class="text-sm dark:text-gray-300 text-gray-600 space-y-2 list-decimal list-inside mb-3">
+              <li>移除 <code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">budget_tokens</code> 參數</li>
+              <li>改用 <code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">effort</code> 參數（low / medium / high）</li>
+              <li>測試關鍵使用案例，確認思考深度是否適當</li>
+              <li>對於延遲敏感的任務，從 <code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">low</code> 開始逐步提升</li>
+              <li>監控 token 使用量和回應品質的變化</li>
+            </ol>
+            <div class="info-box dark:bg-blue-500/5 bg-blue-50 rounded-lg p-4">
+              <p class="text-sm dark:text-gray-300 text-gray-700 leading-relaxed">
+                <strong class="text-blue-500">提示：</strong>Adaptive thinking 的好處是你不再需要猜測 budget_tokens 的最佳值。模型會根據問題複雜度自動分配思考資源。對於大多數任務，<code class="px-1.5 py-0.5 rounded dark:bg-gray-800 bg-gray-200 text-xs">effort: "medium"</code> 是個好的起點。
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t dark:border-gray-800 border-gray-200 py-6 no-print">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+      <p class="text-xs dark:text-gray-500 text-gray-400">Claude Prompting Best Practices — 完整最佳實踐指南 | 2026-04-03</p>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Back to Top Button -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="fixed bottom-6 left-6 z-50 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg hover:shadow-xl opacity-0 pointer-events-none no-print">
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+</button>
+
+<script>
+// ======================== Theme ========================
+function toggleTheme() {
+  document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+}
+(function initTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') document.documentElement.classList.remove('dark');
+})();
+
+// ======================== Sidebar ========================
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  const isOpen = !sb.classList.contains('-translate-x-full');
+  sb.classList.toggle('-translate-x-full', isOpen);
+  ov.classList.toggle('hidden', isOpen);
+}
+
+// ======================== Accordion ========================
+function toggleAccordion(btn) {
+  const body = btn.nextElementSibling;
+  const chevron = btn.querySelector('.accordion-chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('rotated', !isOpen);
+}
+
+let allOpen = false;
+function toggleAllSections() {
+  allOpen = !allOpen;
+  document.querySelectorAll('.accordion-body').forEach(b => b.classList.toggle('open', allOpen));
+  document.querySelectorAll('.accordion-chevron').forEach(c => c.classList.toggle('rotated', allOpen));
+}
+
+// ======================== Copy Code ========================
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('已複製到剪貼簿');
+    btn.textContent = '已複製';
+    setTimeout(() => btn.textContent = '複製', 1500);
+  });
+}
+
+function showToast(msg) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast px-4 py-2 rounded-lg dark:bg-gray-800 bg-white border dark:border-gray-700 border-gray-200 text-sm shadow-lg';
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+// ======================== Search ========================
+function handleSearch(query) {
+  const q = query.trim().toLowerCase();
+  // Remove previous highlights
+  document.querySelectorAll('mark.search-hl').forEach(m => {
+    const parent = m.parentNode;
+    parent.replaceChild(document.createTextNode(m.textContent), m);
+    parent.normalize();
+  });
+
+  if (!q) {
+    document.querySelectorAll('.accordion-section').forEach(s => s.style.display = '');
+    return;
+  }
+
+  document.querySelectorAll('.accordion-section').forEach(section => {
+    const text = section.textContent.toLowerCase();
+    if (text.includes(q)) {
+      section.style.display = '';
+      // Open the accordion
+      const body = section.querySelector('.accordion-body');
+      const chevron = section.querySelector('.accordion-chevron');
+      if (body && !body.classList.contains('open')) {
+        body.classList.add('open');
+        chevron && chevron.classList.add('rotated');
+      }
+      // Highlight matches in paragraph text
+      highlightInElement(section, q);
+    } else {
+      section.style.display = 'none';
+    }
+  });
+}
+
+function highlightInElement(root, query) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (node.parentElement.closest('pre, code, button, script, style, .accordion-header')) return NodeFilter.FILTER_REJECT;
+      return node.textContent.toLowerCase().includes(query) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const frag = document.createDocumentFragment();
+    let remaining = node.textContent;
+    let lower = remaining.toLowerCase();
+    let idx;
+    while ((idx = lower.indexOf(query)) !== -1) {
+      frag.appendChild(document.createTextNode(remaining.slice(0, idx)));
+      const mark = document.createElement('mark');
+      mark.className = 'search-hl';
+      mark.textContent = remaining.slice(idx, idx + query.length);
+      frag.appendChild(mark);
+      remaining = remaining.slice(idx + query.length);
+      lower = remaining.toLowerCase();
+    }
+    frag.appendChild(document.createTextNode(remaining));
+    node.parentNode.replaceChild(frag, node);
+  });
+}
+
+// ======================== Tag Filter ========================
+function filterByTag(tag) {
+  document.querySelectorAll('.tag-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.tag === tag);
+    if (p.dataset.tag === tag) {
+      p.classList.remove('dark:bg-gray-800', 'bg-gray-200', 'dark:text-gray-300', 'text-gray-600');
+      p.classList.add('dark:bg-primary/20', 'bg-primary/10', 'dark:text-primary', 'text-primary');
+    } else {
+      p.classList.remove('dark:bg-primary/20', 'bg-primary/10', 'dark:text-primary', 'text-primary');
+      p.classList.add('dark:bg-gray-800', 'bg-gray-200', 'dark:text-gray-300', 'text-gray-600');
+    }
+  });
+  document.querySelectorAll('.accordion-section').forEach(s => {
+    s.style.display = (tag === 'all' || s.dataset.tags.includes(tag)) ? '' : 'none';
+  });
+}
+
+// ======================== Reading Progress ========================
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('readingProgress').style.width = Math.min(pct, 100) + '%';
+
+  // Back to top
+  const btn = document.getElementById('backToTop');
+  if (h.scrollTop > 400) {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  } else {
+    btn.style.opacity = '0';
+    btn.style.pointerEvents = 'none';
+  }
+});
+
+// ======================== TOC Active State ========================
+const sectionIds = ['sec-general','sec-output','sec-tools','sec-thinking','sec-agentic','sec-capability','sec-migration'];
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      document.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.toc-link[data-section="${entry.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-100px 0px -60% 0px', threshold: 0 });
+sectionIds.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) observer.observe(el);
+});
+
+// Close sidebar on link click (mobile)
+document.querySelectorAll('.toc-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth < 1024) toggleSidebar();
+  });
+});
+</script>
+</body>
+</html>

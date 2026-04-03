@@ -26,5 +26,9 @@
   "cc": {
     "title": "Claude Code 更新日誌",
     "description": "Claude Code 各版本更新內容（繁體中文翻譯）。"
+  },
+  "claude-prompting-best-practices": {
+    "title": "Claude Prompting Best Practices 完整最佳實踐指南",
+    "description": "Claude 最新模型（Opus 4.6 / Sonnet 4.6）的 Prompt Engineering 完整指南，涵蓋通用原則、輸出格式、工具使用、思考推理、Agent 系統、特定能力技巧及遷移注意事項七大章節，含互動式導航與程式碼範例。"
   }
 }
