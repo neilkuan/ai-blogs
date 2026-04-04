@@ -30,5 +30,9 @@
   "claude-prompting-best-practices": {
     "title": "Claude Prompting Best Practices 完整最佳實踐指南",
     "description": "Claude 最新模型（Opus 4.6 / Sonnet 4.6）的 Prompt Engineering 完整指南，涵蓋通用原則、輸出格式、工具使用、思考推理、Agent 系統、特定能力技巧及遷移注意事項七大章節，含互動式導航與程式碼範例。"
+  },
+  "kiro-cli-manual": {
+    "title": "Kiro CLI 完整操作手冊",
+    "description": "AWS Kiro CLI 的完整使用手冊，涵蓋 Chat 互動、模型選擇、Subagents、Plan Agent、Context 管理、權限管理、Steering 導向、Skills 技能系統、ACP 協議、Hooks、Code Intelligence 等功能。"
   }
 }
