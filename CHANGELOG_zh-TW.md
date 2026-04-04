@@ -2,6 +2,29 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.92
+- 新增 `forceRemoteSettingsRefresh` 政策設定：啟用後，CLI 會在啟動時阻止程序直到遠端託管設定被重新取得，若取得失敗則退出（fail-closed）
+- 新增互動式 Bedrock 設定精靈，在登入畫面選擇「第三方平台」時可存取 — 引導你完成 AWS 認證、地區配置、認證驗證和模型固定
+- 新增按模型和快取命中分類統計到 `/cost`（供訂閱用戶使用）
+- `/release-notes` 現在是互動式版本選擇器
+- Remote Control 工作階段名稱現在預設使用你的主機名稱作為前綴（例如 `myhost-graceful-unicorn`），可透過 `--remote-control-session-name-prefix` 覆蓋
+- Pro 用戶在提示快取過期後返回工作階段時，現在會看到頁尾提示，顯示下一輪大約會發送多少未快取的 token
+- 修復了在長時間執行的工作階段中 tmux 窗口被刪除或重新編號後，子代理生成永久失敗並出現「無法確定窗格計數」的問題
+- 修復了當小型快速模型返回 `ok:false` 時，提示類型 Stop hook 不正確地失敗的問題，並恢復了非 Stop 提示類型 hook 的 `preventContinuation:true` 語義
+- 修復了當串流發出陣列/物件欄位作為 JSON 編碼字串時的工具輸入驗證失敗
+- 修復了當擴展思考產生僅空白文字區塊與實際內容並存時可能發生的 API 400 錯誤
+- 修復了來自自動駕駛按鍵和連續提示數字碰撞的意外回饋問卷提交
+- 修復了在全螢幕模式下處理期間存在文字選擇時，出現誤導性「按 esc 中斷」提示與「按 esc 清空」並列的問題
+- 修復了 Homebrew 安裝更新提示改為使用 cask 的發佈頻道（`claude-code` → 穩定版，`claude-code@latest` → 最新版）
+- 修復了在多行提示中已在行尾時，`ctrl+e` 跳到下一行末尾的問題
+- 修復了在全螢幕模式下向上滾動時，同一條訊息可能出現在兩個位置的問題（iTerm2、Ghostty 及其他支援 DEC 2026 的終端機）
+- 修復了空閒返回「/clear 可節省 X token」提示顯示累計工作階段 token 而非目前內容大小的問題
+- 修復了當 plugin MCP 伺服器複製未認證的 claude.ai connector 時，在工作階段啟動時停留在「連線中」的問題
+- 改進了大型檔案的 Write 工具 diff 計算速度（在包含 tab/`&`/`$` 的檔案上快 60%）
+- 移除了 `/tag` 指令
+- 移除了 `/vim` 指令（透過 `/config` → 編輯器模式切換 vim 模式）
+- Linux sandbox 現在在 npm 和原生建置中都包含 `apply-seccomp` 協助工具，恢復了沙箱化指令的 unix socket 阻止功能
+
 ## 2.1.91
 - 新增透過 `_meta["anthropic/maxResultSizeChars"]` 註解進行 MCP 工具結果持久性覆寫功能（最高 500K），允許資料庫 schema 等較大結果通過而無需截斷
 - 新增 `disableSkillShellExecution` 設定，用於停用 skill、自訂 slash 指令和 plugin 指令中的內嵌 shell 執行功能

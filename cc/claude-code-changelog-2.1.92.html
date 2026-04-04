@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.92 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.92 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.92</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">forceRemoteSettingsRefresh</code> 政策設定：啟用後，CLI 會在啟動時阻止程序直到遠端託管設定被重新取得，若取得失敗則退出（fail-closed）</li>
+<li>新增互動式 Bedrock 設定精靈，在登入畫面選擇「第三方平台」時可存取 — 引導你完成 AWS 認證、地區配置、認證驗證和模型固定</li>
+<li>新增按模型和快取命中分類統計到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/cost</code>（供訂閱用戶使用）</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/release-notes</code> 現在是互動式版本選擇器</li>
+<li>Remote Control 工作階段名稱現在預設使用你的主機名稱作為前綴（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">myhost-graceful-unicorn</code>），可透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--remote-control-session-name-prefix</code> 覆蓋</li>
+<li>Pro 用戶在提示快取過期後返回工作階段時，現在會看到頁尾提示，顯示下一輪大約會發送多少未快取的 token</li>
+<li>修復了在長時間執行的工作階段中 tmux 窗口被刪除或重新編號後，子代理生成永久失敗並出現「無法確定窗格計數」的問題</li>
+<li>修復了當小型快速模型返回 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ok:false</code> 時，提示類型 Stop hook 不正確地失敗的問題，並恢復了非 Stop 提示類型 hook 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">preventContinuation:true</code> 語義</li>
+<li>修復了當串流發出陣列/物件欄位作為 JSON 編碼字串時的工具輸入驗證失敗</li>
+<li>修復了當擴展思考產生僅空白文字區塊與實際內容並存時可能發生的 API 400 錯誤</li>
+<li>修復了來自自動駕駛按鍵和連續提示數字碰撞的意外回饋問卷提交</li>
+<li>修復了在全螢幕模式下處理期間存在文字選擇時，出現誤導性「按 esc 中斷」提示與「按 esc 清空」並列的問題</li>
+<li>修復了 Homebrew 安裝更新提示改為使用 cask 的發佈頻道（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude-code</code> → 穩定版，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude-code@latest</code> → 最新版）</li>
+<li>修復了在多行提示中已在行尾時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ctrl+e</code> 跳到下一行末尾的問題</li>
+<li>修復了在全螢幕模式下向上滾動時，同一條訊息可能出現在兩個位置的問題（iTerm2、Ghostty 及其他支援 DEC 2026 的終端機）</li>
+<li>修復了空閒返回「/clear 可節省 X token」提示顯示累計工作階段 token 而非目前內容大小的問題</li>
+<li>修復了當 plugin MCP 伺服器複製未認證的 claude.ai connector 時，在工作階段啟動時停留在「連線中」的問題</li>
+<li>改進了大型檔案的 Write 工具 diff 計算速度（在包含 tab/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">&amp;</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">$</code> 的檔案上快 60%）</li>
+<li>移除了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/tag</code> 指令</li>
+<li>移除了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/vim</code> 指令（透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/config</code> → 編輯器模式切換 vim 模式）</li>
+<li>Linux sandbox 現在在 npm 和原生建置中都包含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">apply-seccomp</code> 協助工具，恢復了沙箱化指令的 unix socket 阻止功能</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
