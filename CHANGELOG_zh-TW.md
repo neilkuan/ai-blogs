@@ -2,6 +2,33 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.94
+- 新增對 Amazon Bedrock（由 Mantle 提供支援）的支援，設定 `CLAUDE_CODE_USE_MANTLE=1`
+- 將 API 金鑰、Bedrock/Vertex/Foundry、Team 和 Enterprise 使用者的預設努力程度從中等改為高（可用 `/effort` 指令控制）
+- 為 Slack MCP 傳送訊息工具呼叫新增了簡潔的 `Slacked #channel` 標頭，並包含可點擊的頻道連結
+- 新增 `keep-coding-instructions` frontmatter 欄位支援，用於 plugin 輸出樣式
+- 向 `UserPromptSubmit` hooks 新增 `hookSpecificOutput.sessionTitle`，用於設定工作階段標題
+- 透過 `"skills": ["./"]` 宣告的 Plugin skills 現在使用 skill 的 frontmatter `name` 作為呼叫名稱，而非目錄名稱，在不同安裝方法間提供穩定名稱
+- 修正在收到 429 rate-limit 回應且 Retry-After 標頭很長時，agent 出現卡住的問題 — 現在錯誤會立即顯示，而不是無聲地等待
+- 修正 macOS 上 Console 登入無聲失敗且顯示「未登入」的問題（當登入鑰匙圈被鎖定或密碼不同步時）— 錯誤現在會顯示，`claude doctor` 可診斷修復方法
+- 修正在 YAML frontmatter 中定義的 plugin skill hooks 被無聲忽略的問題
+- 修正當 `CLAUDE_PLUGIN_ROOT` 未設定時，plugin hooks 失敗並顯示「找不到檔案或目錄」的問題
+- 修正啟動時 `${CLAUDE_PLUGIN_ROOT}` 對本機 marketplace plugins 解析到 marketplace 來源目錄而非已安裝快取的問題
+- 修正在長時間執行的工作階段中，scrollback 顯示重複的 diff 和空白頁面的問題
+- 修正多行使用者提示在文字稿中換行縮排在 `❯` 符號下而非文字下的問題
+- 修正 Shift+Space 在搜尋輸入中插入字面意思的「space」而非空格字元的問題
+- 修正在 tmux 中執行（VS Code、Hyper、Tabby 等基於 xterm.js 的終端）時，點擊超連結會開啟兩個瀏覽器標籤的問題
+- 修正 alt-screen 渲染錯誤，其中內容高度在捲動途中變更可能留下堆積的幽靈行
+- 修正 `FORCE_HYPERLINK` 環境變數在透過 `settings.json` `env` 設定時被忽略的問題
+- 修正原生終端游標未跟蹤對話框中所選分頁的問題，讓螢幕閱讀器和放大器能跟隨分頁導覽
+- 修正透過使用 `us.` inference profile ID 對 Bedrock 呼叫 Sonnet 3.5 v2 的問題
+- 修正 SDK/print 模式在中斷串流途中未在對話歷史記錄中保留部分助手回應的問題
+- 改進 `--resume` 功能，現在可直接從同一儲存庫的其他 worktree 繼續工作階段，而不是列印 `cd` 指令
+- 修正 CJK 及其他多位元組文字在 stream-json 輸入/輸出中被 U+FFFD 破壞的問題（當 chunk 邊界分割 UTF-8 序列時）
+- [VSCode] 減少啟動工作階段時冷啟動 subprocess 的工作
+- [VSCode] 修正當滑鼠在列表上方時輸入或使用方向鍵導致下拉選單選取錯誤項目的問題
+- [VSCode] 新增警告橫幅，當 `settings.json` 檔案無法解析時顯示，讓使用者知道其權限規則未被套用
+
 ## 2.1.92
 - 新增 `forceRemoteSettingsRefresh` 政策設定：啟用後，CLI 會在啟動時阻止程序直到遠端託管設定被重新取得，若取得失敗則退出（fail-closed）
 - 新增互動式 Bedrock 設定精靈，在登入畫面選擇「第三方平台」時可存取 — 引導你完成 AWS 認證、地區配置、認證驗證和模型固定
