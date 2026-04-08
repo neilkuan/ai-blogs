@@ -2,6 +2,54 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.97
+- 在 `NO_FLICKER` 模式下新增焦點檢視切換（`Ctrl+O`），顯示提示詞、單行工具摘要及編輯差異統計和最終回應
+- 新增 `refreshInterval` 狀態列設定，每 N 秒重新執行狀態列指令
+- 新增 `workspace.git_worktree` 到狀態列 JSON 輸入，當目前目錄位於關聯的 git worktree 時會設定
+- 在 `/agents` 中新增 `● N running` 指示器，顯示具有即時 subagent 實例的代理類型
+- 新增 Cedar policy 檔案（`.cedar`、`.cedarpolicy`）的語法高亮
+- 修正在核准寫入受保護路徑後，`--dangerously-skip-permissions` 被無聲地降級為 accept-edits 模式的問題
+- 修正並強化 Bash 工具權限，加強環境變數前綴和網路重新導向的檢查，減少常見指令上的誤判提示
+- 修正權限規則的名稱與 JavaScript 原型屬性相符（例如 `toString`）導致 `settings.json` 被無聲忽略的問題
+- 修正在管理員移除受管設定允許規則後，規則仍保持啟用直到程序重啟的問題
+- 修正 settings 中的 `permissions.additionalDirectories` 變更在會話進行中不適用的問題
+- 修正從 `settings.permissions.additionalDirectories` 移除目錄會撤銷透過 `--add-dir` 傳遞的相同目錄存取權的問題
+- 修正 MCP HTTP/SSE 連線在伺服器重新連線時累積 ~50 MB/小時未釋放緩衝區的問題
+- 修正 MCP OAuth `oauth.authServerMetadataUrl` 在重啟後的令牌重新整理時未被遵守，修正 ADFS 和類似身份提供商的問題
+- 修正當伺服器返回較小的 `Retry-After` 時，429 重試在 ~13 秒內耗盡所有嘗試的問題—指數退避現在作為最小值應用
+- 修正速率限制升級選項在上下文壓縮後消失的問題
+- 修正多個 `/resume` 選擇器問題：`--resume <name>` 開啟為不可編輯、Ctrl+A 重新載入清除搜尋、空列表吞沒導航、任務狀態文字取代對話摘要和跨專案過期
+- 修正編輯的檔案大於 10KB 時，在 `--resume` 上檔案編輯差異消失的問題
+- 修正 `--resume` 快取遺漏和附件訊息未被保存到文字記錄的中斷輸入丟失的問題
+- 修正 Claude 工作時輸入的訊息未被保存到文字記錄的問題
+- 修正提示類型 `Stop`/`SubagentStop` hook 在長會話時失敗，以及 hook 評估器 API 錯誤顯示「JSON validation failed」而不是實際訊息的問題
+- 修正具有 worktree 隔離或 `cwd:` 覆蓋的 subagent 將其工作目錄洩漏回父會話 Bash 工具的問題
+- 修正壓縮在提示詞過長重試時寫入重複的多 MB subagent 文字記錄檔案的問題
+- 修正 `claude plugin update` 在遠端有新提交時針對基於 git 的市集外掛報告「already at the latest version」的問題
+- 修正當外掛的 frontmatter `name` 是 YAML 布林關鍵字時，斜斜線指令選擇器破損的問題
+- 修正在 `NO_FLICKER` 模式下複製換行 URL 在行尾插入空格的問題
+- 修正在 zellij 內執行時 `NO_FLICKER` 模式的捲動渲染偽影
+- 修正在 `NO_FLICKER` 模式下懸停 MCP 工具結果時的崩潰
+- 修正 `NO_FLICKER` 模式的記憶體洩漏，其中 API 重試留下過期的串流狀態
+- 修正 Windows Terminal 上 `NO_FLICKER` 模式下滑鼠滾輪捲動緩慢的問題
+- 修正在短於 24 行的終端上 `NO_FLICKER` 模式下自訂狀態列不顯示的問題
+- 修正在 Warp 上的 Shift+Enter 和 Alt/Cmd+arrow 快速鍵在 `NO_FLICKER` 模式下不工作的問題
+- 修正在 Windows 上無閃爍模式下複製時韓文/日文/Unicode 文字變得亂碼的問題
+- 修正當 `AWS_BEARER_TOKEN_BEDROCK` 或 `ANTHROPIC_BEDROCK_BASE_URL` 設定為空字串（如 GitHub Actions 對未設定輸入所做的那樣）時，Bedrock SigV4 認證失敗的問題
+- 改進 Accept Edits 模式以自動核准前綴為安全環境變數或程序包裝器的檔案系統指令（例如 `LANG=C rm foo`、`timeout 5 mkdir out`）
+- 改進自動模式和繞過權限模式以自動核准沙箱網路存取提示
+- 改進沙箱：`sandbox.network.allowMachLookup` 現在在 macOS 上生效
+- 改進圖片處理：貼上和附加的圖片現在會壓縮到與透過 Read 工具讀取的圖片相同的令牌預算
+- 改進斜斜線指令和 `@` 提及完成，在 CJK 句子標點後觸發，因此日文/中文輸入不再需要在 `/` 或 `@` 前的空格
+- 改進 Bridge 會話在 claude.ai 會話卡上顯示本機 git 儲存庫、分支和工作目錄
+- 改進頁尾配置：指示器（焦點、通知）現在保持在模式指示器列上，而不是換行到下方
+- 改進上下文偏低警告以顯示為暫時性頁尾通知而不是持續性列
+- 改進 markdown 區塊引用，在換行上顯示連續左邊欄
+- 改進會話文字記錄大小，跳過空 hook 項目並限制儲存的編輯前檔案副本
+- 改進文字記錄準確性：按區塊項目現在帶有最終令牌使用量而不是串流預留位置
+- 改進 Bash 工具 OTEL 追蹤：啟用追蹤時，子程序現在繼承 W3C `TRACEPARENT` 環境變數
+- 更新 `/claude-api` 技能以涵蓋 Managed Agents 和 Claude API
+
 ## 2.1.96
 - 修正使用 `AWS_BEARER_TOKEN_BEDROCK` 或 `CLAUDE_CODE_SKIP_BEDROCK_AUTH` 時，Bedrock 請求失敗且出現 `403 "Authorization header is missing"` 的問題（2.1.94 版本的回歸問題）
 

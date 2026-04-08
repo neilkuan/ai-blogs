@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.97 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.97 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.97</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_FLICKER</code> 模式下新增焦點檢視切換（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Ctrl+O</code>），顯示提示詞、單行工具摘要及編輯差異統計和最終回應</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">refreshInterval</code> 狀態列設定，每 N 秒重新執行狀態列指令</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">workspace.git_worktree</code> 到狀態列 JSON 輸入，當目前目錄位於關聯的 git worktree 時會設定</li>
+<li>在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/agents</code> 中新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">● N running</code> 指示器，顯示具有即時 subagent 實例的代理類型</li>
+<li>新增 Cedar policy 檔案（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.cedar</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.cedarpolicy</code>）的語法高亮</li>
+<li>修正在核准寫入受保護路徑後，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--dangerously-skip-permissions</code> 被無聲地降級為 accept-edits 模式的問題</li>
+<li>修正並強化 Bash 工具權限，加強環境變數前綴和網路重新導向的檢查，減少常見指令上的誤判提示</li>
+<li>修正權限規則的名稱與 JavaScript 原型屬性相符（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">toString</code>）導致 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> 被無聲忽略的問題</li>
+<li>修正在管理員移除受管設定允許規則後，規則仍保持啟用直到程序重啟的問題</li>
+<li>修正 settings 中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">permissions.additionalDirectories</code> 變更在會話進行中不適用的問題</li>
+<li>修正從 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.permissions.additionalDirectories</code> 移除目錄會撤銷透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--add-dir</code> 傳遞的相同目錄存取權的問題</li>
+<li>修正 MCP HTTP/SSE 連線在伺服器重新連線時累積 ~50 MB/小時未釋放緩衝區的問題</li>
+<li>修正 MCP OAuth <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">oauth.authServerMetadataUrl</code> 在重啟後的令牌重新整理時未被遵守，修正 ADFS 和類似身份提供商的問題</li>
+<li>修正當伺服器返回較小的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Retry-After</code> 時，429 重試在 ~13 秒內耗盡所有嘗試的問題—指數退避現在作為最小值應用</li>
+<li>修正速率限制升級選項在上下文壓縮後消失的問題</li>
+<li>修正多個 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 選擇器問題：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume &lt;name&gt;</code> 開啟為不可編輯、Ctrl+A 重新載入清除搜尋、空列表吞沒導航、任務狀態文字取代對話摘要和跨專案過期</li>
+<li>修正編輯的檔案大於 10KB 時，在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 上檔案編輯差異消失的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 快取遺漏和附件訊息未被保存到文字記錄的中斷輸入丟失的問題</li>
+<li>修正 Claude 工作時輸入的訊息未被保存到文字記錄的問題</li>
+<li>修正提示類型 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Stop</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">SubagentStop</code> hook 在長會話時失敗，以及 hook 評估器 API 錯誤顯示「JSON validation failed」而不是實際訊息的問題</li>
+<li>修正具有 worktree 隔離或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cwd:</code> 覆蓋的 subagent 將其工作目錄洩漏回父會話 Bash 工具的問題</li>
+<li>修正壓縮在提示詞過長重試時寫入重複的多 MB subagent 文字記錄檔案的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin update</code> 在遠端有新提交時針對基於 git 的市集外掛報告「already at the latest version」的問題</li>
+<li>修正當外掛的 frontmatter <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">name</code> 是 YAML 布林關鍵字時，斜斜線指令選擇器破損的問題</li>
+<li>修正在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_FLICKER</code> 模式下複製換行 URL 在行尾插入空格的問題</li>
+<li>修正在 zellij 內執行時 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_FLICKER</code> 模式的捲動渲染偽影</li>
+<li>修正在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_FLICKER</code> 模式下懸停 MCP 工具結果時的崩潰</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_FLICKER</code> 模式的記憶體洩漏，其中 API 重試留下過期的串流狀態</li>
+<li>修正 Windows Terminal 上 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_FLICKER</code> 模式下滑鼠滾輪捲動緩慢的問題</li>
+<li>修正在短於 24 行的終端上 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_FLICKER</code> 模式下自訂狀態列不顯示的問題</li>
+<li>修正在 Warp 上的 Shift+Enter 和 Alt/Cmd+arrow 快速鍵在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_FLICKER</code> 模式下不工作的問題</li>
+<li>修正在 Windows 上無閃爍模式下複製時韓文/日文/Unicode 文字變得亂碼的問題</li>
+<li>修正當 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">AWS_BEARER_TOKEN_BEDROCK</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ANTHROPIC_BEDROCK_BASE_URL</code> 設定為空字串（如 GitHub Actions 對未設定輸入所做的那樣）時，Bedrock SigV4 認證失敗的問題</li>
+<li>改進 Accept Edits 模式以自動核准前綴為安全環境變數或程序包裝器的檔案系統指令（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">LANG=C rm foo</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">timeout 5 mkdir out</code>）</li>
+<li>改進自動模式和繞過權限模式以自動核准沙箱網路存取提示</li>
+<li>改進沙箱：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">sandbox.network.allowMachLookup</code> 現在在 macOS 上生效</li>
+<li>改進圖片處理：貼上和附加的圖片現在會壓縮到與透過 Read 工具讀取的圖片相同的令牌預算</li>
+<li>改進斜斜線指令和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@</code> 提及完成，在 CJK 句子標點後觸發，因此日文/中文輸入不再需要在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@</code> 前的空格</li>
+<li>改進 Bridge 會話在 claude.ai 會話卡上顯示本機 git 儲存庫、分支和工作目錄</li>
+<li>改進頁尾配置：指示器（焦點、通知）現在保持在模式指示器列上，而不是換行到下方</li>
+<li>改進上下文偏低警告以顯示為暫時性頁尾通知而不是持續性列</li>
+<li>改進 markdown 區塊引用，在換行上顯示連續左邊欄</li>
+<li>改進會話文字記錄大小，跳過空 hook 項目並限制儲存的編輯前檔案副本</li>
+<li>改進文字記錄準確性：按區塊項目現在帶有最終令牌使用量而不是串流預留位置</li>
+<li>改進 Bash 工具 OTEL 追蹤：啟用追蹤時，子程序現在繼承 W3C <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">TRACEPARENT</code> 環境變數</li>
+<li>更新 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/claude-api</code> 技能以涵蓋 Managed Agents 和 Claude API</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
