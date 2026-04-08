@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.96
+- 修正使用 `AWS_BEARER_TOKEN_BEDROCK` 或 `CLAUDE_CODE_SKIP_BEDROCK_AUTH` 時，Bedrock 請求失敗且出現 `403 "Authorization header is missing"` 的問題（2.1.94 版本的回歸問題）
+
 ## 2.1.94
 - 新增對 Amazon Bedrock（由 Mantle 提供支援）的支援，設定 `CLAUDE_CODE_USE_MANTLE=1`
 - 將 API 金鑰、Bedrock/Vertex/Foundry、Team 和 Enterprise 使用者的預設努力程度從中等改為高（可用 `/effort` 指令控制）
