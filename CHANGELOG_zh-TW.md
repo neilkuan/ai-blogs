@@ -2,6 +2,65 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.98
+- 新增互動式 Google Vertex AI 設定精靈，在登入畫面選擇「3rd-party platform」時可使用，引導您完成 GCP 身份驗證、專案和區域配置、憑證驗證和模型固定
+- 新增 `CLAUDE_CODE_PERFORCE_MODE` 環境變數：設定後，Edit/Write/NotebookEdit 會在唯讀檔案上失敗並提示 `p4 edit` 指令，而不是無聲地覆寫檔案
+- 新增 Monitor 工具用於串流背景指令碼的事件
+- 新增 Linux 子程序沙箱化（設定 `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` 時使用 PID namespace 隔離），以及 `CLAUDE_CODE_SCRIPT_CAPS` 環境變數以限制每個工作階段的指令碼調用次數
+- 新增 `--exclude-dynamic-system-prompt-sections` 旗標到列印模式，以改進跨使用者 prompt 快取
+- 新增 `workspace.git_worktree` 到狀態列 JSON 輸入，當目前目錄位於連結的 git worktree 內時設定
+- OTEL 追蹤啟用時，新增 W3C `TRACEPARENT` 環境變數到 Bash 工具子程序，讓子程序 span 正確地父化到 Claude Code 的追蹤樹
+- LSP：Claude Code 現在透過初始化請求中的 `clientInfo` 向語言伺服器識別自己
+- 修復 Bash 工具權限略過漏洞，其中反斜線轉義的旗標可能被自動允許為唯讀，導致任意代碼執行
+- 修復複合 Bash 指令在 auto 和 bypass-permissions 模式下繞過強制權限提示和明確詢問規則的問題
+- 修復具有環境變數前綴的唯讀指令不提示的問題，除非該變數是已知安全的（`LANG`、`TZ`、`NO_COLOR` 等）
+- 修復重定向到 `/dev/tcp/...` 或 `/dev/udp/...` 不提示而自動允許的問題
+- 修復停滯的串流回應逾時而不是回退到非串流模式的問題
+- 修復 429 重試在伺服器返回較小的 `Retry-After` 時在 ~13 秒內燃盡所有嘗試的問題——指數退避現在適用作為最小值
+- 修復 MCP OAuth `oauth.authServerMetadataUrl` 配置覆蓋在重啟後重新整理令牌時未被遵守，影響 ADFS 和類似 IdP
+- 修復在 xterm 和 VS Code 整合終端上當 kitty 鍵盤協議活躍時大寫字母被轉換為小寫的問題
+- 修復 macOS 文字替換刪除觸發詞而不是插入替換文字的問題
+- 修復 `--dangerously-skip-permissions` 在批准透過 Bash 對受保護路徑的寫入後無聲地降級為 accept-edits 模式的問題
+- 修復受管設定允許規則在管理員移除後仍保持活躍，直到程序重啟的問題
+- 修復 `permissions.additionalDirectories` 變更在工作階段中點不應用的問題——移除的目錄立即失去存取權限，新增的目錄無需重啟即可運作
+- 修復從 `additionalDirectories` 移除目錄撤銷對相同目錄存取權限的問題，該目錄已透過 `--add-dir` 傳遞
+- 修復 `Bash(cmd:*)` 和 `Bash(git commit *)` 萬用字元權限規則無法匹配包含額外空格或制表符的指令的問題
+- 修復 `Bash(...)` 拒絕規則被降級為混合 `cd` 和其他段的管線指令提示的問題
+- 修復對 `cut -d /`、`paste -d /`、`column -s /`、`awk '{print $1}' file` 和包含 `%` 的檔名的誤報 Bash 權限提示
+- 修復名稱與 JavaScript prototype 屬性相符的權限規則（例如 `toString`）導致 `settings.json` 被無聲地忽略的問題
+- 修復使用 `--dangerously-skip-permissions` 時代理團隊成員未繼承領導者權限模式的問題
+- 修復全螢幕模式中懸停在 MCP 工具結果上時的崩潰
+- 修復在全螢幕模式中複製包裝的 URL 在換行處插入空格的問題
+- 修復檔案編輯 diff 在 `--resume` 時從 UI 消失的問題，當被編輯的檔案大於 10KB
+- 修復多個 `/resume` 選擇器問題：`--resume <name>` 開啟為無法編輯狀態、篩選重載清除搜尋狀態、空列表吞嚥方向鍵、跨專案陳舊性和短暫任務狀態文字替換對話摘要
+- 修復 `/export` 不遵守絕對路徑和 `~`，且無聲地將使用者提供的副檔名重寫為 `.txt` 的問題
+- 修復 `/effort max` 對未知或未來模型 ID 被拒的問題
+- 修復當外掛的前置資料 `name` 是 YAML 布林關鍵字時斜杆指令選擇器中斷的問題
+- 修復訊息重新掛載後速率限制上銷售文字被隱藏的問題
+- 修復具有 `_meta["anthropic/maxResultSizeChars"]` 的 MCP 工具未繞過基於令牌的持久層的問題
+- 修復語音模式在先前的文字記錄仍在處理時重新按住按鍵說話鍵而洩漏數十個空格字元到輸入的問題
+- 修復 `DISABLE_AUTOUPDATER` 未完全抑制 npm 登錄檔版本檢查和在基於 npm 的安裝上修改符號連結的問題
+- 修復記憶洩漏，其中遠端控制權限處理程序項目在工作階段的生命週期內被保留
+- 修復失敗並出錯的背景子代理未向父代理報告部分進度的問題
+- 修復在長工作階段中 prompt 類型 Stop/SubagentStop hook 失敗，以及 hook 評估器 API 錯誤顯示「JSON validation failed」而不是實際訊息的問題
+- 修復解除時的回饋調查呈現問題
+- 修復 Bash `grep -f FILE` / `rg -f FILE` 在讀取工作目錄外的模式檔案時不提示的問題
+- 修復過時的子代理 worktree 清理移除包含未追蹤檔案的 worktree 的問題
+- 修復 `sandbox.network.allowMachLookup` 在 macOS 上未生效的問題
+- 改進 `/resume` 篩選提示標籤，並在篩選指示器中新增專案/worktree/分支名稱
+- 改進頁腳指示器（Focus、通知）以保留在模式指示器列上，而不在狹窄的終端寬度下換行
+- 改進 `/agents`，採用標籤式佈局：Running 標籤顯示即時子代理，Library 標籤新增 Run agent 和 View running instance 動作
+- 改進 `/reload-plugins` 以無需重啟即可接取外掛提供的技能
+- 改進 Accept Edits 模式以自動批准前綴為安全環境變數或程序包裝程式的檔案系統指令
+- 改進 Vim 模式：NORMAL 模式中的 `j`/`k` 現在導航歷史記錄並在輸入邊界處選擇頁腳按鈕
+- 改進文字記錄中的 hook 錯誤以包含 stderr 的第一行，無需 `--debug` 即可自行診斷
+- 改進 OTEL 追蹤：互動 span 現在在併發 SDK 呼叫下正確包裝完整回合，無頭回合按回合結束 span
+- 改進文字記錄項目以帶有最終令牌使用情況而不是串流佔位符
+- 更新 `/claude-api` 技能以涵蓋受管代理和 Claude API
+- [VSCode] 修復在 Windows 上設定 `CLAUDE_CODE_GIT_BASH_PATH` 或 Git 安裝在預設位置時誤報「requires git-bash」錯誤
+- 修復 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 以在設定時遵守 `DISABLE_COMPACT`
+- 當設定 `DISABLE_COMPACT` 時移除 `/compact` 提示
+
 ## 2.1.97
 - 在 `NO_FLICKER` 模式下新增焦點檢視切換（`Ctrl+O`），顯示提示詞、單行工具摘要及編輯差異統計和最終回應
 - 新增 `refreshInterval` 狀態列設定，每 N 秒重新執行狀態列指令
