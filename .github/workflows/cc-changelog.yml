@@ -2,7 +2,7 @@ name: Translate Claude Code Changelog
 
 on:
   schedule:
-    - cron: '16 * * * *'
+    - cron: '16 */3 * * *'
   workflow_dispatch: # 手動觸發
 
 permissions:
