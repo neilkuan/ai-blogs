@@ -18,14 +18,28 @@ BEDROCK_REGION = os.getenv("BEDROCK_REGION", "us-west-2")
 BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0")
 
 
+def _parse_version(v: str) -> tuple:
+    """Parse a version string like '2.1.98' into a comparable tuple (2, 1, 98)."""
+    try:
+        return tuple(int(x) for x in v.split("."))
+    except ValueError:
+        return (0,)
+
+
 def extract_versions_between(changelog_text: str, latest_tag: str, last_tag: str) -> str:
     """
     Extract all changelog sections from latest_tag down to (but not including) last_tag.
     If last_tag is 'none', extract only the latest_tag section.
+
+    Uses numeric version comparison so that skipped version numbers
+    (e.g. tag v2.1.100 exists but CHANGELOG only has ## 2.1.98) are handled correctly.
     """
     # Strip leading 'v' from tags if present for matching
     latest_ver = latest_tag.lstrip("v")
     last_ver = last_tag.lstrip("v") if last_tag != "none" else None
+
+    latest_tuple = _parse_version(latest_ver)
+    last_tuple = _parse_version(last_ver) if last_ver else None
 
     # Split by version headers: ## x.y.z
     pattern = r"^(## \d+\.\d+\.\d+)"
@@ -41,25 +55,28 @@ def extract_versions_between(changelog_text: str, latest_tag: str, last_tag: str
         sections.append((version, header + "\n" + body.strip()))
         i += 2
 
-    # Collect sections between latest and last (exclusive)
+    # Collect sections newer than last_tag
+    # Sections are ordered newest-first in CHANGELOG; we want everything
+    # from the top down to (but not including) the last processed version.
     result_sections = []
-    collecting = False
 
     for version, content in sections:
-        if version == latest_ver:
-            collecting = True
-        if collecting:
-            if last_ver and version == last_ver:
-                break
-            result_sections.append(content)
-            # If no last_ver (first run), only take the latest version
-            if not last_ver:
-                break
+        ver_tuple = _parse_version(version)
+
+        # Stop when we reach a version <= last processed version
+        if last_tuple and ver_tuple <= last_tuple:
+            break
+
+        result_sections.append(content)
+
+        # If no last_ver (first run), only take the first (latest) section
+        if not last_tuple:
+            break
 
     if not result_sections:
-        # Fallback: just grab the first section (latest)
-        if sections:
-            result_sections = [sections[0][1]]
+        # No matching sections found — the target tag likely has no changelog entry
+        print(f"   ⚠️ No changelog section found newer than {last_ver or 'none'} (upstream may not have updated CHANGELOG.md for {latest_ver})")
+        return ""
 
     print(f"   Found {len(result_sections)} version(s) to translate")
     return "\n\n".join(result_sections)
@@ -361,7 +378,9 @@ def main():
     print(f"   ⏱ Extract: {time.time() - t0:.1f}s")
 
     if not new_content.strip():
-        print("⚠️ No new content found, skipping.")
+        print("⚠️ No new content found — upstream tag has no new changelog entry, updating state only.")
+        Path(".last_processed_version").write_text(target_tag, encoding="utf-8")
+        print(f"📌 Updated state: {target_tag}")
         sys.exit(0)
 
     print(f"📝 Content to translate ({len(new_content)} chars):\n{new_content[:300]}...")
