@@ -39,63 +39,63 @@ tailwind.config = {
     <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
 <h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.98</h2>
 <ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
-<li>新增互動式 Google Vertex AI 設定精靈，在登入畫面選擇「3rd-party platform」時可使用，引導您完成 GCP 身份驗證、專案和區域配置、憑證驗證和模型固定</li>
-<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_PERFORCE_MODE</code> 環境變數：設定後，Edit/Write/NotebookEdit 會在唯讀檔案上失敗並提示 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">p4 edit</code> 指令，而不是無聲地覆寫檔案</li>
-<li>新增 Monitor 工具用於串流背景指令碼的事件</li>
-<li>新增 Linux 子程序沙箱化（設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_SUBPROCESS_ENV_SCRUB</code> 時使用 PID namespace 隔離），以及 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_SCRIPT_CAPS</code> 環境變數以限制每個工作階段的指令碼調用次數</li>
-<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--exclude-dynamic-system-prompt-sections</code> 旗標到列印模式，以改進跨使用者 prompt 快取</li>
-<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">workspace.git_worktree</code> 到狀態列 JSON 輸入，當目前目錄位於連結的 git worktree 內時設定</li>
-<li>OTEL 追蹤啟用時，新增 W3C <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">TRACEPARENT</code> 環境變數到 Bash 工具子程序，讓子程序 span 正確地父化到 Claude Code 的追蹤樹</li>
-<li>LSP：Claude Code 現在透過初始化請求中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">clientInfo</code> 向語言伺服器識別自己</li>
-<li>修復 Bash 工具權限略過漏洞，其中反斜線轉義的旗標可能被自動允許為唯讀，導致任意代碼執行</li>
-<li>修復複合 Bash 指令在 auto 和 bypass-permissions 模式下繞過強制權限提示和明確詢問規則的問題</li>
-<li>修復具有環境變數前綴的唯讀指令不提示的問題，除非該變數是已知安全的（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">LANG</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">TZ</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_COLOR</code> 等）</li>
-<li>修復重定向到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/dev/tcp/...</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/dev/udp/...</code> 不提示而自動允許的問題</li>
-<li>修復停滯的串流回應逾時而不是回退到非串流模式的問題</li>
-<li>修復 429 重試在伺服器返回較小的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Retry-After</code> 時在 ~13 秒內燃盡所有嘗試的問題——指數退避現在適用作為最小值</li>
-<li>修復 MCP OAuth <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">oauth.authServerMetadataUrl</code> 配置覆蓋在重啟後重新整理令牌時未被遵守，影響 ADFS 和類似 IdP</li>
-<li>修復在 xterm 和 VS Code 整合終端上當 kitty 鍵盤協議活躍時大寫字母被轉換為小寫的問題</li>
-<li>修復 macOS 文字替換刪除觸發詞而不是插入替換文字的問題</li>
-<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--dangerously-skip-permissions</code> 在批准透過 Bash 對受保護路徑的寫入後無聲地降級為 accept-edits 模式的問題</li>
-<li>修復受管設定允許規則在管理員移除後仍保持活躍，直到程序重啟的問題</li>
-<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">permissions.additionalDirectories</code> 變更在工作階段中點不應用的問題——移除的目錄立即失去存取權限，新增的目錄無需重啟即可運作</li>
-<li>修復從 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">additionalDirectories</code> 移除目錄撤銷對相同目錄存取權限的問題，該目錄已透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--add-dir</code> 傳遞</li>
-<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Bash(cmd:*)</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Bash(git commit *)</code> 萬用字元權限規則無法匹配包含額外空格或制表符的指令的問題</li>
-<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Bash(...)</code> 拒絕規則被降級為混合 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cd</code> 和其他段的管線指令提示的問題</li>
-<li>修復對 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cut -d /</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">paste -d /</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">column -s /</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">awk &#x27;{print $1}&#x27; file</code> 和包含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">%</code> 的檔名的誤報 Bash 權限提示</li>
-<li>修復名稱與 JavaScript prototype 屬性相符的權限規則（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">toString</code>）導致 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> 被無聲地忽略的問題</li>
-<li>修復使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--dangerously-skip-permissions</code> 時代理團隊成員未繼承領導者權限模式的問題</li>
-<li>修復全螢幕模式中懸停在 MCP 工具結果上時的崩潰</li>
-<li>修復在全螢幕模式中複製包裝的 URL 在換行處插入空格的問題</li>
-<li>修復檔案編輯 diff 在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 時從 UI 消失的問題，當被編輯的檔案大於 10KB</li>
-<li>修復多個 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 選擇器問題：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume &lt;name&gt;</code> 開啟為無法編輯狀態、篩選重載清除搜尋狀態、空列表吞嚥方向鍵、跨專案陳舊性和短暫任務狀態文字替換對話摘要</li>
-<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/export</code> 不遵守絕對路徑和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~</code>，且無聲地將使用者提供的副檔名重寫為 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.txt</code> 的問題</li>
-<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/effort max</code> 對未知或未來模型 ID 被拒的問題</li>
-<li>修復當外掛的前置資料 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">name</code> 是 YAML 布林關鍵字時斜杆指令選擇器中斷的問題</li>
-<li>修復訊息重新掛載後速率限制上銷售文字被隱藏的問題</li>
-<li>修復具有 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">_meta[&quot;anthropic/maxResultSizeChars&quot;]</code> 的 MCP 工具未繞過基於令牌的持久層的問題</li>
-<li>修復語音模式在先前的文字記錄仍在處理時重新按住按鍵說話鍵而洩漏數十個空格字元到輸入的問題</li>
-<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">DISABLE_AUTOUPDATER</code> 未完全抑制 npm 登錄檔版本檢查和在基於 npm 的安裝上修改符號連結的問題</li>
-<li>修復記憶洩漏，其中遠端控制權限處理程序項目在工作階段的生命週期內被保留</li>
-<li>修復失敗並出錯的背景子代理未向父代理報告部分進度的問題</li>
-<li>修復在長工作階段中 prompt 類型 Stop/SubagentStop hook 失敗，以及 hook 評估器 API 錯誤顯示「JSON validation failed」而不是實際訊息的問題</li>
-<li>修復解除時的回饋調查呈現問題</li>
-<li>修復 Bash <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">grep -f FILE</code> / <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">rg -f FILE</code> 在讀取工作目錄外的模式檔案時不提示的問題</li>
-<li>修復過時的子代理 worktree 清理移除包含未追蹤檔案的 worktree 的問題</li>
-<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">sandbox.network.allowMachLookup</code> 在 macOS 上未生效的問題</li>
-<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 篩選提示標籤，並在篩選指示器中新增專案/worktree/分支名稱</li>
-<li>改進頁腳指示器（Focus、通知）以保留在模式指示器列上，而不在狹窄的終端寬度下換行</li>
-<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/agents</code>，採用標籤式佈局：Running 標籤顯示即時子代理，Library 標籤新增 Run agent 和 View running instance 動作</li>
-<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/reload-plugins</code> 以無需重啟即可接取外掛提供的技能</li>
-<li>改進 Accept Edits 模式以自動批准前綴為安全環境變數或程序包裝程式的檔案系統指令</li>
-<li>改進 Vim 模式：NORMAL 模式中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">j</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">k</code> 現在導航歷史記錄並在輸入邊界處選擇頁腳按鈕</li>
-<li>改進文字記錄中的 hook 錯誤以包含 stderr 的第一行，無需 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--debug</code> 即可自行診斷</li>
-<li>改進 OTEL 追蹤：互動 span 現在在併發 SDK 呼叫下正確包裝完整回合，無頭回合按回合結束 span</li>
-<li>改進文字記錄項目以帶有最終令牌使用情況而不是串流佔位符</li>
-<li>更新 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/claude-api</code> 技能以涵蓋受管代理和 Claude API</li>
-<li>[VSCode] 修復在 Windows 上設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_GIT_BASH_PATH</code> 或 Git 安裝在預設位置時誤報「requires git-bash」錯誤</li>
-<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_MAX_CONTEXT_TOKENS</code> 以在設定時遵守 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">DISABLE_COMPACT</code></li>
-<li>當設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">DISABLE_COMPACT</code> 時移除 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/compact</code> 提示</li>
+<li>新增互動式 Google Vertex AI 設定精靈，可從登入畫面選擇「第三方平台」時存取，引導你完成 GCP 驗證、專案與地區設定、認證驗證及模型綁定</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_PERFORCE_MODE</code> 環境變數：設定後，Edit/Write/NotebookEdit 會在唯讀檔案上失敗並提示執行 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">p4 edit</code>，而不是默默地覆寫檔案</li>
+<li>新增 Monitor 工具，用於串流背景指令碼的事件</li>
+<li>在 Linux 上新增子程序沙盒化，設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_SUBPROCESS_ENV_SCRUB</code> 時使用 PID namespace 隔離，並新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_SCRIPT_CAPS</code> 環境變數限制每次 session 的指令碼叫用次數</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--exclude-dynamic-system-prompt-sections</code> 旗標至列印模式，改善跨用戶 prompt 快取</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">workspace.git_worktree</code> 至狀態行 JSON 輸入，當目前目錄位於連結的 git worktree 內時設定</li>
+<li>啟用 OTEL tracing 時，新增 W3C <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">TRACEPARENT</code> 環境變數到 Bash 工具子程序，使子程序 span 能正確連結到 Claude Code 的 trace tree</li>
+<li>LSP：Claude Code 現在透過 initialize 請求中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">clientInfo</code> 向語言伺服器表明身份</li>
+<li>修正 Bash 工具權限繞過問題，其中反斜線轉義的旗標可能被自動允許為唯讀並導致任意程式碼執行</li>
+<li>修正複合 Bash 指令在 auto 和 bypass-permissions 模式下繞過強制權限提示的問題</li>
+<li>修正帶有環境變數前綴的唯讀指令未提示的問題，除非該變數是已知安全的（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">LANG</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">TZ</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_COLOR</code> 等）</li>
+<li>修正重新導向到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/dev/tcp/...</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/dev/udp/...</code> 未提示而自動允許的問題</li>
+<li>修正停滯的串流回應逾時而非回退到非串流模式的問題</li>
+<li>修正當伺服器返回較小的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Retry-After</code> 時，429 重試在約 13 秒內消耗所有嘗試次數的問題 — 指數退避現在作為最小值應用</li>
+<li>修正 MCP OAuth <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">oauth.authServerMetadataUrl</code> 設定覆蓋在重新啟動後重新整理權杖時未被尊重的問題，影響 ADFS 和類似的 IdP</li>
+<li>修正在 xterm 和 VS Code 整合終端上，當 kitty 鍵盤協議為有效時，大寫字母被轉換為小寫的問題</li>
+<li>修正 macOS 文字替換刪除觸發詞而非插入替換文字的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--dangerously-skip-permissions</code> 在透過 Bash 核准寫入受保護路徑後被默默降級為 accept-edits 模式的問題</li>
+<li>修正管理設定允許規則在管理員移除後仍保持有效的問題，直到程序重新啟動</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">permissions.additionalDirectories</code> 變更未在 session 中途套用的問題 — 移除的目錄立即失去存取權限，新增的目錄無需重新啟動即可使用</li>
+<li>修正從 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">additionalDirectories</code> 移除目錄撤銷透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--add-dir</code> 傳遞之相同目錄存取權限的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Bash(cmd:*)</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Bash(git commit *)</code> 萬用字元權限規則無法匹配包含額外空格或制表符的指令的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Bash(...)</code> 拒絕規則對混合 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cd</code> 和其他段落的管道指令被降級為提示的問題</li>
+<li>修正對 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cut -d /</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">paste -d /</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">column -s /</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">awk &#x27;{print $1}&#x27; file</code> 和包含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">%</code> 的檔案名稱的假性 Bash 權限提示</li>
+<li>修正名稱與 JavaScript 原型屬性相符的權限規則（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">toString</code>）導致 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> 被默默忽略的問題</li>
+<li>修正使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--dangerously-skip-permissions</code> 時代理團隊成員未繼承領導者權限模式的問題</li>
+<li>修正全螢幕模式下懸停在 MCP 工具結果上時的當機問題</li>
+<li>修正在全螢幕模式下複製換行 URL 在換行處插入空格的問題</li>
+<li>修正檔案編輯差異在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 時從 UI 消失的問題，當編輯的檔案大於 10KB 時</li>
+<li>修正多個 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 選擇器問題：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume &lt;name&gt;</code> 開啟為不可編輯、篩選重新載入擦除搜尋狀態、空清單吞沒方向鍵、跨專案陳舊性和暫時性任務狀態文字取代對話摘要</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/export</code> 未尊重絕對路徑和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~</code> 的問題，並默默將用戶提供的副檔名重寫為 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.txt</code></li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/effort max</code> 對未知或未來的模型 ID 被拒絕的問題</li>
+<li>修正當外掛程式的前置事項 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">name</code> 是 YAML 布林值關鍵字時，斜線指令選擇器損壞的問題</li>
+<li>修正訊息重新掛載後速率限制追加銷售文字被隱藏的問題</li>
+<li>修正具有 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">_meta[&quot;anthropic/maxResultSizeChars&quot;]</code> 的 MCP 工具未繞過基於權杖的持久層的問題</li>
+<li>修正語音模式在先前的記錄仍在處理時重新按住推送通話鍵時洩漏數十個空格字元至輸入的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">DISABLE_AUTOUPDATER</code> 未完全抑制 npm 登錄檔版本檢查和 npm 型安裝上的符號連結修改的問題</li>
+<li>修正遠端控制權限處理器項目在 session 期間保留的記憶體洩漏</li>
+<li>修正失敗並出現錯誤的背景子代理未向父代理報告部分進度的問題</li>
+<li>修正長 session 上 prompt 類型 Stop/SubagentStop hook 失敗，以及 hook 評估程式 API 錯誤顯示「JSON 驗證失敗」而非實際訊息的問題</li>
+<li>修正回饋調查在被關閉時的渲染問題</li>
+<li>修正 Bash <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">grep -f FILE</code> / <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">rg -f FILE</code> 在讀取工作目錄外的模式檔案時未提示的問題</li>
+<li>修正陳舊的子代理 worktree 清理移除包含未追蹤檔案的 worktree 的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">sandbox.network.allowMachLookup</code> 在 macOS 上未生效的問題</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 篩選提示標籤，並在篩選指示器中新增專案/worktree/分支名稱</li>
+<li>改善頁尾指標（Focus、notifications）保持在模式指標列上，而不是在窄終端寬度處換行</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/agents</code> 添加標籤版配置：Running 標籤顯示即時子代理，Library 標籤新增 Run agent 和 View running instance 動作</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/reload-plugins</code> 以自動取得外掛程式提供的技能，無需重新啟動</li>
+<li>改善 Accept Edits 模式以自動核准以安全環境變數或程序包裝程式為前綴的檔案系統指令</li>
+<li>改善 Vim 模式：NORMAL 模式下的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">j</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">k</code> 現在瀏覽歷史記錄並在輸入邊界處選擇頁尾按鈕</li>
+<li>改善記錄中的 hook 錯誤以包含 stderr 的第一行，便於不使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--debug</code> 時的自我診斷</li>
+<li>改善 OTEL tracing：interaction span 現在在並行 SDK 呼叫下正確包裝完整回合，headless 回合按回合結束 span</li>
+<li>改善記錄項目以攜帶最終權杖用量而非串流預留位置</li>
+<li>更新 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/claude-api</code> 技能以涵蓋 Managed Agents 以及 Claude API</li>
+<li>[VSCode] 修正當 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_GIT_BASH_PATH</code> 已設定或 Git 安裝在預設位置時，Windows 上的假性「requires git-bash」錯誤</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_MAX_CONTEXT_TOKENS</code> 在設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">DISABLE_COMPACT</code> 時的尊重問題</li>
+<li>在設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">DISABLE_COMPACT</code> 時移除 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/compact</code> 提示</li>
 </ul>
     </article>
     <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
