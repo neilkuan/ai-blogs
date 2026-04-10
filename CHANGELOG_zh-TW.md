@@ -2,6 +2,54 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.101
+- 新增 `/team-onboarding` 指令，可根據本地 Claude Code 使用情況產生團隊成員快速上手指南
+- 預設啟用 OS CA 憑證存儲信任，企業 TLS 代理無需額外設置即可運作（設定 `CLAUDE_CODE_CERT_STORE=bundled` 可僅使用內建 CA）
+- `/ultraplan` 和其他遠端工作階段功能現在會自動建立預設雲端環境，無需先進行網頁設置
+- 改進簡潔模式，當 Claude 回應純文本而非結構化訊息時會重試一次
+- 改進焦點模式：Claude 現在會撰寫更自成一體的摘要，因為它知道你只會看到最終訊息
+- 改進工具不可用的錯誤提示，當模型呼叫的工具存在但在目前上下文中不可用時，會解釋原因和解決方式
+- 改進速率限制重試訊息，顯示觸發了哪個限制以及何時重置，而不是模糊的秒數倒計時
+- 改進拒絕錯誤訊息，在可用時附上 API 提供的解釋
+- 改進 `claude -p --resume <name>` 以接受透過 `/rename` 或 `--name` 設定的工作階段標題
+- 改進設定穩定性：`settings.json` 中無法識別的 hook 事件名稱不再導致整個檔案被忽略
+- 改進受管設定強制啟用的外掛 hook，在設定 `allowManagedHooksOnly` 時能正常執行
+- 改進 `/plugin` 和 `claude plugin update` 在無法重新整理市集時顯示警告，而非默默回報舊版本
+- 改進計畫模式，當使用者組織或驗證設置無法連接 Claude Code 網頁時隱藏「使用 Ultraplan 精煉」選項
+- 改進 beta 追蹤以遵守 `OTEL_LOG_USER_PROMPTS`、`OTEL_LOG_TOOL_DETAILS` 和 `OTEL_LOG_TOOL_CONTENT`；敏感 span 屬性除非明確選擇加入，否則不會發出
+- 改進 SDK `query()` 在消費者從 `for await` 中 `break` 或使用 `await using` 時清理子程序和臨時檔案
+- 修復 POSIX `which` 後備方案中的指令注入漏洞（LSP 二進制偵測使用）
+- 修復記憶體洩漏，長工作階段在虛擬捲軸中保留了數十個歷史訊息列表副本
+- 修復 `--resume`/`--continue` 在載入器錨定在死胡同分支而非即時對話時，大型工作階段丟失對話上下文
+- 修復 `--resume` 鏈恢復在子代理訊息落在主鏈寫入間隙附近時橋接到無關子代理對話
+- 修復 `--resume` 崩潰的問題，當持續存在的 Edit/Write 工具結果缺少 `file_path` 時
+- 修復硬編碼 5 分鐘請求逾時中止緩慢後端（本地 LLM、擴展思考、緩慢閘道）的問題，忽略 `API_TIMEOUT_MS` 設定
+- 修復 `permissions.deny` 規則無法覆蓋 PreToolUse hook 的 `permissionDecision: "ask"` — 過去 hook 可將拒絕降級為提示
+- 修復 `--setting-sources` 不含 `user` 時導致背景清理忽略 `cleanupPeriodDays` 並刪除超過 30 天的對話歷史
+- 修復當 `ANTHROPIC_AUTH_TOKEN`、`apiKeyHelper` 或 `ANTHROPIC_CUSTOM_HEADERS` 設定 Authorization 標頭時 Bedrock SigV4 驗證以 403 失敗
+- 修復上個工作階段的工作樹清理留下過時目錄後 `claude -w <name>` 失敗並顯示「已存在」
+- 修復子代理未從動態注入的伺服器繼承 MCP 工具
+- 修復在隔離工作樹中執行的子代理被拒絕讀取/編輯其自身工作樹內檔案的存取權限
+- 修復沙箱化 Bash 指令在重新啟動後失敗並顯示 `mktemp: No such file or directory`
+- 修復 `claude mcp serve` 工具呼叫在驗證 `outputSchema` 的 MCP 用戶端中失敗並顯示「工具執行失敗」
+- 修復 `RemoteTrigger` 工具的 `run` 動作發送空白本體並被伺服器拒絕
+- 修復多個 `/resume` 選取器問題：窄預設檢視隱藏其他專案的工作階段、Windows Terminal 無法存取的預覽、工作樹中不正確的 cwd、工作階段未找到的錯誤未顯示在 stderr、終端標題未設定，以及恢復提示與提示輸入重疊
+- 修復嵌入式 ripgrep 二進制路徑變成過時時 Grep 工具 ENOENT（VS Code 擴充自動更新、macOS App Translocation）；現在會後備到系統 `rg` 並在工作階段中自我修復
+- 修復 `/btw` 在每次使用時寫入整個對話副本到磁碟
+- 修復 `/context` 可用空間和訊息細分與標頭百分比不一致
+- 修復多個外掛問題：斜線指令因重複 `name:` frontmatter 而解析到錯誤的外掛、`/plugin update` 失敗並顯示 `ENAMETOOLONG`、Discover 顯示已安裝的外掛、目錄來源外掛從過時版本快取載入，以及技能不遵守 `context: fork` 和 `agent` frontmatter 欄位
+- 修復 `/mcp` 選單為使用 `headersHelper` 設定的 MCP 伺服器提供 OAuth 特定動作；現在改為提供「重新連接」以重新呼叫 helper 腳本
+- 修復 `ctrl+]`、`ctrl+\` 和 `ctrl+^` 快鍵在傳送原始 C0 控制位元組的終端中不觸發（Terminal.app、預設 iTerm2、xterm）
+- 修復 `/login` OAuth URL 因填充而無法進行乾淨滑鼠選擇的問題
+- 修復渲染問題：非全螢幕模式下可見區域上方內容變更時的閃爍、長工作階段期間非全螢幕模式下終端 scrollback 被清除，以及滑鼠捲動逸出序列偶爾洩漏到提示中
+- 修復 `settings.json` env 值為數字而非字串時的崩潰
+- 修復應用內設定寫入（例如 `/add-dir --remember`、`/config`）未重新整理記憶體快照，導致已移除的目錄無法在工作階段中被撤銷
+- 修復自訂快鍵（`~/.claude/keybindings.json`）在 Bedrock、Vertex 和其他第三方提供者上無法載入
+- 修復 `claude --continue -p` 無法正確繼續由 `-p` 或 SDK 建立的工作階段
+- 修復多個遠端控制問題：工作階段在工作階段崩潰時移除、連接失敗未保存在逐字稿中、簡潔模式下本地工作階段出現虛假「已斷開連接」指示器，以及 `/remote-control` 在僅設定 `CLAUDE_CODE_ORGANIZATION_UUID` 時透過 SSH 失敗
+- 修復 `/insights` 有時從其回應中省略報告檔案連結
+- [VSCode] 修復最後一個編輯器標籤頁關閉時聊天輸入下方的檔案附件未清除的問題
+
 ## 2.1.98
 - 新增互動式 Google Vertex AI 設定精靈，可從登入畫面選擇「第三方平台」時存取，引導你完成 GCP 驗證、專案與地區設定、認證驗證及模型綁定
 - 新增 `CLAUDE_CODE_PERFORCE_MODE` 環境變數：設定後，Edit/Write/NotebookEdit 會在唯讀檔案上失敗並提示執行 `p4 edit`，而不是默默地覆寫檔案

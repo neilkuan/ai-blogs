@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.101 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.101 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.101</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/team-onboarding</code> 指令，可根據本地 Claude Code 使用情況產生團隊成員快速上手指南</li>
+<li>預設啟用 OS CA 憑證存儲信任，企業 TLS 代理無需額外設置即可運作（設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_CERT_STORE=bundled</code> 可僅使用內建 CA）</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/ultraplan</code> 和其他遠端工作階段功能現在會自動建立預設雲端環境，無需先進行網頁設置</li>
+<li>改進簡潔模式，當 Claude 回應純文本而非結構化訊息時會重試一次</li>
+<li>改進焦點模式：Claude 現在會撰寫更自成一體的摘要，因為它知道你只會看到最終訊息</li>
+<li>改進工具不可用的錯誤提示，當模型呼叫的工具存在但在目前上下文中不可用時，會解釋原因和解決方式</li>
+<li>改進速率限制重試訊息，顯示觸發了哪個限制以及何時重置，而不是模糊的秒數倒計時</li>
+<li>改進拒絕錯誤訊息，在可用時附上 API 提供的解釋</li>
+<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude -p --resume &lt;name&gt;</code> 以接受透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/rename</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--name</code> 設定的工作階段標題</li>
+<li>改進設定穩定性：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> 中無法識別的 hook 事件名稱不再導致整個檔案被忽略</li>
+<li>改進受管設定強制啟用的外掛 hook，在設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">allowManagedHooksOnly</code> 時能正常執行</li>
+<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin update</code> 在無法重新整理市集時顯示警告，而非默默回報舊版本</li>
+<li>改進計畫模式，當使用者組織或驗證設置無法連接 Claude Code 網頁時隱藏「使用 Ultraplan 精煉」選項</li>
+<li>改進 beta 追蹤以遵守 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">OTEL_LOG_USER_PROMPTS</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">OTEL_LOG_TOOL_DETAILS</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">OTEL_LOG_TOOL_CONTENT</code>；敏感 span 屬性除非明確選擇加入，否則不會發出</li>
+<li>改進 SDK <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">query()</code> 在消費者從 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">for await</code> 中 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">break</code> 或使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">await using</code> 時清理子程序和臨時檔案</li>
+<li>修復 POSIX <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">which</code> 後備方案中的指令注入漏洞（LSP 二進制偵測使用）</li>
+<li>修復記憶體洩漏，長工作階段在虛擬捲軸中保留了數十個歷史訊息列表副本</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--continue</code> 在載入器錨定在死胡同分支而非即時對話時，大型工作階段丟失對話上下文</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 鏈恢復在子代理訊息落在主鏈寫入間隙附近時橋接到無關子代理對話</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 崩潰的問題，當持續存在的 Edit/Write 工具結果缺少 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">file_path</code> 時</li>
+<li>修復硬編碼 5 分鐘請求逾時中止緩慢後端（本地 LLM、擴展思考、緩慢閘道）的問題，忽略 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">API_TIMEOUT_MS</code> 設定</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">permissions.deny</code> 規則無法覆蓋 PreToolUse hook 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">permissionDecision: &quot;ask&quot;</code> — 過去 hook 可將拒絕降級為提示</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--setting-sources</code> 不含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">user</code> 時導致背景清理忽略 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cleanupPeriodDays</code> 並刪除超過 30 天的對話歷史</li>
+<li>修復當 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ANTHROPIC_AUTH_TOKEN</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">apiKeyHelper</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ANTHROPIC_CUSTOM_HEADERS</code> 設定 Authorization 標頭時 Bedrock SigV4 驗證以 403 失敗</li>
+<li>修復上個工作階段的工作樹清理留下過時目錄後 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude -w &lt;name&gt;</code> 失敗並顯示「已存在」</li>
+<li>修復子代理未從動態注入的伺服器繼承 MCP 工具</li>
+<li>修復在隔離工作樹中執行的子代理被拒絕讀取/編輯其自身工作樹內檔案的存取權限</li>
+<li>修復沙箱化 Bash 指令在重新啟動後失敗並顯示 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">mktemp: No such file or directory</code></li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude mcp serve</code> 工具呼叫在驗證 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">outputSchema</code> 的 MCP 用戶端中失敗並顯示「工具執行失敗」</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">RemoteTrigger</code> 工具的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">run</code> 動作發送空白本體並被伺服器拒絕</li>
+<li>修復多個 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 選取器問題：窄預設檢視隱藏其他專案的工作階段、Windows Terminal 無法存取的預覽、工作樹中不正確的 cwd、工作階段未找到的錯誤未顯示在 stderr、終端標題未設定，以及恢復提示與提示輸入重疊</li>
+<li>修復嵌入式 ripgrep 二進制路徑變成過時時 Grep 工具 ENOENT（VS Code 擴充自動更新、macOS App Translocation）；現在會後備到系統 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">rg</code> 並在工作階段中自我修復</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/btw</code> 在每次使用時寫入整個對話副本到磁碟</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/context</code> 可用空間和訊息細分與標頭百分比不一致</li>
+<li>修復多個外掛問題：斜線指令因重複 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">name:</code> frontmatter 而解析到錯誤的外掛、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin update</code> 失敗並顯示 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ENAMETOOLONG</code>、Discover 顯示已安裝的外掛、目錄來源外掛從過時版本快取載入，以及技能不遵守 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">context: fork</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">agent</code> frontmatter 欄位</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/mcp</code> 選單為使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">headersHelper</code> 設定的 MCP 伺服器提供 OAuth 特定動作；現在改為提供「重新連接」以重新呼叫 helper 腳本</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ctrl+]</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ctrl+\</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ctrl+^</code> 快鍵在傳送原始 C0 控制位元組的終端中不觸發（Terminal.app、預設 iTerm2、xterm）</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/login</code> OAuth URL 因填充而無法進行乾淨滑鼠選擇的問題</li>
+<li>修復渲染問題：非全螢幕模式下可見區域上方內容變更時的閃爍、長工作階段期間非全螢幕模式下終端 scrollback 被清除，以及滑鼠捲動逸出序列偶爾洩漏到提示中</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> env 值為數字而非字串時的崩潰</li>
+<li>修復應用內設定寫入（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/add-dir --remember</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/config</code>）未重新整理記憶體快照，導致已移除的目錄無法在工作階段中被撤銷</li>
+<li>修復自訂快鍵（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/keybindings.json</code>）在 Bedrock、Vertex 和其他第三方提供者上無法載入</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude --continue -p</code> 無法正確繼續由 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">-p</code> 或 SDK 建立的工作階段</li>
+<li>修復多個遠端控制問題：工作階段在工作階段崩潰時移除、連接失敗未保存在逐字稿中、簡潔模式下本地工作階段出現虛假「已斷開連接」指示器，以及 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/remote-control</code> 在僅設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_ORGANIZATION_UUID</code> 時透過 SSH 失敗</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/insights</code> 有時從其回應中省略報告檔案連結</li>
+<li>[VSCode] 修復最後一個編輯器標籤頁關閉時聊天輸入下方的檔案附件未清除的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
