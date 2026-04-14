@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.105 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.105 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.105</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">EnterWorktree</code> 工具中新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">path</code> 參數，可以切換到目前版本庫中現有的 worktree</li>
+<li>新增 PreCompact hook 支援：hook 現在可以透過以代碼 2 結束或回傳 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">{&quot;decision&quot;:&quot;block&quot;}</code> 來阻止壓縮</li>
+<li>新增 plugin 的背景監視器支援，透過頂層 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">monitors</code> manifest 鍵，在會話啟動或技能叫用時自動啟用</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/proactive</code> 現在是 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/loop</code> 的別名</li>
+<li>改進停滯 API stream 處理：stream 現在會在 5 分鐘無資料後中止，並改為重試非 streaming 版本，而不是無限期地掛起</li>
+<li>改進網路錯誤訊息：連線錯誤現在會立即顯示重試訊息，而不是無聲的加載動畫</li>
+<li>改進檔案寫入顯示：長單行寫入（例如最小化的 JSON）現在在 UI 中會被截斷，而不是分頁顯示</li>
+<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/doctor</code> 的版面配置（新增狀態圖示），按 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">f</code> 讓 Claude 修復回報的問題</li>
+<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/config</code> 的標籤和描述，讓表述更清楚</li>
+<li>改進技能說明處理：將上限從 250 提升到 1,536 個字元，並在說明被截斷時新增啟動警告</li>
+<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">WebFetch</code> 以移除擷取頁面中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">&lt;style&gt;</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">&lt;script&gt;</code> 內容，讓 CSS 繁重的頁面不會在到達實際文字前耗盡內容預算</li>
+<li>改進過期的 agent worktree 清理，移除 PR 被 squash-merged 的 worktree，而不是無限期保留它們</li>
+<li>改進 MCP 大量輸出截斷提示詞，提供格式特定的方案（例如 JSON 用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">jq</code>、文字用計算的 Read chunk 大小）</li>
+<li>修正排隊訊息中附加的圖像（在 Claude 工作時傳送）被丟棄的問題</li>
+<li>修正在長對話中當提示輸入換到第二行時螢幕變空白的問題</li>
+<li>修正在全螢幕模式下選取多行助手回應時，前導空格被複製的問題</li>
+<li>修正前導空格從助手訊息中被移除，破壞 ASCII 藝術和縮排圖表的問題</li>
+<li>修正當命令列印可點擊的檔案連結（例如 Python <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">rich</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">loguru</code> 日誌）時，bash 輸出亂碼的問題</li>
+<li>修正在使用 ESC 前綴 alt 編碼的終端中 alt+enter 不插入換行符，以及 Ctrl+J 不插入換行符的問題（2.1.100 中的回歸）</li>
+<li>修正 EnterWorktree/ExitWorktree 工具顯示中出現重複「Creating worktree」文字的問題</li>
+<li>修正排隊的使用者提示在焦點模式中消失的問題</li>
+<li>修正單次排程任務在檔案監視器錯過後續清理時重複觸發的問題</li>
+<li>修正 Team/Enterprise 使用者在第一則訊息後，內嵌頻道通知被無聲地丟棄的問題</li>
+<li>修正市集 plugin 具有 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">package.json</code> 和鎖定檔案時，在安裝/更新後依賴項不會自動安裝的問題</li>
+<li>修正市集自動更新在 plugin 程序在更新期間持有檔案開啟時，導致官方市集處於損壞狀態的問題</li>
+<li>修正在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--worktree</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/branch</code> 後，退出時沒有列印「Resume this session with...」提示的問題</li>
+<li>修正在較長的提示末尾輸入時，意見回饋調查快速鍵觸發的問題</li>
+<li>修正 stdio MCP server 發出格式不正確（非 JSON）輸出時，導致會話掛起而不是以「Connection closed」快速失敗的問題</li>
+<li>修正 MCP 工具在 MCP server 非同步連線時，在 headless/remote-trigger 會話的首個回合中遺失的問題</li>
+<li>修正在 AWS Bedrock 非美國地區的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/model</code> 選擇器，當推論設定檔探索仍在進行中時，將無效的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">us.*</code> 模型 ID 保留到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> 的問題</li>
+<li>修正 429 速率限制錯誤對 API 金鑰、Bedrock 和 Vertex 使用者顯示原始 JSON 轉儲而不是清楚訊息的問題</li>
+<li>修正繼續會話時，會話包含格式不正確的文字區塊導致當機的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/help</code> 在終端高度過短時，丟棄標籤列、Shortcuts 標題和頁尾的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">keybindings.json</code> 中格式不正確的快速鍵項目值被無聲載入而不是以清楚錯誤拒絕的問題</li>
+<li>修正某個專案設定中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC</code> 永久停用機器上所有專案的使用量指標的問題</li>
+<li>修正在 SSH/mosh 上使用 Ghostty、Kitty、Alacritty、WezTerm、foot、rio 或 Contour 時，16 色調色盤褪色的問題</li>
+<li>修正 Bash 工具在退出計畫模式時會建議 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">acceptEdits</code> 權限模式，但這會從更高權限等級降級的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>

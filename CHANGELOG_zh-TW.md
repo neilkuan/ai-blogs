@@ -2,6 +2,45 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.105
+- 在 `EnterWorktree` 工具中新增 `path` 參數，可以切換到目前版本庫中現有的 worktree
+- 新增 PreCompact hook 支援：hook 現在可以透過以代碼 2 結束或回傳 `{"decision":"block"}` 來阻止壓縮
+- 新增 plugin 的背景監視器支援，透過頂層 `monitors` manifest 鍵，在會話啟動或技能叫用時自動啟用
+- `/proactive` 現在是 `/loop` 的別名
+- 改進停滯 API stream 處理：stream 現在會在 5 分鐘無資料後中止，並改為重試非 streaming 版本，而不是無限期地掛起
+- 改進網路錯誤訊息：連線錯誤現在會立即顯示重試訊息，而不是無聲的加載動畫
+- 改進檔案寫入顯示：長單行寫入（例如最小化的 JSON）現在在 UI 中會被截斷，而不是分頁顯示
+- 改進 `/doctor` 的版面配置（新增狀態圖示），按 `f` 讓 Claude 修復回報的問題
+- 改進 `/config` 的標籤和描述，讓表述更清楚
+- 改進技能說明處理：將上限從 250 提升到 1,536 個字元，並在說明被截斷時新增啟動警告
+- 改進 `WebFetch` 以移除擷取頁面中的 `<style>` 和 `<script>` 內容，讓 CSS 繁重的頁面不會在到達實際文字前耗盡內容預算
+- 改進過期的 agent worktree 清理，移除 PR 被 squash-merged 的 worktree，而不是無限期保留它們
+- 改進 MCP 大量輸出截斷提示詞，提供格式特定的方案（例如 JSON 用 `jq`、文字用計算的 Read chunk 大小）
+- 修正排隊訊息中附加的圖像（在 Claude 工作時傳送）被丟棄的問題
+- 修正在長對話中當提示輸入換到第二行時螢幕變空白的問題
+- 修正在全螢幕模式下選取多行助手回應時，前導空格被複製的問題
+- 修正前導空格從助手訊息中被移除，破壞 ASCII 藝術和縮排圖表的問題
+- 修正當命令列印可點擊的檔案連結（例如 Python `rich`/`loguru` 日誌）時，bash 輸出亂碼的問題
+- 修正在使用 ESC 前綴 alt 編碼的終端中 alt+enter 不插入換行符，以及 Ctrl+J 不插入換行符的問題（2.1.100 中的回歸）
+- 修正 EnterWorktree/ExitWorktree 工具顯示中出現重複「Creating worktree」文字的問題
+- 修正排隊的使用者提示在焦點模式中消失的問題
+- 修正單次排程任務在檔案監視器錯過後續清理時重複觸發的問題
+- 修正 Team/Enterprise 使用者在第一則訊息後，內嵌頻道通知被無聲地丟棄的問題
+- 修正市集 plugin 具有 `package.json` 和鎖定檔案時，在安裝/更新後依賴項不會自動安裝的問題
+- 修正市集自動更新在 plugin 程序在更新期間持有檔案開啟時，導致官方市集處於損壞狀態的問題
+- 修正在 `/resume`、`--worktree` 或 `/branch` 後，退出時沒有列印「Resume this session with...」提示的問題
+- 修正在較長的提示末尾輸入時，意見回饋調查快速鍵觸發的問題
+- 修正 stdio MCP server 發出格式不正確（非 JSON）輸出時，導致會話掛起而不是以「Connection closed」快速失敗的問題
+- 修正 MCP 工具在 MCP server 非同步連線時，在 headless/remote-trigger 會話的首個回合中遺失的問題
+- 修正在 AWS Bedrock 非美國地區的 `/model` 選擇器，當推論設定檔探索仍在進行中時，將無效的 `us.*` 模型 ID 保留到 `settings.json` 的問題
+- 修正 429 速率限制錯誤對 API 金鑰、Bedrock 和 Vertex 使用者顯示原始 JSON 轉儲而不是清楚訊息的問題
+- 修正繼續會話時，會話包含格式不正確的文字區塊導致當機的問題
+- 修正 `/help` 在終端高度過短時，丟棄標籤列、Shortcuts 標題和頁尾的問題
+- 修正 `keybindings.json` 中格式不正確的快速鍵項目值被無聲載入而不是以清楚錯誤拒絕的問題
+- 修正某個專案設定中的 `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` 永久停用機器上所有專案的使用量指標的問題
+- 修正在 SSH/mosh 上使用 Ghostty、Kitty、Alacritty、WezTerm、foot、rio 或 Contour 時，16 色調色盤褪色的問題
+- 修正 Bash 工具在退出計畫模式時會建議 `acceptEdits` 權限模式，但這會從更高權限等級降級的問題
+
 ## 2.1.101
 - 新增 `/team-onboarding` 指令，可根據本地 Claude Code 使用情況產生團隊成員快速上手指南
 - 預設啟用 OS CA 憑證存儲信任，企業 TLS 代理無需額外設置即可運作（設定 `CLAUDE_CODE_CERT_STORE=bundled` 可僅使用內建 CA）
