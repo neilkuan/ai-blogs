@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.107
+- 在長時間操作期間更早顯示思考提示
+
 ## 2.1.105
 - 在 `EnterWorktree` 工具中新增 `path` 參數，可以切換到目前版本庫中現有的 worktree
 - 新增 PreCompact hook 支援：hook 現在可以透過以代碼 2 結束或回傳 `{"decision":"block"}` 來阻止壓縮
