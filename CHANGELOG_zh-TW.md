@@ -2,6 +2,32 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.108
+- 新增 `ENABLE_PROMPT_CACHING_1H` 環境變數，可在 API key、Bedrock、Vertex 和 Foundry 上選擇使用 1 小時的 prompt cache TTL（`ENABLE_PROMPT_CACHING_1H_BEDROCK` 已棄用但仍然有效），以及 `FORCE_PROMPT_CACHING_5M` 可強制使用 5 分鐘 TTL
+- 新增回顧功能，在返回工作階段時提供背景資訊，可在 /config 中設定，並可透過 /recap 手動調用；若停用遙測，可使用 `CLAUDE_CODE_ENABLE_AWAY_SUMMARY` 強制啟用
+- 模型現在可以透過 Skill tool 發現並調用內建斜線指令，例如 `/init`、`/review` 和 `/security-review`
+- `/undo` 現在是 `/rewind` 的別名
+- 改進 `/model` 功能：在對話中途切換模型時會先發出警告，因為下一個回應會重新讀取完整歷史且不使用 cache
+- 改進 `/resume` 選擇器：預設顯示目前目錄中的工作階段；按 `Ctrl+A` 可顯示所有專案
+- 改進錯誤訊息：伺服器速率限制現在與方案使用限制區分開；5xx/529 錯誤顯示 status.claude.com 的連結；未知斜線指令會建議最接近的匹配
+- 透過按需載入語言文法，減少檔案讀取、編輯和語法醒目提示的記憶體佔用
+- 檢視詳細文稿時（`Ctrl+O`）新增「詳細」指示器
+- 啟動時新增警告：當 prompt caching 被 `DISABLE_PROMPT_CACHING*` 環境變數停用時會顯示
+- 修正粘貼在 `/login` 代碼提示中無法運作的問題（2.1.105 中的迴歸）
+- 修正設定 `DISABLE_TELEMETRY` 的訂閱者改而使用 5 分鐘 prompt cache TTL 而非 1 小時的問題
+- 修正 Agent tool 在自動模式下，當安全分類器的文稿超過其上下文視窗時要求權限的問題
+- 修正 Bash tool 在 `CLAUDE_ENV_FILE`（例如 `~/.zprofile`）以 `#` 註解行結尾時無法產生輸出的問題
+- 修正 `claude --resume <session-id>` 遺失工作階段自訂名稱和透過 `/rename` 設定的顏色的問題
+- 修正當第一條訊息為簡短問候語時，工作階段標題顯示預留位置範例文字的問題
+- 修正在 `--teleport` 後，終端機逸出代碼在提示輸入中顯示為亂碼的問題
+- 修正 `/feedback` 重試：在失敗後按 Enter 重新提交現在無須先編輯描述即可運作
+- 修正 `--teleport` 和 `--resume <id>` 前置條件錯誤（例如 dirty git tree、找不到工作階段）以無聲方式結束而非顯示錯誤訊息的問題
+- 修正在網頁 UI 中設定的 Remote Control 工作階段標題在第三條訊息後被自動生成的標題覆寫的問題
+- 修正 `--resume` 在文稿包含自引用訊息時截斷工作階段的問題
+- 修正文稿寫入失敗（例如磁碟滿）被無聲丟棄而非被記錄的問題
+- 修正當 `language` 設定被設定時，回應中的變音符號（重音、母音變音、下加符）被移除的問題
+- 修正原則管理的 plugin 在從與首次安裝位置不同的專案執行時永遠無法自動更新的問題
+
 ## 2.1.107
 - 在長時間操作期間更早顯示思考提示
 
