@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.109
+- 改進了延伸思考指示器，加入旋轉進度提示
+
 ## 2.1.108
 - 新增 `ENABLE_PROMPT_CACHING_1H` 環境變數，可在 API key、Bedrock、Vertex 和 Foundry 上選擇使用 1 小時的 prompt cache TTL（`ENABLE_PROMPT_CACHING_1H_BEDROCK` 已棄用但仍然有效），以及 `FORCE_PROMPT_CACHING_5M` 可強制使用 5 分鐘 TTL
 - 新增回顧功能，在返回工作階段時提供背景資訊，可在 /config 中設定，並可透過 /recap 手動調用；若停用遙測，可使用 `CLAUDE_CODE_ENABLE_AWAY_SUMMARY` 強制啟用
