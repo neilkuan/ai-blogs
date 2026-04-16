@@ -2,6 +2,46 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.111
+- Claude Opus 4.7 xhigh 現已推出！使用 `/effort` 來調整速度與智能程度
+- Max 訂閱用戶現在在使用 Opus 4.7 時可使用自動模式
+- 為 Opus 4.7 新增 `xhigh` 努力等級，位於 `high` 和 `max` 之間。可透過 `/effort`、`--effort` 和模型選擇器存取；其他模型會回退到 `high`
+- `/effort` 在不帶引數呼叫時現在會開啟互動式滑塊，可用方向鍵在各等級間導航，按 Enter 確認
+- 新增「自動 (配合終端機)」主題選項，會配合您的終端機深色/淺色模式 — 從 `/theme` 選擇
+- 新增 `/less-permission-prompts` 技能 — 掃描記錄中常見的唯讀 Bash 和 MCP 工具呼叫，並為 `.claude/settings.json` 提議優先級清單
+- 新增 `/ultrareview` 用於在雲端執行綜合程式碼審查，使用並行多代理分析和評論 — 不帶引數呼叫可審查目前分支，或使用 `/ultrareview <PR#>` 來擷取並審查特定 GitHub PR
+- 自動模式不再需要 `--enable-auto-mode`
+- Windows：PowerShell 工具正逐步推出。使用 `CLAUDE_CODE_USE_POWERSHELL_TOOL` 來選擇加入或退出。在 Linux 和 macOS 上，使用 `CLAUDE_CODE_USE_POWERSHELL_TOOL=1` 啟用（PATH 上需要 `pwsh`）
+- 帶有萬用字元模式的唯讀 bash 指令（例如 `ls *.ts`）和以 `cd <project-dir> &&` 開頭的指令不再觸發權限提示
+- 當使用打字錯誤呼叫 `claude <word>` 時建議最接近的子指令（例如 `claude udpate` → 「你是不是想用 `claude update`?」）
+- 計畫檔案現在以您的提示詞命名（例如 `fix-auth-race-snug-otter.md`）而不是純隨機詞彙
+- 改進 `/setup-vertex` 和 `/setup-bedrock` 以在設定 `CLAUDE_CONFIG_DIR` 時顯示實際 `settings.json` 路徑、從重新執行時的現有固定項目播種模型候選項，以及針對支援的模型提供「含 1M 上下文」選項
+- `/skills` 選單現在支援按預計代幣計數排序 — 按 `t` 切換
+- `Ctrl+U` 現在清除整個輸入緩衝區（之前：刪除至行首）；按 `Ctrl+Y` 可恢復
+- `Ctrl+L` 現在除了清除提示符輸入外，還強制完整螢幕重繪
+- 記錄檢視頁尾現在顯示 `[`（傾印至回捲區域）和 `v`（在編輯器中開啟）快捷鍵
+- 截斷的長貼上的「+N 行」標記現在是全寬規則，便於掃描
+- Headless `--output-format stream-json` 現在在 init 事件時包含 `plugin_errors`（當外掛因不滿足的相依性而被降級時）
+- 新增 `OTEL_LOG_RAW_API_BODIES` 環境變數以將完整 API 請求和回應本體作為 OpenTelemetry 日誌事件發出，用於偵錯
+- 抑制了在正常操作中可能出現在 TUI 中的虛假解壓縮、網路和暫時性錯誤訊息
+- 恢復了 v2.1.110 對非串流後備重試的限制 — 它用更多直接失敗換取了 API 超載期間的長時間等待
+- 修正了 iTerm2 + tmux 設定中送出終端機通知時的終端機顯示撕裂（隨機字元、漂移輸入）
+- 修正了在非 git 工作目錄中 `@` 檔案建議在每輪時重新掃描整個專案，以及在新初始化的 git 倉庫中只顯示設定檔的問題
+- 修正了編輯前的 LSP 診斷出現在編輯之後的問題，導致模型重新讀取它剛編輯的檔案
+- 修正了 tab 鍵補全 `/resume` 立即繼續某個任意有標題的工作階段而不是顯示工作階段選擇器的問題
+- 修正了 `/context` 網格渲染行間出現多餘空白行的問題
+- 修正了 `/clear` 丟棄由 `/rename` 設定的工作階段名稱，導致狀態列輸出遺失 `session_name` 的問題
+- 改進了外掛錯誤處理：相依性錯誤現在區分衝突、無效和過度複雜的版本要求；修正了 `plugin update` 之後的過期已解析版本；`plugin install` 現在可從中斷的先前安裝復原
+- 修正了 Claude 呼叫不存在的 `commit` 技能並為沒有自訂 `/commit` 指令的使用者顯示「未知技能：commit」的問題
+- 修正了 Bedrock/Vertex/Foundry 上的 429 速率限制錯誤參考 status.claude.com 的問題（它只涵蓋 Anthropic 運營的提供者）
+- 修正了關閉一個意見回饋調查後反覆出現的問題
+- 修正了 bash/PowerShell/MCP 工具輸出中的裸 URL 在終端機換行時無法點擊的問題
+- Windows：`CLAUDE_ENV_FILE` 和 SessionStart hook 環境檔案現在適用（之前無作用）
+- Windows：帶有磁碟機代號路徑的權限規則現在已正確根植，且只差磁碟機代號大小寫的路徑被識別為相同路徑
+
+- 新增推送通知工具 — 啟用遠端控制和「在 Claude 決定時推送」設定時，Claude 可傳送行動推送通知
+- `/context`、`/exit` 和 `/reload-plugins` 現在可從遠端控制（行動裝置/網路）用戶端使用
+
 ## 2.1.110
 - 新增 `/tui` 指令和 `tui` 設定 — 執行 `/tui fullscreen` 在同一對話中切換到無閃爍渲染
 - 變更 `Ctrl+O` 僅在常規和詳細記錄間切換；焦點檢視現在改由新的 `/focus` 指令單獨切換

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.111 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.111 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.111</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>Claude Opus 4.7 xhigh 現已推出！使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/effort</code> 來調整速度與智能程度</li>
+<li>Max 訂閱用戶現在在使用 Opus 4.7 時可使用自動模式</li>
+<li>為 Opus 4.7 新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">xhigh</code> 努力等級，位於 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">high</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">max</code> 之間。可透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/effort</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--effort</code> 和模型選擇器存取；其他模型會回退到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">high</code></li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/effort</code> 在不帶引數呼叫時現在會開啟互動式滑塊，可用方向鍵在各等級間導航，按 Enter 確認</li>
+<li>新增「自動 (配合終端機)」主題選項，會配合您的終端機深色/淺色模式 — 從 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/theme</code> 選擇</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/less-permission-prompts</code> 技能 — 掃描記錄中常見的唯讀 Bash 和 MCP 工具呼叫，並為 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.claude/settings.json</code> 提議優先級清單</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/ultrareview</code> 用於在雲端執行綜合程式碼審查，使用並行多代理分析和評論 — 不帶引數呼叫可審查目前分支，或使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/ultrareview &lt;PR#&gt;</code> 來擷取並審查特定 GitHub PR</li>
+<li>自動模式不再需要 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--enable-auto-mode</code></li>
+<li>Windows：PowerShell 工具正逐步推出。使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_USE_POWERSHELL_TOOL</code> 來選擇加入或退出。在 Linux 和 macOS 上，使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_USE_POWERSHELL_TOOL=1</code> 啟用（PATH 上需要 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">pwsh</code>）</li>
+<li>帶有萬用字元模式的唯讀 bash 指令（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ls *.ts</code>）和以 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cd &lt;project-dir&gt; &amp;&amp;</code> 開頭的指令不再觸發權限提示</li>
+<li>當使用打字錯誤呼叫 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude &lt;word&gt;</code> 時建議最接近的子指令（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude udpate</code> → 「你是不是想用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude update</code>?」）</li>
+<li>計畫檔案現在以您的提示詞命名（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">fix-auth-race-snug-otter.md</code>）而不是純隨機詞彙</li>
+<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/setup-vertex</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/setup-bedrock</code> 以在設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CONFIG_DIR</code> 時顯示實際 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> 路徑、從重新執行時的現有固定項目播種模型候選項，以及針對支援的模型提供「含 1M 上下文」選項</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/skills</code> 選單現在支援按預計代幣計數排序 — 按 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">t</code> 切換</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Ctrl+U</code> 現在清除整個輸入緩衝區（之前：刪除至行首）；按 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Ctrl+Y</code> 可恢復</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Ctrl+L</code> 現在除了清除提示符輸入外，還強制完整螢幕重繪</li>
+<li>記錄檢視頁尾現在顯示 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">[</code>（傾印至回捲區域）和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">v</code>（在編輯器中開啟）快捷鍵</li>
+<li>截斷的長貼上的「+N 行」標記現在是全寬規則，便於掃描</li>
+<li>Headless <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--output-format stream-json</code> 現在在 init 事件時包含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin_errors</code>（當外掛因不滿足的相依性而被降級時）</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">OTEL_LOG_RAW_API_BODIES</code> 環境變數以將完整 API 請求和回應本體作為 OpenTelemetry 日誌事件發出，用於偵錯</li>
+<li>抑制了在正常操作中可能出現在 TUI 中的虛假解壓縮、網路和暫時性錯誤訊息</li>
+<li>恢復了 v2.1.110 對非串流後備重試的限制 — 它用更多直接失敗換取了 API 超載期間的長時間等待</li>
+<li>修正了 iTerm2 + tmux 設定中送出終端機通知時的終端機顯示撕裂（隨機字元、漂移輸入）</li>
+<li>修正了在非 git 工作目錄中 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@</code> 檔案建議在每輪時重新掃描整個專案，以及在新初始化的 git 倉庫中只顯示設定檔的問題</li>
+<li>修正了編輯前的 LSP 診斷出現在編輯之後的問題，導致模型重新讀取它剛編輯的檔案</li>
+<li>修正了 tab 鍵補全 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 立即繼續某個任意有標題的工作階段而不是顯示工作階段選擇器的問題</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/context</code> 網格渲染行間出現多餘空白行的問題</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/clear</code> 丟棄由 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/rename</code> 設定的工作階段名稱，導致狀態列輸出遺失 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">session_name</code> 的問題</li>
+<li>改進了外掛錯誤處理：相依性錯誤現在區分衝突、無效和過度複雜的版本要求；修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin update</code> 之後的過期已解析版本；<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin install</code> 現在可從中斷的先前安裝復原</li>
+<li>修正了 Claude 呼叫不存在的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">commit</code> 技能並為沒有自訂 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/commit</code> 指令的使用者顯示「未知技能：commit」的問題</li>
+<li>修正了 Bedrock/Vertex/Foundry 上的 429 速率限制錯誤參考 status.claude.com 的問題（它只涵蓋 Anthropic 運營的提供者）</li>
+<li>修正了關閉一個意見回饋調查後反覆出現的問題</li>
+<li>修正了 bash/PowerShell/MCP 工具輸出中的裸 URL 在終端機換行時無法點擊的問題</li>
+<li>Windows：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_ENV_FILE</code> 和 SessionStart hook 環境檔案現在適用（之前無作用）</li>
+<li>Windows：帶有磁碟機代號路徑的權限規則現在已正確根植，且只差磁碟機代號大小寫的路徑被識別為相同路徑</li>
+</ul>
+
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增推送通知工具 — 啟用遠端控制和「在 Claude 決定時推送」設定時，Claude 可傳送行動推送通知</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/context</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/exit</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/reload-plugins</code> 現在可從遠端控制（行動裝置/網路）用戶端使用</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
