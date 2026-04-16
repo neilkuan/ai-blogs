@@ -2,6 +2,42 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.110
+- 新增 `/tui` 指令和 `tui` 設定 — 執行 `/tui fullscreen` 在同一對話中切換到無閃爍渲染
+- 變更 `Ctrl+O` 僅在常規和詳細記錄間切換；焦點檢視現在改由新的 `/focus` 指令單獨切換
+- 新增 `autoScrollEnabled` 設定以在全螢幕模式中停用對話自動捲動
+- 新增選項在 `Ctrl+G` 外部編輯器中將 Claude 的最後回應顯示為註解上下文（透過 `/config` 啟用）
+- 改進 `/plugin` 已安裝分頁 — 需要關注的項目和常用項目顯示在上方，停用的項目隱藏在摺疊後方，`f` 鍵可將選定項目設為常用
+- 改進 `/doctor` 以在 MCP 伺服器在多個設定範圍中定義但具有不同端點時發出警告
+- `--resume`/`--continue` 現在會恢復未過期的排程工作
+- `/autocompact`、`/context`、`/exit` 和 `/reload-plugins` 現在可從遠端控制（行動裝置/網頁）用戶端使用
+- 寫入工具現在會通知模型當你在 IDE diff 中編輯提議內容後再接受
+- Bash 工具現在強制執行已記載的最大逾時，而非接受任意大的值
+- SDK/headless 工作階段現在從環境中讀取 `TRACEPARENT`/`TRACESTATE` 以用於分散式追蹤連結
+- 工作階段摘要現在對停用遙測的使用者啟用（Bedrock、Vertex、Foundry、`DISABLE_TELEMETRY`）。透過 `/config` 或 `CLAUDE_CODE_ENABLE_AWAY_SUMMARY=0` 選擇退出。
+- 修正 MCP 工具呼叫在 SSE/HTTP 傳輸上伺服器連線在回應中途中斷時無限期掛起的問題
+- 修正非串流後備重試在 API 無法連線時造成多分鐘掛起的問題
+- 修正工作階段摘要、本機斜線指令輸出和其他系統狀態行在焦點模式中不顯示的問題
+- 修正工具執行時在全螢幕中選中文字導致 CPU 使用率過高的問題
+- 修正外掛安裝在市場項目省略依賴項時未遵守 `plugin.json` 中聲明的依賴項；`/plugin` 安裝現在列出自動安裝的依賴項
+- 修正設有 `disable-model-invocation: true` 的技能在訊息中途透過 `/<skill>` 呼叫時失敗的問題
+- 修正 `--resume` 有時對於仍在執行或未正確結束的工作階段顯示第一個提示而非 `/rename` 名稱的問題
+- 修正排隊的訊息在多工具呼叫回合期間短暫出現兩次的問題
+- 修正工作階段清理未移除包括子代理記錄在內的完整工作階段目錄的問題
+- 修正 CLI 重新啟動後（例如 `/tui`、提供者設定精靈）擊鍵遺失的問題
+- 修正 macOS Terminal.app 和其他不支援同步輸出的終端機中啟動渲染亂碼的問題
+- 強化「在編輯器中開啟」操作以防止來自不受信任檔案名稱的命令注入
+- 修正 `PermissionRequest` hook 傳回 `updatedInput` 未針對 `permissions.deny` 規則重新檢查的問題；`setMode:'bypassPermissions'` 更新現在遵守 `disableBypassPermissionsMode`
+- 修正 `PreToolUse` hook `additionalContext` 在工具呼叫失敗時遭到捨棄的問題
+- 修正 stdio MCP 伺服器將雜散非 JSON 行列印到 stdout 時在第一行雜散行時中斷連線的問題（2.1.105 中的迴歸）
+- 修正在設定 `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` 或 `CLAUDE_CODE_DISABLE_TERMINAL_TITLE` 時 headless/SDK 工作階段自動標題觸發額外 Haiku 請求的問題
+- 修正管道化（非 TTY）Ink 輸出包含單一非常寬行時潛在過度記憶體配置的問題
+- 修正 `/skills` 選單在全螢幕模式中列表溢出模態時不捲動的問題
+- 修正遠端控制工作階段在工作階段過舊時顯示通用錯誤而非提示重新登入的問題
+- 修正遠端控制工作階段從 claude.ai 重新命名未保持標題到本機 CLI 工作階段的問題
+
+- 新增摘要功能以在返回工作階段時提供上下文，在 `/config` 中可設定，可透過 `/recap` 手動呼叫；如停用遙測可透過 `CLAUDE_CODE_ENABLE_AWAY_SUMMARY` 強制啟用。
+
 ## 2.1.109
 - 改進了延伸思考指示器，加入旋轉進度提示
 
