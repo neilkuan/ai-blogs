@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.112
+- 修正自動模式下「claude-opus-4-7 is temporarily unavailable」的問題
+
 ## 2.1.111
 - Claude Opus 4.7 xhigh 現已推出！使用 `/effort` 來調整速度與智能程度
 - Max 訂閱用戶現在在使用 Opus 4.7 時可使用自動模式
