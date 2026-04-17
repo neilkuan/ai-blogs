@@ -2,6 +2,46 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.113
+- 改變 CLI 使用原生 Claude Code 二進位檔案（透過平台相關的可選依賴）而非捆綁的 JavaScript
+- 新增 `sandbox.network.deniedDomains` 設定，即使更廣泛的 `allowedDomains` 萬用字元允許，仍可阻止特定網域
+- 全螢幕模式：Shift+↑/↓ 現在可在選取範圍超過可見邊界時捲動檢視窗
+- `Ctrl+A` 和 `Ctrl+E` 現在在多行輸入中移動到目前邏輯行的開始/結束，符合 readline 行為
+- Windows：`Ctrl+Backspace` 現在可刪除前一個單詞
+- 回應和 bash 輸出中的長 URL 在跨行換行時仍保持可點擊（在支援 OSC 8 超連結的終端中）
+- 改進 `/loop`：按 Esc 現在可取消待機喚醒，喚醒顯示為「Claude 恢復 /loop 喚醒」以提高清晰度
+- `/extra-usage` 現在可從遠端控制（行動/網路）客戶端使用
+- 遠端控制客戶端現在可以查詢 `@` 檔案自動完成建議
+- 改進 `/ultrareview`：更快的啟動速度（平行化檢查）、啟動對話框中的 diffstat，以及動畫啟動狀態
+- 串流中途停頓的子代理現在在 10 分鐘後以清晰的錯誤訊息失敗，而不是無聲地掛起
+- Bash 工具：第一行為註解的多行命令現在在文稿中顯示完整命令，關閉了一個 UI 欺騙漏洞
+- 執行 `cd <current-directory> && git …` 當 `cd` 是無操作時，不再觸發權限提示
+- 安全性：在 macOS 上，`/private/{etc,var,tmp,home}` 路徑現在在 `Bash(rm:*)` 允許規則下被視為危險移除目標
+- 安全性：Bash 拒絕規則現在匹配包裝在 `env`/`sudo`/`watch`/`ionice`/`setsid` 和類似 exec 包裝器中的命令
+- 安全性：`Bash(find:*)` 允許規則不再自動批准 `find -exec`/`-delete`
+- 修正 MCP 並行呼叫逾時處理，其中一個工具呼叫的訊息可能會無聲地解除另一個呼叫的監視器
+- 修正 Cmd-backspace / `Ctrl+U` 恢復從游標刪除到行首的功能
+- 修正 markdown 表格在儲存格包含帶有管道符號的內嵌程式碼跨度時斷裂的問題
+- 修正撰寫未傳送文字時自動觸發的工作階段摘要
+- 修正 `/copy` 「完整回應」未對齊 markdown 表格欄位以貼到 GitHub、Notion 或 Slack 的問題
+- 修正檢視執行中子代理時輸入的訊息被隱藏在其文稿中並誤歸因於父 AI 的問題
+- 修正 Bash `dangerouslyDisableSandbox` 在沒有權限提示的情況下在沙盒外執行命令
+- 修正 `/effort auto` 確認 — 現在顯示「設定難度為最大」以符合狀態欄標籤
+- 修正「複製了 N 個字元」提示因 emoji 和其他多程式碼單位字元而過度計數
+- 修正 `/insights` 在 Windows 上因 `EBUSY` 而當機
+- 修正退出確認對話框將單次排程工作誤標為循環工作 — 現在顯示倒計時
+- 修正斜線/@完成選單在全螢幕模式中不與提示邊界齊平的問題
+- 修正 `CLAUDE_CODE_EXTRA_BODY` `output_config.effort` 在子代理呼叫不支援 effort 的模型和 Vertex AI 上導致 400 錯誤
+- 修正設定 `NO_COLOR` 時提示游標消失的問題
+- 修正 `ToolSearch` 排名使貼上的 MCP 工具名稱浮現實際工具而非描述匹配的同級項
+- 修正壓縮已恢復的長內容工作階段因「長內容請求需要額外使用」而失敗
+- 修正 `plugin install` 當依賴版本與已安裝的外掛衝突時成功 — 現在報告 `range-conflict`
+- 修正「使用 Ultraplan 精化」未在文稿中顯示遠端工作階段 URL 的問題
+- 修正無法處理的 SDK 影像內容塊導致工作階段當機 — 現在降級為文字預留位置
+- 修正遠端控制工作階段未串流子代理文稿的問題
+- 修正遠端控制工作階段在 Claude Code 退出時未歸檔的問題
+- 修正透過 Bedrock 應用推論設定檔 ARN 使用 Opus 4.7 時 `thinking.type.enabled is not supported` 400 錯誤
+
 ## 2.1.112
 - 修正自動模式下「claude-opus-4-7 is temporarily unavailable」的問題
 

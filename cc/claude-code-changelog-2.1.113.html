@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.113 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.113 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.113</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>改變 CLI 使用原生 Claude Code 二進位檔案（透過平台相關的可選依賴）而非捆綁的 JavaScript</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">sandbox.network.deniedDomains</code> 設定，即使更廣泛的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">allowedDomains</code> 萬用字元允許，仍可阻止特定網域</li>
+<li>全螢幕模式：Shift+↑/↓ 現在可在選取範圍超過可見邊界時捲動檢視窗</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Ctrl+A</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Ctrl+E</code> 現在在多行輸入中移動到目前邏輯行的開始/結束，符合 readline 行為</li>
+<li>Windows：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Ctrl+Backspace</code> 現在可刪除前一個單詞</li>
+<li>回應和 bash 輸出中的長 URL 在跨行換行時仍保持可點擊（在支援 OSC 8 超連結的終端中）</li>
+<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/loop</code>：按 Esc 現在可取消待機喚醒，喚醒顯示為「Claude 恢復 /loop 喚醒」以提高清晰度</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/extra-usage</code> 現在可從遠端控制（行動/網路）客戶端使用</li>
+<li>遠端控制客戶端現在可以查詢 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@</code> 檔案自動完成建議</li>
+<li>改進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/ultrareview</code>：更快的啟動速度（平行化檢查）、啟動對話框中的 diffstat，以及動畫啟動狀態</li>
+<li>串流中途停頓的子代理現在在 10 分鐘後以清晰的錯誤訊息失敗，而不是無聲地掛起</li>
+<li>Bash 工具：第一行為註解的多行命令現在在文稿中顯示完整命令，關閉了一個 UI 欺騙漏洞</li>
+<li>執行 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cd &lt;current-directory&gt; &amp;&amp; git …</code> 當 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cd</code> 是無操作時，不再觸發權限提示</li>
+<li>安全性：在 macOS 上，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/private/{etc,var,tmp,home}</code> 路徑現在在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Bash(rm:*)</code> 允許規則下被視為危險移除目標</li>
+<li>安全性：Bash 拒絕規則現在匹配包裝在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">env</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">sudo</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">watch</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ionice</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">setsid</code> 和類似 exec 包裝器中的命令</li>
+<li>安全性：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Bash(find:*)</code> 允許規則不再自動批准 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">find -exec</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">-delete</code></li>
+<li>修正 MCP 並行呼叫逾時處理，其中一個工具呼叫的訊息可能會無聲地解除另一個呼叫的監視器</li>
+<li>修正 Cmd-backspace / <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Ctrl+U</code> 恢復從游標刪除到行首的功能</li>
+<li>修正 markdown 表格在儲存格包含帶有管道符號的內嵌程式碼跨度時斷裂的問題</li>
+<li>修正撰寫未傳送文字時自動觸發的工作階段摘要</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/copy</code> 「完整回應」未對齊 markdown 表格欄位以貼到 GitHub、Notion 或 Slack 的問題</li>
+<li>修正檢視執行中子代理時輸入的訊息被隱藏在其文稿中並誤歸因於父 AI 的問題</li>
+<li>修正 Bash <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">dangerouslyDisableSandbox</code> 在沒有權限提示的情況下在沙盒外執行命令</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/effort auto</code> 確認 — 現在顯示「設定難度為最大」以符合狀態欄標籤</li>
+<li>修正「複製了 N 個字元」提示因 emoji 和其他多程式碼單位字元而過度計數</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/insights</code> 在 Windows 上因 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">EBUSY</code> 而當機</li>
+<li>修正退出確認對話框將單次排程工作誤標為循環工作 — 現在顯示倒計時</li>
+<li>修正斜線/@完成選單在全螢幕模式中不與提示邊界齊平的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_EXTRA_BODY</code> <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">output_config.effort</code> 在子代理呼叫不支援 effort 的模型和 Vertex AI 上導致 400 錯誤</li>
+<li>修正設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_COLOR</code> 時提示游標消失的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ToolSearch</code> 排名使貼上的 MCP 工具名稱浮現實際工具而非描述匹配的同級項</li>
+<li>修正壓縮已恢復的長內容工作階段因「長內容請求需要額外使用」而失敗</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin install</code> 當依賴版本與已安裝的外掛衝突時成功 — 現在報告 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">range-conflict</code></li>
+<li>修正「使用 Ultraplan 精化」未在文稿中顯示遠端工作階段 URL 的問題</li>
+<li>修正無法處理的 SDK 影像內容塊導致工作階段當機 — 現在降級為文字預留位置</li>
+<li>修正遠端控制工作階段未串流子代理文稿的問題</li>
+<li>修正遠端控制工作階段在 Claude Code 退出時未歸檔的問題</li>
+<li>修正透過 Bedrock 應用推論設定檔 ARN 使用 Opus 4.7 時 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">thinking.type.enabled is not supported</code> 400 錯誤</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
