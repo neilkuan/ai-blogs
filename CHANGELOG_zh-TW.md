@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.114
+- 修正當 agent teams 隊友請求工具權限時，permission dialog 發生的當機問題
+
 ## 2.1.113
 - 改變 CLI 使用原生 Claude Code 二進位檔案（透過平台相關的可選依賴）而非捆綁的 JavaScript
 - 新增 `sandbox.network.deniedDomains` 設定，即使更廣泛的 `allowedDomains` 萬用字元允許，仍可阻止特定網域
