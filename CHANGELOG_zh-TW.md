@@ -2,6 +2,32 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.116
+- `/resume` 在大型會話上明顯加快（40MB 以上的會話可快達 67%），並更有效地處理包含許多已死亡分支條目的會話
+- 在配置多個 stdio servers 時，MCP 啟動更快；`resources/templates/list` 現在會延遲到首次 `@`-mention 時才載入
+- VS Code、Cursor 和 Windsurf 終端中的全螢幕滾動更流暢——`/terminal-setup` 現在會設定編輯器的滾動敏感度
+- 思考旋轉指示器現在會行內顯示進度（「還在思考」、「繼續思考」、「快想好了」），取代獨立的提示行
+- `/config` 搜尋現在會匹配選項值（例如搜尋「vim」會找到編輯器模式設定）
+- `/doctor` 現在可以在 Claude 回應時開啟，無需等待目前回合完成
+- `/reload-plugins` 和背景 plugin 自動更新現在會自動從你已新增的市集安裝遺漏的 plugin 依賴項
+- Bash tool 現在會在 `gh` 指令觸發 GitHub API 速率限制時提示，讓 agents 可以退避而非重試
+- Settings 中的 Usage 標籤現在會立即顯示你的 5 小時和週期用量，當 usage endpoint 被速率限制時也不會失敗
+- Agent frontmatter `hooks:` 現在會在透過 `--agent` 以 main-thread agent 身份運行時觸發
+- Slash 指令選單現在會在篩選結果為零時顯示「沒有指令符合」，而不是消失
+- 安全性：沙箱自動允許不再繞過針對 `/`、`$HOME` 或其他關鍵系統目錄的 `rm`/`rmdir` 的危險路徑安全檢查
+- 修正梵文及其他印度文字在終端 UI 中以破損的列對齊方式渲染的問題
+- 修正在使用 Kitty keyboard protocol 的終端中 Ctrl+- 無法觸發復原的問題（iTerm2、Ghostty、kitty、WezTerm、Windows Terminal）
+- 修正在使用 Kitty keyboard protocol 的終端中 Cmd+Left/Right 無法跳至行首/行尾的問題（Warp 全螢幕、kitty、Ghostty、WezTerm）
+- 修正 Claude Code 透過包裝進程（例如 `npx`、`bun run`）啟動時 Ctrl+Z 導致終端掛起的問題
+- 修正內聯模式中的滾動回溯重複問題，其中調整終端大小或大量輸出會重複先前的對話歷史
+- 修正模態搜尋對話框在終端高度較小時溢出螢幕，隱藏搜尋框和鍵盤提示的問題
+- 修正滾動時 VS Code 整合終端中出現零散空白儲存格及 composer chrome 消失的問題
+- 修正與快取控制 TTL 排序相關的間歇性 API 400 錯誤，該錯誤可能在平行請求於請求設定期間完成時發生
+- 修正 `/branch` 拒絕轉錄稿大於 50MB 的對話的問題
+- 修正 `/resume` 在大型會話檔案上默默顯示空白對話，而非報告載入錯誤的問題
+- 修正 `/plugin` 的 Installed 標籤在項目出現在 Needs attention 或 Favorites 下時顯示同一項目兩次的問題
+- 修正 `/update` 和 `/tui` 在會話中途進入 worktree 後無法運作的問題
+
 ## 2.1.114
 - 修正當 agent teams 隊友請求工具權限時，permission dialog 發生的當機問題
 

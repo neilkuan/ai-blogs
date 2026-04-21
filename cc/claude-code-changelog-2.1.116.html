@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.116 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.116 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.116</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 在大型會話上明顯加快（40MB 以上的會話可快達 67%），並更有效地處理包含許多已死亡分支條目的會話</li>
+<li>在配置多個 stdio servers 時，MCP 啟動更快；<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">resources/templates/list</code> 現在會延遲到首次 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@</code>-mention 時才載入</li>
+<li>VS Code、Cursor 和 Windsurf 終端中的全螢幕滾動更流暢——<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/terminal-setup</code> 現在會設定編輯器的滾動敏感度</li>
+<li>思考旋轉指示器現在會行內顯示進度（「還在思考」、「繼續思考」、「快想好了」），取代獨立的提示行</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/config</code> 搜尋現在會匹配選項值（例如搜尋「vim」會找到編輯器模式設定）</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/doctor</code> 現在可以在 Claude 回應時開啟，無需等待目前回合完成</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/reload-plugins</code> 和背景 plugin 自動更新現在會自動從你已新增的市集安裝遺漏的 plugin 依賴項</li>
+<li>Bash tool 現在會在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">gh</code> 指令觸發 GitHub API 速率限制時提示，讓 agents 可以退避而非重試</li>
+<li>Settings 中的 Usage 標籤現在會立即顯示你的 5 小時和週期用量，當 usage endpoint 被速率限制時也不會失敗</li>
+<li>Agent frontmatter <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">hooks:</code> 現在會在透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--agent</code> 以 main-thread agent 身份運行時觸發</li>
+<li>Slash 指令選單現在會在篩選結果為零時顯示「沒有指令符合」，而不是消失</li>
+<li>安全性：沙箱自動允許不再繞過針對 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">$HOME</code> 或其他關鍵系統目錄的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">rm</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">rmdir</code> 的危險路徑安全檢查</li>
+<li>修正梵文及其他印度文字在終端 UI 中以破損的列對齊方式渲染的問題</li>
+<li>修正在使用 Kitty keyboard protocol 的終端中 Ctrl+- 無法觸發復原的問題（iTerm2、Ghostty、kitty、WezTerm、Windows Terminal）</li>
+<li>修正在使用 Kitty keyboard protocol 的終端中 Cmd+Left/Right 無法跳至行首/行尾的問題（Warp 全螢幕、kitty、Ghostty、WezTerm）</li>
+<li>修正 Claude Code 透過包裝進程（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">npx</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">bun run</code>）啟動時 Ctrl+Z 導致終端掛起的問題</li>
+<li>修正內聯模式中的滾動回溯重複問題，其中調整終端大小或大量輸出會重複先前的對話歷史</li>
+<li>修正模態搜尋對話框在終端高度較小時溢出螢幕，隱藏搜尋框和鍵盤提示的問題</li>
+<li>修正滾動時 VS Code 整合終端中出現零散空白儲存格及 composer chrome 消失的問題</li>
+<li>修正與快取控制 TTL 排序相關的間歇性 API 400 錯誤，該錯誤可能在平行請求於請求設定期間完成時發生</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/branch</code> 拒絕轉錄稿大於 50MB 的對話的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 在大型會話檔案上默默顯示空白對話，而非報告載入錯誤的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code> 的 Installed 標籤在項目出現在 Needs attention 或 Favorites 下時顯示同一項目兩次的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/update</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/tui</code> 在會話中途進入 worktree 後無法運作的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
