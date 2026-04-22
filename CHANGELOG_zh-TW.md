@@ -2,6 +2,36 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.117
+- Fork 出來的 subagent 現在可以通過設定 `CLAUDE_CODE_FORK_SUBAGENT=1` 在外部建置上啟用
+- Agent frontmatter 中的 `mcpServers` 現在可以通過 `--agent` 為主執行緒 agent 工作階段載入
+- 改進了 `/model`：即使專案已釘選不同的模型，使用者的選擇現在會在重新啟動後保留，而啟動標題會顯示活躍模型是來自專案還是託管設定的釘選
+- `/resume` 命令現在會在重新讀取舊的大型工作階段前主動提供摘要化選項，與現有的 `--resume` 行為一致
+- 當同時設定本地和 claude.ai MCP server 時啟動更快（並行連線現為預設值）
+- 在已安裝的 plugin 上執行 `plugin install` 現在會安裝任何遺失的依賴項，而不是停在「已安裝」提示
+- Plugin 依賴項錯誤現在會顯示「未安裝」並附上安裝提示，`claude plugin marketplace add` 現在會自動從已設定的市場解決遺失的依賴項
+- 託管設定中的 `blockedMarketplaces` 和 `strictKnownMarketplaces` 現在在 plugin 安裝、更新、重新整理和自動更新時被強制執行
+- Advisor Tool（實驗性）：對話框現在帶有「實驗性」標籤、了解更多連結，以及啟用時的啟動通知；工作階段不再因為每次提示和 `/compact` 時出現「Advisor tool 結果內容無法處理」錯誤而卡住
+- `cleanupPeriodDays` 保留期清理掃描現在也涵蓋 `~/.claude/tasks/`、`~/.claude/shell-snapshots/` 和 `~/.claude/backups/`
+- OpenTelemetry：`user_prompt` 事件現在包含 `command_name` 和 `command_source` 用於斜槓命令；`cost.usage`、`token.usage`、`api_request` 和 `api_error` 在模型支援 effort 等級時現在包含 `effort` 屬性。自訂/MCP 命令名稱會被隱蔽，除非設定 `OTEL_LOG_TOOL_DETAILS=1`
+- macOS 和 Linux 上的原生建置：`Glob` 和 `Grep` 工具被替換為通過 Bash tool 可用的嵌入式 `bfs` 和 `ugrep` — 更快的搜尋，無需額外的工具往返（Windows 和 npm 安裝的建置保持不變）
+- Windows：每個程序快取 `where.exe` 可執行檔查詢，以加快子程序啟動速度
+- Pro/Max 訂閱者在 Opus 4.6 和 Sonnet 4.6 上的預設 effort 現在是 `high`（之前是 `medium`）
+- 修復了 Plain-CLI OAuth 工作階段在存取 token 於工作階段中途過期時因「請執行 /login」而中斷的問題 — token 現在會在 401 時主動重新整理
+- 修復了 `WebFetch` 在非常大的 HTML 頁面上掛起的問題，通過在 HTML 轉 markdown 轉換前截斷輸入
+- 修復了當 proxy 返回 HTTP 204 No Content 時的當機 — 現在顯示清楚的錯誤而不是 `TypeError`
+- 修復了當使用 `CLAUDE_CODE_OAUTH_TOKEN` 環境變數啟動且該 token 已過期時 `/login` 無效的問題
+- 修復了提示輸入復原（`Ctrl+_`）在輸入後立即無反應，且每個復原步驟跳過一個狀態的問題
+- 修復了在 Bun 下執行時 `NO_PROXY` 不被尊重遠端 API 請求的問題
+- 修復了在慢速連線上按鍵名稱作為合併文字到達時罕見的虛假 escape/return 觸發
+- 修復了 SDK `reload_plugins` 串列重新連線所有使用者 MCP server 的問題
+- 修復了 Bedrock 應用程序推理設定檔請求在由禁用思考的 Opus 4.7 支援時因 400 失敗的問題
+- 修復了 MCP `elicitation/create` 請求在列印/SDK 模式下當伺服器在中途完成連線時自動取消的問題
+- 修復了執行不同於主 agent 模型的 subagent 不正確地使用惡意軟體警告標記檔案讀取的問題
+- 修復了當存在後台工作時的空閒重新渲染迴圈，減少 Linux 上的記憶體成長
+- [VSCode] 修復了設定多個大型市場時「管理 Plugin」面板中斷的問題
+- 修復了 Opus 4.7 工作階段顯示膨脹的 `/context` 百分比並過早自動壓縮的問題 — Claude Code 在計算時使用了 200K 的上下文視窗而不是 Opus 4.7 原生的 1M
+
 ## 2.1.116
 - `/resume` 在大型會話上明顯加快（40MB 以上的會話可快達 67%），並更有效地處理包含許多已死亡分支條目的會話
 - 在配置多個 stdio servers 時，MCP 啟動更快；`resources/templates/list` 現在會延遲到首次 `@`-mention 時才載入

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.117 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.117 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.117</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>Fork 出來的 subagent 現在可以通過設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_FORK_SUBAGENT=1</code> 在外部建置上啟用</li>
+<li>Agent frontmatter 中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">mcpServers</code> 現在可以通過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--agent</code> 為主執行緒 agent 工作階段載入</li>
+<li>改進了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/model</code>：即使專案已釘選不同的模型，使用者的選擇現在會在重新啟動後保留，而啟動標題會顯示活躍模型是來自專案還是託管設定的釘選</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 命令現在會在重新讀取舊的大型工作階段前主動提供摘要化選項，與現有的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 行為一致</li>
+<li>當同時設定本地和 claude.ai MCP server 時啟動更快（並行連線現為預設值）</li>
+<li>在已安裝的 plugin 上執行 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin install</code> 現在會安裝任何遺失的依賴項，而不是停在「已安裝」提示</li>
+<li>Plugin 依賴項錯誤現在會顯示「未安裝」並附上安裝提示，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin marketplace add</code> 現在會自動從已設定的市場解決遺失的依賴項</li>
+<li>託管設定中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">blockedMarketplaces</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">strictKnownMarketplaces</code> 現在在 plugin 安裝、更新、重新整理和自動更新時被強制執行</li>
+<li>Advisor Tool（實驗性）：對話框現在帶有「實驗性」標籤、了解更多連結，以及啟用時的啟動通知；工作階段不再因為每次提示和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/compact</code> 時出現「Advisor tool 結果內容無法處理」錯誤而卡住</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cleanupPeriodDays</code> 保留期清理掃描現在也涵蓋 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/tasks/</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/shell-snapshots/</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/backups/</code></li>
+<li>OpenTelemetry：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">user_prompt</code> 事件現在包含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">command_name</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">command_source</code> 用於斜槓命令；<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cost.usage</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">token.usage</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">api_request</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">api_error</code> 在模型支援 effort 等級時現在包含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">effort</code> 屬性。自訂/MCP 命令名稱會被隱蔽，除非設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">OTEL_LOG_TOOL_DETAILS=1</code></li>
+<li>macOS 和 Linux 上的原生建置：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Glob</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Grep</code> 工具被替換為通過 Bash tool 可用的嵌入式 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">bfs</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ugrep</code> — 更快的搜尋，無需額外的工具往返（Windows 和 npm 安裝的建置保持不變）</li>
+<li>Windows：每個程序快取 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">where.exe</code> 可執行檔查詢，以加快子程序啟動速度</li>
+<li>Pro/Max 訂閱者在 Opus 4.6 和 Sonnet 4.6 上的預設 effort 現在是 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">high</code>（之前是 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">medium</code>）</li>
+<li>修復了 Plain-CLI OAuth 工作階段在存取 token 於工作階段中途過期時因「請執行 /login」而中斷的問題 — token 現在會在 401 時主動重新整理</li>
+<li>修復了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">WebFetch</code> 在非常大的 HTML 頁面上掛起的問題，通過在 HTML 轉 markdown 轉換前截斷輸入</li>
+<li>修復了當 proxy 返回 HTTP 204 No Content 時的當機 — 現在顯示清楚的錯誤而不是 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">TypeError</code></li>
+<li>修復了當使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_OAUTH_TOKEN</code> 環境變數啟動且該 token 已過期時 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/login</code> 無效的問題</li>
+<li>修復了提示輸入復原（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Ctrl+_</code>）在輸入後立即無反應，且每個復原步驟跳過一個狀態的問題</li>
+<li>修復了在 Bun 下執行時 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_PROXY</code> 不被尊重遠端 API 請求的問題</li>
+<li>修復了在慢速連線上按鍵名稱作為合併文字到達時罕見的虛假 escape/return 觸發</li>
+<li>修復了 SDK <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">reload_plugins</code> 串列重新連線所有使用者 MCP server 的問題</li>
+<li>修復了 Bedrock 應用程序推理設定檔請求在由禁用思考的 Opus 4.7 支援時因 400 失敗的問題</li>
+<li>修復了 MCP <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">elicitation/create</code> 請求在列印/SDK 模式下當伺服器在中途完成連線時自動取消的問題</li>
+<li>修復了執行不同於主 agent 模型的 subagent 不正確地使用惡意軟體警告標記檔案讀取的問題</li>
+<li>修復了當存在後台工作時的空閒重新渲染迴圈，減少 Linux 上的記憶體成長</li>
+<li>[VSCode] 修復了設定多個大型市場時「管理 Plugin」面板中斷的問題</li>
+<li>修復了 Opus 4.7 工作階段顯示膨脹的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/context</code> 百分比並過早自動壓縮的問題 — Claude Code 在計算時使用了 200K 的上下文視窗而不是 Opus 4.7 原生的 1M</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
