@@ -2,6 +2,44 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.118
+- 新增 vim 視覺模式（`v`）和視覺行模式（`V`），支援選取、操作符和視覺回饋
+- 合併 `/cost` 和 `/stats` 為 `/usage` — 兩者仍可作為快速鍵使用，會開啟相應的分頁
+- 可以從 `/theme` 建立和切換自訂命名主題，或直接編輯 `~/.claude/themes/` 中的 JSON 檔案；外掛程式也可以透過 `themes/` 目錄提供主題
+- Hook 現在可以透過 `type: "mcp_tool"` 直接呼叫 MCP 工具
+- 新增 `DISABLE_UPDATES` 環境變數可完全阻止所有更新路徑，包括手動執行 `claude update` — 比 `DISABLE_AUTOUPDATER` 更嚴格
+- WSL 在 Windows 上現可透過 `wslInheritsWindowsSettings` 政策金鑰繼承 Windows 端的受管設定
+- 自動模式：在 `autoMode.allow`、`autoMode.soft_deny` 或 `autoMode.environment` 中加入 `"$defaults"` 即可在內建列表基礎上新增自訂規則，而不是替換它
+- 在自動模式選擇加入提示中新增「不再詢問」選項
+- 新增 `claude plugin tag` 指令可為外掛程式建立帶有版本驗證的發佈 git 標籤
+- `--continue`/`--resume` 現在可以找到透過 `/add-dir` 新增了目前目錄的會話
+- `/color` 現在會在遠端控制（Remote Control）連線時將會話強調色同步到 claude.ai/code
+- `/model` 選擇器在使用自訂 `ANTHROPIC_BASE_URL` 閘道時，現在會遵守 `ANTHROPIC_DEFAULT_*_MODEL_NAME`/`_DESCRIPTION` 覆寫設定
+- 當自動更新因其他外掛程式的版本限制而略過外掛程式時，略過狀態現在會出現在 `/doctor` 和 `/plugin` 的「錯誤」分頁中
+- 修復 `/mcp` 選單隱藏為使用 `headersHelper` 設定的伺服器的 OAuth 驗證/重新驗證操作，以及 HTTP/SSE MCP 伺服器在自訂標頭後卡在「需要驗證」狀態的問題
+- 修復 MCP 伺服器的 OAuth 權杖回應遺漏 `expires_in` 導致每小時都需重新驗證的問題
+- 修復 MCP 升階授權在伺服器的 `insufficient_scope` 403 中指名的範圍目前權杖已具備時，會無聲重新整理而不是提示重新同意的問題
+- 修復 MCP 伺服器的 OAuth 流程逾時或被取消時發生未處理的 Promise 拒絕
+- 修復 MCP OAuth 重新整理在有爭用時無跨程序鎖定而執行的問題
+- 修復 macOS 鑰匙圈競態條件，其中並行 MCP 權杖重新整理可能會覆寫剛重新整理的 OAuth 權杖，導致出現意外的「請執行 /login」提示
+- 修復伺服器在本機到期時間之前撤銷權杖時 OAuth 權杖重新整理失敗的問題
+- 修復 Linux/Windows 上認證儲存崩潰導致 `~/.claude/.credentials.json` 損毀的問題
+- 修復使用 `CLAUDE_CODE_OAUTH_TOKEN` 啟動的會話中 `/login` 無效的問題 — 環境變數權杖現已清除，以便磁碟認證生效
+- 修復「新訊息」捲動藥丸和 `/plugin` 徽章中文字不可讀的問題
+- 修復使用 `--dangerously-skip-permissions` 執行時，計畫接受對話框提供「自動模式」而非「略過權限」的問題
+- 修復代理類型 hook 在為 `Stop` 或 `SubagentStop` 以外的事件設定時失敗並出現「Messages are required for agent hooks」的問題
+- 修復 `prompt` hook 在代理 hook 驗證器子代理進行的工具呼叫上重新觸發的問題
+- 修復 `/fork` 將完整父對話寫入磁碟（每個 fork）— 現已改為寫入指標並於讀取時進行補充
+- 修復 Alt+K / Alt+X / Alt+^ / Alt+_ 凍結鍵盤輸入的問題
+- 修復連線到遠端會話會覆寫 `~/.claude/settings.json` 中本機 `model` 設定的問題
+- 修復貼上以 `/` 開頭的檔案路徑時預輸入顯示「No commands match」錯誤的問題
+- 修復已安裝外掛程式上執行 `plugin install` 時未重新解析版本不正確的相依性的問題
+- 修復無效路徑或 fd 耗盡時檔案監視程式的未處理錯誤
+- 修復遠端控制會話在 JWT 重新整理期間暫時 CCR 初始化中斷時被封存的問題
+- 修復透過 `SendMessage` 恢復的子代理未還原生成時指定的 `cwd` 的問題
+
+- Claude Code 和安裝程式現改用 `https://downloads.claude.ai/claude-code-releases` 取代 `https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases`
+
 ## 2.1.117
 - Fork 出來的 subagent 現在可以通過設定 `CLAUDE_CODE_FORK_SUBAGENT=1` 在外部建置上啟用
 - Agent frontmatter 中的 `mcpServers` 現在可以通過 `--agent` 為主執行緒 agent 工作階段載入

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.118 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.118 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.118</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 vim 視覺模式（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">v</code>）和視覺行模式（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">V</code>），支援選取、操作符和視覺回饋</li>
+<li>合併 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/cost</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/stats</code> 為 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code> — 兩者仍可作為快速鍵使用，會開啟相應的分頁</li>
+<li>可以從 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/theme</code> 建立和切換自訂命名主題，或直接編輯 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/themes/</code> 中的 JSON 檔案；外掛程式也可以透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">themes/</code> 目錄提供主題</li>
+<li>Hook 現在可以透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">type: &quot;mcp_tool&quot;</code> 直接呼叫 MCP 工具</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">DISABLE_UPDATES</code> 環境變數可完全阻止所有更新路徑，包括手動執行 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude update</code> — 比 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">DISABLE_AUTOUPDATER</code> 更嚴格</li>
+<li>WSL 在 Windows 上現可透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">wslInheritsWindowsSettings</code> 政策金鑰繼承 Windows 端的受管設定</li>
+<li>自動模式：在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">autoMode.allow</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">autoMode.soft_deny</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">autoMode.environment</code> 中加入 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">&quot;$defaults&quot;</code> 即可在內建列表基礎上新增自訂規則，而不是替換它</li>
+<li>在自動模式選擇加入提示中新增「不再詢問」選項</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin tag</code> 指令可為外掛程式建立帶有版本驗證的發佈 git 標籤</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--continue</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 現在可以找到透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/add-dir</code> 新增了目前目錄的會話</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/color</code> 現在會在遠端控制（Remote Control）連線時將會話強調色同步到 claude.ai/code</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/model</code> 選擇器在使用自訂 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ANTHROPIC_BASE_URL</code> 閘道時，現在會遵守 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ANTHROPIC_DEFAULT_*_MODEL_NAME</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">_DESCRIPTION</code> 覆寫設定</li>
+<li>當自動更新因其他外掛程式的版本限制而略過外掛程式時，略過狀態現在會出現在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/doctor</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code> 的「錯誤」分頁中</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/mcp</code> 選單隱藏為使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">headersHelper</code> 設定的伺服器的 OAuth 驗證/重新驗證操作，以及 HTTP/SSE MCP 伺服器在自訂標頭後卡在「需要驗證」狀態的問題</li>
+<li>修復 MCP 伺服器的 OAuth 權杖回應遺漏 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">expires_in</code> 導致每小時都需重新驗證的問題</li>
+<li>修復 MCP 升階授權在伺服器的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">insufficient_scope</code> 403 中指名的範圍目前權杖已具備時，會無聲重新整理而不是提示重新同意的問題</li>
+<li>修復 MCP 伺服器的 OAuth 流程逾時或被取消時發生未處理的 Promise 拒絕</li>
+<li>修復 MCP OAuth 重新整理在有爭用時無跨程序鎖定而執行的問題</li>
+<li>修復 macOS 鑰匙圈競態條件，其中並行 MCP 權杖重新整理可能會覆寫剛重新整理的 OAuth 權杖，導致出現意外的「請執行 /login」提示</li>
+<li>修復伺服器在本機到期時間之前撤銷權杖時 OAuth 權杖重新整理失敗的問題</li>
+<li>修復 Linux/Windows 上認證儲存崩潰導致 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/.credentials.json</code> 損毀的問題</li>
+<li>修復使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_OAUTH_TOKEN</code> 啟動的會話中 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/login</code> 無效的問題 — 環境變數權杖現已清除，以便磁碟認證生效</li>
+<li>修復「新訊息」捲動藥丸和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code> 徽章中文字不可讀的問題</li>
+<li>修復使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--dangerously-skip-permissions</code> 執行時，計畫接受對話框提供「自動模式」而非「略過權限」的問題</li>
+<li>修復代理類型 hook 在為 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Stop</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">SubagentStop</code> 以外的事件設定時失敗並出現「Messages are required for agent hooks」的問題</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">prompt</code> hook 在代理 hook 驗證器子代理進行的工具呼叫上重新觸發的問題</li>
+<li>修復 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/fork</code> 將完整父對話寫入磁碟（每個 fork）— 現已改為寫入指標並於讀取時進行補充</li>
+<li>修復 Alt+K / Alt+X / Alt+^ / Alt+_ 凍結鍵盤輸入的問題</li>
+<li>修復連線到遠端會話會覆寫 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/settings.json</code> 中本機 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">model</code> 設定的問題</li>
+<li>修復貼上以 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/</code> 開頭的檔案路徑時預輸入顯示「No commands match」錯誤的問題</li>
+<li>修復已安裝外掛程式上執行 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin install</code> 時未重新解析版本不正確的相依性的問題</li>
+<li>修復無效路徑或 fd 耗盡時檔案監視程式的未處理錯誤</li>
+<li>修復遠端控制會話在 JWT 重新整理期間暫時 CCR 初始化中斷時被封存的問題</li>
+<li>修復透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">SendMessage</code> 恢復的子代理未還原生成時指定的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cwd</code> 的問題</li>
+</ul>
+
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>Claude Code 和安裝程式現改用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">https://downloads.claude.ai/claude-code-releases</code> 取代 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases</code></li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
