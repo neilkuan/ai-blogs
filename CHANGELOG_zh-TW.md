@@ -2,6 +2,59 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.119
+- `/config` 設定（主題、編輯器模式、詳細模式等）現已持久化到 `~/.claude/settings.json`，並遵循專案/本地/原則的覆蓋優先順序
+- 新增 `prUrlTemplate` 設定，用來將頁腳的 PR 徽章指向自訂程式碼審核 URL，而非 github.com
+- 新增 `CLAUDE_CODE_HIDE_CWD` 環境變數，可在啟動標誌中隱藏工作目錄
+- `--from-pr` 現已支援 GitLab merge-request、Bitbucket pull-request 和 GitHub Enterprise PR URL
+- `--print` 模式現已遵守 agent 的 `tools:` 和 `disallowedTools:` frontmatter，與互動模式行為一致
+- `--agent <name>` 現已遵守 agent 定義中的 `permissionMode`（針對內建 agent）
+- PowerShell 工具指令現已可在權限模式中自動批准，與 Bash 行為一致
+- Hooks：`PostToolUse` 和 `PostToolUseFailure` hook 輸入現已包含 `duration_ms`（工具執行時間，不含權限提示和 PreToolUse hooks）
+- Subagent 和 SDK MCP server 重新配置現已平行連接伺服器，而非序列連接
+- 由其他 plugin 的版本限制所釘選的 plugin 現已自動更新至最高滿足條件的 git tag
+- Vim 模式：INSERT 中的 Esc 不再將已排隊的訊息拉回輸入框；再按一次 Esc 可中斷
+- Slash command 建議現已突顯符合查詢的字元
+- Slash command 選擇器現已將長描述換行到第二行，而非截斷
+- 輸出中的 `owner/repo#N` 快速連結現已使用您的 git remote 主機，而非始終指向 github.com
+- 安全性：`blockedMarketplaces` 現已正確強制執行 `hostPattern` 和 `pathPattern` 條目
+- OpenTelemetry：`tool_result` 和 `tool_decision` 事件現已包含 `tool_use_id`；`tool_result` 還包含 `tool_input_size_bytes`
+- 狀態列：stdin JSON 現已包含 `effort.level` 和 `thinking.enabled`
+- 修正貼上 CRLF 內容（Windows 剪貼簿、Xcode 主控台）時，每行之間插入額外空行的問題
+- 修正在使用 kitty keyboard protocol sequences 的終端機中，多行貼上在括號貼上內部遺失換行符的問題
+- 修正在透過權限拒絕 Bash 工具時，Glob 和 Grep 工具在原生 macOS/Linux 版本上消失的問題
+- 修正在全螢幕模式下向上滾動時，每次工具完成後都會快速跳回底部的問題
+- 修正 MCP HTTP 連接在伺服器為 OAuth 探索請求返回非 JSON 主體時，出現「Invalid OAuth error response」錯誤的問題
+- 修正 Rewind 疊加層對有影像附件的訊息顯示「(no prompt)」的問題
+- 修正自動模式用衝突的「Execute immediately」指令覆蓋計畫模式的問題
+- 修正非同步 `PostToolUse` hooks 若沒有發出回應內容，會將空項目寫入工作階段逐字稿的問題
+- 修正當 subagent 任務通知在佇列中孤立時，微調器持續開啟的問題
+- 在 Vertex AI 上，工具搜尋現已預設停用以避免不支援的 beta header 錯誤（可用 `ENABLE_TOOL_SEARCH` 選擇加入）
+- 修正 `@`-file Tab 完成在 slash command 內搭配絕對路徑使用時，替換整個提示的問題
+- 修正在 macOS Terminal.app（透過 Docker 或 SSH）啟動時，提示符處出現多餘 `p` 字元的問題
+- 修正 HTTP/SSE/WebSocket MCP server 的 `headers` 中的 `${ENV_VAR}` 預留位置在請求前未被替換的問題
+- 修正透過 `--client-secret` 儲存的 MCP OAuth 用戶端密鑰，在需要 `client_secret_post` 的伺服器進行權杖交換時未被傳送的問題
+- 修正 `/skills` Enter 鍵關閉對話框，而非在提示中預先填入 `/<skill-name>` 的問題
+- 修正 `/agents` 詳細檢視將無法用於 subagent 的內建工具誤標為「Unrecognized」的問題
+- 修正 plugin 中的 MCP server 在 plugin 快取不完整時無法在 Windows 上生成的問題
+- 修正 `/export` 顯示目前預設模型而非對話實際使用的模型的問題
+- 修正詳細模式設定在重啟後未能持久化的問題
+- 修正 `/usage` 進度條與其「Resets …」標籤重疊的問題
+- 修正 plugin MCP server 在 `${user_config.*}` 參照留白選用欄位時失敗的問題
+- 修正包含句末數字的清單項目將該數字換行到其本身一行的問題
+- 修正 `/plan` 和 `/plan open` 進入計畫模式時未對現有計畫起作用的問題
+- 修正自動壓縮前叫用的技能對下一個使用者訊息重新執行的問題
+- 修正 `/reload-plugins` 和 `/doctor` 報告已停用 plugin 的載入錯誤的問題
+- 修正 Agent 工具搭配 `isolation: "worktree"` 時，重複使用先前工作階段的陳舊工作樹的問題
+- 修正已停用的 MCP server 在 `/status` 中顯示為「failed」的問題
+- 修正 `TaskList` 按任意檔案系統順序傳回任務而非按 ID 排序的問題
+- 修正當 `gh` 輸出包含提及「rate limit」的 PR 標題時，出現虛假「GitHub API rate limit exceeded」提示的問題
+- 修正 SDK/bridge `read_file` 未正確對成長中檔案強制執行大小上限的問題
+- 修正在 git worktree 中工作時，PR 未連結到工作階段的問題
+- 修正 `/doctor` 就被更高優先順序範圍覆蓋的 MCP server 項目發出警告的問題
+- Windows：移除虛假的「Windows requires 'cmd /c' wrapper」MCP 配置警告
+- [VSCode] 修正在 macOS 上麥克風權限提示顯示時，語音聽寫的第一次錄音無任何輸出的問題
+
 ## 2.1.118
 - 新增 vim 視覺模式（`v`）和視覺行模式（`V`），支援選取、操作符和視覺回饋
 - 合併 `/cost` 和 `/stats` 為 `/usage` — 兩者仍可作為快速鍵使用，會開啟相應的分頁

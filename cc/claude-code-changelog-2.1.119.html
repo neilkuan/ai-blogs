@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.119 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.119 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.119</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/config</code> 設定（主題、編輯器模式、詳細模式等）現已持久化到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/settings.json</code>，並遵循專案/本地/原則的覆蓋優先順序</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">prUrlTemplate</code> 設定，用來將頁腳的 PR 徽章指向自訂程式碼審核 URL，而非 github.com</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_HIDE_CWD</code> 環境變數，可在啟動標誌中隱藏工作目錄</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--from-pr</code> 現已支援 GitLab merge-request、Bitbucket pull-request 和 GitHub Enterprise PR URL</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--print</code> 模式現已遵守 agent 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tools:</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">disallowedTools:</code> frontmatter，與互動模式行為一致</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--agent &lt;name&gt;</code> 現已遵守 agent 定義中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">permissionMode</code>（針對內建 agent）</li>
+<li>PowerShell 工具指令現已可在權限模式中自動批准，與 Bash 行為一致</li>
+<li>Hooks：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">PostToolUse</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">PostToolUseFailure</code> hook 輸入現已包含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">duration_ms</code>（工具執行時間，不含權限提示和 PreToolUse hooks）</li>
+<li>Subagent 和 SDK MCP server 重新配置現已平行連接伺服器，而非序列連接</li>
+<li>由其他 plugin 的版本限制所釘選的 plugin 現已自動更新至最高滿足條件的 git tag</li>
+<li>Vim 模式：INSERT 中的 Esc 不再將已排隊的訊息拉回輸入框；再按一次 Esc 可中斷</li>
+<li>Slash command 建議現已突顯符合查詢的字元</li>
+<li>Slash command 選擇器現已將長描述換行到第二行，而非截斷</li>
+<li>輸出中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">owner/repo#N</code> 快速連結現已使用您的 git remote 主機，而非始終指向 github.com</li>
+<li>安全性：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">blockedMarketplaces</code> 現已正確強制執行 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">hostPattern</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">pathPattern</code> 條目</li>
+<li>OpenTelemetry：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tool_result</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tool_decision</code> 事件現已包含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tool_use_id</code>；<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tool_result</code> 還包含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tool_input_size_bytes</code></li>
+<li>狀態列：stdin JSON 現已包含 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">effort.level</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">thinking.enabled</code></li>
+<li>修正貼上 CRLF 內容（Windows 剪貼簿、Xcode 主控台）時，每行之間插入額外空行的問題</li>
+<li>修正在使用 kitty keyboard protocol sequences 的終端機中，多行貼上在括號貼上內部遺失換行符的問題</li>
+<li>修正在透過權限拒絕 Bash 工具時，Glob 和 Grep 工具在原生 macOS/Linux 版本上消失的問題</li>
+<li>修正在全螢幕模式下向上滾動時，每次工具完成後都會快速跳回底部的問題</li>
+<li>修正 MCP HTTP 連接在伺服器為 OAuth 探索請求返回非 JSON 主體時，出現「Invalid OAuth error response」錯誤的問題</li>
+<li>修正 Rewind 疊加層對有影像附件的訊息顯示「(no prompt)」的問題</li>
+<li>修正自動模式用衝突的「Execute immediately」指令覆蓋計畫模式的問題</li>
+<li>修正非同步 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">PostToolUse</code> hooks 若沒有發出回應內容，會將空項目寫入工作階段逐字稿的問題</li>
+<li>修正當 subagent 任務通知在佇列中孤立時，微調器持續開啟的問題</li>
+<li>在 Vertex AI 上，工具搜尋現已預設停用以避免不支援的 beta header 錯誤（可用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ENABLE_TOOL_SEARCH</code> 選擇加入）</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@</code>-file Tab 完成在 slash command 內搭配絕對路徑使用時，替換整個提示的問題</li>
+<li>修正在 macOS Terminal.app（透過 Docker 或 SSH）啟動時，提示符處出現多餘 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">p</code> 字元的問題</li>
+<li>修正 HTTP/SSE/WebSocket MCP server 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">headers</code> 中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">${ENV_VAR}</code> 預留位置在請求前未被替換的問題</li>
+<li>修正透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--client-secret</code> 儲存的 MCP OAuth 用戶端密鑰，在需要 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">client_secret_post</code> 的伺服器進行權杖交換時未被傳送的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/skills</code> Enter 鍵關閉對話框，而非在提示中預先填入 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/&lt;skill-name&gt;</code> 的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/agents</code> 詳細檢視將無法用於 subagent 的內建工具誤標為「Unrecognized」的問題</li>
+<li>修正 plugin 中的 MCP server 在 plugin 快取不完整時無法在 Windows 上生成的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/export</code> 顯示目前預設模型而非對話實際使用的模型的問題</li>
+<li>修正詳細模式設定在重啟後未能持久化的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code> 進度條與其「Resets …」標籤重疊的問題</li>
+<li>修正 plugin MCP server 在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">${user_config.*}</code> 參照留白選用欄位時失敗的問題</li>
+<li>修正包含句末數字的清單項目將該數字換行到其本身一行的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plan</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plan open</code> 進入計畫模式時未對現有計畫起作用的問題</li>
+<li>修正自動壓縮前叫用的技能對下一個使用者訊息重新執行的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/reload-plugins</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/doctor</code> 報告已停用 plugin 的載入錯誤的問題</li>
+<li>修正 Agent 工具搭配 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">isolation: &quot;worktree&quot;</code> 時，重複使用先前工作階段的陳舊工作樹的問題</li>
+<li>修正已停用的 MCP server 在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/status</code> 中顯示為「failed」的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">TaskList</code> 按任意檔案系統順序傳回任務而非按 ID 排序的問題</li>
+<li>修正當 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">gh</code> 輸出包含提及「rate limit」的 PR 標題時，出現虛假「GitHub API rate limit exceeded」提示的問題</li>
+<li>修正 SDK/bridge <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">read_file</code> 未正確對成長中檔案強制執行大小上限的問題</li>
+<li>修正在 git worktree 中工作時，PR 未連結到工作階段的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/doctor</code> 就被更高優先順序範圍覆蓋的 MCP server 項目發出警告的問題</li>
+<li>Windows：移除虛假的「Windows requires &#x27;cmd /c&#x27; wrapper」MCP 配置警告</li>
+<li>[VSCode] 修正在 macOS 上麥克風權限提示顯示時，語音聽寫的第一次錄音無任何輸出的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
