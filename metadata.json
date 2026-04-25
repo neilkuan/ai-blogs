@@ -34,5 +34,9 @@
   "kiro-cli-manual": {
     "title": "Kiro CLI 完整操作手冊",
     "description": "AWS Kiro CLI 的完整使用手冊，涵蓋 Chat 互動、模型選擇、Subagents、Plan Agent、Context 管理、權限管理、Steering 導向、Skills 技能系統、ACP 協議、Hooks、Code Intelligence 等功能。"
+  },
+  "macos-guide": {
+    "title": "給新手的 macOS 指南 — 一學就會的 70 個小技巧",
+    "description": "為 macOS 新手整理的 70 個實用小技巧，涵蓋桌面、視窗、檔案、Finder、輸入法、快捷鍵與系統設定，快速上手 Mac 必備指南。"
   }
 }
