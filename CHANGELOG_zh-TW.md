@@ -2,6 +2,30 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.120
+- Windows：當 Git for Windows（Git Bash）不存在時，Claude Code 將改用 PowerShell 作為 shell 工具，不再強制要求安裝
+- 新增 `claude ultrareview [target]` 子指令，可從 CI 或腳本以非互動模式執行 `/ultrareview`，將結果輸出到 stdout（使用 `--json` 取得原始輸出），完成時返回 0，失敗時返回 1
+- Skill 現在可以在內容中使用 `${CLAUDE_EFFORT}` 參考當前的努力等級
+- 為子行程設定 `AI_AGENT` 環境變數，以便 `gh` 可以將流量歸屬於 Claude Code
+- 當你已經安裝桌面應用或建立過 Skill/Agent 時，微調提示中推薦安裝應用或建立 Skill/Agent 的提示將被隱藏
+- 當終端機發送方向鍵而非滾動事件時，現在會顯示「使用 PgUp/PgDn 滾動」提示
+- 當配置了多個 claude.ai 連接器但未授權時，工作階段啟動速度更快
+- 自動模式拒絕訊息現在會連結至設定文件
+- `claude plugin validate` 現在接受 `marketplace.json` 頂層的 `$schema`、`version` 和 `description`，以及 `plugin.json` 中的 `$schema`
+- 自動模式的自動壓縮現在顯示 `auto`（小寫，不含 token 計數），而非誤導性的 token 值
+- 修正在 stdio MCP tool 呼叫期間按下 Esc 會關閉整個伺服器連線的問題（2.1.105 版本回歸）
+- 修正使用 `claude --resume` 啟動後，`/rewind` 及其他互動式覆蓋層無法響應鍵盤輸入的問題
+- 修正非全螢幕模式下終端機滾動履歷重複的問題（調整大小、關閉對話框、長工作階段）
+- 修正 `DISABLE_TELEMETRY` / `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` 未能抑制 API 和企業版用戶的使用指標遙測的問題
+- 修正自動模式下，多行 bash 指令同時包含管線和重新導向時，誤判為「危險的 rm 操作」權限提示的問題
+- 修正長選單在全螢幕模式下被裁切超出終端機的問題——捲動時會保持焦點選項在螢幕上
+- 修正在全螢幕下點擊「+N lines」時，Write tool 輸出摺疊而非展開的問題
+- 修正斜線指令選擇器在輸入時跳躍，並改進高亮功能只用藍色標示連續子字串
+- 修正 `/plugin` marketplace 中一個項目使用無法辨識的來源格式時載入失敗的問題——該項目會顯示，但安裝時會提示更新
+- [VSCode] `/usage` 現在開啟原生的帳戶與使用量對話框，而非返回純文字工作階段成本
+- [VSCode] 語音聽寫現在會遵守 `~/.claude/settings.json` 中的 `language` 設定
+- 修正 Bash tool 中的 `find` 在大型目錄樹上耗盡開放檔案描述子、導致主機級崩潰的問題（macOS/Linux 原生版本）
+
 ## 2.1.119
 - `/config` 設定（主題、編輯器模式、詳細模式等）現已持久化到 `~/.claude/settings.json`，並遵循專案/本地/原則的覆蓋優先順序
 - 新增 `prUrlTemplate` 設定，用來將頁腳的 PR 徽章指向自訂程式碼審核 URL，而非 github.com
