@@ -38,5 +38,9 @@
   "macos-guide": {
     "title": "給新手的 macOS 指南 — 一學就會的 70 個小技巧",
     "description": "為 macOS 新手整理的 70 個實用小技巧，涵蓋桌面、視窗、檔案、Finder、輸入法、快捷鍵與系統設定，快速上手 Mac 必備指南。"
+  },
+  "ai-subscription-comparison-2026q2": {
+    "title": "AI 訂閱方案比較 — 2026/04",
+    "description": "2026 年 Q2 主流 AI 訂閱方案對照與比較，含定價、功能、模型存取與適用情境分析，協助選出最划算的訂閱組合。"
   }
 }
