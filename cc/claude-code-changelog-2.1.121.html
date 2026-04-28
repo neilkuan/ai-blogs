@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.121 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.121 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.121</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 MCP 伺服器配置的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">alwaysLoad</code> 選項 — 設為 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">true</code> 時，該伺服器的所有工具會跳過工具搜尋延遲，永遠都可用</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin prune</code> 指令用來移除孤立的自動安裝外掛相依性；<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin uninstall --prune</code> 會連鎖卸載</li>
+<li>在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/skills</code> 新增搜尋框，可以在長列表中直接輸入篩選技能，不必滾動瀏覽</li>
+<li>PostToolUse hook 現在可以透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">hookSpecificOutput.updatedToolOutput</code> 替換所有工具的輸出（先前僅限 MCP）</li>
+<li>全螢幕模式：在提示字元中輸入時，不會在你向上滾動閱讀早期輸出後跳回底部</li>
+<li>超過終端高度的對話框現在在全螢幕及非全螢幕模式下都可以用方向鍵、PgUp/PgDn、Home/End 及滑鼠滾輪滾動</li>
+<li>在全螢幕模式下，點擊跨越多行的長 URL 的任何一行現在會開啟完整的 URL</li>
+<li>SDK 及 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude -p</code>：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_FORK_SUBAGENT=1</code> 現在可在非互動工作階段中運作</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--dangerously-skip-permissions</code> 不再對 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.claude/skills/</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.claude/agents/</code> 及 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.claude/commands/</code> 的寫入進行提示</li>
+<li><code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/terminal-setup</code> 現在啟用 iTerm2 的「應用程式可存取剪貼簿」設定，讓 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/copy</code> 正常運作（包括從 tmux 使用）</li>
+<li>啟動期間遇到暫時性錯誤的 MCP 伺服器現在會自動重試最多 3 次，而不是保持斷線</li>
+<li>終端機分頁工作階段標題現在會以你設定的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">language</code> 語言產生</li>
+<li>Claude.ai 連接器若具有相同的上游 URL 現在會被去重複，而不會顯示為重複項目</li>
+<li>Vertex AI：支援 X.509 憑證型工作負載身分聯盟 (mTLS ADC)</li>
+<li>升級後啟動更快速：從發布說明頁面移除了最近活動面板</li>
+<li>LSP 診斷摘要現在點擊/Ctrl+O 時會展開並顯示展開提示</li>
+<li>SDK：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">mcp_authenticate</code> 現在支援 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">redirectUri</code> 用於自訂配置完成和 claude.ai 連接器</li>
+<li>OpenTelemetry：在 LLM 要求 span 中新增了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">stop_reason</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">gen_ai.response.finish_reasons</code> 及 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">user_system_prompt</code>（在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">OTEL_LOG_USER_PROMPTS</code> 後面)</li>
+<li>[VSCode] 當未設定 Claude Code 語言時，語音聽寫現在會遵守 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">accessibility.voice.speechLanguage</code> 設定</li>
+<li>[VSCode] <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/context</code> 現在開啟原生的 token 用量對話框</li>
+<li>修正在工作階段中處理許多圖片時發生的無限記憶體成長（多 GB RSS）問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code> 在具有大型文字記錄歷史的機器上洩漏最多 ~2GB 記憶體的問題</li>
+<li>修正當長時間執行的工具未發出清晰進度事件時發生的記憶體洩漏</li>
+<li>修正當 Claude 啟動時所在的目錄在工作階段中途被刪除或移動時，Bash 工具變得永久無法使用的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 在外部構建中啟動時崩潰的問題</li>
+<li>修正當不乾淨的關閉導致文字記錄行損壞時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 在大型工作階段上失敗 — 現在會跳過損壞的行</li>
+<li>修正使用 Bedrock 應用程式推論配置檔 ARN 時出現 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">thinking.type.enabled is not supported</code> 錯誤的問題</li>
+<li>修正 Microsoft 365 MCP OAuth 因重複或不支援的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">prompt</code> 參數而失敗的問題</li>
+<li>修正在 tmux、GNOME Terminal、Windows Terminal 及 Konsole 上按下 Ctrl+L 或在非全螢幕模式下觸發重繪時發生的滾動區域重複問題</li>
+<li>修正 claude.ai MCP 連接器在啟動時連接器列表擷取遇到暫時性驗證錯誤時無聲消失的問題</li>
+<li>修正遠端工作階段中內建工具的「永遠允許」規則在背景工作程式重新啟動時沒有保留的問題</li>
+<li>修正在原生構建下透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">managed-settings.json</code> 設定時 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NO_PROXY</code> 未被所有 HTTP 用戶端尊重的問題</li>
+<li>修正受管設定核准提示在被接受時結束工作階段的問題 — 現在會套用設定並繼續</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code> 在舊版 OAuth 權杖後返回「受限制速率」的問題 — 現在自動重新整理</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> 中無效的舊版列舉值使整個設定檔失效的問題</li>
+<li>修正關閉無閃爍模式時 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code> 對話框內容被裁剪的問題</li>
+<li>修正全螢幕渲染器關閉時 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/focus</code> 顯示「未知指令」的問題 — 現在解釋如何啟用</li>
+<li>修正當執行中的二進位檔在工作階段中途被刪除時，嵌入式 grep/find/rg shell 包裝器失敗的問題 — 現在回退到已安裝的工具</li>
+<li>減少 Bash 工具在大型目錄樹上執行 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">find</code> 時的尖峰檔案描述符使用量</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>

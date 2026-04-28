@@ -2,6 +2,47 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.121
+- 新增 MCP 伺服器配置的 `alwaysLoad` 選項 — 設為 `true` 時，該伺服器的所有工具會跳過工具搜尋延遲，永遠都可用
+- 新增 `claude plugin prune` 指令用來移除孤立的自動安裝外掛相依性；`plugin uninstall --prune` 會連鎖卸載
+- 在 `/skills` 新增搜尋框，可以在長列表中直接輸入篩選技能，不必滾動瀏覽
+- PostToolUse hook 現在可以透過 `hookSpecificOutput.updatedToolOutput` 替換所有工具的輸出（先前僅限 MCP）
+- 全螢幕模式：在提示字元中輸入時，不會在你向上滾動閱讀早期輸出後跳回底部
+- 超過終端高度的對話框現在在全螢幕及非全螢幕模式下都可以用方向鍵、PgUp/PgDn、Home/End 及滑鼠滾輪滾動
+- 在全螢幕模式下，點擊跨越多行的長 URL 的任何一行現在會開啟完整的 URL
+- SDK 及 `claude -p`：`CLAUDE_CODE_FORK_SUBAGENT=1` 現在可在非互動工作階段中運作
+- `--dangerously-skip-permissions` 不再對 `.claude/skills/`、`.claude/agents/` 及 `.claude/commands/` 的寫入進行提示
+- `/terminal-setup` 現在啟用 iTerm2 的「應用程式可存取剪貼簿」設定，讓 `/copy` 正常運作（包括從 tmux 使用）
+- 啟動期間遇到暫時性錯誤的 MCP 伺服器現在會自動重試最多 3 次，而不是保持斷線
+- 終端機分頁工作階段標題現在會以你設定的 `language` 語言產生
+- Claude.ai 連接器若具有相同的上游 URL 現在會被去重複，而不會顯示為重複項目
+- Vertex AI：支援 X.509 憑證型工作負載身分聯盟 (mTLS ADC)
+- 升級後啟動更快速：從發布說明頁面移除了最近活動面板
+- LSP 診斷摘要現在點擊/Ctrl+O 時會展開並顯示展開提示
+- SDK：`mcp_authenticate` 現在支援 `redirectUri` 用於自訂配置完成和 claude.ai 連接器
+- OpenTelemetry：在 LLM 要求 span 中新增了 `stop_reason`、`gen_ai.response.finish_reasons` 及 `user_system_prompt`（在 `OTEL_LOG_USER_PROMPTS` 後面)
+- [VSCode] 當未設定 Claude Code 語言時，語音聽寫現在會遵守 `accessibility.voice.speechLanguage` 設定
+- [VSCode] `/context` 現在開啟原生的 token 用量對話框
+- 修正在工作階段中處理許多圖片時發生的無限記憶體成長（多 GB RSS）問題
+- 修正 `/usage` 在具有大型文字記錄歷史的機器上洩漏最多 ~2GB 記憶體的問題
+- 修正當長時間執行的工具未發出清晰進度事件時發生的記憶體洩漏
+- 修正當 Claude 啟動時所在的目錄在工作階段中途被刪除或移動時，Bash 工具變得永久無法使用的問題
+- 修正 `--resume` 在外部構建中啟動時崩潰的問題
+- 修正當不乾淨的關閉導致文字記錄行損壞時，`--resume` 在大型工作階段上失敗 — 現在會跳過損壞的行
+- 修正使用 Bedrock 應用程式推論配置檔 ARN 時出現 `thinking.type.enabled is not supported` 錯誤的問題
+- 修正 Microsoft 365 MCP OAuth 因重複或不支援的 `prompt` 參數而失敗的問題
+- 修正在 tmux、GNOME Terminal、Windows Terminal 及 Konsole 上按下 Ctrl+L 或在非全螢幕模式下觸發重繪時發生的滾動區域重複問題
+- 修正 claude.ai MCP 連接器在啟動時連接器列表擷取遇到暫時性驗證錯誤時無聲消失的問題
+- 修正遠端工作階段中內建工具的「永遠允許」規則在背景工作程式重新啟動時沒有保留的問題
+- 修正在原生構建下透過 `managed-settings.json` 設定時 `NO_PROXY` 未被所有 HTTP 用戶端尊重的問題
+- 修正受管設定核准提示在被接受時結束工作階段的問題 — 現在會套用設定並繼續
+- 修正 `/usage` 在舊版 OAuth 權杖後返回「受限制速率」的問題 — 現在自動重新整理
+- 修正 `settings.json` 中無效的舊版列舉值使整個設定檔失效的問題
+- 修正關閉無閃爍模式時 `/usage` 對話框內容被裁剪的問題
+- 修正全螢幕渲染器關閉時 `/focus` 顯示「未知指令」的問題 — 現在解釋如何啟用
+- 修正當執行中的二進位檔在工作階段中途被刪除時，嵌入式 grep/find/rg shell 包裝器失敗的問題 — 現在回退到已安裝的工具
+- 減少 Bash 工具在大型目錄樹上執行 `find` 時的尖峰檔案描述符使用量
+
 ## 2.1.120
 - Windows：當 Git for Windows（Git Bash）不存在時，Claude Code 將改用 PowerShell 作為 shell 工具，不再強制要求安裝
 - 新增 `claude ultrareview [target]` 子指令，可從 CI 或腳本以非互動模式執行 `/ultrareview`，將結果輸出到 stdout（使用 `--json` 取得原始輸出），完成時返回 0，失敗時返回 1
