@@ -2,6 +2,26 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.122
+- 新增 `ANTHROPIC_BEDROCK_SERVICE_TIER` 環境變數用於選擇 Bedrock 服務層級（`default`、`flex` 或 `priority`），以 `X-Amzn-Bedrock-Service-Tier` header 形式發送
+- 在 `/resume` 搜尋框貼上 PR URL 現在可以找到建立該 PR 的 session（支援 GitHub、GitHub Enterprise、GitLab 和 Bitbucket）
+- `/mcp` 現在會顯示被手動新增的相同 URL server 隱藏的 claude.ai connectors，並提示移除重複項目
+- 優化了當 MCP server 在瀏覽器登入流程後仍未授權時顯示的 `/mcp` 訊息
+- OpenTelemetry：`api_request`/`api_error` log 事件上的數值屬性現在以數字格式發送，而不是字串
+- OpenTelemetry：新增 `claude_code.at_mention` log 事件用於 `@`-mention 解析
+- 修正 `/branch` 在來源 session 包含已回溯時間軸的項目時產生失敗 fork，錯誤訊息為「tool_use ids were found without tool_result blocks」
+- 修正 `/model` 未顯示 Bedrock application inference profile ARN 的 Effort 選項，且這些 ARN 未收到 `output_config.effort`
+- 修正 Vertex AI 和 Bedrock 在 session 標題生成與其他結構化輸出查詢時返回 `invalid_request_error: output_config: Extra inputs are not permitted`
+- 修正 Vertex AI `count_tokens` endpoint 對代理閘道後的使用者返回 400 錯誤
+- 修正 `spinnerTipsOverride.excludeDefault` 未抑制時間型 spinner tips
+- 修正 ToolSearch 在非阻擋模式下遺漏 session 開始後連接的 MCP 工具
+- 修正在 bash 模式中使用 `!exit` / `!quit` 導致 CLI 終止而不是作為 shell 指令執行
+- 修正傳送至較新模型的圖像被調整為每邊 2576px，應為正確的 2000px 上限
+- 修正遠端控制 session 閒置狀態每秒重繪兩次，可能導致 `tmux -CC` 控制管道洪泛並暫停終端機
+- 修正助手訊息在某些 session 中因過時檢視偏好設定而顯示為空白
+- 修正 `settings.json` 中格式不良的 hooks 項目不再導致整個檔案失效
+- 語音模式：綁定至 Caps Lock 的快速鍵現在顯示錯誤，因為終端機不會將 Caps Lock 作為按鍵事件傳遞
+
 ## 2.1.121
 - 新增 MCP 伺服器配置的 `alwaysLoad` 選項 — 設為 `true` 時，該伺服器的所有工具會跳過工具搜尋延遲，永遠都可用
 - 新增 `claude plugin prune` 指令用來移除孤立的自動安裝外掛相依性；`plugin uninstall --prune` 會連鎖卸載
