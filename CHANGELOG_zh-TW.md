@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.123
+- 修正當設定 `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1` 時，OAuth 驗證失敗導致 401 重試迴圈的問題
+
 ## 2.1.122
 - 新增 `ANTHROPIC_BEDROCK_SERVICE_TIER` 環境變數用於選擇 Bedrock 服務層級（`default`、`flex` 或 `priority`），以 `X-Amzn-Bedrock-Service-Tier` header 形式發送
 - 在 `/resume` 搜尋框貼上 PR URL 現在可以找到建立該 PR 的 session（支援 GitHub、GitHub Enterprise、GitLab 和 Bitbucket）
