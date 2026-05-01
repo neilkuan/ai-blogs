@@ -2,6 +2,41 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.126
+- `/model` 選擇器現在會在 `ANTHROPIC_BASE_URL` 指向 Anthropic 相容的 gateway 時，列出該 gateway `/v1/models` endpoint 中的模型
+- 新增 `claude project purge [path]` 指令來刪除專案的所有 Claude Code 狀態（包括逐字稿、任務、檔案歷史和設定項目）— 支持 `--dry-run`、`-y/--yes`、`-i/--interactive` 和 `--all` 選項
+- `--dangerously-skip-permissions` 現在可以繞過對 `.claude/`、`.git/`、`.vscode/`、shell 設定檔和其他先前受保護路徑的寫入提示（災難性刪除指令仍會提示以作為安全防護）
+- `claude auth login` 現在接受無法連接到 localhost 時貼到終端的 OAuth 代碼（適用於 WSL2、SSH、容器）
+- `claude_code.skill_activated` OpenTelemetry 事件現在會針對使用者輸入的斜線指令觸發，並帶有新的 `invocation_trigger` 屬性（`"user-slash"`、`"claude-proactive"` 或 `"nested-skill"`）
+- 自動模式：當權限檢查卡住時，旋轉動畫會變紅，而不是看起來像工具在執行
+- 主機管理部署（`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST`）在 Bedrock/Vertex/Foundry 上不再自動停用分析
+- Windows：現在可偵測透過 Microsoft Store 安裝、MSI 無 PATH 或 `.NET global tool` 安裝的 PowerShell 7
+- Windows：當啟用 PowerShell 工具時，Claude 現在將 PowerShell 視為主要 shell，而不是預設為 Bash
+- 讀取工具：移除了每個檔案的惡意軟體評估提醒，該提醒可能導致虛假拒絕和舊版模型上的「這不是惡意軟體」評論
+- **安全性：** 修復了當更高優先權的管理設定來源缺少 `sandbox` 區塊時，`allowManagedDomainsOnly` / `allowManagedReadPathsOnly` 被忽略的問題
+- 修復了貼上超過 2000px 的影像會中斷工作階段的問題 — 現在影像在貼上時會縮小，歷史記錄中過大的影像會自動移除並重試請求
+- 修復了「OAuth 不允許用於組織」錯誤時顯示登入畫面的問題 — 現在顯示聯絡管理員的指導
+- 修復了 OAuth 登入在連接速度慢、有代理或無法連接到 localhost 的 IPv6 專用容器上超時失敗的問題
+- 修復了罕見的競態條件，其中併行認證寫入可能清除有效的 OAuth 重新整理權杖
+- 修復了 API 重試倒數卡在「0s」而不是在嘗試之間倒數的問題
+- 修復了 Mac 從睡眠中途喚醒時的「串流閒置逾時」錯誤
+- 修復了背景和遠端工作階段在長時間模型思考暫停期間虛假中止「串流閒置逾時」的問題
+- 修復了助手可能完成思考但在一系列空白輪次後無法顯示任何輸出的掛起問題
+- 修復了 Cursor 和 VS Code 1.92–1.104 整合終端中過快的觸控板滾動
+- 修復了被困在需要驗證狀態的手動伺服器抑制 claude.ai MCP 連接器的問題
+- 修復了在 Windows 無閃爍模式下日文/韓文/中文文字顯示為亂碼的問題
+- 修復了 `Ctrl+L` 清除提示輸入的問題 — 現在只會強制重繪畫面，符合 readline 行為
+- 修復了延遲工具（WebSearch、WebFetch 等）對具有 `context: fork` 的 skills 和其他子代理在第一輪不可用的問題
+- 修復了計畫模式工具在使用 `--channels` 啟動的互動式工作階段中不可用的問題
+- 修復了某些訊息工具無法使用時遠端工作階段逐字稿為空白的問題
+- 修復了 `/plugin` 卸載報告為「已啟用」而不是「已卸載」的問題
+- 限制了當 linter 一次觸及許多檔案時檔案修改提醒的總大小
+- 修復了 `/remote-control` 重試顯示卡在「連接中…」的問題 — 每次重試現在會顯示其結果，未註冊的信任裝置失敗會提前捕捉
+- 修復了遠端控制失敗通知未顯示初始連接失敗錯誤原因的問題
+- Windows：剪貼簿寫入不再在 EDR/SIEM 遙測可見的程式指令列引數中暴露複製的內容；也修復了超過 22KB 的選擇無法到達剪貼簿的問題
+- PowerShell 工具：裸露的 `--`（例如 `git diff -- file`）不再被誤判為 `--%` 停止解析權杖
+- 修復了當模型在平行工具呼叫批次中發出格式不正確的工具名稱時 Agent SDK 掛起的問題
+
 ## 2.1.123
 - 修正當設定 `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1` 時，OAuth 驗證失敗導致 401 重試迴圈的問題
 
