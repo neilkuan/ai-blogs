@@ -109,6 +109,8 @@ def translate_changelog(text: str) -> str:
 
     # Strip ANSI escape codes from output
     output = re.sub(r'\x1b\[[0-9;]*m', '', result.stdout)
+    # Remove blockquote prefix kiro-cli may add to lines
+    output = re.sub(r'^> ', '', output, flags=re.MULTILINE)
     return output.strip()
 
 
