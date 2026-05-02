@@ -2,6 +2,41 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.126
+- /model 選擇器現在會從閘道的 /v1/models 端點列出模型，當 ANTHROPIC_BASE_URL 指向相容 Anthropic 的閘道時
+- 新增 claude project purge [path] 指令，可刪除專案的所有 Claude Code 狀態（紀錄、任務、檔案歷史、設定項目）— 支援 --dry-run、-y/--yes、-i/--interactive 和 --all
+- --dangerously-skip-permissions 現在會略過寫入 .claude/、.git/、.vscode/、shell 設定檔和其他先前受保護路徑的提示（災難性的刪除指令仍會提示作為安全網）
+- 當瀏覽器回呼無法連上 localhost 時（WSL2、SSH、容器），claude auth login 現在可以接受貼到終端機的 OAuth code
+- claude_code.skill_activated OpenTelemetry 事件現在會在使用者輸入的斜線指令時觸發，並帶有新的 invocation_trigger 屬性（"user-slash"、"claude-proactive" 或 "nested-skill"）
+- 自動模式：當權限檢查卡住時，spinner 現在會變紅，而不是看起來像工具正在執行
+- 主機管理的部署（CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST）不再在 Bedrock/Vertex/Foundry 上自動停用分析
+- Windows：現在可以偵測到透過 Microsoft Store、不含 PATH 的 MSI 或 .NET global tool 安裝的 PowerShell 7
+- Windows：當 PowerShell 工具啟用時，Claude 現在會將 PowerShell 視為主要 shell，而不是預設使用 Bash
+- Read 工具：移除了可能導致誤判拒絕和舊模型產生「這不是惡意程式」註解的個別檔案惡意程式評估提醒
+- **安全性：** 修正當較高優先順序的受管理設定來源缺少 sandbox 區塊時，allowManagedDomainsOnly / allowManagedReadPathsOnly 被忽略的問題
+- 修正貼上大於 2000px 的圖片會中斷工作階段的問題 — 圖片現在會在貼上時縮小，歷史記錄中的過大圖片會自動移除並重試請求
+- 修正「OAuth 不允許組織使用」錯誤時顯示登入畫面 — 現在會顯示聯絡管理員的指引
+- 修正 OAuth 登入在緩慢或代理連線、僅 IPv6 的 devcontainer，以及瀏覽器回呼無法連上 localhost 時發生逾時失敗的問題
+- 修正並行憑證寫入可能清除有效 OAuth refresh token 的罕見競爭條件（race condition）
+- 修正 API 重試倒數卡在「0s」而不是在嘗試之間倒數的問題
+- 修正 Mac 從睡眠喚醒時在請求中途出現「Stream idle timeout」錯誤的問題
+- 修正背景和遠端工作階段在模型長時間思考暫停時錯誤中止並顯示「Stream idle timeout」的問題
+- 修正助理在連續空回合後可能完成思考但未顯示輸出的卡住問題
+- 修正 Cursor 和 VS Code 1.92–1.104 整合終端機中觸控板捲動過快的問題
+- 修正 claude.ai MCP 連接器被卡在需要認證狀態的手動伺服器阻擋的問題
+- 修正 Windows 在無閃爍模式下日文/韓文/中文文字顯示為亂碼的問題
+- 修正 Ctrl+L 清除提示輸入的問題 — 現在只會強制重繪畫面，符合 readline 行為
+- 修正延後工具（WebSearch、WebFetch 等）在具有 context: fork 的技能和其他子代理的第一回合無法使用的問題
+- 修正以 --channels 啟動的互動工作階段中無法使用計劃模式工具的問題
+- 修正某些訊息工具無法使用時遠端工作階段紀錄空白的問題
+- 修正 /plugin 解除安裝回報「已啟用」而非「已解除安裝」的問題
+- 限制 linter 一次觸碰多個檔案時的檔案修改提醒總大小
+- 修正 /remote-control 重試看起來卡在「連線中…」的問題 — 每次重試現在會顯示結果，未註冊的受信任裝置失敗會在開頭被捕獲
+- 修正遠端控制失敗通知未顯示初始連線失敗錯誤原因的問題
+- Windows：剪貼簿寫入不再在 EDR/SIEM 遙測可見的程序命令列引數中暴露複製內容；同時修正 >22KB 選取內容無法到達剪貼簿的問題
+- PowerShell 工具：單獨的 --（例如 git diff -- file）不再被誤標為 --% 停止剖析 token
+- 修正當模型在並行工具呼叫批次中發出格式錯誤的工具名稱時 Agent SDK 卡住的問題
+
 ## 2.1.123
 - 修正當設定 `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1` 時，OAuth 驗證失敗導致 401 重試迴圈的問題
 
