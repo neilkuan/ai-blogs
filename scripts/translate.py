@@ -11,11 +11,7 @@ import sys
 import time
 from pathlib import Path
 
-import anthropic
-
-
-BEDROCK_REGION = os.getenv("BEDROCK_REGION", "us-west-2")
-BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "us.anthropic.claude-haiku-4-5-20251001-v1:0")
+import subprocess
 
 
 def _parse_version(v: str) -> tuple:
@@ -83,10 +79,8 @@ def extract_versions_between(changelog_text: str, latest_tag: str, last_tag: str
 
 
 def translate_changelog(text: str) -> str:
-    """Translate changelog text to Traditional Chinese using Claude API."""
-    client = anthropic.AnthropicBedrock(aws_region=BEDROCK_REGION)
-
-    system_prompt = """你是一位專業的技術文件翻譯員，擅長將英文軟體 changelog 翻譯成繁體中文。
+    """Translate changelog text to Traditional Chinese using kiro-cli headless mode."""
+    prompt = """請將以下 Claude Code changelog 翻譯成繁體中文。
 
 翻譯規則：
 1. 保留以下不翻譯：
@@ -98,21 +92,22 @@ def translate_changelog(text: str) -> str:
 2. 用口語化但專業的語氣
 3. 保持 markdown 格式不變（## 標題、bullet points 等）
 4. 版本號標題保持原樣
-5. 如果翻譯後意思可能不明確，可以在括號內附上英文原文"""
+5. 如果翻譯後意思可能不明確，可以在括號內附上英文原文
+6. 只輸出翻譯結果，不要加任何前言或說明
 
-    message = client.messages.create(
-        model=BEDROCK_MODEL_ID,
-        max_tokens=8192,
-        system=system_prompt,
-        messages=[
-            {
-                "role": "user",
-                "content": f"請將以下 Claude Code changelog 翻譯成繁體中文：\n\n{text}",
-            }
-        ],
+以下是要翻譯的內容：
+
+""" + text
+
+    result = subprocess.run(
+        ["kiro-cli", "chat", "--no-interactive", prompt],
+        capture_output=True, text=True, timeout=300,
     )
+    if result.returncode != 0:
+        print(f"❌ kiro-cli failed (exit {result.returncode}): {result.stderr}")
+        sys.exit(1)
 
-    return message.content[0].text
+    return result.stdout.strip()
 
 
 def markdown_to_html_content(md_text: str) -> str:
@@ -387,7 +382,7 @@ def main():
 
     # Translate
     t0 = time.time()
-    print("🤖 Translating via Bedrock...")
+    print("🤖 Translating via kiro-cli...")
     translated = translate_changelog(new_content)
     print(f"   ⏱ Translate: {time.time() - t0:.1f}s")
 

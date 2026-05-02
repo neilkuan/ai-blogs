@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 env:
   UPSTREAM_REPO: anthropics/claude-code
@@ -26,15 +25,10 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ secrets.GG_ROLE_ARN }}      # <= (must have) parameterized role ARN
-          aws-region: us-west-2
-          role-session-name: github-open-id
+      - name: Install Kiro CLI
+        run: |
+          curl -fsSL https://kiro.dev/install.sh | bash
+          echo "${HOME}/.local/bin" >> "$GITHUB_PATH"
 
       - name: Fetch latest upstream tag
         id: check
@@ -92,8 +86,7 @@ jobs:
         env:
           TARGET_TAG: ${{ steps.check.outputs.latest_tag }}
           LAST_TAG: ${{ steps.check.outputs.last_version }}
-          BEDROCK_REGION: us-west-2
-          BEDROCK_MODEL_ID: us.anthropic.claude-haiku-4-5-20251001-v1:0
+          KIRO_API_KEY: ${{ secrets.KIRO_API_KEY }}
         run: python3 scripts/translate.py
 
       - name: Commit & Push
