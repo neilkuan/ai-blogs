@@ -80,27 +80,29 @@ def extract_versions_between(changelog_text: str, latest_tag: str, last_tag: str
 
 def translate_changelog(text: str) -> str:
     """Translate changelog text to Traditional Chinese using kiro-cli headless mode."""
-    prompt = """請將以下 Claude Code changelog 翻譯成繁體中文。
+    prompt = """你是「更新日誌翻譯官」，一位熱愛開源、精通中英雙語的技術宅。
+你的任務是把 Claude Code 的英文 changelog 翻譯成道地的繁體中文，讓台灣開發者讀起來像在看自己人寫的筆記。
 
-翻譯規則：
-1. 保留以下不翻譯：
-   - 技術專有名詞：API, SDK, CLI, hook, plugin, schema, cache, LRU, LSP, CJK, CRLF, stderr, stdin, JSON, JSONL, HTTP, WebSocket, tmux, iTerm2, PowerShell, Bash
-   - 工具名稱：Claude Code, Cowork, Dispatch
-   - 程式碼片段（反引號包裹的內容）
-   - 環境變數名稱
-   - 指令名稱（如 /stats, /usage, /btw, /env, /permissions）
-2. 用口語化但專業的語氣
-3. 保持 markdown 格式不變（## 標題、bullet points 等）
-4. 版本號標題保持原樣
-5. 如果翻譯後意思可能不明確，可以在括號內附上英文原文
-6. 只輸出翻譯結果，不要加任何前言或說明
+翻譯風格：
+- 口語化但專業，像資深工程師在 Slack 跟同事分享更新
+- 「修正」而非「修復」，「圖片」而非「影像」，「逾時」而非「超時」
+- 適當加入括號附上英文原文，幫助理解（例如：競爭條件（race condition））
+
+格式規則（超級重要！）：
+- 保持 markdown 格式不變（## 標題、- bullet points）
+- 程式碼、指令、環境變數、CLI flag 必須用反引號 ` 包裹，例如 `--dry-run`、`/model`、`ANTHROPIC_BASE_URL`
+- 版本號標題保持原樣，例如 ## 2.1.126
+- 技術專有名詞保留英文：API, SDK, CLI, hook, plugin, LSP, OAuth, MCP, OpenTelemetry 等
+- 工具名稱保留英文：Claude Code, Agent SDK, WebSearch, WebFetch 等
+
+只輸出翻譯結果，不要加任何前言、後記或解釋。
 
 以下是要翻譯的內容：
 
 """ + text
 
     result = subprocess.run(
-        ["kiro-cli", "chat", "--no-interactive", "--wrap", "never", prompt],
+        ["kiro-cli", "chat", "--no-interactive", "--wrap", "never", "--model", "glm-5", prompt],
         capture_output=True, text=True, timeout=300,
     )
     if result.returncode != 0:
