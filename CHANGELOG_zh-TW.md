@@ -2,6 +2,41 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.126
+- /model 選擇器現在會列出你的 gateway 的 /v1/models endpoint 中的模型，當 ANTHROPIC_BASE_URL 指向 Anthropic 相容的 gateway 時
+- 新增 claude project purge [path] 指令來刪除專案的所有 Claude Code 狀態（transcript、task、檔案歷史、設定項目）— 支援 --dry-run、-y/--yes、-i/--interactive 和 --all
+- --dangerously-skip-permissions 現在會略過對 .claude/、.git/、.vscode/、shell 設定檔和其他先前受保護路徑的寫入提示（具有破壞性的移除指令仍會提示作為安全防護）
+- claude auth login 現在接受當 browser callback 無法連到 localhost 時貼上終端機的 OAuth code（WSL2、SSH、container）
+- claude_code.skill_activated OpenTelemetry 事件現在會針對使用者輸入的 slash command 觸發，並帶有新的 invocation_trigger 屬性（"user-slash"、"claude-proactive" 或 "nested-skill"）
+- Auto mode：當權限檢查卡住時，spinner 現在會轉紅色，而不是看起來像工具在執行
+- Host-managed deployment（CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST）在 Bedrock/Vertex/Foundry 上不再自動停用分析
+- Windows：現在偵測到透過 Microsoft Store 安裝、MSI 無 PATH 或 .NET global tool 安裝的 PowerShell 7
+- Windows：當 PowerShell tool 啟用時，Claude 現在將 PowerShell 視為主要 shell，而不是預設為 Bash
+- Read tool：移除了每個檔案的惡意軟體評估提醒，該提醒可能導致虛假拒絕和舊版模型上的「這不是惡意軟體」評論
+- **安全性：** 修正當更高優先級的 managed-settings source 缺少 sandbox block 時，allowManagedDomainsOnly / allowManagedReadPathsOnly 被忽略的問題
+- 修正貼上大於 2000px 的圖片導致 session 中斷 — 圖片現在會在貼上時縮小，歷史中的超大圖片會自動移除並重試請求
+- 修正針對「OAuth not allowed for organization」錯誤顯示登入畫面 — 現在顯示聯絡管理員的指引
+- 修正 OAuth 登入在慢速或代理連線、IPv6-only devcontainer 和 browser callback 無法連到 localhost 時逾時失敗
+- 修正罕見的競爭條件（race condition），其中並行的 credential 寫入可能清除有效的 OAuth refresh token
+- 修正 API 重試倒數卡在「0s」而不是在嘗試之間倒數的問題
+- 修正 Mac 從睡眠中喚醒並在請求中途出現「Stream idle timeout」錯誤
+- 修正背景和遠端 session 在長時間模型思考暫停期間虛假中止並出現「Stream idle timeout」
+- 修正助手可能完成思考但在一連串空白回合後沒有輸出的罕見卡住情況
+- 修正 Cursor 和 VS Code 1.92–1.104 整合終端機中過快的觸控板滾動
+- 修正 claude.ai MCP connector 被卡在 needs-auth 狀態的手動 server 抑制
+- 修正日文/韓文/中文文字在 Windows no-flicker mode 中呈現為亂碼
+- 修正 Ctrl+L 清除提示輸入 — 現在只強制螢幕重繪，符合 readline 行為
+- 修正 deferred tool（WebSearch、WebFetch 等）對具有 context: fork 的 skill 和其他 subagent 在第一回合不可用
+- 修正 plan-mode tool 在使用 --channels 啟動的互動式 session 中不可用
+- 修正某些訊息工具不可用時遠端 session transcript 為空白
+- 修正 /plugin Uninstall 報告「Enabled」而非「Uninstalled」
+- 限制檔案修改提醒的總大小，當 linter 一次觸及許多檔案時
+- 修正 /remote-control 重試顯示卡在「connecting…」— 每次重試現在顯示其結果，未註冊的信任裝置失敗會提前捕捉
+- 修正 Remote Control 失敗通知未顯示初始連線失敗的錯誤原因
+- Windows：剪貼簿寫入不再在 EDR/SIEM 遙測可見的 process command-line argument 中暴露複製內容；也修正 >22KB 選取項目無法到達剪貼簿的問題
+- PowerShell tool：裸露的 --（例如 git diff -- file）不再被誤判為 --% stop-parsing token
+- 修正 Agent SDK 在模型在並行 tool call batch 中發出格式不正確的 tool name 時卡住
+
 ## 2.1.123
 - 修正當設定 `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1` 時，OAuth 驗證失敗導致 401 重試迴圈的問題
 
