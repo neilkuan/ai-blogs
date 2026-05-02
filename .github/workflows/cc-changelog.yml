@@ -27,7 +27,7 @@ jobs:
 
       - name: Install Kiro CLI
         run: |
-          curl -fsSL https://kiro.dev/install.sh | bash
+          curl -fsSL https://cli.kiro.dev/install | bash
           echo "${HOME}/.local/bin" >> "$GITHUB_PATH"
 
       - name: Fetch latest upstream tag
