@@ -102,7 +102,7 @@ def translate_changelog(text: str) -> str:
 """ + text
 
     result = subprocess.run(
-        ["kiro-cli", "chat", "--no-interactive", "--wrap", "never", "--model", "glm-5", prompt],
+        ["kiro-cli", "chat", "--no-interactive", "--wrap", "never", "--model", os.getenv("KIRO_MODEL", "claude-haiku-4.5"), prompt],
         capture_output=True, text=True, timeout=300,
     )
     if result.returncode != 0:

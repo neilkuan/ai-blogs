@@ -87,6 +87,7 @@ jobs:
           TARGET_TAG: ${{ steps.check.outputs.latest_tag }}
           LAST_TAG: ${{ steps.check.outputs.last_version }}
           KIRO_API_KEY: ${{ secrets.KIRO_API_KEY }}
+          KIRO_MODEL: ${{ vars.KIRO_MODEL }}
         run: python3 scripts/translate.py
 
       - name: Commit & Push
