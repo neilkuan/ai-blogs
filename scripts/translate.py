@@ -100,14 +100,16 @@ def translate_changelog(text: str) -> str:
 """ + text
 
     result = subprocess.run(
-        ["kiro-cli", "chat", "--no-interactive", prompt],
+        ["kiro-cli", "chat", "--no-interactive", "--wrap", "never", prompt],
         capture_output=True, text=True, timeout=300,
     )
     if result.returncode != 0:
         print(f"❌ kiro-cli failed (exit {result.returncode}): {result.stderr}")
         sys.exit(1)
 
-    return result.stdout.strip()
+    # Strip ANSI escape codes from output
+    output = re.sub(r'\x1b\[[0-9;]*m', '', result.stdout)
+    return output.strip()
 
 
 def markdown_to_html_content(md_text: str) -> str:
