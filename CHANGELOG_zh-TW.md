@@ -2,6 +2,41 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+[38;5;141m> [0m[38;5;252m[1m## 2.1.126[0m[0m
+- [38;5;10m/model[0m 選擇器現在會從你 gateway 的 [38;5;10m/v1/models[0m 端點列出模型，前提是 [38;5;10mANTHROPIC_BASE_URL[0m 指向一個 Anthropic 相容的 gateway[0m[0m
+- 新增 [38;5;10mclaude project purge [path][0m，可刪除某個專案的所有 Claude Code 狀態（對話記錄、任務、檔案歷史、設定項目）——支援 [38;5;10m--dry-run[0m、[38;5;10m-y/--yes[0m、[38;5;10m-i/--interactive[0m 和 [38;5;10m--all[0m[0m[0m
+- [38;5;10m--dangerously-skip-permissions[0m 現在會跳過對 [38;5;10m.claude/[0m、[38;5;10m.git/[0m、[38;5;10m.vscode/[0m、shell 設定檔及其他先前受保護路徑的寫入提示（災難性的刪除指令仍會提示，作為安全防線）[0m[0m
+- [38;5;10mclaude auth login[0m 現在支援在瀏覽器回呼無法連到 localhost 時（WSL2、SSH、容器），直接在終端機貼上 OAuth 授權碼[0m[0m
+- [38;5;10mclaude_code.skill_activated[0m OpenTelemetry 事件現在會在使用者輸入斜線指令時觸發，並帶有新的 [38;5;10minvocation_trigger[0m 屬性（[38;5;10m"user-slash"[0m、[38;5;10m"claude-proactive"[0m 或 [38;5;10m"nested-skill"[0m）[0m[0m
+- Auto 模式：當權限檢查卡住時，旋轉圖示現在會變紅，而不是看起來像工具還在執行[0m[0m
+- 由主機管理的部署（[38;5;10mCLAUDE_CODE_PROVIDER_MANAGED_BY_HOST[0m）不再於 Bedrock/Vertex/Foundry 上自動停用分析功能[0m[0m
+- Windows：透過 Microsoft Store、不含 PATH 的 MSI 或 [38;5;10m.NET global tool[0m 安裝的 PowerShell 7 現在可以被偵測到[0m[0m
+- Windows：啟用 PowerShell 工具後，Claude 現在會將 PowerShell 視為主要 shell，而非預設使用 Bash[0m[0m
+- Read 工具：移除了每個檔案的惡意軟體評估提醒，該提醒可能導致舊版模型出現誤判拒絕和「這不是惡意軟體」的多餘評論[0m[0m
+- **安全性：** 修正了當較高優先順序的受管設定來源缺少 [38;5;10msandbox[0m 區塊時，[38;5;10mallowManagedDomainsOnly[0m / [38;5;10mallowManagedReadPathsOnly[0m 被忽略的問題[0m[0m
+- 修正貼上超過 2000px 的圖片會導致工作階段損壞的問題——現在貼上時會自動縮小圖片，歷史記錄中過大的圖片也會被自動移除並重試請求[0m[0m
+- 修正「組織不允許 OAuth」錯誤時顯示登入畫面的問題——現在會顯示聯繫管理員的指引[0m[0m
+- 修正 OAuth 登入在連線緩慢或經過代理時逾時、在僅有 IPv6 的 devcontainer 中失敗、以及瀏覽器回呼無法連到 localhost 時失敗的問題[0m[0m
+- 修正一個罕見的競爭條件，同時寫入憑證可能會清除有效的 OAuth refresh token[0m[0m
+- 修正 API 重試倒數卡在「0s」而非正常倒數的問題[0m[0m
+- 修正 Mac 在請求進行中從睡眠喚醒後出現「Stream idle timeout」錯誤的問題[0m[0m
+- 修正背景和遠端工作階段在模型長時間思考暫停期間誤報「Stream idle timeout」而中斷的問題[0m[0m
+- 修正助理完成思考後卡住、在連續空回合後不顯示任何輸出的問題[0m[0m
+- 修正在 Cursor 和 VS Code 1.92–1.104 整合終端機中觸控板捲動過快的問題[0m[0m
+- 修正 claude.ai MCP 連接器被卡在需要驗證狀態的手動伺服器所抑制的問題[0m[0m
+- 修正 CJK 文字在 Windows 無閃爍模式下顯示為亂碼的問題[0m[0m
+- 修正 [38;5;10mCtrl+L[0m 會清除提示輸入的問題——現在只會強制重繪畫面，與 readline 行為一致[0m[0m
+- 修正延遲工具（WebSearch、WebFetch 等）在使用 [38;5;10mcontext: fork[0m 的技能及其他子代理的第一個回合中無法使用的問題[0m[0m
+- 修正使用 [38;5;10m--channels[0m 啟動的互動式工作階段中計畫模式工具無法使用的問題[0m[0m
+- 修正某些訊息工具不可用時遠端工作階段對話記錄為空白的問題[0m[0m
+- 修正 [38;5;10m/plugin[0m 解除安裝後顯示「Enabled」而非「Uninstalled」的問題[0m[0m
+- 限制了當 linter 一次修改大量檔案時，檔案修改提醒的總大小[0m[0m
+- 修正 [38;5;10m/remote-control[0m 重試時卡在「connecting…」的問題——現在每次重試都會顯示結果，且未註冊的受信任裝置失敗會提前被攔截[0m[0m
+- 修正 Remote Control 初始連線失敗時，失敗通知未顯示錯誤原因的問題[0m[0m
+- Windows：剪貼簿寫入不再將複製的內容暴露在 EDR/SIEM 遙測可見的程序命令列參數中；同時修正超過 22KB 的選取內容無法寫入剪貼簿的問題[0m[0m
+- PowerShell 工具：單獨的 [38;5;10m--[0m（例如 [38;5;10mgit diff -- file[0m）不再被誤判為 [38;5;10m--%[0m 停止解析符號[0m[0m
+- 修正 Agent SDK 在模型於平行工具呼叫批次中產生格式錯誤的工具名稱時會卡住的問題
+
 ## 2.1.126
 - `/model` 選擇器現在會在 `ANTHROPIC_BASE_URL` 指向 Anthropic 相容的 gateway 時，列出該 gateway `/v1/models` endpoint 中的模型
 - 新增 `claude project purge [path]` 指令來刪除專案的所有 Claude Code 狀態（包括逐字稿、任務、檔案歷史和設定項目）— 支持 `--dry-run`、`-y/--yes`、`-i/--interactive` 和 `--all` 選項
