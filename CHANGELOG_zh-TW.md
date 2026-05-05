@@ -2,6 +2,46 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.128
+- 單獨使用 /color（不帶參數）現在會隨機選擇一個工作階段顏色
+- /mcp 現在顯示已連接伺服器的工具數量，並標記連接時工具數為 0 的伺服器
+- --plugin-dir 現在除了接受目錄外，也支援 .zip 外掛程式封存檔
+- --channels 現在支援主控台（API 金鑰）認證——具有受管設定的主控台組織必須設定 channelsEnabled: true 才能啟用
+- 更新 /model 選擇器：合併重複的 Opus 4.7 項目，目前的 Opus 現在顯示為「Opus」而非「Opus 4.7」
+- 子行程（Bash、hook、MCP、LSP）不再繼承 OTEL_* 環境變數，所以透過 Bash 工具執行的 OTEL 檢測應用程式不會再拾取 CLI 本身的 OTLP 端點
+- MCP：workspace 現在是保留的伺服器名稱——現有同名伺服器會被跳過並顯示警告
+- 重新連接 MCP 伺服器不再在每次重新連接時用完整工具名稱清單淹沒對話——重新宣告的工具會按伺服器前綴摘要顯示
+- SDK 主機現在會收到持久的 localSettings 建議用於 Bash 權限提示，所以「一律允許」會寫入 .claude/settings.local.json
+- EnterWorktree 現在如文件所述從本機 HEAD 建立新分支，而非從 origin/<default-branch> 建立——未推送的提交不再被丟棄
+- 自動模式：當分類器無法評估動作時，錯誤現在會包含提示（重試、/compact 或使用 --debug 執行）
+- 修正焦點模式在提交新提示時短暫變暗前一個回應的問題
+- 修正在 Kitty 和其他將 OSC 9 解釋為通知的終端機上，每次 /exit 時出現的雜散「4;0;」桌面通知
+- 修正遠端控制在速率限制時顯示空白「開啟選項中…」訊息，而非可操作的升級選項
+- 修正拖放圖片上傳在圖片讀取失敗時卡在「貼上文字中…」的問題
+- 修正透過 stdin 用 claude -p 管道傳輸非常大的輸入（>10 MB）時的當機迴圈
+- 修正長 URL 在全螢幕模式下每個換行列上無法個別點擊的問題
+- 修正 /plugin 元件面板對於透過 --plugin-dir 載入的外掛程式顯示「找不到 Marketplace 'inline'」的問題
+- 修正 MCP 工具結果在伺服器同時返回結構化內容和內容區塊時丟棄圖片的問題
+- 修正列表項目內的圍欄程式碼區塊在複製貼上時將前導空白帶入剪貼簿的問題
+- 修正 /config 中的標籤導航使焦點卡住——標籤標題現在保持焦點，所以方向鍵和 Esc 繼續運作
+- 修正在不支援 OSC 8 超連結的終端機上 markdown 連結標籤遺失的問題——連結現在顯示為 label (url) 而非只有 URL
+- 修正 1M 上下文模型上具有較小自動壓縮視窗的工作階段在達到實際 API 限制前被誤判為「提示過長」的問題
+- 修正平行 shell 工具呼叫：失敗的唯讀指令（grep、git diff、ls）不再取消同層呼叫
+- 修正橫幅在不支援 effort 的模型上顯示「with X effort」的問題
+- 修正 /fast 在第三方提供者上模糊比對到無關技能而非顯示「不可用」的問題
+- 修正 Bedrock 預設模型解析為 global.* 而非區域適當前綴的問題
+- 修正 vim 模式：NORMAL 模式下的 Space 現在向右移動游標，符合標準 vi/vim 行為
+- 修正終端機進度指示器（OSC 9;4）在工具呼叫間閃爍關閉的問題——現在在整個回合中保持可見
+- 修正 /rename 在最後項目為壓縮邊界的已恢復工作階段上無參數執行失敗的問題
+- 修正來自先前工作階段的過時「remote-control 已啟用」狀態列在 --resume/--continue 後出現的問題
+- 修正指向已刪除快取目錄的過時 installed_plugins.json 項目污染 PATH 的問題
+- 修正設定 CLAUDE_CODE_SHELL_PREFIX 且引數包含空格或 shell 元字元時，MCP stdio 伺服器接收損毀引數的問題
+- 修正子代理進度摘要遺漏提示快取的問題（~3× cache_creation 減少）
+- 修正 /plugin update 永遠無法偵測 npm 來源外掛程式新版本的問題
+- 修正子代理摘要在子代理文字記錄靜止時重複觸發的問題，限制閒置子代理的最壞情況代幣成本
+- 無頭 --output-format stream-json：init.plugin_errors 現在除了依賴降級外，還包含 --plugin-dir 載入失敗
+- 修正 /remote-control 重試顯示卡在「連接中…」的問題——每次重試現在顯示其結果
+
 ## 2.1.126
 - /model 選擇器現在會列出你的 gateway 的 /v1/models endpoint 中的模型，當 ANTHROPIC_BASE_URL 指向 Anthropic 相容的 gateway 時
 - 新增 claude project purge [path] 指令來刪除專案的所有 Claude Code 狀態（transcript、task、檔案歷史、設定項目）— 支援 --dry-run、-y/--yes、-i/--interactive 和 --all

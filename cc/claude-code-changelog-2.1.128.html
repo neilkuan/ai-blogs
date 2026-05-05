@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.128 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.128 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.128</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>單獨使用 /color（不帶參數）現在會隨機選擇一個工作階段顏色</li>
+<li>/mcp 現在顯示已連接伺服器的工具數量，並標記連接時工具數為 0 的伺服器</li>
+<li>--plugin-dir 現在除了接受目錄外，也支援 .zip 外掛程式封存檔</li>
+<li>--channels 現在支援主控台（API 金鑰）認證——具有受管設定的主控台組織必須設定 channelsEnabled: true 才能啟用</li>
+<li>更新 /model 選擇器：合併重複的 Opus 4.7 項目，目前的 Opus 現在顯示為「Opus」而非「Opus 4.7」</li>
+<li>子行程（Bash、hook、MCP、LSP）不再繼承 OTEL_* 環境變數，所以透過 Bash 工具執行的 OTEL 檢測應用程式不會再拾取 CLI 本身的 OTLP 端點</li>
+<li>MCP：workspace 現在是保留的伺服器名稱——現有同名伺服器會被跳過並顯示警告</li>
+<li>重新連接 MCP 伺服器不再在每次重新連接時用完整工具名稱清單淹沒對話——重新宣告的工具會按伺服器前綴摘要顯示</li>
+<li>SDK 主機現在會收到持久的 localSettings 建議用於 Bash 權限提示，所以「一律允許」會寫入 .claude/settings.local.json</li>
+<li>EnterWorktree 現在如文件所述從本機 HEAD 建立新分支，而非從 origin/&lt;default-branch&gt; 建立——未推送的提交不再被丟棄</li>
+<li>自動模式：當分類器無法評估動作時，錯誤現在會包含提示（重試、/compact 或使用 --debug 執行）</li>
+<li>修正焦點模式在提交新提示時短暫變暗前一個回應的問題</li>
+<li>修正在 Kitty 和其他將 OSC 9 解釋為通知的終端機上，每次 /exit 時出現的雜散「4;0;」桌面通知</li>
+<li>修正遠端控制在速率限制時顯示空白「開啟選項中…」訊息，而非可操作的升級選項</li>
+<li>修正拖放圖片上傳在圖片讀取失敗時卡在「貼上文字中…」的問題</li>
+<li>修正透過 stdin 用 claude -p 管道傳輸非常大的輸入（&gt;10 MB）時的當機迴圈</li>
+<li>修正長 URL 在全螢幕模式下每個換行列上無法個別點擊的問題</li>
+<li>修正 /plugin 元件面板對於透過 --plugin-dir 載入的外掛程式顯示「找不到 Marketplace &#x27;inline&#x27;」的問題</li>
+<li>修正 MCP 工具結果在伺服器同時返回結構化內容和內容區塊時丟棄圖片的問題</li>
+<li>修正列表項目內的圍欄程式碼區塊在複製貼上時將前導空白帶入剪貼簿的問題</li>
+<li>修正 /config 中的標籤導航使焦點卡住——標籤標題現在保持焦點，所以方向鍵和 Esc 繼續運作</li>
+<li>修正在不支援 OSC 8 超連結的終端機上 markdown 連結標籤遺失的問題——連結現在顯示為 label (url) 而非只有 URL</li>
+<li>修正 1M 上下文模型上具有較小自動壓縮視窗的工作階段在達到實際 API 限制前被誤判為「提示過長」的問題</li>
+<li>修正平行 shell 工具呼叫：失敗的唯讀指令（grep、git diff、ls）不再取消同層呼叫</li>
+<li>修正橫幅在不支援 effort 的模型上顯示「with X effort」的問題</li>
+<li>修正 /fast 在第三方提供者上模糊比對到無關技能而非顯示「不可用」的問題</li>
+<li>修正 Bedrock 預設模型解析為 global.* 而非區域適當前綴的問題</li>
+<li>修正 vim 模式：NORMAL 模式下的 Space 現在向右移動游標，符合標準 vi/vim 行為</li>
+<li>修正終端機進度指示器（OSC 9;4）在工具呼叫間閃爍關閉的問題——現在在整個回合中保持可見</li>
+<li>修正 /rename 在最後項目為壓縮邊界的已恢復工作階段上無參數執行失敗的問題</li>
+<li>修正來自先前工作階段的過時「remote-control 已啟用」狀態列在 --resume/--continue 後出現的問題</li>
+<li>修正指向已刪除快取目錄的過時 installed_plugins.json 項目污染 PATH 的問題</li>
+<li>修正設定 CLAUDE_CODE_SHELL_PREFIX 且引數包含空格或 shell 元字元時，MCP stdio 伺服器接收損毀引數的問題</li>
+<li>修正子代理進度摘要遺漏提示快取的問題（~3× cache_creation 減少）</li>
+<li>修正 /plugin update 永遠無法偵測 npm 來源外掛程式新版本的問題</li>
+<li>修正子代理摘要在子代理文字記錄靜止時重複觸發的問題，限制閒置子代理的最壞情況代幣成本</li>
+<li>無頭 --output-format stream-json：init.plugin_errors 現在除了依賴降級外，還包含 --plugin-dir 載入失敗</li>
+<li>修正 /remote-control 重試顯示卡在「連接中…」的問題——每次重試現在顯示其結果</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
