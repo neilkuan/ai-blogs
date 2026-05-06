@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.129 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.129 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.129</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 --plugin-url &lt;url&gt; flag，可從 URL 抓取 plugin .zip 壓縮檔供當前 session 使用</li>
+<li>新增 CLAUDE_CODE_FORCE_SYNC_OUTPUT=1 環境變數，強制啟用同步輸出，適用於自動偵測遺漏的終端機（例如 Emacs eat）</li>
+<li>新增 CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE：在 Homebrew 或 WinGet 安裝環境設定後，Claude Code 會在背景執行升級指令並提示重新啟動</li>
+<li>Plugin manifests：themes 和 monitors 現在應宣告在 &quot;experimental&quot;: { ... } 底下。頂層宣告仍可運作，但 claude plugin validate 會發出警告</li>
+<li>Gateway /v1/models 探索功能（供 /model 選擇器使用）現改為透過 CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1 手動啟用（2.1.126–2.1.128 版本中是自動啟用的）</li>
+<li>Ctrl+R 歷史記錄選擇器現在預設搜尋所有專案的所有提示，回歸 2.1.124 之前的行為。按 Ctrl+S 可縮小範圍至當前專案或 session</li>
+<li>第三方部署（Bedrock、Vertex、Foundry 或 ANTHROPIC_BASE_URL gateway）不再顯示指向 Anthropic 第一方服務的 spinner 提示</li>
+<li>skillOverrides 設定現已生效：off 對 model 和 / 隱藏、user-invocable-only 僅對 model 隱藏、name-only 摺疊描述</li>
+<li>claude_code.pull_request.count OTel 指標現在也計算透過 MCP 工具建立的 PR/MR，不再只計算 shell 指令</li>
+<li>Policy 拒絕的錯誤訊息現在包含 API Request ID，方便除錯與聯繫支援</li>
+<li>修正無法辨識的 400 狀態碼 API 錯誤顯示原始 JSON 而非底層錯誤訊息的問題</li>
+<li>修正 /clear 沒有重設終端機分頁標題的問題</li>
+<li>修正 /rename 的 session 標題標籤在權限對話框或其他對話框啟動時消失的問題</li>
+<li>修正 subagent 執行時，提示列下方的 agent 面板被隱藏的問題（2.1.122 的迴歸 bug）</li>
+<li>修正外部編輯器切換（Ctrl+G）會清空提示列上方對話記錄的問題</li>
+<li>修正 /context 把渲染後的 ASCII 視覺化格線倒進對話中，每次呼叫浪費約 1.6k tokens</li>
+<li>修正 /agents Library 列表方向鍵導覽：當列表超出可視範圍時，高亮的 agent 現在會保持可見</li>
+<li>修正 /branch 成功訊息未包含新分支 session id（供 /resume 使用）的問題</li>
+<li>修正全螢幕模式下，含有 keycap/ZWJ/膚色 emoji 的粗體標題會遺失尾端字元的問題</li>
+<li>修正企業/團隊使用者儲存的 OAuth 憑證缺少 user:inference scope 時，server-managed settings policy 未套用的問題</li>
+<li>修正從睡眠喚醒後的 OAuth refresh 競爭條件（race condition），該問題可能導致所有執行中的 session 被登出</li>
+<li>修正 1 小時的 prompt cache TTL 被靜默降級為 5 分鐘的問題</li>
+<li>修正在 /clear 或壓縮後切換 /effort 或 /model 時，cache-miss 警告誤報的問題</li>
+<li>修正 Bash(mkdir *)、Bash(touch *) 等允許規則在專案內路徑未被正確套用的問題</li>
+<li>修正 deniedMcpServers 中帶有 *:// scheme 萬用字元的 pattern 無法匹配大小寫混合主機名稱的問題</li>
+<li>修正語音模式下 --debug 中無害的 WebSocket 警告被記錄為錯誤的問題</li>
+<li>[VSCode] 修正 /clear 沒有清除對話 context 和顯示的對話記錄的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>

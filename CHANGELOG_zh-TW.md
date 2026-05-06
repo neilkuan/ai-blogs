@@ -2,6 +2,39 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.131
+- 修正 VS Code 擴充套件在 Windows 上無法啟動的問題，原因是打包的 SDK 中有寫死的建置路徑（createRequire polyfill bug）
+- 修正 Mantle 端點驗證失敗，缺少 x-api-key header
+
+## 2.1.129
+- 新增 --plugin-url <url> flag，可從 URL 抓取 plugin .zip 壓縮檔供當前 session 使用
+- 新增 CLAUDE_CODE_FORCE_SYNC_OUTPUT=1 環境變數，強制啟用同步輸出，適用於自動偵測遺漏的終端機（例如 Emacs eat）
+- 新增 CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE：在 Homebrew 或 WinGet 安裝環境設定後，Claude Code 會在背景執行升級指令並提示重新啟動
+- Plugin manifests：themes 和 monitors 現在應宣告在 "experimental": { ... } 底下。頂層宣告仍可運作，但 claude plugin validate 會發出警告
+- Gateway /v1/models 探索功能（供 /model 選擇器使用）現改為透過 CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1 手動啟用（2.1.126–2.1.128 版本中是自動啟用的）
+- Ctrl+R 歷史記錄選擇器現在預設搜尋所有專案的所有提示，回歸 2.1.124 之前的行為。按 Ctrl+S 可縮小範圍至當前專案或 session
+- 第三方部署（Bedrock、Vertex、Foundry 或 ANTHROPIC_BASE_URL gateway）不再顯示指向 Anthropic 第一方服務的 spinner 提示
+- skillOverrides 設定現已生效：off 對 model 和 / 隱藏、user-invocable-only 僅對 model 隱藏、name-only 摺疊描述
+- claude_code.pull_request.count OTel 指標現在也計算透過 MCP 工具建立的 PR/MR，不再只計算 shell 指令
+- Policy 拒絕的錯誤訊息現在包含 API Request ID，方便除錯與聯繫支援
+- 修正無法辨識的 400 狀態碼 API 錯誤顯示原始 JSON 而非底層錯誤訊息的問題
+- 修正 /clear 沒有重設終端機分頁標題的問題
+- 修正 /rename 的 session 標題標籤在權限對話框或其他對話框啟動時消失的問題
+- 修正 subagent 執行時，提示列下方的 agent 面板被隱藏的問題（2.1.122 的迴歸 bug）
+- 修正外部編輯器切換（Ctrl+G）會清空提示列上方對話記錄的問題
+- 修正 /context 把渲染後的 ASCII 視覺化格線倒進對話中，每次呼叫浪費約 1.6k tokens
+- 修正 /agents Library 列表方向鍵導覽：當列表超出可視範圍時，高亮的 agent 現在會保持可見
+- 修正 /branch 成功訊息未包含新分支 session id（供 /resume 使用）的問題
+- 修正全螢幕模式下，含有 keycap/ZWJ/膚色 emoji 的粗體標題會遺失尾端字元的問題
+- 修正企業/團隊使用者儲存的 OAuth 憑證缺少 user:inference scope 時，server-managed settings policy 未套用的問題
+- 修正從睡眠喚醒後的 OAuth refresh 競爭條件（race condition），該問題可能導致所有執行中的 session 被登出
+- 修正 1 小時的 prompt cache TTL 被靜默降級為 5 分鐘的問題
+- 修正在 /clear 或壓縮後切換 /effort 或 /model 時，cache-miss 警告誤報的問題
+- 修正 Bash(mkdir *)、Bash(touch *) 等允許規則在專案內路徑未被正確套用的問題
+- 修正 deniedMcpServers 中帶有 *:// scheme 萬用字元的 pattern 無法匹配大小寫混合主機名稱的問題
+- 修正語音模式下 --debug 中無害的 WebSocket 警告被記錄為錯誤的問題
+- [VSCode] 修正 /clear 沒有清除對話 context 和顯示的對話記錄的問題
+
 ## 2.1.128
 - 單獨使用 /color（不帶參數）現在會隨機選擇一個工作階段顏色
 - /mcp 現在顯示已連接伺服器的工具數量，並標記連接時工具數為 0 的伺服器
