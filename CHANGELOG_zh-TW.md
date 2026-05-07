@@ -2,6 +2,36 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.132
+- 新增 CLAUDE_CODE_SESSION_ID 環境變數到 Bash 工具的子程序環境中，與傳給 hooks 的 session_id 一致
+- 新增 CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1 環境變數，可退出全螢幕 alternate-screen 渲染器，讓對話內容留在終端機原生的捲動緩衝區（scrollback）中
+- 新增「Pasting…」的底部提示，在用 Ctrl+V 貼上圖片、從剪貼簿讀取時顯示
+- 修正外部 SIGINT（例如 IDE 的停止按鈕、kill -INT）沒有執行優雅關閉的問題 — 現在會正確還原終端機模式並印出 --resume 提示，而非直接粗暴退出
+- 修正在 native build 下，終端機被關閉或 SSH 中途斷線時會拋出未捕獲例外的問題
+- 修正 --resume 因 no low surrogate in string 而失敗的問題，原因是工具錯誤截斷時切到了 emoji 的一半；已損壞的 session 在載入時會自動清理
+- 修正使用 -p --continue/--resume 恢復 plan-mode session 時 --permission-mode flag 被忽略的問題，以及在同一 session 中執行 ExitPlanMode 後 plan mode 沒有重新套用的問題
+- 修正全螢幕模式在筆電睡眠/喚醒或 Ctrl+Z/fg 後顯示空白畫面，直到下一次按鍵或串流輸出才恢復的問題
+- 修正使用 Ctrl+E/A/K/U/方向鍵時，游標落在字素（grapheme）中間的問題，發生在印度語系連字（Indic conjunct）或 ZWJ emoji 跨行換行時
+- 修正 vim 操作符在處理含有分解式（NFD）重音字元的文字時會損壞內容的問題
+- 修正貼上以 / 開頭的文字時，輸入被靜默吞掉或觸發未知指令回覆的問題
+- 修正貼上文字時，因焦點事件（focus events）或滑鼠追蹤報告與 bracketed paste 交錯，導致多餘的跳脫序列（escape sequences）跑進提示框的問題
+- 修正在 Cursor 和 VS Code 1.92–1.104 中滑鼠滾輪捲動過快的問題，原因是上游 xterm.js 的 bug
+- 修正在 JetBrains IDE 2025.2 終端機中滾輪處理異常的問題（多餘的方向鍵、方向錯誤的事件、失控的加速）
+- 修正 /usage 按 Ctrl+S 時在 Linux/X11 上複製統計截圖到剪貼簿會卡住的問題
+- 修正 /terminal-setup 在 Windows Terminal 中顯示矛盾錯誤訊息的問題 — Shift+Enter 在那裡是原生支援的
+- 修正 /effort 選擇器沒有反映 CLAUDE_CODE_EFFORT_LEVEL 環境變數覆寫值的問題
+- 修正 /status 對部分使用者顯示錯誤的預設模型的問題
+- 修正斜線指令自動完成彈出視窗只顯示約 3–5 個指令，而非隨終端機高度縮放的問題
+- 修正狀態列的 context_window token 計數顯示的是累計 session 總量，而非當前 context 使用量的問題
+- 修正 Alt+T（切換思考模式）在沒有啟用「Option as Meta」的 macOS 終端機（iTerm2、Terminal.app 預設值）上無法使用的問題
+- 修正在 Windows 上從 claude agents 重新開啟背景 session 後鍵盤輸入失效的問題
+- 修正當 stdio MCP server 將非協定資料寫入 stdout 時，記憶體無限增長（RSS 超過 10GB）的問題
+- 修正連線成功但 tools/list 失敗的 MCP server 靜默顯示 0 個工具的問題 — 現在會重試一次，並在 /mcp 中顯示「connected · tools fetch failed」
+- 修正未授權的 claude.ai MCP 連接器顯示為「failed」而非「needs auth」的問題，以及 headless -p 模式對非暫時性 4xx 連線失敗重複重試的問題
+- 改善斜線指令對話框以及 /login、/upgrade、/extra-usage 對話框間距的視覺一致性
+- 更新 /tui fullscreen 啟動橫幅，加入額外渲染器優勢說明（更低記憶體用量、滑鼠支援、選取時自動複製）
+- 修正設定 ENABLE_PROMPT_CACHING_1H 時 Bedrock 和 Vertex 回傳 400 錯誤的問題
+
 ## 2.1.131
 - 修正 VS Code 擴充套件在 Windows 上無法啟動的問題，原因是打包的 SDK 中有寫死的建置路徑（createRequire polyfill bug）
 - 修正 Mantle 端點驗證失敗，缺少 x-api-key header
