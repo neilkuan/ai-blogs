@@ -2,6 +2,25 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.133
+- 新增 worktree.baseRef 設定（fresh | head），可選擇 --worktree、EnterWorktree 及 agent-isolation worktree 要從 origin/<default> 還是本地 HEAD 分支出去。**注意：** 預設值 fresh 會把 EnterWorktree 的基底改回 origin/<default>（自 2.1.128 起一直是用本地 HEAD）— 如果想在新 worktree 保留未推送的 commit，請設定 worktree.baseRef: "head"
+- 新增 sandbox.bwrapPath 和 sandbox.socatPath managed settings（Linux/WSL），可指定自訂的 bubblewrap 和 socat 執行檔路徑
+- 新增 parentSettingsBehavior admin-tier 鍵值（'first-wins' | 'merge'），讓管理員可以將 SDK managedSettings（parent tier）納入 policy 合併機制
+- Hook 現在可透過 JSON 輸入欄位 effort.level 和環境變數 $CLAUDE_EFFORT 取得目前的 effort level，Bash tool 指令也能讀取 $CLAUDE_EFFORT
+- 改善 focus mode 行為
+- 改善記憶體使用：在記憶體壓力下會釋放暖備（warm-spare）的背景 worker
+- 修正平行 session 在 refresh-token 競爭條件（race condition）清除共用憑證後，全部卡在 401 的問題
+- 修正 Edit/Write allow 規則作用於磁碟根目錄（C:\）或 POSIX / 時比對錯誤、總是跳出確認提示的問題
+- 修正當 history 或 session-log 檔案鎖因時鐘偏移或磁碟過慢而失效時，產生未處理的 rejection（ECOMPROMISED）
+- 修正在對話壓縮（conversation compaction）期間按 Esc 會顯示假的「Error compacting conversation」通知
+- 修正 HTTP(S)_PROXY / NO_PROXY / mTLS 在完整 MCP OAuth 流程中未被正確套用的問題，包含 discovery、dynamic client registration、token exchange 及 token refresh
+- 修正透過 --add-dir / SDK additionalDirectories 傳入的網路磁碟機（mapped network drives）無法執行 Read/Write/Edit 的問題
+- 修正從 claude.ai 發出的 Remote Control stop/interrupt 無法像本地按 Esc 一樣完整取消 CLI session，導致中斷卡住的 tool 或 prompt 後，排隊中的訊息永遠不會繼續執行
+- 修正在某個 session 使用 /effort 會意外改變其他同時執行的 session 的 effort level，以及相關的 IDE effort 變更被靜默丟棄的問題
+- 修正 subagent 無法透過 Skill tool 發現 project、user 或 plugin skills 的問題
+- claude --help 現在會把 --remote-control 和 --remote-control-session-name-prefix 一起列出
+- [VSCode] 修正 claudeCode.claudeProcessWrapper 在 extension build 未打包 Claude binary 時報「Unsupported platform」錯誤的問題
+
 ## 2.1.132
 - 新增 CLAUDE_CODE_SESSION_ID 環境變數到 Bash 工具的子程序環境中，與傳給 hooks 的 session_id 一致
 - 新增 CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1 環境變數，可退出全螢幕 alternate-screen 渲染器，讓對話內容留在終端機原生的捲動緩衝區（scrollback）中
