@@ -2,6 +2,60 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.136
+- 新增 CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL，讓透過 OpenTelemetry 收集回應的企業可以重新啟用工作階段品質問卷
+- 新增 settings.autoMode.hard_deny，用於 auto mode 分類器規則，無論使用者意圖或允許例外都會無條件封鎖
+- 修正在 VS Code 擴充套件、JetBrains plugin 及 Agent SDK 中，執行 /clear 後 .mcp.json 設定的 MCP 伺服器、plugin 和 claude.ai connector 會無聲消失的問題
+- 修正一個罕見的登入迴圈：並行的憑證寫入可能覆蓋剛輪換的 OAuth token，導致強制重新登入
+- 修正多個 MCP 伺服器同時刷新時 OAuth refresh token 遺失的問題——擁有多個遠端 MCP 伺服器的使用者不再需要每天重新驗證
+- 修正當 extended thinking 在 tool call 之後產生被遮蔽的 thinking block 時出現 API 錯誤（400）
+- 修正 --resume / --continue 在專案路徑包含底線時找不到工作階段的問題
+- 修正 plan mode 在存在匹配的 Edit(...) allow 規則時未阻擋檔案寫入
+- WSL2：Windows 剪貼簿貼上圖片現在可透過 PowerShell fallback 運作，適用於 xclip/wl-paste 無法讀取圖片資料的情況
+- 修正 plugin 的 Stop/UserPromptSubmit hook 在快取清理刪除了仍被執行中工作階段使用的版本時失敗
+- 改善斜線指令對話框的視覺一致性：統一了底部提示、對話框間距和方向鍵樣式，且對話框外框現在會在載入時立即出現，而非延遲彈出
+- 修正 bash 指令輸出和 markdown 程式碼區塊中顏色出現在錯誤位置
+- 修正 ReasonML diff 在 word-diff 邊界渲染出損壞的 "undefined" 文字殘影
+- 修正 worktree 移除後，退出對話框警告未提交檔案時指向錯誤目錄
+- 修正 @ 檔案選擇器在小型非 git 目錄中無法匹配工作階段中途建立的檔案
+- 修正 @ 提及檔案選擇器在目錄超過 100 個項目時找不到檔案
+- 修正失敗的 tool call 在全螢幕模式下輸出被截斷時無法點擊展開
+- 修正在具有持久性 extended-key 模式的終端機上使用 Ctrl+G 開啟外部編輯器後，Backspace 和 Ctrl+Backspace 互換的問題
+- 修正 /usage 每週重置顯示時間而非日曆日期
+- 修正歡迎橫幅的省略號在 CJK 終端機上造成欄位溢出
+- 修正 /insights 在工作階段歷史包含格式錯誤輸入欄位的 tool call 時當掉
+- 修正工具的可摺疊分類在工作階段中途變更時造成渲染器當掉
+- 修正 plugin.json 中的 skills 項目會隱藏 plugin 預設的 skills/ 目錄，且列出檔案路徑時現在會顯示錯誤而非靜默失敗
+- 修正 IDE shell-integration 鎖定檔案未遵循 CLAUDE_CONFIG_DIR
+- 修正串流期間複製終端機輸出時的尾隨空白
+- 修正 plugin 解除安裝和啟用/停用未以大小寫不敏感方式匹配 slug
+- 修正工具錯誤截斷標記對 surrogate-pair 字串顯示負數計數
+- 修正來自 CLAUDE_ENV_FILE SessionStart hook 的環境變數在 /resume 或 /clear 後變得過時
+- 修正 /branch 在貼上多行名稱時儲存了多行工作階段標題
+- 修正在欄位邊界換行文字第二行出現多餘前導空格
+- 修正 Esc 無法關閉 /install-github-app、/desktop、/resume 和 /web-setup 的對話框
+- 修正 /doctor MCP schema 錯誤未顯示缺少的欄位名稱或來源檔案路徑
+- 修正 Bash 權限提示顯示內部解析器診斷訊息而非使用者可讀的說明
+- 修正含空格的 plugin 斜線指令（例如 /myplugin review）無法解析為其命名空間形式
+- 修正 AskUserQuestion 在答案以陣列提供時丟棄多選答案
+- 修正 /clear <name> 未將已清除的工作階段標記給 /resume 使用
+- 修正 CronList 輸出缺少限定詞和排程提示
+- 修正「跳至底部」覆蓋層在全螢幕模式下於 CJK 字元上留下顏色殘影
+- 修正寬 markdown 表格在串流時於終端機捲動緩衝區留下過時的邊框渲染
+- 修正當帶有貼上文字佔位符的長提示被自動截斷時，貼上的文字被靜默丟棄
+- 修正 /release-notes 在 changelog 刷新失敗後卡在舊版本
+- 修正 /mcp 伺服器列表在伺服器數量超過終端機可顯示範圍時無法捲動
+- 修正在初始斜線指令後，輸入中途的斜線指令自動完成無法運作
+- 修正捲動到底部在 autoScrollEnabled: false 時重新啟動自動跟隨
+- 修正提示建議在空白輸入時被 Enter 自動送出，而非要求 Tab 或方向鍵接受
+- 修正鍵盤快捷鍵提示未反映 keybindings.json 中重新綁定的按鍵
+- 修正 /settings 語言變更在確認後按 Escape 被還原
+- 修正 /terminal-setup 只在完全名稱匹配時才出現在自動完成中，而非支援部分前綴
+- 修正在 AskUserQuestion 對話框上選擇「Chat about this」會清除問題文字
+- 修正 MCP 工具結果在伺服器回傳 content block 時不可見
+- 改善 --worktree 與既有或過時 worktree 衝突時的錯誤訊息
+- 將 plugin marketplace 移除快捷鍵改為 d（與其他地方的刪除一致），取代原本與重試衝突的 r
+
 ## 2.1.133
 - 新增 worktree.baseRef 設定（fresh | head），可選擇 --worktree、EnterWorktree 及 agent-isolation worktree 要從 origin/<default> 還是本地 HEAD 分支出去。**注意：** 預設值 fresh 會把 EnterWorktree 的基底改回 origin/<default>（自 2.1.128 起一直是用本地 HEAD）— 如果想在新 worktree 保留未推送的 commit，請設定 worktree.baseRef: "head"
 - 新增 sandbox.bwrapPath 和 sandbox.socatPath managed settings（Linux/WSL），可指定自訂的 bubblewrap 和 socat 執行檔路徑
