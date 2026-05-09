@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.137
+- [VSCode] 修正擴充套件在 Windows 上無法啟動的問題
+
 ## 2.1.136
 - 新增 CLAUDE_CODE_ENABLE_FEEDBACK_SURVEY_FOR_OTEL，讓透過 OpenTelemetry 收集回應的企業可以重新啟用工作階段品質問卷
 - 新增 settings.autoMode.hard_deny，用於 auto mode 分類器規則，無論使用者意圖或允許例外都會無條件封鎖
