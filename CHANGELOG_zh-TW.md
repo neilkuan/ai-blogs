@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.138
+- 內部修正
+
 ## 2.1.137
 - [VSCode] 修正擴充套件在 Windows 上無法啟動的問題
 
