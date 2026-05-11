@@ -2,6 +2,58 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.139
+- 新增 agent 檢視（Research Preview）：一個清單就能看到所有 Claude Code session——執行中、等你回應、或已完成。執行 claude agents 即可開始使用。詳見 https://code.claude.com/docs/en/agent-view
+- 新增 /goal 指令：設定完成條件後，Claude 會跨回合持續工作直到達成目標。支援互動模式、-p 及 Remote Control。執行期間會以浮動面板即時顯示經過時間／回合數／token 數
+- 新增 /scroll-speed 指令，可調整滑鼠滾輪速度並即時預覽效果
+- 新增 claude plugin details <name>，顯示 plugin 的元件清單及預估每次 session 的 token 成本
+- 新增 transcript 檢視導覽功能：? 顯示鍵盤快捷鍵、{/} 在使用者提示之間跳轉、v 切換快捷鍵面板
+- 新增 hook args: string[] 欄位（exec 形式），直接啟動指令而不經過 shell，路徑佔位符不再需要加引號
+- 新增 hook continueOnBlock 設定選項，適用於 PostToolUse——設為 true 可將 hook 的拒絕原因回饋給 Claude 並繼續當前回合
+- MCP stdio server 現在會在環境變數中收到 CLAUDE_PROJECT_DIR，與 hook 行為一致。Plugin 設定可在指令中引用 ${CLAUDE_PROJECT_DIR}
+- 壓縮提示（compaction prompt）現在會要求模型保留敏感的使用者指令
+- /mcp 重新連線現在會即時套用 .mcp.json 的修改，不需重啟；連線失敗時會顯示 HTTP 狀態碼與 URL
+- /context all 各 skill 的 token 估算現在會依據模型的 tokenizer 計算，並顯示四捨五入的數值
+- claude plugin install <name>@<marketplace> 現在會自動重新整理 marketplace 並重試，再回報找不到 plugin
+- /plugin 已安裝 plugin 的詳細資訊現在會清楚顯示 hook 事件名稱與 MCP server 名稱
+- /context 現在會顯示 plugin 來源 skill 所屬的 plugin 名稱
+- Remote MCP server 在暫時性失敗時的重新連線重試機制，現已對所有使用者啟用
+- 來自 subagent 的 API 請求現在會帶上 x-claude-code-agent-id / x-claude-code-parent-agent-id header，且 claude_code.llm_request OpenTelemetry span 包含 agent_id / parent_agent_id 屬性
+- 當設定了 ANTHROPIC_API_KEY / apiKeyHelper / ANTHROPIC_AUTH_TOKEN 時，即使同時存在 Claude.ai 登入，Remote Control、/schedule、claude.ai MCP 連接器及通知偏好設定都會被停用。移除 API key 即可使用這些功能
+- 修正一個死鎖（deadlock）問題：過期的憑證加上 forceRemoteSettingsRefresh policy 設定會導致 claude auth login/logout/status 卡住且無法恢復
+- 修正 autoAllowBashIfSandboxed 未自動核准含有 shell 展開（如 $VAR 和 $(cmd)）指令的問題
+- 修正 hook 寫入終端機時可能破壞畫面上互動提示的 bug；hook 現在不再擁有終端機存取權限
+- 修正當 HTTP/SSE MCP server 串流非協定資料時造成記憶體無限增長的問題——回應內容現在每個 SSE frame 上限為 16 MB
+- 修正 Skill(name *) 權限規則——萬用字元形式現在正確作為前綴比對，與 Bash(ls *) 行為一致
+- 修正設定熱重載（hot-reload）未偵測到符號連結（symlink）~/.claude/settings.json 被編輯的問題
+- 修正當 marketplace key 與 manifest 名稱不同時，plugin 詳細資訊載入失敗的問題
+- 修正 /model 選擇器中「Default」列未反映 ANTHROPIC_DEFAULT_OPUS_MODEL/ANTHROPIC_DEFAULT_SONNET_MODEL 覆寫值的問題
+- 修正回應完成後 5 分鐘出現假性「stream idle timeout」的問題，原因是串流取消時看門狗計時器未被清除
+- 修正當設定了 10 個以上 MCP server 且快取目錄無法寫入時靜默 exit 1 的問題——錯誤訊息現在會包含底層原因
+- 修正對話框中 tab 名稱、清單指標及選取列出現閃爍游標的問題
+- 修正 transcript 檢視中字母快捷鍵在滑鼠點擊後失效的問題
+- 修正 Bash 模式中按上方向鍵瀏覽歷史時重複第一筆紀錄並覆蓋正在編輯草稿的問題
+- 修正貼上或拖放多張圖片時只插入最後一張的問題
+- 修正超連結在深色主題下使用難以閱讀的深藍色——現在會自動適應當前主題
+- 修正第三方使用者的模型設為 opus 別名時，model picker 顯示多餘「Current model」列的問題
+- 修正 PAYG 3P provider 上舊版 Opus picker 項目解析到與預設項目相同模型的問題
+- 修正在 Cursor 和 VS Code 1.92–1.104 中滑鼠滾輪速度異常的問題；觸控板現在以穩定速率捲動，滑鼠滾輪維持每格約 3 行
+- 修正在 Windows Terminal 和 VS Code 中連接背景 session 時的捲動行為
+- 修正已斷線 MCP server 的資源仍殘留在 @server: 自動完成中的問題
+- 修正雙檔案 diff 片段多報一行截斷行數的問題
+- 修正 Grep 結果未將 Windows 磁碟機代號路徑相對化，以及 count 模式對單一檔案路徑回報錯誤總數的問題
+- 修正 CJK／emoji 因視覺字元寬度計算錯誤導致邊框內嵌文字溢出的問題
+- 修正模糊比對（fuzzy-match）高亮顯示時將 emoji 和星光面（astral-plane）字元從中間拆開的問題
+- 修正 skill 參數名稱包含正規表達式元字元（regex metacharacter）時破壞參數替換的問題
+- 修正 ProgressBar 在接近滿格的小數格中渲染出完整方塊的問題
+- 修正當最後一個訂閱者在 fetch 進行中離開時，task polling 和 fs.watch 被重新啟動的問題
+- 修正當 manifest 名稱與來源識別碼不同時，plugin 相依性解析殘留過期計數的問題
+- 修正 Insights 每日時段圖表在 session 有無法解析的時間戳記時產生偏移的問題
+- 修正僅使用 cmd/super/win 修飾鍵的快捷鍵綁定被標記為無法解析的問題
+- 修正 claude_code.active_time.total OpenTelemetry 指標在 --print 模式下未被發送的問題
+- 修正 claude plugin update 未保留 marketplace 內跨 plugin 符號連結的問題
+- [VSCode] 按 Cmd/Ctrl+Shift+T 可重新開啟最近關閉的 session 分頁，可透過 claudeCode.enableReopenClosedSessionShortcut 設定
+
 ## 2.1.138
 - 內部修正
 
