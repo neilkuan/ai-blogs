@@ -2,6 +2,21 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.140
+- 改善 Agent 工具的 subagent_type 比對邏輯，現在接受不分大小寫、不分分隔符號的值（例如 "Code Reviewer" 會解析為 code-reviewer）
+- 更新了 agent 配色方案
+- 修正 /goal 在設定了 disableAllHooks 或 allowManagedHooksOnly 時會靜默卡住的問題——現在會顯示明確訊息，而不是一個永遠不會結束的指示器
+- 修正設定檔熱重載的迴歸問題：當設定檔是 symlink 時，會導致變更事件歸因錯誤並觸發多餘的 ConfigChange hook
+- 修正 claude --bg 在背景服務即將閒置退出時失敗並報「connection dropped mid-request」的問題
+- 修正在裝有企業端點安全軟體的機器上，背景服務啟動失敗的問題——現在給予更多啟動時間
+- 修正遠端託管設定在收到 401 時不會重試的問題——現在會用強制刷新的 token 重試一次
+- 修正託管的 extraKnownMarketplaces 自動更新策略沒有被持久化到 known_marketplaces.json 的問題
+- 修正 /loop 對已經會在完成時主動通知的背景任務，仍排程多餘的輪詢喚醒
+- 修正 Windows 上反覆出現的事件迴圈卡頓（event-loop stall）：當找不到執行檔（例如 gh）時，會在每次檢查都同步重新呼叫 where.exe
+- 修正 Read 工具在 offset 以帶空白或 + 前綴的字串傳入時驗證失敗的問題
+- 修正原生終端機游標在終端機失去焦點時，沒有停留在輸入插入點的問題
+- Plugin 現在會在預設元件資料夾（例如 commands/）因為 plugin.json 已設定對應 key 而被靜默忽略時發出警告。可在 /doctor、claude plugin list 及 /plugin 中看到提示。
+
 ## 2.1.139
 - 新增 agent 檢視（Research Preview）：一個清單就能看到所有 Claude Code session——執行中、等你回應、或已完成。執行 claude agents 即可開始使用。詳見 https://code.claude.com/docs/en/agent-view
 - 新增 /goal 指令：設定完成條件後，Claude 會跨回合持續工作直到達成目標。支援互動模式、-p 及 Remote Control。執行期間會以浮動面板即時顯示經過時間／回合數／token 數

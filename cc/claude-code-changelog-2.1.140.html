@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.140 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.140 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.140</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>改善 Agent 工具的 subagent_type 比對邏輯，現在接受不分大小寫、不分分隔符號的值（例如 &quot;Code Reviewer&quot; 會解析為 code-reviewer）</li>
+<li>更新了 agent 配色方案</li>
+<li>修正 /goal 在設定了 disableAllHooks 或 allowManagedHooksOnly 時會靜默卡住的問題——現在會顯示明確訊息，而不是一個永遠不會結束的指示器</li>
+<li>修正設定檔熱重載的迴歸問題：當設定檔是 symlink 時，會導致變更事件歸因錯誤並觸發多餘的 ConfigChange hook</li>
+<li>修正 claude --bg 在背景服務即將閒置退出時失敗並報「connection dropped mid-request」的問題</li>
+<li>修正在裝有企業端點安全軟體的機器上，背景服務啟動失敗的問題——現在給予更多啟動時間</li>
+<li>修正遠端託管設定在收到 401 時不會重試的問題——現在會用強制刷新的 token 重試一次</li>
+<li>修正託管的 extraKnownMarketplaces 自動更新策略沒有被持久化到 known_marketplaces.json 的問題</li>
+<li>修正 /loop 對已經會在完成時主動通知的背景任務，仍排程多餘的輪詢喚醒</li>
+<li>修正 Windows 上反覆出現的事件迴圈卡頓（event-loop stall）：當找不到執行檔（例如 gh）時，會在每次檢查都同步重新呼叫 where.exe</li>
+<li>修正 Read 工具在 offset 以帶空白或 + 前綴的字串傳入時驗證失敗的問題</li>
+<li>修正原生終端機游標在終端機失去焦點時，沒有停留在輸入插入點的問題</li>
+<li>Plugin 現在會在預設元件資料夾（例如 commands/）因為 plugin.json 已設定對應 key 而被靜默忽略時發出警告。可在 /doctor、claude plugin list 及 /plugin 中看到提示。</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
