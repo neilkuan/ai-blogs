@@ -2,6 +2,69 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.141
+- 新增 terminalSequence 欄位到 hook JSON 輸出，讓 hook 可以在沒有控制終端機的情況下發送桌面通知、視窗標題和響鈴
+- 新增 CLAUDE_CODE_PLUGIN_PREFER_HTTPS 環境變數，讓 GitHub plugin 來源改用 HTTPS clone，適用於沒有 GitHub SSH key 的環境
+- 新增 ANTHROPIC_WORKSPACE_ID 環境變數，用於工作負載身份聯邦（workload identity federation）— 當聯邦規則涵蓋多個 workspace 時，可將產生的 token 限定在特定 workspace
+- 新增 claude agents --cwd <path> 可將 session 列表限定在指定目錄
+- /feedback 現在可以附帶近期 session（過去 24 小時或 7 天），方便回報跨越當前 session 的問題
+- Rewind 選單：新增「Summarize up to here」，可壓縮較早的上下文同時保留近期對話
+- Auto mode 權限對話框現在會說明是哪條 permissions.ask 規則觸發了提示
+- 當 IDE 已連線時，恢復檔案編輯權限提示中的「在你的 IDE 中查看 diff」選項
+- 透過 /bg 或 ←← 啟動的背景 agent 現在會保留當前的權限模式，而非回退到預設值
+- claude agents：完成工作但仍有背景 shell 在跑的 agent，現在會移到「Completed」而非停留在「Working」
+- 改善長時間思考時的 spinner 回饋 — spinner 在 10 秒後會轉為琥珀色，表示 Claude 仍在運作中
+- 改善 plugin 選單導覽：→/Tab 切換分頁，↑ 移到分頁列，全螢幕模式下分頁標題和搜尋框可點擊
+- 修正背景 side-query 在 Bedrock/Vertex/Foundry/gateway 上送出不可用的 Haiku model ID 的問題（未設定 ANTHROPIC_SMALL_FAST_MODEL 時）— 現在會 fallback 到主迴圈模型
+- 修正 Windows 上 claude daemon status 和 /doctor 在 daemon pipe key 檔案被鎖定或無法讀取時拋出錯誤 — 現在會顯示底層錯誤而非不透明的失敗訊息
+- 修正 claude agents 透過帶有額外 flag 的 wrapper 啟動時，顯示 agent 類型列表而非 dashboard
+- 修正 claude agents 開啟已崩潰的 session 時，在工作目錄已被刪除的情況下觸發多餘的 dispatch
+- 修正使用自訂 ANTHROPIC_BASE_URL gateway 的背景任務無法自動命名的問題 — 命名器現在會在沒有 Haiku 模型時使用主模型
+- 修正 /model 在一個 session 中靜默改變其他並行 session 的 autocompact 閾值
+- 修正在工具權限提示開啟時切換權限模式，當新設定允許該工具時未自動關閉提示
+- 修正在權限/對話提示開啟時按 Enter 同時也送出了輸入框中的文字
+- 修正 hook 在 EnterWorktree 切換工作目錄後收到不存在的 transcript_path
+- 修正含有儲存格換行的 markdown 表格退回到垂直 key-value 排版，而非渲染為有框線的表格（2.1.136 的迴歸問題）
+- 修正被取消的提示在自動還原到輸入框時從上鍵歷史中被移除，避免重複項目
+- 修正在收到任何回應前用 Ctrl+C/Esc 取消的提示從上鍵歷史中消失
+- 修正在 vim INSERT/VISUAL 模式下 Ctrl+C 無法中斷正在執行的回合
+- 修正當 enter 被重新綁定為 chat:newline 時，替代的 chat:submit 快捷鍵（如 meta+enter、ctrl+enter）無法使用
+- 修正設定了 output style 時 prompt suggestions 被靜默停用
+- 修正 spinnerVerbs 設定在回合完成訊息中未被採用
+- 修正 AskUserQuestion 彈出視窗遮住前面聊天內容的最後一行
+- 修正 Web Search 狀態在搜尋回傳錯誤時顯示「Did 0 searches」
+- 修正多行 statusline 輸出在任一行超過終端機寬度時掉行或顯示亂碼
+- 修正 light-ansi 主題在淺色背景下 diff context 行使用不可見的白色 — 現在改用黑色
+- 修正錯誤覆蓋層傾印壓縮後的 bundle 原始碼，導致原始錯誤訊息被隱藏
+- 修正輸入 feedback 問卷評分數字後按 Enter，被當成聊天訊息送出而非提交評分
+- 修正在 agent 面板中選取 subagent 後按 x，字元被輸入到提示框而非停止該 agent
+- 修正 session 標題在使用者第一次提示之前就從 plugin monitor 通知中產生
+- 修正「Allowed by PermissionRequest hook」在收合的 read/search 群組下每次工具呼叫都重複顯示
+- 修正 /tui 靜默丟棄正在執行的背景 shell 和 subagent — 現在會拒絕並要求等待它們完成
+- 修正歡迎橫幅在 Bedrock、Vertex、Foundry 及其他第三方 provider 上顯示「API Usage Billing」— 現在會顯示 provider 名稱
+- 修正 /mcp server 列表在全螢幕模式的短終端機中，未保持聚焦的 server 可見
+- 修正 /feedback bundle 中的遮蔽處理對帶引號的值（如 session ID）產生無效 JSON
+- 修正桌面版和第三方 provider session 錯誤繼承了來自 host managed-settings 的 apiKeyHelper/ANTHROPIC_AUTH_TOKEN
+- 修正早期 analytics 事件在 logger 初始化前觸發時被靜默丟棄
+- 修正 claude plugin install 在 plugin 的 marketplace ref 已不存在於上游、但同時有 pinned sha 時安裝失敗
+- 修正 plugin 詳細資訊面板對透過 .mcp.json 宣告 MCP server 的 plugin 顯示 0 個 MCP server
+- 修正 plugin MCP server 在設定變數未設定時顯示通用連線失敗，而非顯示「config issue」訊息並附帶修正提示；格式錯誤的 .mcp.json 項目不再導致其他 MCP server 一起掛掉
+- 修正使用 POSIX shell 參數展開（如 ${var%pattern}）的 MCP server 設定被錯誤標記為缺少環境變數
+- 修正 MCP HTTP/SSE server 在連線時回傳 403 顯示為「failed」而非「needs auth」
+- 修正遠端 MCP server 在可選的 server-events 串流重連失敗時不必要地斷線 — 工具呼叫仍可透過 POST 繼續
+- 修正 Remote Control MCP connector 在 worker session token 於 session 中途輪換時全部回傳 401 失敗
+- 修正 Remote Control 在 server 拒絕過期 token 時自動重新註冊受信任裝置，而非循環跑 /login
+- 修正在 SDK/headless 模式啟用 beta tracing 時，早期 OTel span 可能因競爭條件（race condition）被靜默丟棄
+- 修正自訂 voice:pushToTalk 快捷鍵綁定和 "space": null 解綁被靜默忽略
+- 修正 Windows 上 Alt+V 貼上圖片時，剪貼簿含有截圖卻回報「no image found」
+- 修正 Linux 上同時安裝 glibc 和 musl platform package 時，SDK 報「Claude Code native binary not found」
+- Bedrock：awsCredentialExport 現在在有設定時一律執行，不再因為環境 AWS 憑證可解析就跳過，修正跨帳號存取的驗證問題
+- [VSCode] 修正聊天中的麥克風在麥克風只產生靜音時沒有回饋 — 現在會顯示「No audio detected」
+- [VSCode] 語音模式：WSL 錯誤現在會建議 WSLg 使用者安裝 sox libsox-fmt-pulse
+- claude agents：啟動 session 時若預熱的背景 worker 不健康，不再失敗 — 現在會 fallback 到全新啟動
+- claude agents 不再顯示因背景化全新 REPL 而留下的空白佔位 session，且透過 ← 進入時若無其他 agent 會顯示引導文字
+- 因 ← 留下的空閒背景 session 現在會被 daemon 在 5 分鐘後自動回收
+
 ## 2.1.140
 - 改善 Agent 工具的 subagent_type 比對邏輯，現在接受不分大小寫、不分分隔符號的值（例如 "Code Reviewer" 會解析為 code-reviewer）
 - 更新了 agent 配色方案
