@@ -2,6 +2,32 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.142
+- 新增多個 claude agents flag：--add-dir、--settings、--mcp-config、--plugin-dir、--permission-mode、--model、--effort 以及 --dangerously-skip-permissions，用來設定派發的背景 session
+- Fast mode 現在預設使用 Opus 4.7（先前為 Opus 4.6）。設定 CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE=1 可將 fast mode 釘選在 Opus 4.6
+- 擁有根層級 SKILL.md 但沒有 skills/ 子目錄的 plugin，現在也會被當作 skill 顯示
+- /plugin 詳細資訊面板與 claude plugin details 現在會顯示 plugin 提供的 LSP server
+- /web-setup 在覆蓋既有的 GitHub App 連線前會先發出警告
+- 修正 MCP_TOOL_TIMEOUT 未正確提高遠端 HTTP 及 SSE MCP server 的單次請求 fetch 逾時問題，導致工具呼叫無論設定值為何都被限制在 60 秒
+- 修正背景 session 無法辨識既有的 git worktree，導致 Edit 被擋住、而 EnterWorktree 又拒絕建立重複項目的問題
+- 修正 macOS 睡眠/喚醒後背景 session 消失且 daemon 重連失敗的問題——daemon 現在會偵測時鐘跳躍（clock jump），而非將其視為已經過的閒置時間
+- 修正 daemon 在二進位檔升級後（例如 brew upgrade）無法乾淨退出的問題，這會導致派發的 agent 在已刪除的路徑上不斷 crash-loop
+- 修正當 Claude-in-Chrome 擴充功能已連線但沒有共享分頁時，背景 agent 不斷 crash-loop 的問題
+- 修正在已附加的 claude agents session 中點擊連結時，背景 worker 的 headless browser shim 仍然生效的問題
+- 修正 claude agents 的「v 在編輯器中開啟」使用 daemon 的預設編輯器，而非你 shell 的 $EDITOR/$VISUAL
+- 修正 claude agents 在 Windows 上搭配網路磁碟工作目錄時發生死鎖（deadlock）的問題；啟動期間 Ctrl+C 現在可正常運作
+- 修正從 Apple Terminal 或其他僅支援 256 色的終端機附加到 claude agents session 時，背景色溢出（background-color bleed）的問題
+- 修正 claude --bg --dangerously-skip-permissions 在 retire/wake 後未被保留的問題
+- 修正當第一則訊息是連結時，session 標題從 URL 衍生的問題
+- 修正遠端客戶端發送多餘的 set_model 請求，導致重複的 /model breadcrumb 被注入到對話紀錄中的問題
+- 修正使用 skills: ["./"] 的 plugin 顯示錯誤的「path escapes plugin directory」錯誤訊息
+- 修正 plugin cache 清理在沒有安裝 metadata 時，誤刪正在使用中的 plugin 版本目錄的問題
+- 修正 /plugin 瀏覽面板對新發布的 plugin 顯示「0 installs」的問題
+- 修正 plugin advisory 未列出所有覆蓋預設資料夾的 plugin.json key 的問題
+- 改善 reactive compaction：第一次摘要嘗試現在會以原始請求的溢出大小作為種子，避免浪費一次接近滿 context 的重試
+- 改善 hook 設定錯誤訊息：將 prompt 或 agent 類型的 hook 設定在 SessionStart/Setup/SubagentStart 時，現在會顯示清楚的「請改用 command 類型的 hook」錯誤
+- 移除 Usage Policy 拒絕訊息中過時的 /model claude-sonnet-4-20250514 建議
+
 ## 2.1.141
 - 新增 terminalSequence 欄位到 hook JSON 輸出，讓 hook 可以在沒有控制終端機的情況下發送桌面通知、視窗標題和響鈴
 - 新增 CLAUDE_CODE_PLUGIN_PREFER_HTTPS 環境變數，讓 GitHub plugin 來源改用 HTTPS clone，適用於沒有 GitHub SSH key 的環境
