@@ -2,6 +2,41 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.143
+- 新增 plugin 依賴強制檢查：claude plugin disable 現在會拒絕停用被其他已啟用 plugin 依賴的目標（並附上可直接複製貼上的停用鏈提示），而 claude plugin enable 會強制啟用所有傳遞性依賴
+- 新增預估 context 成本（每輪及每次呼叫的 token 估算）到 /plugin marketplace 瀏覽面板
+- 新增 worktree.bgIsolation: "none" 設定，讓背景 session 可以直接編輯工作目錄而不需要 EnterWorktree，適用於不方便使用 worktree 的 repo
+- PowerShell 工具現在會傳入 -ExecutionPolicy Bypass。可透過設定 CLAUDE_CODE_POWERSHELL_RESPECT_EXECUTION_POLICY=1 來取消
+- 背景 session 現在會在從閒置喚醒後保留你設定的 model 和 effort level
+- 在已附加的 agent session 中按 Shift+Tab 現在會把 auto mode 納入切換循環
+- 修正損壞的 .credentials.json（scopes 值不是陣列）導致 CLI 啟動時卡住或 OAuth token 刷新靜默中斷的問題
+- 修正在 Windows Terminal 和 WSL 上 claude agents 無法右鍵貼上的問題
+- 修正 stop hook 重複阻擋時無限迴圈的問題——現在連續阻擋 8 次後會結束該輪並顯示警告（可透過 CLAUDE_CODE_STOP_HOOK_BLOCK_CAP 覆寫）
+- 修正在 Claude 於迭代間閒置時，按 Esc/Ctrl+C 無法取消等待中的 /loop 喚醒的問題
+- 修正 /goal 評估器在背景 shell 或委派的 subagent 仍在執行時就觸發的問題
+- 修正在 settings.json 的 env 中設定 NO_COLOR/FORCE_COLOR 會連帶移除 Claude Code 自身 UI 顏色的問題——現在只會套用到子程序
+- 修正 agent view 在 Windows 上列出 session 時重複產生 PowerShell 程序的問題
+- 修正 /bg 不帶 prompt 時會對 fork 出的 session 送出 "continue" 的問題——fork 現在會等待輸入
+- 修正 --agent <name> 在沒有加 plugin: 前綴時找不到 plugin 提供的 agent 的問題
+- 修正從 agent view 刪除 session 時沒有移除其 transcript 檔案的問題
+- 修正在 Windows Terminal 上捲動已附加的背景 session 時出現殘留片段渲染（stale-fragment rendering）的問題
+- 修正背景 agent 在主機休眠或 macOS App Nap 後誤判 worker 停滯（false-positive worker-stall detection storm）的問題
+- 修正 5xx 錯誤訊息指向 status.claude.com 而非顯示已設定的 gateway 或雲端供應商名稱的問題
+- PowerShell 工具現在預設在 Windows 上為 Bedrock、Vertex 和 Foundry 使用者啟用。可透過 CLAUDE_CODE_USE_POWERSHELL_TOOL=0 取消
+- claude agents 現在接受 --add-dir、--settings、--mcp-config 和 --plugin-dir，並套用到 dashboard 及從中派發的背景 session
+- claude agents 接受 --permission-mode、--model、--effort 和 --dangerously-skip-permissions 來設定從該 view 派發的 session 預設值
+- claude --bg --dangerously-skip-permissions 現在會在 retire→wake 之間持續保留
+- 修正背景 session 靜默地將 IDE 檔案參照捕獲到 warm spare 的輸入中，導致該參照被前置到從 claude agents 派發的下一個 prompt 的問題
+- Worktree 清理不再於 git worktree remove 失敗時退而使用 rm -rf，避免遺失被 gitignore 的檔案或進行中的檔案
+- 修正 macOS 上的背景工作 session 在讀取 ~/Documents、~/Desktop 或 ~/Downloads 下的檔案時出現 "Operation not permitted" 錯誤的問題（即使已授予完整磁碟存取權限）
+- /bg 現在會保留 --mcp-config、--settings、--add-dir、--plugin-dir 和 --strict-mcp-config，讓背景化的 session 在重新產生時保持其 MCP server 和設定
+- 從 claude agents 啟動的背景 session 現在會遵守 settings.json 中的 permissions.defaultMode（之前會被覆寫為 auto mode）
+- 修正：在 Windows 上，當回應正在串流時在 claude agents 中按 ← 可能導致 agent 列表對所有輸入無回應
+- /bg 和 ← 分離現在會保留 --fallback-model，讓背景化的 worker 在過載時降級到 fallback model 而非直接失敗
+- /bg 和 ← 分離現在會保留 --allow-dangerously-skip-permissions，讓 fork 出的 worker 在其 Shift+Tab 循環中保持 bypass-permissions 可用
+- 修正：背景 daemon 產生時，當 ~/.local/bin/claude launcher 不存在或不可執行時，現在會退而使用正在執行的 binary
+- 修正 claude agents --allow-dangerously-skip-permissions 將派發的 session 預設為 bypass mode 而非僅讓其在權限循環中可用的問題
+
 ## 2.1.142
 - 新增多個 claude agents flag：--add-dir、--settings、--mcp-config、--plugin-dir、--permission-mode、--model、--effort 以及 --dangerously-skip-permissions，用來設定派發的背景 session
 - Fast mode 現在預設使用 Opus 4.7（先前為 Opus 4.6）。設定 CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE=1 可將 fast mode 釘選在 Opus 4.6
