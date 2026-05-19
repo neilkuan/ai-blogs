@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.144 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.144 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.144</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 /resume 支援背景工作階段（background sessions）— 透過 claude --bg 或 agent view 啟動的工作階段現在會跟互動式的一起顯示，並標註 bg</li>
+<li>背景 subagent 完成通知現在會顯示經過時間（例如「Agent completed · 3h 2m 5s」）</li>
+<li>/plugin 的瀏覽與探索面板現在會顯示 plugin 最後更新時間</li>
+<li>/model 現在只會變更當前工作階段的模型；在模型選擇器中按 d 可設定新工作階段的預設值</li>
+<li>將「extra usage」重新命名為「usage credits」；/extra-usage 現改為 /usage-credits（舊名稱仍可使用）</li>
+<li>修正當 api.anthropic.com 無法連線時（captive portal、防火牆、VPN 問題）啟動會卡住最多 75 秒的問題 — 側通道 API 呼叫現在 15 秒後就會逾時</li>
+<li>修正錯過視窗大小變更事件（例如拖曳 VS Code 分割面板分隔線）後終端機輸出亂碼的問題 — 現在會在下一幀自動修復，不再需要按 Ctrl+L</li>
+<li>修正在很長的工作階段中可能出現的漸進式終端機顯示損壞（殘留/亂碼字元），之前只能透過調整終端機大小或重啟來清除</li>
+<li>減少 VS Code 中的終端機渲染閃爍，降低了 spinner 動畫的色彩數量</li>
+<li>修正 macOS 背景工作階段在專案位於受「完整磁碟存取權限」保護的資料夾下時，會以「exit 1 before init」崩潰的問題（2.1.143 的迴歸）</li>
+<li>修正讀取圖片副檔名與實際內容不符的檔案（例如 HTML 存成 .png）時造成對話無法恢復的問題 — 現在會退回（fallback）以純文字處理</li>
+<li>搜尋時減少不必要的工具錯誤：head/tail 檔案檢視現在滿足編輯前需先讀取的檢查，且 egrep、fgrep、git grep 或 git diff 的「無符合結果」（exit code 1）不再被回報為指令失敗</li>
+<li>修正 /branch 在進入 worktree 或某些背景工作階段後出現「No conversation to branch」失敗的問題</li>
+<li>修正在 AskUserQuestion 備註欄位按 Escape 會中止整個回合，而非返回答案選擇的問題</li>
+<li>修正透過 IDE 模型選擇器或啟動後的 applyFlagSettings 變更模型時未生效的問題</li>
+<li>恢復的工作階段現在會保留原本使用的模型，而非套用其他工作階段的 /model 選擇</li>
+<li>修正 Bedrock 和 Vertex 使用者無法從 /model 選擇器選取「Opus (1M context)」的問題（v2.1.129 的迴歸）</li>
+<li>修正設定了 forceLoginMethod 和 forceLoginOrgUUID 的使用者在遠端工作階段登入時出現「Can&#x27;t access this organization」失敗的問題</li>
+<li>修正 MCP 伺服器在 tools/list 回應有分頁時只回傳第一頁、靜默丟棄其餘工具的問題</li>
+<li>修正不支援 MIME 類型的 MCP 圖片（例如 SVG）會中斷對話的問題 — 現在會儲存到磁碟並在工具結果中引用</li>
+<li>修正在 skill 目錄內執行建置時造成 file descriptor 耗盡的問題 — 非 .md 檔案不再觸發 skill 重新載入</li>
+<li>修正工作階段標題從 plugin monitor 輸出產生，而非使用者第一則提示的問題</li>
+<li>修正 Skill 工具在 headless 模式下出現權限錯誤的問題（v2.1.141 的迴歸）</li>
+<li>修正在全新機器上首次載入後，你自己設定中啟用的 plugin 顯示「not cached」錯誤的問題；僅由專案 .claude/settings.json 啟用的 plugin 現在會顯示可操作的 claude plugin install 提示</li>
+<li>修正 claude mcp list 在 .mcp.json 無法解析時（例如使用 VS Code 的 &quot;servers&quot; key 而非 &quot;mcpServers&quot;）靜默回報沒有伺服器的問題 — 現在會顯示設定錯誤</li>
+<li>修正在自訂 ANTHROPIC_BASE_URL 設定和 Bedrock Mantle 上的背景側查詢（side-queries）未使用 Haiku 的問題 — 現在在設定了第一方 API key 或未設定 Haiku 模型時會正確退回</li>
+<li>修正在 Windows 上附加到背景工作階段時的捲動問題 — PgUp/PgDn、滑鼠滾輪和 Ctrl+O 逐字稿導覽現在可正常運作</li>
+<li>修正在附加到背景工作階段時關閉終端機會崩潰的問題</li>
+<li>修正 ! &lt;cmd&gt; exec 工作階段在附加狀態下不回應 Ctrl+C 的問題 — 現在會中斷正在執行的指令</li>
+<li>修正 agent view 中 shell 指令列在完成後仍停留在 Working 下方，以及在輸出過期後對已完成的列按 Enter 會重新執行指令的問題</li>
+<li>修正在 Windows 上，於 claude agents 中按 ← 會導致列表對鍵盤輸入無回應的問題</li>
+<li>修正在 Windows Terminal 中有 CJK 內容時，切換 Agent View 面板會出現左側邊緣殘影字元的問題</li>
+<li>/bg 和 ← 分離現在會保留透過 /add-dir 新增的目錄</li>
+<li>修正在分離一個已在原地編輯的工作階段後，Edit/Write 拒絕並顯示「background session hasn&#x27;t isolated its changes yet」的問題</li>
+<li>修正對已停止的背景工作階段執行 claude respawn &lt;id&gt; 時顯示「stopped」而非實際執行的問題</li>
+<li>修正 /resume 選擇器不顯示從背景工作階段 fork 出來的工作階段的問題</li>
+<li>修正從 claude agents 開啟工作階段或執行 claude logs &lt;id&gt; 在背景服務無回應時會卡住的問題 — 現在 10 秒後逾時並提供恢復提示</li>
+<li>修正由 subagent 產生的背景 Bash 任務在程序結束後仍在 SDK 任務面板中顯示「Running」的問題</li>
+<li>修正已完成或已停止的背景工作階段短暫無法喚醒時被永久標記為啟動崩潰的問題</li>
+<li>修正 claude agents 附加工作階段中的 markdown 連結顯示為純文字而非可點擊超連結的問題</li>
+<li>修正自訂 spinnerVerbs 被套用到回合後持續時間訊息的問題 — 內建的過去式（如「Worked for 5s」）已在該處恢復</li>
+<li>claude agents / --bg 的拒絕訊息現在會指出具體的阻擋原因（non-TTY、環境變數或設定），而非顯示通用訊息</li>
+<li>claude --bg --name &lt;label&gt; 現在會在啟動確認中回顯名稱</li>
+<li>claude agents：使用 Ctrl+R 重新命名背景工作階段後，附加工作階段的橫幅會立即更新</li>
+<li>背景工作階段的 worktree 隔離防護現在也適用於設定了 WorktreeCreate hook 的非 git VCS 使用者</li>
+<li>Plugin marketplace 的新增/更新現在會遵循 CLAUDE_CODE_PLUGIN_PREFER_HTTPS</li>
+<li>/plugin 在啟用、停用或解除安裝 plugin 後現在會返回已安裝列表</li>
+<li>/doctor 現在會在 command hook 缺少 command 欄位時顯示 exec-form 範例</li>
+<li>Skill 列表截斷不再顯示為啟動通知 — 執行 /doctor 可查看完整明細</li>
+<li>改善罕見的回應前串流停滯（stream stall）恢復機制 — 現在會重試一次串流，而非退回到較慢的非串流請求</li>
+<li>改善 SDK/headless MCP 啟動：pre-wait 現在與啟動重疊執行，而非在第一個回合前阻塞（MCP 伺服器較慢時可快最多 2 秒）</li>
+<li>問卷後的後續提示現在會在每次非關閉的問卷回應後出現，並附帶情境感知文案，讓你更容易透過 /feedback 分享更多細節</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
