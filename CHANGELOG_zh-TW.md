@@ -2,6 +2,28 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.145
+- 新增 claude agents --json，可將目前執行中的 Claude session 以 JSON 格式列出，方便腳本整合（tmux-resurrect、狀態列、session 選擇器）
+- 在 claude_code.tool OTEL span 中新增 agent_id 與 parent_agent_id 屬性，並修正 trace 的父子關係，讓背景 subagent span 正確巢狀在發起的 Agent tool span 底下
+- Status line 的 JSON 輸入現在會包含偵測到的 GitHub repo 與 PR 資訊
+- /plugin 的探索與瀏覽畫面現在會在安裝前顯示 plugin 的 commands、agents、skills、hooks 以及 MCP/LSP servers
+- claude agents 的終端機分頁標題現在會顯示等待輸入的數量，讓你 alt-tab 切到其他視窗時也能知道哪個 agent 需要你的注意
+- Slash command 與 @-mention 建議清單現在在全螢幕模式下支援滑鼠懸停與點擊
+- Stop 與 SubagentStop hook 的輸入現在包含 background_tasks 和 session_crons 欄位
+- 修正一個權限提示繞過問題：Bash 指令中對非允許清單環境變數的裸變數賦值（bare variable assignment）會被自動核准
+- 修正 MCP prompt slash command 在省略必要參數時顯示原始伺服器驗證錯誤的問題——現在錯誤訊息會指出缺少的參數名稱並顯示預期用法
+- 修正終端機調整大小或重新取得焦點後，spinner 與經過時間顯示凍結直到按下按鍵的問題
+- 修正跨專案 resume 提示在 Windows 預設的 PowerShell 5.1 中失敗的問題——Windows 現在使用 ; 作為指令分隔符
+- 修正語音按住說話（push-to-talk）在 agent 檢視的回覆面板中無法使用的問題
+- 修正多個任務同時建立時，任務清單以隨機順序呈現的問題
+- 修正 marketplace 已安裝時仍顯示過期的「Failed to install Anthropic marketplace」橫幅的問題
+- 修正 footer 中的 PR badge 在 session 內執行 gh pr create 及其他改變 PR 狀態的指令後沒有立即更新的問題
+- 修正 Agent Teams 中名稱含非 ASCII 字元的隊友因 header 編碼無效導致每次 API 呼叫都失敗的問題
+- 修正 /review 使用已棄用的 projectCards GraphQL 查詢，在有 Classic Projects 的 repo 上會報錯的問題
+- 修正 claude plugin validate 未標記 skills: 項目指向檔案而非目錄的問題——錯誤訊息現在會建議使用上層目錄
+- 修正使用 context: fork 的 skill 可能反覆重新呼叫自身而非執行的無限迴圈問題
+- 改善 Read 工具：當整檔讀取超過 token 上限時，現在會回傳截斷的第一頁並附上「PARTIAL view」提示，而非直接報錯
+
 ## 2.1.144
 - 新增 /resume 支援背景工作階段（background sessions）— 透過 claude --bg 或 agent view 啟動的工作階段現在會跟互動式的一起顯示，並標註 bg
 - 背景 subagent 完成通知現在會顯示經過時間（例如「Agent completed · 3h 2m 5s」）
