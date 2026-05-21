@@ -2,6 +2,39 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.147
+- 新增 Workflow 工具，用於確定性的多 agent 協作編排。預設關閉——設定 CLAUDE_CODE_WORKFLOWS=1 即可啟用
+- 釘選的背景 session（在 claude agents 中按 Ctrl+T）現在閒置時不會被關閉、套用 Claude Code 更新時會原地重啟，且只有在記憶體壓力下才會在非釘選 session 之後被回收
+- /simplify 已更名為 /code-review。現在會依照指定的力度等級回報正確性 bug（例如 /code-review high）；加上 --comment 可將發現直接以 inline 留言貼到 GitHub PR 上。舊的清理並修正行為已移除
+- 強化 REPL 與 Workflow 工具的沙箱，防範原型污染（prototype pollution）與 thenable-based 逃逸攻擊
+- 改善自動更新器：會重試暫時性網路失敗、失敗時回報具體的錯誤分類與 OS 錯誤碼，並在更新失敗時顯示目前版本
+- 改善大型檔案編輯時的 diff 渲染效能
+- 提示歷史不再記錄連續重複的輸入——用方向鍵上叫回一條提示再送出，不會多塞一筆副本
+- 修正企業登入限制（forceLoginOrgUUID 與 forceLoginMethod managed-settings）未對第三方 provider 及 API key session 生效的問題
+- 修正 ! 指令輸出中的 & 顯示為 &，導致在 headless 機器上從 gcloud auth login 等指令複製貼上 URL 時壞掉
+- 修正未知的 slash command 在 headless/SDK 模式下靜默無反應——現在會顯示錯誤訊息
+- 修正 /help 在非全螢幕的小終端機上渲染出壞掉的 tab 標頭，且每頁只顯示一個指令
+- 修正 shell snapshot 會丟棄名稱以單底線開頭的使用者函式，導致引用它們的 alias 壞掉
+- 修正 plugin agent 在 tools: frontmatter 中宣告多個 Agent(...) 類型時，只保留最後一個的問題
+- 修正 hook if 條件如 PowerShell(git push*) 永遠不匹配——之前只有 PowerShell(*) 能用
+- 修正 PowerShell 工具在指令依賴預設格式器時會丟失輸出
+- 修正：在 Windows 上，對 PowerShell 腳本執行選擇「Yes, and don't ask again」後，現在會寫入一條後續執行時真正能匹配的規則
+- 修正 PowerShell 工具在 Windows 上透過 winget 或 Microsoft Store 安裝 pwsh 時以 exit code 1 失敗
+- 修正 /effort 開啟時滑桿停在錯誤的等級——現在會從你目前的 effort 等級開始
+- 修正分頁載入 MCP server 時，第一頁之後的 resource、template 和 prompt 被丟棄
+- 修正：在 Windows 上，移除背景工作的 worktree 時不再順著 NTFS junction 進入主 repo
+- 修正 auto mode 在使用者或 skill 明確依賴 AskUserQuestion 時將其壓制的問題；auto-mode 分類器現在會把使用者的回答視為意圖訊號
+- 修正 /theme「New custom theme」與色彩編輯器對話框不回應 Esc 鍵
+- 修正在 Windows 上等待捲動穩定時偶發的卡住問題
+- 修正在 Windows 上當背景 session 結果包含全形（CJK）字元時，agent 檢視列表出現過期與重複列
+- 修正貼上的文字被以不可讀的 [Pasted text #N] placeholder 傳給 agent，而非實際內容
+- 修正 claude plugin details 與 /plugin 中的 plugin 元件計數翻倍——當 plugin manifest 列出的路徑與其預設目錄重疊時會發生
+- 修正背景化的 session 重新詢問你已經以「don't ask again」授權過的工具權限
+- 修正 CLAUDE_CODE_SUBAGENT_MODEL 未套用到 agent team 所產生的 teammate process
+- 修正 slash command 後面接 tab 或換行時被當成未知指令
+- 修正 /plugin、/status、/mobile、/sandbox、/permissions 選單中的多處間距與排版問題
+- 修正被移除的圖片仍觸發模型反覆重新讀取已不存在的媒體
+
 ## 2.1.146
 - /simplify 更名為 /code-review，可選擇性帶入努力程度參數（例如 /code-review high）
 - Auto 模式不再在使用者或 skill 明確依賴 AskUserQuestion 時將其抑制
