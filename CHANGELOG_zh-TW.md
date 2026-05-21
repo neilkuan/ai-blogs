@@ -2,6 +2,24 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.146
+- /simplify 更名為 /code-review，可選擇性帶入努力程度參數（例如 /code-review high）
+- Auto 模式不再在使用者或 skill 明確依賴 AskUserQuestion 時將其抑制
+- 修正 Windows PowerShell 工具在透過 winget 或 Microsoft Store 安裝 pwsh 時出現「command line is invalid」錯誤的問題（v2.1.124 引入的迴歸）
+- 修正 MCP 的 resources/list、resources/templates/list 和 prompts/list 在分頁伺服器上遺漏第一頁之後項目的問題
+- 修正 Windows Terminal 中附加的背景 session 在 Claude 串流輸出時全螢幕閃爍的問題
+- 修正自動更新器在更新失敗時狀態列未顯示目前版本的問題
+- 修正 Windows 上移除背景工作的 worktree 時會順著 NTFS junction 進入主 repo 的問題
+- 修正 /background 拒絕那些唯一輸入為 skill 或自訂斜線指令的 session
+- 修正背景化的 session 重新詢問你已經授權並勾選「不再詢問」的工具權限
+- 修正 /theme 色彩編輯器和「New custom theme」對話框無法用 Esc 關閉的問題
+- 修正透過 Agent SDK 執行時，串流 session 結束時拋出未捕獲例外的問題
+- 修正 forceLoginOrgUUID 和 forceLoginMethod 管理設定政策未對第三方 provider 及 API key session 生效的問題
+- 修正 GNOME Terminal 右鍵和中鍵貼上無法插入文字的問題
+- 修正 CLAUDE_CODE_SUBAGENT_MODEL 在多 agent session 中未被轉發給子程序的問題
+- 改善自動更新器的穩定性：原生版本檢查與下載現在會在遇到暫時性網路錯誤時重試，而非直接失敗
+- 改善大型檔案編輯時的 diff 渲染效能
+
 ## 2.1.145
 - 新增 claude agents --json，可將目前執行中的 Claude session 以 JSON 格式列出，方便腳本整合（tmux-resurrect、狀態列、session 選擇器）
 - 在 claude_code.tool OTEL span 中新增 agent_id 與 parent_agent_id 屬性，並修正 trace 的父子關係，讓背景 subagent span 正確巢狀在發起的 Agent tool span 底下
