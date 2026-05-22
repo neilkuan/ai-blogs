@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.148
+- 修正 Bash 工具對部分使用者每次執行指令都回傳 exit code 127 的問題（這是 2.1.147 引入的回歸錯誤（regression））
+
 ## 2.1.147
 - 新增 Workflow 工具，用於確定性的多 agent 協作編排。預設關閉——設定 CLAUDE_CODE_WORKFLOWS=1 即可啟用
 - 釘選的背景 session（在 claude agents 中按 Ctrl+T）現在閒置時不會被關閉、套用 Claude Code 更新時會原地重啟，且只有在記憶體壓力下才會在非釘選 session 之後被回收
