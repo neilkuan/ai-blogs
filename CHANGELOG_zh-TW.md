@@ -2,6 +2,34 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.149
+- /usage 現在會顯示各類別的用量明細——skills、subagents、plugins，以及每個 MCP server 的花費
+- /diff 詳細檢視現在支援鍵盤捲動（方向鍵、j/k、PgUp/PgDn、Space、Home/End）
+- Markdown 輸出現在會渲染 GFM 任務清單核取方塊（- [ ] todo / - [x] done），不再顯示為普通項目符號
+- 企業版：新增 allowAllClaudeAiMcps 管理設定，可在 managed-mcp.json 之外同時載入 claude.ai 的雲端 MCP 連接器
+- 修正 PowerShell 權限繞過問題：內建的 cd 函式（cd..、cd\、cd~、X:）會在不被偵測的情況下切換工作目錄，讓後續指令能讀取工作區以外的檔案
+- 修正 git worktree 中 sandbox 寫入白名單涵蓋了整個主 repository 根目錄，而非僅限共用的 .git 目錄（且 hooks/ 和 config 應被拒絕）
+- 修正 PowerShell 前綴/萬用字元允許規則（例如 PowerShell(dotnet.exe build *)）未預先核准原生執行檔和腳本的問題
+- 修正權限分析漏洞：parser 在 cd/pushd/popd 之後仍信任過時的 PWD/OLDPWD/DIRSTACK 變數追蹤值
+- 修正 Bash 工具中的 find 在大型目錄樹上耗盡 macOS 系統檔案/vnode 表導致主機崩潰的問題
+- 修正 managed-settings 核准對話框在啟動時接受後導致終端機凍結
+- 修正 /ultraplan 和遠端 session 建立時，在工作樹沒有實際變更的情況下報錯「Could not capture uncommitted changes」
+- 修正 otelHeadersHelper 在腳本路徑含有空格時靜默失敗；helper 失敗現在會回報在 /doctor 和 debug log 中
+- 修正 thinking spinner 在跨 tool call 和新的 thinking burst 時持續顯示琥珀色
+- 修正收合的 Bash 輸出在多短行輸出時回報錯誤的隱藏行數
+- 修正斜線指令的參數提示（argument hint）在提示溢出輸入框時裁切尾端已輸入的字元
+- 修正 Tab 補全一個 frontmatter name: 與目錄 basename 不同的 skill 後，參數提示和漸進式參數建議不會出現的問題
+- 修正狀態列顯示使用者的基準 /effort 設定，而非 skill/agent effort: frontmatter 所套用的 effort 等級
+- 修正 Ctrl+O 對話紀錄檢視在開啟瞬間凍結，而非持續追蹤新訊息
+- 修正編輯一筆從歷史紀錄叫回的 prompt 後，再用方向鍵上下瀏覽時編輯內容遺失
+- 修正 /config 退出摘要在切換無關設定時，錯誤回報 auto-compact 和 theme 有變更
+- 修正 /insights 在快取的 session-meta 檔案缺少選填欄位時崩潰
+- 修正格式錯誤的 PowerShell 和 History tool call（缺少 input）在對話紀錄收合時被誤分類為讀取操作
+- 修正從 claude.ai 或 Claude 行動 app 重新命名 Remote Control session 後，本地 session 名稱未更新導致 claude --resume 顯示舊名稱
+- 修正競爭條件（race condition）：剛送出的 prompt 可能在上方向鍵歷史中出現兩次
+- 修正在全螢幕模式點擊「Jump to bottom」膠囊後未立即消失
+- 改善 /feedback 回報內容，現在會包含 context compaction 之前的對話，讓長 session 中較早發生的問題更容易分類處理
+
 ## 2.1.148
 - 修正 Bash 工具對部分使用者每次執行指令都回傳 exit code 127 的問題（這是 2.1.147 引入的回歸錯誤（regression））
 
