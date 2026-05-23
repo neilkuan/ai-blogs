@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.150
+- 內部基礎設施改善（無使用者可見的變更）
+
 ## 2.1.149
 - /usage 現在會顯示各類別的用量明細——skills、subagents、plugins，以及每個 MCP server 的花費
 - /diff 詳細檢視現在支援鍵盤捲動（方向鍵、j/k、PgUp/PgDn、Space、Home/End）
