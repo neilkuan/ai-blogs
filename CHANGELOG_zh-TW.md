@@ -2,6 +2,41 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.152
+- /code-review --fix 現在會在審查完成後，將發現的問題直接套用到你的工作目錄，包含重複利用、簡化和效率方面的建議；/simplify 現在會呼叫 /code-review --fix
+- Skills 和斜線指令現在可以在 frontmatter 中設定 disallowed-tools，在該 skill 啟用期間移除指定工具
+- 新增 /reload-skills 指令，不用重啟 session 就能重新掃描 skill 目錄
+- SessionStart hook 現在可以回傳 reloadSkills: true 來重新掃描 skill 目錄，讓 hook 安裝的 skills 在同一個 session 中就能使用
+- SessionStart hook 現在可以透過 hookSpecificOutput.sessionTitle 在啟動和恢復時設定 session 標題
+- 新增 MessageDisplay hook 事件，讓 hook 可以在助理訊息顯示時進行轉換或隱藏
+- 新增 pluginSuggestionMarketplaces 管理設定：管理員可以設定允許清單，指定哪些組織 marketplace 的 plugin 可以透過情境感知提示被推薦
+- claude plugin marketplace remove 現在支援 --scope user|project|local，與 marketplace add、install、uninstall 保持一致
+- Claude Code 現在當主要模型找不到時，會在該 session 剩餘時間切換到你設定的 --fallback-model，而不是每個請求都失敗
+- Auto 模式不再需要同意確認（opt-in consent）
+- Vim 模式：NORMAL 模式下按 / 現在會開啟反向歷史搜尋（類似 Ctrl+R），與 bash/zsh 的 vi-mode 行為一致
+- /usage 明細現在包含大型 session 檔案；檔案以串流讀取方式掃描，記憶體使用量維持平穩
+- 摺疊區塊中的思考摘要現在至少會顯示 3 秒、以 markdown 渲染，並限制在 10 行以內（Ctrl+O 可查看完整思考過程）
+- 全螢幕模式中，「Thinking for Ns」指示器現在會即時往上計數，如果你在思考中途中斷，數值會保留
+- 簡化了 Workflow 工具的行內進度顯示——即時 agent 數量現在只顯示在提示列下方的持久狀態列
+- 回應後的計時器現在會顯示「Waiting for N background agents/workflows to finish」，當背景 agent 或 workflow 仍在執行時，並在結果處理完成後回報累計時間
+- 新增 session 進入點作為 OpenTelemetry metric 屬性（app.entrypoint，透過 OTEL_METRICS_INCLUDE_ENTRYPOINT=true 啟用）
+- 修正在很長的 session 中終端樣式逐漸劣化的問題，透過回收渲染器的樣式池解決
+- 修正 sandbox 啟用警告在精簡啟動模式下不會出現的問題——現在在所有版面配置中都會顯示
+- 修正載入動畫在工具執行期間顯示「still thinking」/「almost done thinking」的問題，並在每次工具執行後將思考狀態重設為「thinking」
+- 修正 focus 模式在沒有隱藏活動的回合中顯示多餘的「N messages hidden」計數
+- 修正點擊展開的工具結果中的連結時，會把該區塊摺疊起來而非開啟連結的問題
+- 修正 markdown 表格儲存格邊框繼承行內程式碼顏色、換行接續行失去樣式、以及窄終端堆疊版面中空標題儲存格顯示標籤的問題
+- 修正具有相同指令但不同環境變數的 plugin MCP server 被錯誤去重的問題
+- 修正 /doctor 對過期的 enabledPlugins 條目（參照已移除的 marketplace 或已刪除的 plugin）回報「marketplace not found」或「plugin not found」的問題
+- 修正追蹤 git branch 的 plugin 在 plugin registry 重建後，靜默地不再收到更新的問題
+- 修正遠端 MCP server 在啟用 egress proxy 的 Claude Code Remote session 中無法連線的問題
+- 修正在對話沒有訊息時、或在解析為相同底層值的 effort 等級之間切換時，出現 effort 變更確認對話框的問題
+- 修正 Agent 工具描述參照了一個在 --bare 模式或停用附件時永遠不會送達的 agent 清單的問題
+- 修正在 claude agents 中，當子 agent 已被取消後接受過期的權限提示時，背景 worker 崩潰的問題
+- 修正當 API 只透過巢狀的 cache_creation 明細回報快取寫入時，transcript 和結果用量中 cache_creation_input_tokens 顯示為 0 的問題
+- 修正 PushNotification 工具在啟用 Remote Control 的 SDK 託管 session 中，錯誤回報「Mobile push not sent (Remote Control inactive)」的問題
+- 修正在模型或登入切換後，過期的 thinking-block 簽章殘留在歷史中導致 session 卡住的問題；現在會主動清除並搭配重試安全網
+
 ## 2.1.150
 - 內部基礎設施改善（無使用者可見的變更）
 
