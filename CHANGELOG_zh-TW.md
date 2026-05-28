@@ -2,6 +2,52 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.154
+- Opus 4.8 來了！現在預設使用 high effort · 用 /effort xhigh 來處理你最硬的任務
+- 全新動態工作流（dynamic workflows）：叫 Claude 建立一個工作流，它會在背景協調數十到數百個 agent 來執行，讓你能處理更大型、更複雜的任務。執行 /workflows 查看你的執行紀錄
+- Opus 4.8 的 Fast mode 現在只要之前成本的一小部分：2 倍標準費率換 2.5 倍速度
+- 精簡系統提示（lean system prompt）現在是所有模型的預設值，Haiku、Sonnet 和 Opus 4.7 及更早版本除外
+- Claude 現在只在真的無法自行判斷時才會跳出多選題提示，不再在已有足夠上下文時還問你
+- /simplify 現在只跑清理類的審查（重用、簡化、效率、抽象層級），並直接套用修正，而非跑完整的 /code-review --fix 抓 bug 審查
+- /effort 滑桿標籤從 "Speed"/"Intelligence" 改名為 "Faster"/"Smarter"，更直覺
+- claude agents：輸入 ! <command> 可以把 shell 指令當成背景 session 執行，你可以隨時 attach 或 detach。也可以用 claude --bg --exec '<command>'
+- claude agents：/logout 現在會真的登出，而不是被丟到背景 session
+- ←← 開啟 agents 視圖現在在 Bedrock、Vertex、Foundry 以及停用 telemetry 時都能用了
+- Claude in Chrome：透過 /chrome → "Select browser…" 選擇要用哪個已連線的瀏覽器，或在有多個瀏覽器連線時於對話中選擇
+- Plugin 現在可以在 plugin.json 或 marketplace 項目中宣告 defaultEnabled: false；用 /plugin 或 claude plugin enable 來啟用。已啟用 plugin 的相依套件仍會自動啟用
+- /plugin 的 Discover 分頁現在會把與當前目錄相關的 plugin 釘選並標註 "suggested for this directory"
+- 串流工具執行（streaming tool execution）現在永遠啟用，包括停用 telemetry 或在 Bedrock/Vertex/Foundry 上時（之前藏在 feature flag 後面）
+- Stdio MCP server 子程序的環境變數現在會收到 CLAUDE_CODE_SESSION_ID 和 CLAUDECODE=1
+- claude mcp list/get 現在會把未核准的 .mcp.json server 顯示為 ⏸ Pending approval，而非在 output 被 pipe 時自動核准並連線
+- /remote-control 自動完成現在會在 Remote Control 已啟用時顯示 "Disconnect Remote Control"
+- 在 /claude-api skill 中新增 Claude Opus 4.8 支援及 4.7 → 4.8 遷移指南
+- 已棄用 CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE（將於 06/01 移除）。若要在 Opus 4.6 上使用 fast mode，請用 /model claude-opus-4-6[1m] 切換後再 /fast on
+- 改善 auto-mode 分類器對資料外洩的偵測，特別是大量傳輸 repository 內容的情況
+- 修正 rm -rf $HOME 在 HOME 有尾端斜線時未被擋下為危險路徑的問題
+- 修正 $TMPDIR 在同一 session 中的沙箱與非沙箱 Bash 指令裡解析到不同目錄的問題
+- 修正 claude agents 中當 Claude Code 主題與終端機背景不匹配時，高亮列文字無法閱讀的問題
+- 修正背景 agent 完成通知在某些 1M context 模型上觸發過早的 "out of context" 行為
+- 修正背景 session 分類器在排程的 /command 觸發時遺失使用者目標的問題
+- 修正釘選的背景 session 在 Claude Code 更新後每分鐘重新生成，導致重複的 agent 啟動通知和閒置時的程序翻攪（process churn）
+- 修正卡在 "blocked"、"running" 或 "working" 的背景 session 在閒置寬限期後未退休的問題
+- 修正背景 session 中的 subagent 繞過 worktree 隔離防護，寫入共用 checkout 的問題
+- 修正 macOS 上 daemon 結束後孤立的 claude --bg-pty-host 程序佔用 100% CPU 的問題
+- 修正選項對話框中分隔線下方的選項無法用數字鍵快捷鍵選取的問題
+- 修正 worktree.baseRef: "head" 在從 linked worktree 內生成 subagent 或呼叫 EnterWorktree 時，解析到主 checkout 的 HEAD 而非當前 worktree 的 HEAD 的問題
+- 修正當前一行剛好在終端機寬度結束時，換行後出現多餘前導空格的問題
+- 修正 VS Code 中間歇性終端機渲染損壞，透過限制 thinking spinner 產生的不同顏色數量
+- 修正當 plan-mode 提示以貼上的圖片或文字開頭時，計畫檔名包含 [Image #N] / [Pasted text #N] 佔位符的問題
+- 修正彩色工具輸出上的幽靈展開/點擊提示：短的 ANSI 彩色行如果能在螢幕內顯示，不再出現 "ctrl+o to expand" 提示
+- 修正 managed settings 中單一無效的 allowedMcpServers/deniedMcpServers 項目導致整個 managed-settings 政策被丟棄的問題；現在只會丟棄該壞項目並在 claude doctor 顯示警告
+- 修正在不支援 effort 參數的模型上設定 CLAUDE_CODE_ALWAYS_ENABLE_EFFORT 時出現 API 400 錯誤的問題
+- Windows：修正因 claude.exe 正在使用中導致更新失敗時，顯示通用錯誤而非提示你關閉其他 session 再重試的問題
+- 移除快捷鍵說明面板中過時的 "& for background" 提示
+- [VSCode] Auto mode 不再需要 bypass-permissions 設定才能出現在模式選擇器中，且首次啟用時會在新 session 畫面顯示可關閉的說明通知
+- 修正當只有工作流在執行時，提示下方的任務面板顯示一個無法選取的 "main" 列的問題
+- 修正 /mcp 工具列表和工具詳情在 MCP server 有很長或多行的工具名稱或很長描述時的渲染問題
+- 修正 /model 選擇器在 fast mode 開啟時，未對 API（隨用隨付）使用者的 Default 選項顯示 fast mode 定價的問題
+- 修正 auto mode 在安全分類器推理時用完 output token 時，錯誤地以 "could not evaluate this action" 封鎖操作的問題
+
 ## 2.1.153
 - 新增 skipLfs 選項給 github/git plugin marketplace 來源，可在 clone 和更新時跳過 Git LFS 下載
 - Claude Code 現在會在你的 npm 全域安裝無法自動更新時顯示一次性通知；/doctor 會列出修正方式
