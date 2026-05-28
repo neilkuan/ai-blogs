@@ -2,6 +2,44 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.153
+- 新增 skipLfs 選項給 github/git plugin marketplace 來源，可在 clone 和更新時跳過 Git LFS 下載
+- Claude Code 現在會在你的 npm 全域安裝無法自動更新時顯示一次性通知；/doctor 會列出修正方式
+- Status line 指令現在會收到 COLUMNS 和 LINES 環境變數，讓腳本可以根據終端寬度調整輸出大小
+- claude agents：dispatch 輸入框的自動完成現在會建議原生斜線指令和內建 skills，不再只有專案 skills
+- claude agents：PR 欄位現在會顯示 PR #N（單一 PR）或 N PRs（多個 PR）
+- claude doctor 現在會顯示你上次更新嘗試的結果
+- 將 MCP server 和 connector 各自獨立的「需要驗證」啟動通知合併成一則訊息
+- macOS：背景 agent 現在在「隱私權與安全性」中顯示為「Claude Code」，且升級後會保留權限授權
+- 修正有狀態的 MCP server 在沒有可選的 GET SSE stream 時，對 tools/list 不斷重連的問題（v2.1.147 的迴歸）
+- 修正自訂 API gateway 可能收到使用者的 Anthropic OAuth 憑證，而非 gateway 本身 token 的迴歸問題
+- 修正 subagent（Agent tool）frontmatter MCP server 忽略 --strict-mcp-config、--bare、remote mode、企業託管 MCP 設定，以及 managed-settings MCP server allow/deny 政策的問題
+- --strict-mcp-config 不再移除明確傳入的 agent 定義（--agents / SDK agents）中的 inline mcpServers，被封鎖的 subagent MCP server 現在會顯示可見警告
+- 修正 Windows PowerShell 安裝程式在安裝實際失敗時仍回報「Installation complete!」的問題
+- 修正 claude update 在 npm 安裝中裝了最新版本而非設定的 release channel 版本的問題
+- 修正透過 transcript 檔案路徑恢復 session 時，在有大量已儲存 session 的機器上造成過度記憶體使用（數 GB）的問題
+- 修正 claude agents 和 claude --bg 在升級後仍跑在 binary-takeover 支援之前啟動的舊 daemon 上的問題
+- 修正在 stream-json 模式下 stdin 未帶 EOF 就關閉時，CLI 可能無法退出而留下過期 session 標記的掛起問題
+- 修正 Claude 回應中格式錯誤的 file:// 連結在終端中無法點擊的問題
+- 修正 claude --help 在寬度小於 92 欄的終端上輸出未換行的問題
+- 修正 MCP tool 進度通知在收合的工具檢視中未渲染的問題
+- 修正 Agent tool 搭配 subagent_type: 'claude' 時在未文件化的暫時 worktree 中執行，可能靜默丟棄寫入 gitignored 路徑的輸出的問題
+- /bg 在 Claude 回應中使用時，現在會在背景 session 中繼續回應，而非直接丟棄
+- 修正 /btw 快捷鍵在背景 session 有任務執行時變得無回應的問題
+- 修正背景 session 將暫存檔寫入 $CLAUDE_JOB_DIR 時觸發「敏感檔案」權限提示的問題
+- 修正恢復工作目錄已被刪除的背景 agent 時，顯示截斷的 stack trace 而非清楚錯誤訊息的問題
+- 修正 EnterWorktree 在背景 session 中無法立即使用（之前需要先執行 ToolSearch）的問題
+- 修正 iTerm2/Terminal.app 中 cmd+k 未重繪已附加的背景 session 的問題
+- 修正 Windows 上附加背景 session 時，IME 候選字視窗出現在螢幕底部而非輸入游標旁的問題
+- 修正從僅支援 256 色的終端附加到背景 agent 時，agent 已渲染檔案 diff 後出現背景色溢出的問題
+- 修正 /copy 和選取即複製在 tmux 內附加到背景 session 時，靜默無法更新系統剪貼簿的問題
+- 修正啟用 Remote Control 時開啟 claude agents，退出後在 Code 分頁留下殭屍 session 項目的問題
+- 修正背景 session 中 /rename 未立即更新 session 橫幅的問題
+- 修正 Windows 更新回滾：如果 Windows 更新失敗，Claude Code 現在會透過複製還原原始執行檔，並告訴你如何恢復
+- [VSCode] 修正 Windows 上 VS Code 關閉時 Claude Code 程序未正常關閉，導致錯誤的「unclean exit」報告和孤立 MCP server 的問題
+- /model 現在會將你的選擇儲存為新 session 的預設值（與 IDE 行為一致）。在選擇器中按 s 可僅切換當前 session 的模型。
+- 如果你自訂了 modelPicker:setAsDefault 快捷鍵，請在 keybindings.json 中改名為 modelPicker:thisSessionOnly（d 動作已被 s 取代）
+
 ## 2.1.152
 - /code-review --fix 現在會在審查完成後，將發現的問題直接套用到你的工作目錄，包含重複利用、簡化和效率方面的建議；/simplify 現在會呼叫 /code-review --fix
 - Skills 和斜線指令現在可以在 frontmatter 中設定 disallowed-tools，在該 skill 啟用期間移除指定工具
