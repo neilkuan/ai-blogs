@@ -2,6 +2,41 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.157
+- .claude/skills 目錄中的 plugin 現在會自動載入，不需要 marketplace
+- 新增 claude plugin init <name> 指令，可在 .claude/skills 中快速建立新 plugin 骨架
+- /plugin 參數現在支援自動補全：子指令、已安裝的 plugin 名稱、以及已知 marketplace 中的 plugin
+- claude agents：settings.json 中的 agent 欄位現在會套用到派發的 session，也可用 --agent <name> 覆蓋
+- EnterWorktree 現在可以在 session 進行中切換 Claude 管理的 worktree
+- tool_decision 遙測事件現在會在設定 OTEL_LOG_TOOL_DETAILS=1 時包含 tool_parameters（bash 指令、MCP/skill 名稱）
+- Claude 管理的 worktree 在 agent 結束後會保持未鎖定狀態，方便用 git worktree remove/prune 清理
+- 修正無法處理的圖片（零位元組、損毀）透過貼上、MCP 或對話框附加時會導致請求崩潰的問題，現在會改為文字佔位符
+- 修正在使用桌面應用程式、IDE 擴充套件或 SDK 時，sandbox 網路權限提示在 auto 和 bypass-permissions 模式下仍然出現的問題
+- 修正 claude agents 已完成的 session 在閒置的 subagent 仍停留或有洩漏的背景 shell 時無法正確退役的問題
+- 修正 claude agents 按 Esc 無法取消緩慢的「opening…」狀態，導致列表無回應的問題
+- 修正 .claude/worktrees/ 下的背景 agent worktree 在 30 天任務保留期清掃後變成孤兒的問題
+- 修正背景 session 在睡眠/喚醒後重新連接時沒有告知模型正確日期的問題
+- 修正 claude agents 中的選取即複製功能在 tmux 設定 set-clipboard on 時無法寫入系統剪貼簿的問題（2.1.153 的迴歸）
+- 修正 --resume 沒有回報在前一個 Claude Code 程序結束時仍在執行的背景 subagent 的問題
+- 修正 --resume session 選擇器在全螢幕模式下離開後殘留內容在終端機上的問題
+- 修正 --worktree 和 --worktree --tmux 回到主 repo 根目錄而非當前連結的 worktree 的問題
+- 修正 /model 選擇器在所選模型已是該系列最新版時仍顯示錯誤的「有更新版本可用」提示；釘選模型列現在會顯示模型描述而非原始 ID
+- 修正全螢幕模式下進行中的訊息文字出現 markdown 標記符號（反引號、星號）的問題
+- 修正啟動時核准 managed-settings 安全對話框後終端機凍結的問題
+- 修正終端機 UI 重繪後 scrollback 中偶爾出現重複行的罕見問題
+- 修正在 VS Code、Cursor 和 Windsurf 整合終端機中右鍵貼上會重複剪貼簿內容的問題
+- WSL：修正圖片貼上（alt+v 快捷鍵）、Windows 11 截圖貼上，並新增從 Windows 檔案總管拖曳圖片的支援
+- 透過消除冗餘的訊息渲染重新計算，改善長對話和恢復對話的效能
+- /terminal-setup 現在會停用 VS Code/Cursor/Windsurf 整合終端機的 GPU 加速，以防止文字渲染亂碼
+- Feature of the Week 的點數領取狀態現在會以通知形式顯示在狀態區，而非提示列上方的一行文字
+- claude agents：派發輸入框中的斜線指令自動補全現在支援子字串匹配
+- 移除「bash commands will be sandboxed」啟動橫幅 — sandbox 狀態仍可在 /status 和指令被阻擋時查看
+- 移除「/ide for …」啟動提示 toast
+- [IDE] 修正在背景 subagent 執行中點擊 Stop 實際上沒有停止它的問題
+- [VSCode] 修正 Opus 4.8 上 fast mode 指示器未顯示的問題
+- 在 workflow 觸發關鍵字後按 backspace 現在會關閉 workflow 請求（與 alt+w 相同），而非刪除一個字元
+- 在 /config 中新增「Workflow keyword trigger」設定，可防止提示中的「workflow」一詞觸發動態 workflow
+
 ## 2.1.156
 - 修正使用 Opus 4.8 時 thinking blocks 被修改導致 API 錯誤的問題。
 
