@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.156
+- 修正使用 Opus 4.8 時 thinking blocks 被修改導致 API 錯誤的問題。
+
 ## 2.1.154
 - Opus 4.8 來了！現在預設使用 high effort · 用 /effort xhigh 來處理你最硬的任務
 - 全新動態工作流（dynamic workflows）：叫 Claude 建立一個工作流，它會在背景協調數十到數百個 agent 來執行，讓你能處理更大型、更複雜的任務。執行 /workflows 查看你的執行紀錄
