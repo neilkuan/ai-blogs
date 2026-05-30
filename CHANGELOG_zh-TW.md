@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.158
+- Auto 模式現在可在 Bedrock、Vertex 和 Foundry 上搭配 Opus 4.7 及 Opus 4.8 使用。設定 CLAUDE_CODE_ENABLE_AUTO_MODE=1 即可啟用
+
 ## 2.1.157
 - .claude/skills 目錄中的 plugin 現在會自動載入，不需要 marketplace
 - 新增 claude plugin init <name> 指令，可在 .claude/skills 中快速建立新 plugin 骨架
