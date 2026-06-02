@@ -2,6 +2,35 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.160
+- 寫入 shell 啟動檔（.zshenv、.zlogin、.bash_login）及 ~/.config/git/ 前新增確認提示，避免意外執行指令
+- acceptEdits 模式現在會在寫入具有程式碼執行權限的建置工具設定檔前先提示確認（.npmrc、.yarnrc*、bunfig.toml、.bazelrc、.pre-commit-config.yaml、.devcontainer/ 等）
+- 編輯不再需要在用 grep 查看檔案後另外執行 Read：單檔 grep/egrep/fgrep 指令現在可滿足「編輯前需先讀取」的檢查
+- 修正 WSL 上選取複製無法寫入 Windows 剪貼簿的問題——改用 PowerShell interop 取代 OSC 52，因為 MobaXterm 等終端不支援後者
+- 修正從 claude agents 還原已完成的 session 時聊天紀錄遺失並重新執行原始 prompt 的問題
+- 修正背景 session 在整夜休眠後重新連接時遺失對話並重新執行原始 prompt 的問題
+- 修正 claude --bg 在背景 daemon 於高負載機器上冷啟動時偶爾出現「socket missing」錯誤
+- 修正 Windows 上用 claude rm 刪除背景 session 後，其啟動目錄在背景 daemon 結束前無法被刪除的問題
+- 修正恢復工作的背景 agent 在 agents 列表中被歸類到「已完成」的問題
+- 修正 claude agents 因自動更新程式在每次退出時重新檢查，導致返回 session 列表時凍結數秒的問題
+- 修正在 Windows 上連接背景 session 或在 agent 檢視畫面中，當主機 CPU 負載過高時 Esc、方向鍵和打字變得無回應的問題
+- 修正背景 agent 向不支援的終端（Apple Terminal、tmux）輸出終端同步標記，導致進入執行中 agent 時出現渲染異常的問題
+- 修正從 agents 列表開啟 session 後，滑鼠滾輪捲動的是 prompt 歷史而非對話記錄的問題
+- 修正 claude agents 檢視畫面中 CJK 輸入法組字視窗出現在螢幕左下角而非輸入游標位置的問題
+- 修正有效的 file:///C:/... 連結在支援超連結的 Windows 終端上被改寫成錯誤路徑的問題
+- 修正當專案目錄或分支名稱包含非 ASCII 或特殊字元時語音模式無法連線的問題
+- 修正第三方供應商（Bedrock/Vertex/Foundry）上 auto 模式不可用訊息錯誤地歸咎於模型，現在正確指向 CLAUDE_CODE_ENABLE_AUTO_MODE opt-in 設定
+- 修正 /effort ultracode 在模型無法執行 xhigh 時錯誤歸咎於 dynamic workflows 設定；ultracode 不再於不支援的模型上提供
+- 修正 model-not-found 錯誤建議使用 --model，但實際上是透過 SDK 或其他不適用 CLI flag 的 host 執行的情境
+- 修正在關閉 brief mode 後恢復 brief mode session 時，Claude 過去的回覆從捲動紀錄中消失的問題
+- 修正 vim 模式中 p 在暫存器內容是以 v$ 複製時貼到下一行而非游標位置的問題
+- 改善在 claude agents 中開啟近期未活動的背景 agent session 的效能
+- 改善 auto mode 分類器延遲，減少對例行操作的推理運算，降低出現「could not evaluate this action」阻擋的機率
+- 改善背景 session 清除流程（claude rm/stop、閒置回收），現在會先對執行中的 shell 子程序發送 SIGTERM 再 SIGKILL，讓清理 handler 有機會執行
+- 移除 CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE；該環境變數現在無任何作用
+- 移除啟動時的 JetBrains plugin 安裝建議
+- 將 dynamic-workflow 觸發關鍵字從 workflow 改名為 ultracode。「workflow」一詞不再觸發執行；用自己的話描述需求仍然有效。觸發關鍵字會在 prompt 輸入框中以紫色高亮顯示
+
 ## 2.1.159
 - 內部基礎設施改善（無使用者可見的變更）
 
