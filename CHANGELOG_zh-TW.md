@@ -2,6 +2,30 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.161
+- OTEL_RESOURCE_ATTRIBUTES 的值現在會作為 label 附加在 metric 資料點上，讓你可以依自訂維度（例如 team 或 repo）切分使用量指標
+- claude agents 的列表現在會在詳情前顯示 done/total；peek 模式會顯示執行時間最長的項目
+- /mcp 現在會把你從未登入過的 claude.ai connector 收合在「Show unused connectors」列後面
+- 平行工具呼叫：同一批次中某個 Bash 指令失敗不再會取消其他呼叫——每個工具會獨立回傳自己的結果
+- 全螢幕模式：剪貼簿在 Linux 上有 wl-copy/xclip/xsel 時會優先使用，同時複製到 clipboard 和 PRIMARY selection（支援中鍵貼上），「按住 {key} 使用原生選取」的提示現在會依終端機顯示正確的按鍵
+- 修正 /effort 對話框、workflow 動畫和 prompt 關鍵字閃爍效果未遵守「減少動態效果」設定的問題
+- 修正 forceLoginOrgUUID/forceLoginMethod 管理設定策略在釘選組織的同時，錯誤阻擋了第三方 provider session（Bedrock、Vertex、Foundry、Mantle）（2.1.146 引入的迴歸）
+- 修正背景 subagent 輸出在使用 --output-format text 或 json 時汙染 claude -p 的 stdout
+- 修正 /usage-credits 對 Team 和 Enterprise 管理員觸發重新登入，而非導向組織的用量設定頁面
+- 修正 /autofix-pr 在 session 位於 git worktree 或另一個 repository 內時回報「cannot run on the default branch」
+- 修正 --resume 選擇器在目前目錄非 git worktree 時（例如 jj workspaces）不顯示該目錄的 session
+- 修正 Windows 上明確呼叫 bash 的 hook（例如 /usr/bin/bash script.sh）因「command not found」或「cannot execute binary file」而失敗
+- 修正 OpenTelemetry log event（user_prompt、api_request、tool_result、tool_decision）在 telemetry 初始化完成前發送時被靜默丟棄
+- 修正 claude mcp 的 list/get/add 把機敏資訊印到終端機：${VAR} 參照不再被展開，credential header 和 URL 中的 secret 會被遮蔽
+- 修正以 isolation: "worktree" 啟動的 Workflow agent 在背景 session 中被阻止編輯自己 worktree 內的檔案
+- 修正從 claude agents 派發的背景 session 使用 daemon 環境中過時的 model，而非 settings.json 中指定的 model
+- 修正恢復 session 後 render Write 工具結果時可能發生的 crash
+- 修正已完成的 subagent 在結果 finalize 階段發生錯誤時，持續顯示為執行中
+- 修正當 CLAUDE_CODE_TMPDIR 設定為較深路徑時，綁定 Unix socket 於 $TMPDIR 下的工具出現 EADDRINUSE 錯誤
+- 改善終端機 render 效能：穩定排版引擎的 JIT 編譯 profile
+- 改善大型檔案寫入的 render 效能
+- [VSCode] 新增提示建議停用終端機 GPU 加速（或執行 /terminal-setup）以修正字型渲染異常
+
 ## 2.1.160
 - 寫入 shell 啟動檔（.zshenv、.zlogin、.bash_login）及 ~/.config/git/ 前新增確認提示，避免意外執行指令
 - acceptEdits 模式現在會在寫入具有程式碼執行權限的建置工具設定檔前先提示確認（.npmrc、.yarnrc*、bunfig.toml、.bazelrc、.pre-commit-config.yaml、.devcontainer/ 等）
