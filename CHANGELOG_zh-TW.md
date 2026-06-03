@@ -2,6 +2,36 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.162
+- claude agents --json 現在包含 waitingFor 欄位，顯示等待中的 session 卡在什麼地方（例如權限提示）
+- --tools：在內建搜尋的 native build 上，明確列出 Grep/Glob 現在會正確提供專用搜尋工具（之前這些名稱會被靜默忽略）
+- /effort 現在會確認你選擇的等級將作為新 session 的預設值持續生效
+- 在自動完成選單中點擊斜線指令，現在會填入提示框而非立即執行；按 Enter 才會執行
+- Remote Control 現在顯示為常駐的底部標籤（附帶 session 連結），而非啟動訊息
+- 因應編輯器改名，在 /ide 選單、/terminal-setup 和 /scroll-speed 中，將 Windsurf 更名為 Devin Desktop
+- 修正當設定目錄為唯讀或無法寫入時，啟動會靜默卡住的問題 — Claude Code 現在會以記憶體內設定啟動，並顯示啟動錯誤，而非呈現空白畫面
+- 修正 WebFetch 權限規則未套用至內建預核准網域的問題；明確的 WebFetch(domain:...) deny/ask/allow 規則現在優先於預核准主機的自動允許
+- 修正 Windows 上使用反斜線（~\、\\server\share）或大小寫不同的路徑時，權限規則永遠不會匹配的問題，以及 Read deny 規則未將檔案從 Glob/Grep 結果中隱藏的問題
+- 修正在 turn 最開始發送中斷（Esc）時，在 stream-json/SDK session 中會被靜默丟棄，導致 turn 繼續執行卻沒有「已中斷」回饋的問題
+- 修正 API 400 no low surrogate in string 錯誤，發生在分類器側查詢和 MCP server 描述包含 emoji 且接近截斷邊界時
+- 修正 MCP 個別 server 的 timeout 設定值低於 1000 ms 時，會被強制提高為 1 秒 watchdog 而中止每個工具呼叫的問題；低於 1000 ms 的值現在會被忽略（回退至 MCP_TOOL_TIMEOUT 或預設值），claude mcp get 會加註說明
+- 修正 LSP 工具的 workspaceSymbol 操作不回傳任何結果的問題；現在接受 query 參數並傳遞給語言伺服器
+- 修正 claude agents 在寬螢幕終端機上，將即時狀態文字（工具參數、回覆、提示、執行輸出）截斷為 60–120 欄的問題；狀態詳情現在使用完整終端機寬度
+- 修正 claude agents 將過長的 session 名稱截斷為 40 欄的問題；名稱欄位現在會隨終端機寬度增長
+- 修正 claude agents attach 在背景服務重啟後首次嘗試時，偶爾會直接彈回 session 列表的問題
+- 修正 claude agents 中 Ctrl+V 貼上圖片在 dispatch 輸入框和 session 回覆框中無反應的問題；沒有圖片時貼上現在會顯示提示
+- 修正用 ← 將 session 背景化時，若背景服務無法啟動會靜默遺失對話的問題；session 現在會留在列表中顯示為失敗列，可用 Enter 喚醒
+- 修正從 agents 視圖回覆失敗時訊息會遺失的問題；現在會排入佇列，在下次 session 啟動時送出
+- 修正當 CLAUDE_CODE_TMPDIR 或 $TMPDIR 指向深層目錄時，跨 session 訊息傳遞（SendMessage）會靜默中斷的問題
+- 修正從 claude agents 開啟執行中的背景 session 時，會停頓 5 秒才 attach 的問題
+- 更安靜的啟動體驗：通知依嚴重程度分組，session 資訊和公告每次啟動共用一行
+- 啟動警告改寫得更短更清楚，每個都附帶具體修正方式
+- 啟動提示警告（deep link/預填提示）現在會固定在輸入框下方直到你處理，而非捲動消失
+- 失敗的 turn 現在顯示一行精簡警告，而非多行紅色錯誤區塊
+- 改善背景服務啟動和 claude update 驗證，會等待端點安全軟體掃描新二進位檔完成，而非 5 秒後就失敗
+- 背景 dispatch 啟動失敗時，若無 errno 可用，現在會回報錯誤類別名稱
+- 移除「Claude in Chrome enabled」和「marketplace installed」啟動訊息；模型自動更新和團隊引導提示現在以安靜通知顯示在 logo 下方
+
 ## 2.1.161
 - OTEL_RESOURCE_ATTRIBUTES 的值現在會作為 label 附加在 metric 資料點上，讓你可以依自訂維度（例如 team 或 repo）切分使用量指標
 - claude agents 的列表現在會在詳情前顯示 done/total；peek 模式會顯示執行時間最長的項目
