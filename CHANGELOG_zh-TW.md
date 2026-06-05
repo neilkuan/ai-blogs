@@ -2,6 +2,30 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.163
+- 新增 requiredMinimumVersion 和 requiredMaximumVersion 管理設定 — 若 Claude Code 版本不在允許範圍內，會拒絕啟動並引導使用者安裝核准的版本
+- 新增 /plugin list 指令，可列出已安裝的 plugin，支援 --enabled/--disabled 篩選
+- /btw 新增「c 複製」快捷鍵，可將原始 markdown 答案複製到剪貼簿，貼到其他地方時保留格式
+- Hooks：Stop 和 SubagentStop hook 現在可以回傳 hookSpecificOutput.additionalContext，讓 Claude 收到回饋並繼續對話，不會被標記為 hook 錯誤
+- Skills：新增 \$ 跳脫語法，可在 command body 中於數字前插入字面的 $
+- stdio MCP server 現在在 --resume 時會收到與 hooks/Bash 相同的 CLAUDE_CODE_SESSION_ID
+- 修正 claude -p 在最終結果後永遠掛住的問題 — 當背景指令一直不結束時，現在會在 stdin 關閉後約 5 秒停止背景 shell
+- 修正 claude -p 在 Bedrock/Vertex/Foundry 上設定 CI=true 且未設定 Anthropic API key 時，報錯「ANTHROPIC_API_KEY required」的問題
+- 修正 bash 指令在 bazel 和受 EDR 保護的 Go 工作流程中失敗的問題：$TMPDIR 被覆寫為 /tmp/claude-{uid} 套用到所有指令，而非僅限沙箱指令（2.1.154 引入的迴歸）
+- 修正 Windows 上 Bash 指令因 session-env 目錄帶有唯讀屬性或位於 OneDrive 內，而報錯「EEXIST: file already exists」的問題
+- 修正組織管理的權限規則在全新設定目錄首次啟動時，因 managed settings 抓取時機問題而未在整個 session 中生效
+- 修正 claude agents 中的背景 session 在 Claude Code 更新後重新連接時，遺失正在執行的背景任務
+- 修正離開 agent 檢視按 Esc 時終端機對齊錯亂並卡住數秒的問題
+- 修正在桌面應用程式中，當底層 process 已結束時，點擊背景任務晶片上的 Stop 未清除晶片的問題
+- 修正貼上操作的結束標記被終端機丟棄後，鍵盤輸入永久無回應的問題
+- 修正 hook if: "Bash(...)" 條件在包含 $() 或 $VAR 的每個 Bash 指令上都觸發的問題；pattern 現在也會比對 subshell 和反引號內的指令
+- 修正家目錄路徑的 deny 規則（例如 Read(~/Desktop/**)）未阻擋透過 $HOME 引用該路徑的 Bash 指令
+- 修正關閉 /mcp 和 /plugins 等面板對話框後，transcript 中殘留一行「(no content)」的問題
+- 背景 agent session 現在會在背景自動更新到新版 Claude Code，更新後開啟 session 不再需要等待冷啟動
+- / 選單中的內建指令和 skills 描述文字更清楚了
+- 訂閱切換建議現在顯示在啟動公告欄位，而非 toast 通知
+- claude agents 從狀態分組檢視進行 dispatch 時，現在會在開啟 agent 檢視的目錄中啟動 session
+
 ## 2.1.162
 - claude agents --json 現在包含 waitingFor 欄位，顯示等待中的 session 卡在什麼地方（例如權限提示）
 - --tools：在內建搜尋的 native build 上，明確列出 Grep/Glob 現在會正確提供專用搜尋工具（之前這些名稱會被靜默忽略）
