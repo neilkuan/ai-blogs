@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.165
+- 錯誤修正與穩定性改善
+
 ## 2.1.163
 - 新增 requiredMinimumVersion 和 requiredMaximumVersion 管理設定 — 若 Claude Code 版本不在允許範圍內，會拒絕啟動並引導使用者安裝核准的版本
 - 新增 /plugin list 指令，可列出已安裝的 plugin，支援 --enabled/--disabled 篩選
