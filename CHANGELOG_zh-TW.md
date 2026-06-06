@@ -2,6 +2,29 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.166
+- 新增 fallbackModel 設定，可設定最多三個備援模型，當主要模型過載或無法使用時依序嘗試；--fallback-model 現在也適用於互動式 session
+- deny 規則的 tool-name 欄位現在支援 glob pattern（"*" 可拒絕所有工具）；allow 規則會拒絕非 MCP 的 glob，deny 規則中的未知工具名稱會在啟動時發出警告
+- 強化跨 session 訊息機制：透過 SendMessage 從其他 Claude session 轉發的訊息不再具有使用者授權——接收端會拒絕轉發的權限請求，auto 模式也會封鎖它們
+- MAX_THINKING_TOKENS=0、--thinking disabled 以及各模型的 thinking 開關，現在可以透過 Claude API 停用預設會思考的模型的 thinking 功能（第三方 provider 不受影響）
+- 當 API 回傳非預期的不可重試錯誤時，Claude Code 現在會用備援模型重試該回合一次；驗證、速率限制、請求大小和傳輸錯誤仍會直接顯示
+- claude update 現在會在下載前先顯示目標版本，而不是靜默執行
+- claude agents：在列表中輸入 URL 現在會篩選出第一則 prompt 包含該 URL 的 session
+- 修正一個反覆出現的「image could not be processed」錯誤，以及在 session 中傳送無法處理的圖片時造成的額外 token 消耗
+- 修正遠端 session 在啟動時 worker 註冊階段遭遇短暫後端中斷後，會永久卡住的問題
+- 修正 JetBrains IDE 終端機（IntelliJ、PyCharm、WebStorm 等）在 2026.1+ 版本上的畫面閃爍問題，透過啟用 synchronized output 解決
+- 修正使用 Kitty 鍵盤協定的終端機（WezTerm、Ghostty、kitty）中，Shift+非 ASCII 字元（例如 Shift+ä → Ä）輸入被吃掉的問題
+- 修正 Windows 上 PowerShell 指令驗證偶爾嚴重逾時的問題，原因是被終止的程序的子程序仍佔住其輸出 pipe
+- 修正 macOS 上當 daemon 在連線狀態下終止後，孤立的 claude --bg-pty-host 程序會 CPU 跑滿 100% 的問題
+- 修正語音模式在切換 /voice 後需要執行 /login 才能清除過期的驗證檢查
+- 修正 managed settings 中有無效項目時，會靜默停止執行其餘有效政策的問題
+- 修正 managed-settings 的 allowedMcpServers/deniedMcpServers 條件在使用 ${VAR} 參照時無法正確比對的問題
+- 修正進入 git worktree 的背景 agent session 從 claude agents 重新開啟時，會不斷 crash-loop 並顯示「No conversation found」的問題
+- 修正串流時 Ctrl+O 逐字稿檢視中 thinking 文字重複顯示的問題
+- 修正在遠端 session 中執行 /doctor 時，顯示矛盾的「Not inside a remote session」檢查失敗訊息
+- 修正在 claude agents 的派送與回覆輸入框中輸入多行 prompt 時，游標卡在第一行末尾的問題
+- 修正在不支援 Unicode 的終端機上，背景 agent 任務列表中各列之間出現空白行的問題
+
 ## 2.1.165
 - 錯誤修正與穩定性改善
 
