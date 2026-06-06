@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.167
+- Bug 修正與穩定性改善
+
 ## 2.1.166
 - 新增 fallbackModel 設定，可設定最多三個備援模型，當主要模型過載或無法使用時依序嘗試；--fallback-model 現在也適用於互動式 session
 - deny 規則的 tool-name 欄位現在支援 glob pattern（"*" 可拒絕所有工具）；allow 規則會拒絕非 MCP 的 glob，deny 規則中的未知工具名稱會在啟動時發出警告
