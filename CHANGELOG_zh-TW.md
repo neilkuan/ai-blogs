@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.168
+- 錯誤修正與穩定性改善
+
 ## 2.1.167
 - Bug 修正與穩定性改善
 
