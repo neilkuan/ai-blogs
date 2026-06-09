@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STAR 面試法 — 把你的故事說成一場精彩演出</title>
+<meta name="description" content="用 Situation・Task・Action・Result 四個步驟，把行為面試題答得結構清楚、有畫面、有結果。含好壞答案對照與可複製的速查模板。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #0a0c11;
+    --ink-2:      #11141c;
+    --card:       #161a24;
+    --card-hi:    #1d222f;
+    --line:       #262c3a;
+    --line-soft:  #1c212d;
+
+    --text:       #eef1f6;
+    --dim:        #a6adbd;
+    --faint:      #6b7280;
+
+    /* STAR 四色 — 對應圖片 */
+    --s:   #5b6cff;  --s-soft: rgba(91,108,255,.16);   --s-glow: rgba(91,108,255,.45);
+    --t:   #2fbf6e;  --t-soft: rgba(47,191,110,.16);   --t-glow: rgba(47,191,110,.42);
+    --a:   #f0414a;  --a-soft: rgba(240,65,74,.16);    --a-glow: rgba(240,65,74,.42);
+    --r:   #c33bd8;  --r-soft: rgba(195,59,216,.16);   --r-glow: rgba(195,59,216,.42);
+
+    --serif: 'Fraunces', Georgia, serif;
+    --sans:  'Noto Sans TC', -apple-system, sans-serif;
+    --mono:  'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.75;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* 背景：聚光燈光暈 + 細顆粒 */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background:
+      radial-gradient(900px 600px at 12% -5%, var(--s-soft) 0%, transparent 55%),
+      radial-gradient(800px 500px at 90% 8%, var(--r-soft) 0%, transparent 55%),
+      radial-gradient(1000px 700px at 50% 110%, rgba(47,191,110,.10) 0%, transparent 55%);
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* 星點層 */
+  .stars { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  .stars i {
+    position: absolute; width: 2px; height: 2px; border-radius: 50%;
+    background: #fff; opacity: .5;
+    animation: twinkle var(--d,4s) ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%,100%{opacity:.12; transform:scale(.7)} 50%{opacity:.7; transform:scale(1.15)} }
+
+  /* 頂部進度條 */
+  .progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; z-index: 60;
+    background: linear-gradient(90deg, var(--s), var(--t), var(--a), var(--r));
+    box-shadow: 0 0 14px rgba(255,255,255,.25); }
+
+  /* 導覽 */
+  nav {
+    position: fixed; top: 22px; left: 50%; transform: translateX(-50%);
+    z-index: 50; display: flex; align-items: center; gap: 6px;
+    padding: 7px 9px; border-radius: 100px;
+    background: rgba(14,17,24,.72); backdrop-filter: blur(14px);
+    border: 1px solid var(--line); box-shadow: 0 8px 30px rgba(0,0,0,.45);
+  }
+  nav a {
+    display: flex; align-items: center; gap: 7px; text-decoration: none;
+    padding: 7px 13px; border-radius: 100px; color: var(--dim);
+    font-size: 13px; font-weight: 500; letter-spacing: .04em; transition: .25s;
+  }
+  nav a .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); opacity: .55; transition:.25s; }
+  nav a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+  nav a.active { color: #fff; background: rgba(255,255,255,.06); }
+  nav a.active .dot { opacity: 1; box-shadow: 0 0 12px var(--c); transform: scale(1.25); }
+  nav a span.lbl { display: none; }
+  @media (min-width: 720px){ nav a span.lbl { display: inline; } }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 26px; }
+
+  /* ───── Hero ───── */
+  header { position: relative; padding: 168px 0 96px; text-align: center; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: .32em;
+    text-transform: uppercase; color: var(--dim); margin-bottom: 30px;
+    opacity: 0; animation: fadeUp .8s .1s forwards;
+  }
+  .star-word {
+    display: flex; justify-content: center; gap: clamp(4px, 2vw, 20px);
+    margin-bottom: 14px;
+  }
+  .star-word b {
+    font-family: var(--serif); font-weight: 900; line-height: .82;
+    font-size: clamp(78px, 19vw, 188px);
+    position: relative; opacity: 0; transform: translateY(40px) scale(.85);
+    animation: pop .9s cubic-bezier(.2,.9,.25,1.2) forwards;
+  }
+  .star-word b::after {
+    content: attr(data-w); position: absolute; left: 0; top: 0; z-index: -1;
+    color: transparent; filter: blur(26px); opacity: .8;
+  }
+  .star-word b:nth-child(1){ color: var(--s); animation-delay:.20s } .star-word b:nth-child(1)::after{ color:var(--s) }
+  .star-word b:nth-child(2){ color: var(--t); animation-delay:.34s } .star-word b:nth-child(2)::after{ color:var(--t) }
+  .star-word b:nth-child(3){ color: var(--a); animation-delay:.48s } .star-word b:nth-child(3)::after{ color:var(--a) }
+  .star-word b:nth-child(4){ color: var(--r); animation-delay:.62s } .star-word b:nth-child(4)::after{ color:var(--r) }
+
+  .star-legend {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 22px;
+    margin: 8px 0 34px; opacity: 0; animation: fadeUp .8s .9s forwards;
+  }
+  .star-legend span { font-size: 14px; color: var(--dim); font-weight: 400; }
+  .star-legend span b { font-family: var(--serif); font-weight: 900; margin-right: 6px; }
+  .star-legend .s b{color:var(--s)} .star-legend .t b{color:var(--t)}
+  .star-legend .a b{color:var(--a)} .star-legend .r b{color:var(--r)}
+
+  h1.tagline {
+    font-family: var(--serif); font-weight: 600; font-style: italic;
+    font-size: clamp(26px, 5.4vw, 46px); line-height: 1.18; color: var(--text);
+    max-width: 16em; margin: 0 auto 22px; letter-spacing: .005em;
+    opacity: 0; animation: fadeUp .8s 1s forwards;
+  }
+  .lede {
+    font-size: clamp(15px, 2.4vw, 18px); color: var(--dim); font-weight: 300;
+    max-width: 34em; margin: 0 auto 42px; line-height: 1.85;
+    opacity: 0; animation: fadeUp .8s 1.15s forwards;
+  }
+  .scroll-cue {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .25em; color: var(--faint);
+    text-transform: uppercase; opacity: 0; animation: fadeUp .8s 1.3s forwards;
+  }
+  .scroll-cue::after { content:''; display:block; width:1px; height:46px; margin: 14px auto 0;
+    background: linear-gradient(var(--faint), transparent); animation: drop 2s ease-in-out infinite; }
+
+  @keyframes pop { to { opacity:1; transform: translateY(0) scale(1) } }
+  @keyframes fadeUp { from{opacity:0; transform:translateY(22px)} to{opacity:1; transform:translateY(0)} }
+  @keyframes drop { 0%,100%{transform:scaleY(.4); transform-origin:top; opacity:.4} 50%{transform:scaleY(1); opacity:1} }
+
+  /* ───── 區塊通用 ───── */
+  section { padding: 76px 0; position: relative; }
+  .reveal { opacity: 0; transform: translateY(34px); transition: opacity .8s, transform .8s; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  .kicker {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .26em; text-transform: uppercase;
+    color: var(--faint); margin-bottom: 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .kicker::before { content:''; width: 34px; height: 1px; background: var(--line); }
+  h2 {
+    font-family: var(--serif); font-weight: 900; line-height: 1.12;
+    font-size: clamp(30px, 5.6vw, 50px); letter-spacing: -.01em; margin-bottom: 22px;
+  }
+  .section-lead { font-size: 17px; color: var(--dim); max-width: 40em; line-height: 1.9; font-weight: 300; }
+  .section-lead strong { color: var(--text); font-weight: 500; }
+
+  /* 為什麼 — 統計卡 */
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 18px; margin-top: 46px; }
+  .why-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 28px 26px; transition:.3s; }
+  .why-card:hover { transform: translateY(-4px); border-color: var(--line-soft); box-shadow: 0 18px 40px rgba(0,0,0,.35); }
+  .why-card .ic { font-size: 26px; margin-bottom: 14px; }
+  .why-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+  .why-card p { font-size: 14.5px; color: var(--dim); line-height: 1.8; font-weight: 300; }
+
+  /* ───── STAR 四步驟 ───── */
+  .steps { margin-top: 30px; position: relative; }
+  .step {
+    position: relative; display: grid; grid-template-columns: 132px 1fr; gap: 30px;
+    padding: 40px 0; border-top: 1px solid var(--line-soft);
+  }
+  .step:first-child { border-top: none; }
+  @media (max-width: 680px){ .step { grid-template-columns: 1fr; gap: 18px; } }
+
+  .step-badge { position: relative; }
+  .step-badge .big {
+    font-family: var(--serif); font-weight: 900; font-size: 116px; line-height: .8;
+    color: var(--accent); position: relative; display: inline-block;
+    text-shadow: 0 0 38px var(--accent-glow);
+  }
+  @media (max-width: 680px){ .step-badge .big { font-size: 78px; } }
+  .step-badge .num { font-family: var(--mono); font-size: 12px; color: var(--faint); letter-spacing:.2em; margin-top: 4px; }
+
+  .step-body .eng { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--accent); letter-spacing: .04em; }
+  .step-body h3 { font-size: clamp(22px, 4vw, 28px); font-weight: 700; margin: 2px 0 12px; color: var(--text); }
+  .step-body .desc { font-size: 16.5px; color: var(--dim); line-height: 1.85; font-weight: 300; max-width: 38em; }
+  .step-body .desc b { color: var(--text); font-weight: 500; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; margin: 20px 0 4px; }
+  .chip {
+    font-size: 13.5px; font-weight: 500; padding: 7px 15px; border-radius: 100px;
+    background: var(--accent-soft); color: var(--text);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .ask {
+    margin-top: 20px; padding: 16px 20px; border-left: 3px solid var(--accent);
+    background: linear-gradient(90deg, var(--accent-soft), transparent);
+    border-radius: 0 12px 12px 0; font-size: 15px; line-height: 1.8;
+  }
+  .ask .q { color: var(--accent); font-weight: 600; font-size: 13px; letter-spacing:.04em; display:block; margin-bottom: 4px; }
+  .ask .ex { color: var(--dim); font-weight: 300; }
+  .ask .ex b { color: var(--text); font-weight: 500; }
+
+  .step.s { --accent: var(--s); --accent-soft: var(--s-soft); --accent-glow: var(--s-glow); }
+  .step.t { --accent: var(--t); --accent-soft: var(--t-soft); --accent-glow: var(--t-glow); }
+  .step.a { --accent: var(--a); --accent-soft: var(--a-soft); --accent-glow: var(--a-glow); }
+  .step.r { --accent: var(--r); --accent-soft: var(--r-soft); --accent-glow: var(--r-glow); }
+
+  /* ───── 好壞對照 ───── */
+  .qbox {
+    margin: 36px 0 30px; padding: 22px 26px; border-radius: 16px;
+    background: var(--ink-2); border: 1px solid var(--line);
+    font-family: var(--serif); font-style: italic; font-size: clamp(18px,3vw,23px); color: var(--text);
+  }
+  .qbox span { font-family: var(--mono); font-style: normal; font-size: 11px; letter-spacing:.2em; color: var(--faint); display:block; margin-bottom: 8px; text-transform: uppercase; }
+
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 720px){ .compare { grid-template-columns: 1fr; } }
+  .ans { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 26px 24px; }
+  .ans.bad { border-color: rgba(240,65,74,.3); }
+  .ans.good { border-color: rgba(47,191,110,.32); }
+  .ans .tag { display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:700; padding:6px 13px; border-radius:100px; margin-bottom:16px; }
+  .ans.bad  .tag { background: var(--a-soft); color: #ff8b91; }
+  .ans.good .tag { background: var(--t-soft); color: #5fe39a; }
+  .ans p { font-size: 15px; color: var(--dim); line-height: 1.9; font-weight: 300; }
+  .ans.good p { color: var(--text); }
+  .ans .seg { display:block; margin-bottom: 12px; padding-left: 14px; border-left: 2px solid var(--segc); }
+  .ans .seg:last-child{ margin-bottom:0; }
+  .ans .seg em { font-style: normal; font-family: var(--mono); font-size: 11px; letter-spacing:.12em; color: var(--segc); display:block; margin-bottom: 3px; }
+  .ans .seg.s{--segc:var(--s)} .ans .seg.t{--segc:var(--t)} .ans .seg.a{--segc:var(--a)} .ans .seg.r{--segc:var(--r)}
+  .ans .seg.s b{color:#9aa6ff} .ans .seg.r b{color:#e89bf2} .ans .seg b{font-weight:500; color:var(--text)}
+
+  /* ───── Do / Don't ───── */
+  .dd { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 40px; }
+  @media (max-width: 720px){ .dd { grid-template-columns: 1fr; } }
+  .dd-col { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 28px 26px; }
+  .dd-col h3 { font-size: 16px; font-weight: 700; margin-bottom: 18px; display:flex; align-items:center; gap:10px; }
+  .dd-col.do h3 { color: #5fe39a; } .dd-col.dont h3 { color: #ff8b91; }
+  .dd-col li { list-style: none; font-size: 14.5px; color: var(--dim); line-height: 1.7; padding: 9px 0 9px 28px; position: relative; border-top: 1px solid var(--line-soft); font-weight: 300; }
+  .dd-col li:first-of-type { border-top: none; }
+  .dd-col li::before { position: absolute; left: 0; top: 9px; font-weight: 700; }
+  .dd-col.do li::before { content: '✓'; color: #5fe39a; }
+  .dd-col.dont li::before { content: '✕'; color: #ff8b91; }
+  .dd-col li b { color: var(--text); font-weight: 500; }
+
+  /* ───── 模板 ───── */
+  .tpl { margin-top: 38px; background: var(--ink-2); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
+  .tpl-head { display:flex; align-items:center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid var(--line); background: var(--card); }
+  .tpl-head .dots { display:flex; gap:7px; }
+  .tpl-head .dots i { width:11px; height:11px; border-radius:50%; display:block; }
+  .tpl-head .dots i:nth-child(1){background:var(--s)} .tpl-head .dots i:nth-child(2){background:var(--t)}
+  .tpl-head .dots i:nth-child(3){background:var(--a)} .tpl-head .dots i:nth-child(4){background:var(--r)}
+  .tpl-head .ttl { font-family: var(--mono); font-size: 12px; letter-spacing:.14em; color: var(--dim); }
+  .copy-btn { font-family: var(--mono); font-size: 12px; color: var(--dim); background: rgba(255,255,255,.04);
+    border: 1px solid var(--line); padding: 7px 14px; border-radius: 9px; cursor: pointer; transition:.2s; letter-spacing:.05em; }
+  .copy-btn:hover { color: #fff; border-color: var(--dim); }
+  .copy-btn.ok { color: #5fe39a; border-color: rgba(47,191,110,.4); }
+  .tpl-body { padding: 8px 0; }
+  .tpl-row { display: grid; grid-template-columns: 96px 1fr; gap: 18px; padding: 18px 24px; border-top: 1px solid var(--line-soft); align-items: start; }
+  .tpl-row:first-child { border-top: none; }
+  .tpl-row .lt { font-family: var(--serif); font-weight: 900; font-size: 30px; line-height:1; color: var(--lc); }
+  .tpl-row.s{--lc:var(--s)} .tpl-row.t{--lc:var(--t)} .tpl-row.a{--lc:var(--a)} .tpl-row.r{--lc:var(--r)}
+  .tpl-row .lt small { display:block; font-family: var(--sans); font-weight: 500; font-size: 11px; letter-spacing:.1em; color: var(--faint); margin-top: 6px; }
+  .tpl-row .ph { font-size: 15px; color: var(--dim); line-height: 1.95; font-weight: 300; }
+  .tpl-row .ph u { text-decoration: none; color: var(--faint); border-bottom: 1px dashed var(--faint); padding: 0 3px; }
+
+  /* ───── Footer ───── */
+  footer { text-align: center; padding: 80px 26px 70px; border-top: 1px solid var(--line-soft); margin-top: 40px; }
+  footer .fstar { font-family: var(--serif); font-weight: 900; font-size: 42px; letter-spacing:.1em; margin-bottom: 18px; }
+  footer .fstar b:nth-child(1){color:var(--s)} footer .fstar b:nth-child(2){color:var(--t)}
+  footer .fstar b:nth-child(3){color:var(--a)} footer .fstar b:nth-child(4){color:var(--r)}
+  footer p { color: var(--dim); font-size: 15px; font-weight: 300; max-width: 28em; margin: 0 auto 8px; line-height: 1.9; }
+  footer .sig { font-family: var(--mono); font-size: 11px; color: var(--faint); letter-spacing:.18em; margin-top: 26px; }
+
+  ::selection { background: var(--s); color: #fff; }
+  @media (prefers-reduced-motion: reduce){ *{ animation: none !important; transition: none !important; } .reveal{opacity:1; transform:none;} }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="stars" id="stars"></div>
+
+<nav id="nav">
+  <a href="#s" data-sec="s" style="--c:var(--s)"><i class="dot"></i><span class="lbl">情境</span></a>
+  <a href="#t" data-sec="t" style="--c:var(--t)"><i class="dot"></i><span class="lbl">任務</span></a>
+  <a href="#a" data-sec="a" style="--c:var(--a)"><i class="dot"></i><span class="lbl">行動</span></a>
+  <a href="#r" data-sec="r" style="--c:var(--r)"><i class="dot"></i><span class="lbl">結果</span></a>
+</nav>
+
+<!-- ───── HERO ───── -->
+<header>
+  <div class="wrap">
+    <div class="eyebrow">行為面試 · 答題框架</div>
+    <div class="star-word">
+      <b data-w="S">S</b><b data-w="T">T</b><b data-w="A">A</b><b data-w="R">R</b>
+    </div>
+    <div class="star-legend">
+      <span class="s"><b>S</b>Situation 情境</span>
+      <span class="t"><b>T</b>Task 任務</span>
+      <span class="a"><b>A</b>Action 行動</span>
+      <span class="r"><b>R</b>Results 結果</span>
+    </div>
+    <h1 class="tagline">用四個字母，把你的故事說成一場精彩演出。</h1>
+    <p class="lede">
+      面試官問「請舉一個你曾經……的例子」時，腦袋一片空白？
+      STAR 是一套把經驗講得有結構、有畫面、有結果的萬用框架。
+      學會它，你的每個回答都能讓人記住。
+    </p>
+    <div class="scroll-cue">往下開始</div>
+  </div>
+</header>
+
+<!-- ───── WHY ───── -->
+<section id="why">
+  <div class="wrap reveal">
+    <div class="kicker">為什麼需要 STAR</div>
+    <h2>好的故事，輸在沒有結構</h2>
+    <p class="section-lead">
+      面試裡最常見的「行為題」——<strong>「告訴我一次你解決衝突的經驗」</strong>、<strong>「舉一個你面對期限壓力的例子」</strong>——
+      考的不是答案對錯，而是你能不能<strong>有條理地說清楚一件事</strong>。
+      STAR 把答案拆成四段，讓你不漏重點、不離題、最後一定落在「結果」上。
+    </p>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="ic">🧭</div>
+        <h3>不會講到一半卡住</h3>
+        <p>四個步驟就是四條軌道，照著走就不會東拉西扯、忘記重點在哪。</p>
+      </div>
+      <div class="why-card">
+        <div class="ic">🎬</div>
+        <h3>讓對方「看見」畫面</h3>
+        <p>具體的情境與行動比形容詞更有說服力，面試官能想像你在現場的樣子。</p>
+      </div>
+      <div class="why-card">
+        <div class="ic">📈</div>
+        <h3>把功勞講到位</h3>
+        <p>結尾落在可量化的結果，清楚證明「因為你」帶來了什麼改變。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── STEPS ───── -->
+<section id="steps">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="kicker">四個步驟</div>
+      <h2>S・T・A・R 各說什麼</h2>
+    </div>
+
+    <div class="steps">
+      <!-- S -->
+      <div class="step s reveal" id="s">
+        <div class="step-badge"><span class="big">S</span><div class="num">STEP 01</div></div>
+        <div class="step-body">
+          <div class="eng">Situation</div>
+          <h3>情境 — 描述你當時所處的情況</h3>
+          <p class="desc">用一兩句話交代<b>背景</b>：什麼時候、在哪個團隊、發生了什麼事。目的是讓面試官快速進入狀況，<b>點到為止就好</b>，別把鋪陳講成主角。</p>
+          <div class="ask">
+            <span class="q">怎麼開頭</span>
+            <span class="ex">「去年第四季，我在電商團隊負責結帳系統，<b>雙十一檔期前兩週</b>，我們發現舊金流撐不住預期的流量。」</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- T -->
+      <div class="step t reveal" id="t">
+        <div class="step-badge"><span class="big">T</span><div class="num">STEP 02</div></div>
+        <div class="step-body">
+          <div class="eng">Task</div>
+          <h3>任務 — 描述你必須完成的任務</h3>
+          <p class="desc">說清楚你<b>被賦予的目標</b>，以及讓這件事變難的因素。把難度講出來，後面的行動才顯得有份量。</p>
+          <div class="chips">
+            <span class="chip">挑戰</span><span class="chip">侷限</span><span class="chip">期限</span><span class="chip">問題</span>
+          </div>
+          <div class="ask">
+            <span class="q">怎麼定義任務</span>
+            <span class="ex">「我必須在 <b>12 天內</b>完成新金流整合與壓測，同時<b>不能影響現有交易</b>，否則檔期當天可能大量訂單失敗。」</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- A -->
+      <div class="step a reveal" id="a">
+        <div class="step-badge"><span class="big">A</span><div class="num">STEP 03</div></div>
+        <div class="step-body">
+          <div class="eng">Action</div>
+          <h3>行動 — 描述你採取的行動</h3>
+          <p class="desc">這是<b>整段的核心</b>。具體說出<b>「你」</b>做了哪些決策與步驟——不是「我們」，而是你個人的貢獻。展現你的能力面向：</p>
+          <div class="chips">
+            <span class="chip">團隊合作</span><span class="chip">領導能力</span><span class="chip">誠信正直</span><span class="chip">主動性</span>
+          </div>
+          <div class="ask">
+            <span class="q">怎麼講行動</span>
+            <span class="ex">「<b>我</b>先拆出風險最高的模組優先處理，<b>主動</b>約金流商開技術對接會議，協調兩位後端分工、自己負責壓測腳本，每天同步進度並把阻礙即時回報。」</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- R -->
+      <div class="step r reveal" id="r">
+        <div class="step-badge"><span class="big">R</span><div class="num">STEP 04</div></div>
+        <div class="step-body">
+          <div class="eng">Results</div>
+          <h3>結果 — 描述你行動後帶來的結果</h3>
+          <p class="desc">用<b>數字</b>收尾，證明你的行動真的有效。再加一句「學到什麼／後來如何延續」，會更有層次。</p>
+          <div class="chips">
+            <span class="chip">成就</span><span class="chip">進步</span>
+          </div>
+          <div class="ask">
+            <span class="q">怎麼收尾</span>
+            <span class="ex">「最後<b>提前 2 天上線</b>，當天承載平時 <b>4 倍流量、零金流失敗</b>，轉換率比前一年提升 <b>18%</b>，這套流程後來成為團隊大檔期的標準做法。」</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── COMPARE ───── -->
+<section id="compare">
+  <div class="wrap reveal">
+    <div class="kicker">實戰對照</div>
+    <h2>同一題，兩種答法</h2>
+    <div class="qbox">
+      <span>面試官的問題</span>
+      「請舉一個你在期限壓力下完成專案的例子。」
+    </div>
+    <div class="compare">
+      <div class="ans bad">
+        <span class="tag">✕ 沒有結構</span>
+        <p>「我以前工作很拚，常常加班把事情做完，主管都覺得我很可靠。遇到趕的時候我也都撐得下來，反正最後都有交出來，團隊合作也很 OK 啦。」</p>
+        <p style="margin-top:14px; font-size:13px; color:var(--faint)">→ 空泛、沒有具體事件、看不出你做了什麼、更沒有結果。</p>
+      </div>
+      <div class="ans good">
+        <span class="tag">✓ 套用 STAR</span>
+        <div class="seg s"><em>S 情境</em><b>雙十一前兩週，</b>我發現負責的結帳金流撐不住預期 3 倍流量。</div>
+        <div class="seg t"><em>T 任務</em>必須在 <b>12 天內</b>完成新金流整合與壓測，且不能影響現有交易。</div>
+        <div class="seg a"><em>A 行動</em><b>我</b>優先拆解高風險模組、主動約金流商對接、協調分工並每日回報阻礙。</div>
+        <div class="seg r"><em>R 結果</em><b>提前 2 天上線</b>，當天零失敗、轉換率 <b>+18%</b>，成為團隊標準流程。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── DO / DON'T ───── -->
+<section id="tips">
+  <div class="wrap reveal">
+    <div class="kicker">加分與地雷</div>
+    <h2>讓 STAR 更有殺傷力</h2>
+    <div class="dd">
+      <div class="dd-col do">
+        <h3>✓ 這樣做會加分</h3>
+        <ul>
+          <li>結果<b>盡量量化</b>：用 %、時間、金額、人數說話。</li>
+          <li>行動聚焦在<b>「我」的決策</b>，而不是整個團隊。</li>
+          <li>事前準備 <b>3～5 個故事</b>，對應不同能力（領導、衝突、失敗、創新）。</li>
+          <li>一段話控制在 <b>60～90 秒</b>，先講重點再補細節。</li>
+          <li>結尾加一句<b>「學到什麼」</b>，展現反思與成長。</li>
+        </ul>
+      </div>
+      <div class="dd-col dont">
+        <h3>✕ 這些是地雷</h3>
+        <ul>
+          <li>只講情境跟任務，<b>忘了講結果</b>——最重要的反而漏掉。</li>
+          <li>行動全用「<b>我們</b>」，聽不出你個人貢獻。</li>
+          <li>結果沒有數字，<b>無法量化</b>影響力。</li>
+          <li>鋪陳太長，<b>重點埋在最後</b>，面試官早就分心。</li>
+          <li>舉的例子<b>跟應徵職位無關</b>，浪費寶貴時間。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── TEMPLATE ───── -->
+<section id="template">
+  <div class="wrap reveal">
+    <div class="kicker">帶著走</div>
+    <h2>速查模板</h2>
+    <p class="section-lead">面試前把你的故事套進這四格，每一格都填滿，臨場就不會慌。</p>
+    <div class="tpl">
+      <div class="tpl-head">
+        <div class="dots"><i></i><i></i><i></i><i></i></div>
+        <div class="ttl">STAR_template.txt</div>
+        <button class="copy-btn" id="copyBtn">複製模板</button>
+      </div>
+      <div class="tpl-body">
+        <div class="tpl-row s"><div class="lt">S<small>情境</small></div><div class="ph">當時的背景是 <u>＿＿＿＿</u>，我所處的情況是 <u>＿＿＿＿</u>。</div></div>
+        <div class="tpl-row t"><div class="lt">T<small>任務</small></div><div class="ph">我需要達成的目標是 <u>＿＿＿＿</u>，挑戰／限制是 <u>＿＿＿＿</u>。</div></div>
+        <div class="tpl-row a"><div class="lt">A<small>行動</small></div><div class="ph">我採取的行動是 ① <u>＿＿</u> ② <u>＿＿</u> ③ <u>＿＿</u>（聚焦我的決策）。</div></div>
+        <div class="tpl-row r"><div class="lt">R<small>結果</small></div><div class="ph">結果是 <u>＿＿（數字）</u>，並且 <u>＿＿（長期影響／學到的事）</u>。</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── FOOTER ───── -->
+<footer>
+  <div class="fstar"><b>S</b><b>T</b><b>A</b><b>R</b></div>
+  <p>下次被問到「請舉一個例子」時，深呼吸，照著 S → T → A → R 走一遍。</p>
+  <p>你不是在背答案，而是在說一個只有你能說的故事。</p>
+  <div class="sig">SITUATION · TASK · ACTION · RESULTS</div>
+</footer>
+
+<script>
+  // 星點
+  (function () {
+    const box = document.getElementById('stars');
+    let html = '';
+    for (let i = 0; i < 48; i++) {
+      const x = (Math.sin(i * 12.9898) * 43758.5453) % 1;
+      const y = (Math.sin(i * 78.233) * 43758.5453) % 1;
+      const left = Math.abs(x) * 100, top = Math.abs(y) * 100;
+      const d = 3 + Math.abs(x) * 4;
+      html += `<i style="left:${left.toFixed(2)}%;top:${top.toFixed(2)}%;--d:${d.toFixed(1)}s;animation-delay:${(top % 3).toFixed(1)}s"></i>`;
+    }
+    box.innerHTML = html;
+  })();
+
+  // 進度條
+  const progress = document.getElementById('progress');
+  function onScroll() {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    progress.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // 區塊揭示
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // 導覽 scroll-spy（對應 S/T/A/R 四個步驟）
+  const links = [...document.querySelectorAll('nav a')];
+  const targets = links.map(a => document.querySelector('#' + a.dataset.sec));
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.toggle('active', l.dataset.sec === e.target.id));
+      }
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  targets.forEach(t => t && spy.observe(t));
+
+  // 複製模板
+  const tpl = `STAR 面試法 — 速查模板
+
+S 情境：當時的背景是＿＿，我所處的情況是＿＿。
+T 任務：我需要達成的目標是＿＿，挑戰／限制是＿＿。
+A 行動：我採取的行動是 ①＿ ②＿ ③＿（聚焦我的決策）。
+R 結果：結果是＿＿（數字），並且＿＿（長期影響／學到的事）。`;
+  const btn = document.getElementById('copyBtn');
+  btn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(tpl);
+      btn.textContent = '已複製 ✓'; btn.classList.add('ok');
+      setTimeout(() => { btn.textContent = '複製模板'; btn.classList.remove('ok'); }, 1900);
+    } catch (e) {
+      btn.textContent = '複製失敗';
+      setTimeout(() => { btn.textContent = '複製模板'; }, 1900);
+    }
+  });
+</script>
+</body>
+</html>
