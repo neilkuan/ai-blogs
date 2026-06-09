@@ -2,6 +2,38 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.169
+- 新增 --safe-mode flag（以及 CLAUDE_CODE_SAFE_MODE 環境變數），可以在停用所有自訂設定（CLAUDE.md、plugins、skills、hooks、MCP servers）的狀態下啟動 Claude Code，方便除錯
+- 新增 /cd 指令，讓你在不中斷 prompt cache 的情況下，把當前 session 移到新的工作目錄
+- 新增 disableBundledSkills 設定與 CLAUDE_CODE_DISABLE_BUNDLED_SKILLS 環境變數，可以對 model 隱藏內建的 skills、workflows 和斜線指令
+- 修正上/下方向鍵在長輸入行換行時會直接跳到歷史指令的問題——現在會先逐行移動，呼叫歷史記錄時也會從最近的那端進入
+- 修正企業受管 MCP 政策（allowedMcpServers/deniedMcpServers）在重新連線、IDE 類型設定、安裝後首次 session 的 --mcp-config servers、或遠端設定載入前未被正確執行的問題；同時修正沒有遠端設定的組織冷啟動過慢的情況
+- 修正 macOS 使用者以 claude.ai 憑證登入時，每次對話回合開始會卡住約 30-50ms 的 UI 延遲
+- 修正 claude -p 在 Windows 上因等待斜線指令/skill 掃描而變慢或看起來像當掉的問題（2.1.161 引入的 regression）
+- 修正 Remote Control 在 OAuth token 刷新恰好發生時恢復 session 會卡在「reconnecting」的問題
+- 修正 Windows 啟動時背景 git 指令在沒有快取憑證的情況下觸發 Git Credential Manager 的「Connect to GitHub」彈窗
+- 修正有自訂 statusline 的使用者看不到底部提示（例如「esc to interrupt」）的問題
+- 修正重新附加到遠端 session 時，過期的權限和對話框提示會反覆出現的問題（當 worker 在等待這些提示時死掉的情況）
+- 修正 claude agents --json 遺漏被封鎖和剛派發的背景 session 的問題；新增 --all 可包含已完成的 session，以及新的 id 和 state 欄位
+- 修正在 WSL + Windows Terminal 環境下，從 agent 畫面返回後 agents view 留下殘影/亂碼的問題
+- 修正背景 agents 在被派發到預熱 worker 時忽略專案層級設定的 env 值（例如 ANTHROPIC_MODEL）
+- 修正 MCPB plugin cache 在 Windows 上被無故失效，導致不必要的重新解壓
+- 修正 plugin .in_use PID lock 檔案無限累積的問題；來自已崩潰 session 的過期標記現在每天會清理一次
+- 修正不受信任的專案設定可以在未經信任確認的情況下設定 OTEL client-certificate 路徑的問題
+- /workflows 現在即使對話回合還在進行中也會立刻開啟
+- 改善 TaskCreate 可靠性：格式錯誤的輸入會自動修復，未載入工具的驗證錯誤現在會附上 schema
+- 改善組織停用 API key 認證時的錯誤訊息，會根據當前使用的 API key 來源給出對應指引
+- 降低回應串流和 spinner 動畫期間的 CPU 使用率
+- 恢復 Vertex/Foundry 預設 5 分鐘閒置逾時，讓停滯的串流會中斷而非無限等待；設定 API_FORCE_IDLE_TIMEOUT=0 可停用
+- 遠端受管設定中若有無效項目，現在會套用其餘有效的政策並浮出驗證錯誤，而非靜默丟棄整個 payload
+- 背景 session 現在會在 retire→wake 之間保留 --ide、--chrome、--bare、--remote-control 等 flag，並強化了 respawn 狀態驗證
+- 背景 session 現在會被告知在進入 worktree 前不能編輯共享 checkout，避免在 EnterWorktree 之前浪費一次被拒絕的編輯
+- 「CLAUDE.md is too long」警告的閾值現在會根據 model 的 context window 大小自動調整
+- Windows 上的自動更新在同一 session 內若 claude.exe 被其他 process 佔用，不再反覆重試
+- 改善斜線指令選單中 skill 標籤的顏色對比度
+- 透過 Apple/Google 訂閱但未設定付款方式的使用者，兌換 promo credit 時會說明要去哪裡新增付款方式
+- 新增提示：當同時執行多個 session 時，建議使用 claude agents
+
 ## 2.1.168
 - 錯誤修正與穩定性改善
 

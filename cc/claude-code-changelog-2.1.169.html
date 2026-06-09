@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.169 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.169 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.169</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 --safe-mode flag（以及 CLAUDE_CODE_SAFE_MODE 環境變數），可以在停用所有自訂設定（CLAUDE.md、plugins、skills、hooks、MCP servers）的狀態下啟動 Claude Code，方便除錯</li>
+<li>新增 /cd 指令，讓你在不中斷 prompt cache 的情況下，把當前 session 移到新的工作目錄</li>
+<li>新增 disableBundledSkills 設定與 CLAUDE_CODE_DISABLE_BUNDLED_SKILLS 環境變數，可以對 model 隱藏內建的 skills、workflows 和斜線指令</li>
+<li>修正上/下方向鍵在長輸入行換行時會直接跳到歷史指令的問題——現在會先逐行移動，呼叫歷史記錄時也會從最近的那端進入</li>
+<li>修正企業受管 MCP 政策（allowedMcpServers/deniedMcpServers）在重新連線、IDE 類型設定、安裝後首次 session 的 --mcp-config servers、或遠端設定載入前未被正確執行的問題；同時修正沒有遠端設定的組織冷啟動過慢的情況</li>
+<li>修正 macOS 使用者以 claude.ai 憑證登入時，每次對話回合開始會卡住約 30-50ms 的 UI 延遲</li>
+<li>修正 claude -p 在 Windows 上因等待斜線指令/skill 掃描而變慢或看起來像當掉的問題（2.1.161 引入的 regression）</li>
+<li>修正 Remote Control 在 OAuth token 刷新恰好發生時恢復 session 會卡在「reconnecting」的問題</li>
+<li>修正 Windows 啟動時背景 git 指令在沒有快取憑證的情況下觸發 Git Credential Manager 的「Connect to GitHub」彈窗</li>
+<li>修正有自訂 statusline 的使用者看不到底部提示（例如「esc to interrupt」）的問題</li>
+<li>修正重新附加到遠端 session 時，過期的權限和對話框提示會反覆出現的問題（當 worker 在等待這些提示時死掉的情況）</li>
+<li>修正 claude agents --json 遺漏被封鎖和剛派發的背景 session 的問題；新增 --all 可包含已完成的 session，以及新的 id 和 state 欄位</li>
+<li>修正在 WSL + Windows Terminal 環境下，從 agent 畫面返回後 agents view 留下殘影/亂碼的問題</li>
+<li>修正背景 agents 在被派發到預熱 worker 時忽略專案層級設定的 env 值（例如 ANTHROPIC_MODEL）</li>
+<li>修正 MCPB plugin cache 在 Windows 上被無故失效，導致不必要的重新解壓</li>
+<li>修正 plugin .in_use PID lock 檔案無限累積的問題；來自已崩潰 session 的過期標記現在每天會清理一次</li>
+<li>修正不受信任的專案設定可以在未經信任確認的情況下設定 OTEL client-certificate 路徑的問題</li>
+<li>/workflows 現在即使對話回合還在進行中也會立刻開啟</li>
+<li>改善 TaskCreate 可靠性：格式錯誤的輸入會自動修復，未載入工具的驗證錯誤現在會附上 schema</li>
+<li>改善組織停用 API key 認證時的錯誤訊息，會根據當前使用的 API key 來源給出對應指引</li>
+<li>降低回應串流和 spinner 動畫期間的 CPU 使用率</li>
+<li>恢復 Vertex/Foundry 預設 5 分鐘閒置逾時，讓停滯的串流會中斷而非無限等待；設定 API_FORCE_IDLE_TIMEOUT=0 可停用</li>
+<li>遠端受管設定中若有無效項目，現在會套用其餘有效的政策並浮出驗證錯誤，而非靜默丟棄整個 payload</li>
+<li>背景 session 現在會在 retire→wake 之間保留 --ide、--chrome、--bare、--remote-control 等 flag，並強化了 respawn 狀態驗證</li>
+<li>背景 session 現在會被告知在進入 worktree 前不能編輯共享 checkout，避免在 EnterWorktree 之前浪費一次被拒絕的編輯</li>
+<li>「CLAUDE.md is too long」警告的閾值現在會根據 model 的 context window 大小自動調整</li>
+<li>Windows 上的自動更新在同一 session 內若 claude.exe 被其他 process 佔用，不再反覆重試</li>
+<li>改善斜線指令選單中 skill 標籤的顏色對比度</li>
+<li>透過 Apple/Google 訂閱但未設定付款方式的使用者，兌換 promo credit 時會說明要去哪裡新增付款方式</li>
+<li>新增提示：當同時執行多個 session 時，建議使用 claude agents</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
