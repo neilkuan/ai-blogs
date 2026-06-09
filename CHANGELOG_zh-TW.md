@@ -2,6 +2,10 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.170
+- 隆重介紹 Claude Fable 5：一款 Mythos 等級的模型，我們已將其調整為可安全供一般使用。Fable 的能力超越我們過去所有公開發布的模型。更新至 2.1.170 版即可使用。https://www.anthropic.com/news/claude-fable-5-mythos-5
+- 修正了從 VS Code 整合終端機或任何繼承了 Claude Code 環境變數的 shell 啟動時，session 不會儲存逐字稿（transcript）（也不會出現在 --resume 清單中）的問題。
+
 ## 2.1.169
 - 新增 --safe-mode flag（以及 CLAUDE_CODE_SAFE_MODE 環境變數），可以在停用所有自訂設定（CLAUDE.md、plugins、skills、hooks、MCP servers）的狀態下啟動 Claude Code，方便除錯
 - 新增 /cd 指令，讓你在不中斷 prompt cache 的情況下，把當前 session 移到新的工作目錄
