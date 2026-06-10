@@ -2,6 +2,40 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.172
+- Sub-agent 現在可以產生自己的 sub-agent（最多 5 層深）
+- Amazon Bedrock 現在會在 AWS_REGION 未設定時，從 ~/.aws config 檔讀取 AWS region，符合 AWS SDK 的優先順序；/status 會顯示 region 的來源
+- 在 /plugin 瀏覽 marketplace 的 plugin 時新增了搜尋列
+- 在 claude_code.lines_of_code.count OTEL metric 中新增 model 屬性
+- 修正使用 1M context 但沒有 usage credits 的 session 會永久卡住的問題 — 現在 session 會自動壓縮回標準 context 限制以下
+- 修正當對話中包含多張圖片時，重複出現「an image in the conversation could not be processed and was removed」錯誤的問題
+- 修正 agents 檢視在 worker 回覆後，仍讓 session 維持 Working 狀態並顯示忙碌旋轉動畫長達 30 秒的問題
+- 修正 background agent 被分派到預熱（pre-warmed）worker 時，可能讀取到其他目錄的專案設定（.mcp.json 核准、信任）的問題
+- 修正 daemon 自動更新後，對舊版啟動的 session 執行 background-session attach 會失敗並回報 EAUTH 的問題
+- 修正 background sub-agent 在其產生的巢狀 agent 被停止後，仍在 agent 面板中顯示為「active」的問題
+- 修正 /model 建議在 claude agents dispatch 輸入框中顯示時帶有誤導性的斜線前綴，且會顯示組織已停用的模型的問題
+- 修正 availableModels 限制未套用至 subagent model override、agent dispatch model 選擇器及 advisor model 的問題
+- 修正當 availableModels 允許清單使用版本特定 ID（如 claude-opus-4-8）時，會隱藏 /model 選擇器中 Opus 和 Sonnet 1M 列的問題
+- 修正 /model 選擇器在 Bedrock 上顯示該供應商未提供的模型 — 選擇後會靜默切換 session 模型，並在多列上點亮選取標記
+- 修正當 ANTHROPIC_DEFAULT_OPUS_MODEL 已包含 1M-context 後綴時，model ID 出現重複後綴（例如 [1M][1m]）的問題
+- 修正 opusplan model 設定在 plan 模式下未為有權限的使用者附帶 1M context 的問題；opusplan[1m] 的變通方案現在也能正確切換至 Opus plan 模式
+- 修正 WebFetch(domain:*.example.com) 萬用字元網域規則在 allow、deny 及 ask 位置都無法匹配子網域的問題，以及含有中間萬用字元的檔案權限規則（例如 Read(secrets-*/config.json)）在啟動時被拒絕的問題
+- 修正按上箭頭查看 prompt 歷史時，在 subagent 的聊天分頁中卻顯示主 agent prompt 的問題
+- 修正記憶召回在遠端 session 中找不到已掛載的團隊記憶庫（CLAUDE_MEMORY_STORES）的問題
+- 修正 workflow 驗證誤判 — 當腳本的 prompt 字串或註解中僅是提及 Date.now()/Math.random() 就被拒絕的問題
+- 在不完整支援滑鼠追蹤的 Windows 主控台上停用 mouse tracking
+- 修正 /plugin marketplace 清單在從長列表返回後游標消失的問題，以及從 plugin 瀏覽器按 Esc 時回到錯誤分頁的問題
+- 改善長對話的效能：移除多餘的訊息正規化，並在串流 tool-use 狀態未變更時避免完整訊息歷史轉換
+- 降低閒置時 CPU 使用：/goal 狀態標籤不再於閒置時以 5 Hz 重繪終端機，sub-agent 並行執行時也減少了 UI 重繪次數
+- 改善 Claude in Chrome 的工具載入：瀏覽器工具現在以單一批次呼叫載入，而非逐一載入
+- 改善非互動模式下 Usage Policy 拒絕訊息，建議開啟新 session 或更換模型
+- /code-review 現在即使未登入 claude.ai 也會顯示 ultra 選項，並附帶說明雲端審查需要 claude.ai 帳號
+- 將 Remote Control 頁尾指示縮短為「/rc active」，並在窄終端機上隱藏
+- 在遠端 session 中不再推廣 /loop，因為待執行的 loop 無法讓容器保持存活
+- [VSCode] 修正 PowerShell 工具呼叫顯示為原始 JSON 而非正確的指令顯示與權限對話框的問題，並移除顯示 shell 輸出中的 ANSI 跳脫碼
+
+- Self-hosted runner：新增 post-session 生命週期 hook，在 session 結束後、workspace 刪除前執行，讓你可以快照未提交的變更或匯出日誌；同時讓子行程的 SIGTERM→SIGKILL 等待時間可設定（預設值維持 5 秒不變）
+
 ## 2.1.170
 - 隆重介紹 Claude Fable 5：一款 Mythos 等級的模型，我們已將其調整為可安全供一般使用。Fable 的能力超越我們過去所有公開發布的模型。更新至 2.1.170 版即可使用。https://www.anthropic.com/news/claude-fable-5-mythos-5
 - 修正了從 VS Code 整合終端機或任何繼承了 Claude Code 環境變數的 shell 啟動時，session 不會儲存逐字稿（transcript）（也不會出現在 --resume 清單中）的問題。
