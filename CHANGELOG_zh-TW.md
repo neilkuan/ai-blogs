@@ -2,6 +2,10 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.173
+- 修正 Fable 5 模型名稱帶有 [1m] 後綴時未被正規化的問題——Fable 5 預設就包含 1M context，所以現在會自動移除該後綴
+- 修正 Windows 上啟用 sandbox 時，啟動階段會跳出一個多餘的「sandbox dependencies missing」警告的問題
+
 ## 2.1.172
 - Sub-agent 現在可以產生自己的 sub-agent（最多 5 層深）
 - Amazon Bedrock 現在會在 AWS_REGION 未設定時，從 ~/.aws config 檔讀取 AWS region，符合 AWS SDK 的優先順序；/status 會顯示 region 的來源
