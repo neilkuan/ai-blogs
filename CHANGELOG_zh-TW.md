@@ -2,6 +2,21 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.174
+- 新增 wheelScrollAccelerationEnabled 設定，可關閉全螢幕模式下滑鼠滾輪的捲動加速
+- 修正 /model 選擇器隱藏了 Default 實際對應的模型系列——Opus 現在會在 Max/Team Premium/Enterprise 方案中獨立顯示為一列，Pro/Team 方案顯示 Sonnet，pay-as-you-go API 帳號顯示 Opus
+- 修正當 ANTHROPIC_DEFAULT_SONNET_MODEL 指定了不同的 Sonnet 時，/model 選擇器仍顯示寫死的 Sonnet 版本標籤
+- 修正「Fable 5 正在消耗用量額度」的橫幅在使用量計費（usage-based billing）的企業帳號上誤顯示
+- 修正 Bedrock GovCloud 區域（us-gov-*）推導出錯誤的推論設定檔前綴（inference profile prefix）——用了 global 而非 us-gov，導致衍生模型 ID 回傳 400 錯誤
+- 修正背景 session 從啟動背景 daemon 的 shell 繼承了其他 session 的 ANTHROPIC_* provider 環境變數（gateway URL、自訂 headers、/model 別名）
+- 修正在 macOS 和 Linux 上，當 shell 指令被中斷或終止後不久退出 Claude Code 時會卡頓 1-2 秒
+- 修正 git commit co-author 署名在某些模型上顯示了錯誤的模型名稱
+- 修正 /advisor 對話框預選了一個被 availableModels 白名單封鎖的已儲存 advisor 模型
+- 修正 skill 熱重載（hot-reload）在單一 skill 變更時重新傳送整份 skill 清單；現在只會重新通知有變更的 skill
+- 修正 Workflow 工具 agent() 子代理缺少各代理的歸屬標頭（attribution headers）
+- [VSCode] 在帳號與用量對話框（/usage）新增用量歸屬明細，顯示快取未命中（cache misses）、長上下文、子代理，以及過去 24 小時或 7 天內各 skill/agent/plugin/MCP 的細項拆解
+- 修正預熱的背景 worker 在閒置一段時間後被取用時，發生「Could not resolve authentication method」錯誤
+
 ## 2.1.173
 - 修正 Fable 5 模型名稱帶有 [1m] 後綴時未被正規化的問題——Fable 5 預設就包含 1M context，所以現在會自動移除該後綴
 - 修正 Windows 上啟用 sandbox 時，啟動階段會跳出一個多餘的「sandbox dependencies missing」警告的問題
