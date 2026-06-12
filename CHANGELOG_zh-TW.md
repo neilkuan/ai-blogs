@@ -2,6 +2,30 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.176
+- 對話標題現在會以你的對話語言生成（可透過 language 設定固定指定語言）
+- 新增 footerLinksRegexes 設定，支援以正規表達式匹配底部列的連結徽章（link badge），可透過使用者設定或受管設定進行配置
+- 改善 Bedrock 憑證快取：透過 awsCredentialExport 取得的憑證現在會快取到其 Expiration 時間，而非固定 1 小時
+- 修正 availableModels 的強制機制：別名模型的選擇不再能透過 ANTHROPIC_DEFAULT_*_MODEL 環境變數被導向至封鎖清單中的模型，且 /fast 在切換會導致使用許可清單外的模型時，會拒絕切換
+- 修正 auto 模式在未啟用 Opus 4.8 的組織中使用 Fable 5 時失敗的問題 — 分類器現在會退回到最佳可用的 Opus 模型
+- 修正 hook if 條件對 Read/Edit/Write 工具路徑的匹配：文件中記載的模式如 Edit(src/**)、Read(~/.ssh/**)、Read(.env) 現在能正確匹配
+- 修正 Linux sandbox 在 .claude/settings.json 是絕對路徑目標的符號連結時無法啟動的問題
+- 修正在 tmux over SSH 環境中 /copy 及滑鼠選取複製無法寫入系統剪貼簿的問題，以及 tmux 3.2 以下版本貼上緩衝區無法載入的問題
+- 修正 Remote Control 從 web/mobile 連線時靜默切換 session 模型的問題
+- 修正 Remote Control 斷線通知顯示裸數字代碼而非人類可讀原因的問題，以及連線失敗時在對話紀錄中重複新增一行的問題
+- 修正 Remote Control session 在登入不同帳號時未斷線的問題
+- 修正 /cd 及工作樹（worktree）移動後，session 仍顯示前一個目錄的 git 分支的問題
+- 修正 claude agents：在一個視窗中按返回不再會使附加到同一 session 的其他視窗脫離
+- 修正背景 session 在 /bg 中途已無待續內容時，永遠顯示「Working」的問題
+- 修正背景代理以 PR URL 搜尋的問題：在排程喚醒或任務阻塞期間開啟的 PR 現在能在 claude agents 搜尋中出現
+- 修正 agents 視圖輸入框在 Windows 上不顯示文字游標的問題
+- 修正 claude --bg -cn <name> 未設定 session 名稱的問題
+- 修正背景 session 在重新產生（respawn）前未中和 Windows 網路路徑的問題
+- 修正背景 session 重新產生時因損壞狀態檔案中格式錯誤的 resume ID 而被拒絕的問題
+- 修正 Windows 背景服務 daemon 在 ~/.claude/daemon 設有 ReadOnly 屬性時無法啟動的問題
+- 修正雲端 session 在閒置過久後被領取時，出現「Could not resolve authentication method」錯誤的問題
+- 背景 session 現在會在跨自動更新而保持開啟的視窗無法送出回覆時，顯示更清楚的指引，且 claude daemon status 會說明版本偏差（version-skew）的行為
+
 ## 2.1.175
 - 新增 enforceAvailableModels 受管設定 — 啟用後，availableModels 白名單也會約束 Default 模型（若 Default 解析到的模型不在允許清單中，會退回（fallback）到清單中第一個允許的模型），且使用者或專案設定將無法擴大受管的 availableModels 清單範圍
 
