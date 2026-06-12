@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.175
+- 新增 enforceAvailableModels 受管設定 — 啟用後，availableModels 白名單也會約束 Default 模型（若 Default 解析到的模型不在允許清單中，會退回（fallback）到清單中第一個允許的模型），且使用者或專案設定將無法擴大受管的 availableModels 清單範圍
+
 ## 2.1.174
 - 新增 wheelScrollAccelerationEnabled 設定，可關閉全螢幕模式下滑鼠滾輪的捲動加速
 - 修正 /model 選擇器隱藏了 Default 實際對應的模型系列——Opus 現在會在 Max/Team Premium/Enterprise 方案中獨立顯示為一列，Pro/Team 方案顯示 Sonnet，pay-as-you-go API 帳號顯示 Opus
