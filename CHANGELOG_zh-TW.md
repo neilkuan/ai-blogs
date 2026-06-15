@@ -2,6 +2,30 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.178
+- 新增 Tool(param:value) 語法用於權限規則，可比對工具的輸入參數（支援 * 萬用字元），例如 Agent(model:opus) 可阻擋使用 Opus 的 subagent
+- 巢狀 .claude/skills 目錄中的 skill 現在會在你編輯該目錄下的檔案時自動載入；若名稱衝突，巢狀 skill 會顯示為 <dir>:<name>，兩者都能使用
+- 巢狀 .claude/ 目錄：當名稱衝突時，離工作目錄最近的 agent、workflow 和 output-style 會優先生效；專案層級的 workflow 儲存現在會寫入最近的 .claude/workflows/
+- 改善 auto 模式：subagent 的啟動現在會先經過分類器（classifier）評估，堵住了之前 subagent 可以不經審查就發出被封鎖操作的漏洞
+- 改善 /doctor 的輸出，所有區塊統一使用扁平樹狀排版、更清楚的狀態圖示，以及醒目標示的指令名稱
+- 改善 skill 列表截斷警告，現在會顯示有多少個 skill 描述受到影響
+- 調整 workflow 提示關鍵字的樣式為紫色微光（shimmer）高亮，且只在明確提到「run a workflow」或「workflow:」時才觸發，不再因為隨便提到 workflow 這個字就跳出來
+- 改善 Remote Control 錯誤訊息：連線失敗現在會在底部顯示持續性的紅色「/rc failed」指示器，「尚未啟用」的錯誤現在會說明是 gate 問題、檢查失敗、過期的 entitlement，還是組織政策限制
+- /bug 現在要求填寫描述才能送出，也不再把模型拒絕回應的文字當作 GitHub issue 標題
+- 修正當 CLI 從父行程繼承到過期的 websocket/OAuth file-descriptor 環境變數時會崩潰（記憶體耗盡）的問題
+- 修正 Claude in Chrome 在 OAuth token 屬於不同帳號時，連線會靜默失敗的問題
+- 修正巢狀 .claude/skills 中帶有目錄前綴名稱的 skill 在非互動模式下被權限提示擋住的問題
+- 修正多個 subagent 問題：查看 subagent 的 transcript 現在會顯示工具結果和即時進度、在它完成回合時送出的訊息不再被丟棄、把執行中的 subagent 送到背景（ctrl+b）不再會讓它從頭重跑
+- 修正 claude agents 的 worker 在 daemon 是從設有自訂 API gateway（透過 ANTHROPIC_BASE_URL 和 ANTHROPIC_AUTH_TOKEN）的 shell 啟動時，會出現 401 Invalid bearer token 錯誤
+- 修正 compaction 沒有遵守 --fallback-model 的問題：compaction 現在會在遇到過載或模型不可用錯誤時，正確地依序嘗試設定的 fallback model
+- 修正在 session 外部重新整理憑證後，模型請求仍因快取的舊設定而持續出現驗證錯誤的問題
+- 修正用 /bg 或 ←← 在回合結束後建立的背景 session，在 agents 列表中永遠顯示「Working」的問題
+- 修正 CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE=1 導致全新的 marketplace 安裝無法 clone 的問題
+- 修正 subagent 的 disallowedTools 中，MCP server 層級的 spec（mcp__server、mcp__server__*、mcp__*）被靜默忽略的問題
+- 修正 vim 模式的 undo：u 現在會逐一回復 NORMAL/VISUAL 模式的指令，而非把快速連續的操作合併成一個 undo 步驟
+- 修正 claude agents 中帶有自訂 URI scheme（例如 vscode://）的 statusline 連結點擊後不會開啟的問題
+- [VSCode] 修正按 Esc 關閉 CJK 輸入法候選字視窗時，會同時取消正在執行的 Claude 任務的問題
+
 ## 2.1.176
 - 對話標題現在會以你的對話語言生成（可透過 language 設定固定指定語言）
 - 新增 footerLinksRegexes 設定，支援以正規表達式匹配底部列的連結徽章（link badge），可透過使用者設定或受管設定進行配置

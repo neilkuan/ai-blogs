@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.178 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.178 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.178</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 Tool(param:value) 語法用於權限規則，可比對工具的輸入參數（支援 * 萬用字元），例如 Agent(model:opus) 可阻擋使用 Opus 的 subagent</li>
+<li>巢狀 .claude/skills 目錄中的 skill 現在會在你編輯該目錄下的檔案時自動載入；若名稱衝突，巢狀 skill 會顯示為 &lt;dir&gt;:&lt;name&gt;，兩者都能使用</li>
+<li>巢狀 .claude/ 目錄：當名稱衝突時，離工作目錄最近的 agent、workflow 和 output-style 會優先生效；專案層級的 workflow 儲存現在會寫入最近的 .claude/workflows/</li>
+<li>改善 auto 模式：subagent 的啟動現在會先經過分類器（classifier）評估，堵住了之前 subagent 可以不經審查就發出被封鎖操作的漏洞</li>
+<li>改善 /doctor 的輸出，所有區塊統一使用扁平樹狀排版、更清楚的狀態圖示，以及醒目標示的指令名稱</li>
+<li>改善 skill 列表截斷警告，現在會顯示有多少個 skill 描述受到影響</li>
+<li>調整 workflow 提示關鍵字的樣式為紫色微光（shimmer）高亮，且只在明確提到「run a workflow」或「workflow:」時才觸發，不再因為隨便提到 workflow 這個字就跳出來</li>
+<li>改善 Remote Control 錯誤訊息：連線失敗現在會在底部顯示持續性的紅色「/rc failed」指示器，「尚未啟用」的錯誤現在會說明是 gate 問題、檢查失敗、過期的 entitlement，還是組織政策限制</li>
+<li>/bug 現在要求填寫描述才能送出，也不再把模型拒絕回應的文字當作 GitHub issue 標題</li>
+<li>修正當 CLI 從父行程繼承到過期的 websocket/OAuth file-descriptor 環境變數時會崩潰（記憶體耗盡）的問題</li>
+<li>修正 Claude in Chrome 在 OAuth token 屬於不同帳號時，連線會靜默失敗的問題</li>
+<li>修正巢狀 .claude/skills 中帶有目錄前綴名稱的 skill 在非互動模式下被權限提示擋住的問題</li>
+<li>修正多個 subagent 問題：查看 subagent 的 transcript 現在會顯示工具結果和即時進度、在它完成回合時送出的訊息不再被丟棄、把執行中的 subagent 送到背景（ctrl+b）不再會讓它從頭重跑</li>
+<li>修正 claude agents 的 worker 在 daemon 是從設有自訂 API gateway（透過 ANTHROPIC_BASE_URL 和 ANTHROPIC_AUTH_TOKEN）的 shell 啟動時，會出現 401 Invalid bearer token 錯誤</li>
+<li>修正 compaction 沒有遵守 --fallback-model 的問題：compaction 現在會在遇到過載或模型不可用錯誤時，正確地依序嘗試設定的 fallback model</li>
+<li>修正在 session 外部重新整理憑證後，模型請求仍因快取的舊設定而持續出現驗證錯誤的問題</li>
+<li>修正用 /bg 或 ←← 在回合結束後建立的背景 session，在 agents 列表中永遠顯示「Working」的問題</li>
+<li>修正 CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE=1 導致全新的 marketplace 安裝無法 clone 的問題</li>
+<li>修正 subagent 的 disallowedTools 中，MCP server 層級的 spec（mcp__server、mcp__server__*、mcp__*）被靜默忽略的問題</li>
+<li>修正 vim 模式的 undo：u 現在會逐一回復 NORMAL/VISUAL 模式的指令，而非把快速連續的操作合併成一個 undo 步驟</li>
+<li>修正 claude agents 中帶有自訂 URI scheme（例如 vscode://）的 statusline 連結點擊後不會開啟的問題</li>
+<li>[VSCode] 修正按 Esc 關閉 CJK 輸入法候選字視窗時，會同時取消正在執行的 Claude 任務的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
