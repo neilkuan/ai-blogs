@@ -2,6 +2,17 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.179
+- 修正串流中途斷線問題：部分回應現在會被保留，不再直接顯示原始錯誤，spinner 也不會再卡在「running tool」狀態
+- 修正在 Windows Terminal 和 VS Code 下的 WSL2 環境中滑鼠滾輪無法捲動的問題（2.1.172 引入的 regression）
+- 修正 sandbox 的 denyRead/allowRead glob 對大型目錄樹生效時，會讓 Bash tool 的描述變得超級肥大，導致 Linux 上整個 session 無法使用的問題
+- 修正意見回饋問卷在一個 turn 結束後，會立即把單一數字的回覆當成 session 評分捕捉的問題
+- 修正歡迎畫面堆疊多個宣傳 banner 的問題——現在每個 session 最多只顯示一個 promo
+- 修正在檢視 subagent 時按 Ctrl+O 無法顯示該 subagent 的 transcript 的問題
+- 修正點擊 prompt 輸入框無法從 subagent/footer 面板切回焦點的問題
+- 修正遠端 session 的背景任務在 turn 之間一直顯示「still running」的問題
+- 改善遠端 session 中 plugin 載入的效能
+
 ## 2.1.178
 - 新增 Tool(param:value) 語法用於權限規則，可比對工具的輸入參數（支援 * 萬用字元），例如 Agent(model:opus) 可阻擋使用 Opus 的 subagent
 - 巢狀 .claude/skills 目錄中的 skill 現在會在你編輯該目錄下的檔案時自動載入；若名稱衝突，巢狀 skill 會顯示為 <dir>:<name>，兩者都能使用
