@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.181 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.181 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.181</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 /config key=value 語法，可直接在提示中設定任何設定值（例如 /config thinking=false）——適用於互動模式、-p 模式與 Remote Control</li>
+<li>新增 sandbox.allowAppleEvents opt-in 設定，讓沙箱指令可在 macOS 發送 Apple Events</li>
+<li>新增 CLAUDE_CLIENT_PRESENCE_FILE 環境變數：指向一個標記檔案，當你在電腦前時可抑制行動裝置推播通知</li>
+<li>升級內建的 Bun runtime 至 1.4</li>
+<li>改善長段落的串流顯示：文字現在會逐行出現，不再等到第一個換行才一次顯示</li>
+<li>改善自動重試機制：API 在思考中途斷線時，現在會自動重試，而非顯示「Connection closed while thinking」</li>
+<li>改善 subagent 面板：閒置 subagent 30 秒後自動隱藏、列表上限 5 行並顯示捲動提示、鍵盤快捷鍵提示現在顯示在底部</li>
+<li>改善 MCP OAuth 瀏覽器頁面，視覺風格與 Claude Code 一致，成功後自動關閉</li>
+<li>變更全螢幕模式的 URL 開啟方式，改為需要 Cmd+click（macOS）/ Ctrl+click，與原生終端行為一致</li>
+<li>變更 Improved N memories 提示行，在非 verbose 模式下不再列出個別檔案</li>
+<li>修正使用自訂 ANTHROPIC_BASE_URL 及 Foundry 時 prompt caching 無法讀取的問題（原因是每次請求的 attestation token 都不同）</li>
+<li>修正 Write/Edit 在網路磁碟機和雲端同步資料夾上產生 0 byte 或截斷檔案的問題</li>
+<li>修正 open、osascript 及瀏覽器認證流程在 macOS 因缺少 Apple Events entitlement 而報 error -600 的問題</li>
+<li>修正啟動效能退化問題（每次啟動約多 ~120ms，於 2.1.169 引入）：當沒有設定 MCP servers 時，第一個 prompt 不再等待 managed-settings 抓取</li>
+<li>修正在網路狀態不佳時，啟動時因帳號設定抓取過慢導致空白終端最多卡 15 秒的問題</li>
+<li>修正 .claude.json 包含損壞的 null project entries 時啟動崩潰（TypeError: Cannot read properties of null）</li>
+<li>修正 macOS TUI 在工作階段啟動時凍結（Ctrl+C 無反應），發生在 Spotlight 正在重新索引時</li>
+<li>修正長時間閒置的工作階段，在另一個 Claude Code 程序執行 30 天 transcript 清理時遺失歷史紀錄</li>
+<li>修正前景 subagent 產生無限巢狀鏈的問題；現在與背景 subagent 一樣受 5 層深度限制</li>
+<li>修正 /recap 和對話分叉在切換模型後仍使用前一個模型的問題</li>
+<li>修正 subagent「Thinking」時間顯示的是父 agent 的經過時間，而非 subagent 本身的</li>
+<li>修正在 agent panel 中，等待巢狀 agent 的 subagent 顯示持續跳動的經過時間，而非「waiting」</li>
+<li>修正 API 重試指示器（「Retrying in 0s · attempt N/10」）在重試成功後仍殘留在畫面上</li>
+<li>修正 AWS awsCredentialExport 憑證剩餘壽命過短時每分鐘都觸發憑證刷新的問題，現在也接受 aws configure export-credentials 的 JSON 格式</li>
+<li>修正 claude mcp get/list 在 tools/list 失敗時仍顯示 ✓ Connected；現在會顯示 ! Connected · tools fetch failed 並附上錯誤詳情</li>
+<li>修正 /remote-control 殘留過時的「connecting…」行；現在連線成功後會在 transcript 中確認</li>
+<li>修正 ExitWorktree 在 Windows 上因無法解析裸 git 而拒絕移除乾淨 worktree 並報「Could not verify worktree state」的問題</li>
+<li>修正當 ~/.claude/settings.json 是相對 symlink 且 ~/.claude 本身也是 symlink 時，設定變更（如 /effort 或 /model）因 ENOENT 失敗的問題</li>
+<li>修正 IDE context reminders 中的選取行號差一（off by one）問題（IntelliJ 和 VS Code）</li>
+<li>修正全螢幕模式中，在原生終端選取（modifier+拖曳）後按 Ctrl+C 會用應用程式先前的選取內容覆蓋剪貼簿</li>
+<li>修正剪貼簿包含文字時按 Ctrl+V 顯示「No image found in clipboard」而非正常貼上的問題</li>
+<li>修正在 Windows/OneDrive 上 agents 目錄已存在時，建立 agent 失敗並報「EEXIST: file already exists」</li>
+<li>修正 AskUserQuestion 預覽內容在對話框邊緣被截斷，而非自動換行（word-wrapping）</li>
+<li>修正 AskUserQuestion 多選問題中，手動輸入的「Other」自由文字答案在送出時被無聲丟棄</li>
+<li>修正 /stats 的「Most active day」及每日 token 圖表日期在 UTC 負時區顯示早一天的問題</li>
+<li>修正 /copy 及選取即複製功能在 Linux 上無法偵測到 Claude Code 啟動後才安裝的剪貼簿工具</li>
+<li>修正使用 tab 縮排的程式碼在 Write（create-file）預覽中顯示不正確縮排</li>
+<li>修正在回合進行中排隊的使用者 prompt 在 transcript 中未顯示全寬背景高亮</li>
+<li>修正 Ghostty 中活動 spinner 的脈衝停在錯誤的字形大小上</li>
+<li>修正 Linux sandbox 在 .claude/skills 或 .claude/hooks 是 symlink 時無法啟動的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>

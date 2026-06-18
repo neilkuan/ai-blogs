@@ -2,6 +2,48 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.181
+- 新增 /config key=value 語法，可直接在提示中設定任何設定值（例如 /config thinking=false）——適用於互動模式、-p 模式與 Remote Control
+- 新增 sandbox.allowAppleEvents opt-in 設定，讓沙箱指令可在 macOS 發送 Apple Events
+- 新增 CLAUDE_CLIENT_PRESENCE_FILE 環境變數：指向一個標記檔案，當你在電腦前時可抑制行動裝置推播通知
+- 升級內建的 Bun runtime 至 1.4
+- 改善長段落的串流顯示：文字現在會逐行出現，不再等到第一個換行才一次顯示
+- 改善自動重試機制：API 在思考中途斷線時，現在會自動重試，而非顯示「Connection closed while thinking」
+- 改善 subagent 面板：閒置 subagent 30 秒後自動隱藏、列表上限 5 行並顯示捲動提示、鍵盤快捷鍵提示現在顯示在底部
+- 改善 MCP OAuth 瀏覽器頁面，視覺風格與 Claude Code 一致，成功後自動關閉
+- 變更全螢幕模式的 URL 開啟方式，改為需要 Cmd+click（macOS）/ Ctrl+click，與原生終端行為一致
+- 變更 Improved N memories 提示行，在非 verbose 模式下不再列出個別檔案
+- 修正使用自訂 ANTHROPIC_BASE_URL 及 Foundry 時 prompt caching 無法讀取的問題（原因是每次請求的 attestation token 都不同）
+- 修正 Write/Edit 在網路磁碟機和雲端同步資料夾上產生 0 byte 或截斷檔案的問題
+- 修正 open、osascript 及瀏覽器認證流程在 macOS 因缺少 Apple Events entitlement 而報 error -600 的問題
+- 修正啟動效能退化問題（每次啟動約多 ~120ms，於 2.1.169 引入）：當沒有設定 MCP servers 時，第一個 prompt 不再等待 managed-settings 抓取
+- 修正在網路狀態不佳時，啟動時因帳號設定抓取過慢導致空白終端最多卡 15 秒的問題
+- 修正 .claude.json 包含損壞的 null project entries 時啟動崩潰（TypeError: Cannot read properties of null）
+- 修正 macOS TUI 在工作階段啟動時凍結（Ctrl+C 無反應），發生在 Spotlight 正在重新索引時
+- 修正長時間閒置的工作階段，在另一個 Claude Code 程序執行 30 天 transcript 清理時遺失歷史紀錄
+- 修正前景 subagent 產生無限巢狀鏈的問題；現在與背景 subagent 一樣受 5 層深度限制
+- 修正 /recap 和對話分叉在切換模型後仍使用前一個模型的問題
+- 修正 subagent「Thinking」時間顯示的是父 agent 的經過時間，而非 subagent 本身的
+- 修正在 agent panel 中，等待巢狀 agent 的 subagent 顯示持續跳動的經過時間，而非「waiting」
+- 修正 API 重試指示器（「Retrying in 0s · attempt N/10」）在重試成功後仍殘留在畫面上
+- 修正 AWS awsCredentialExport 憑證剩餘壽命過短時每分鐘都觸發憑證刷新的問題，現在也接受 aws configure export-credentials 的 JSON 格式
+- 修正 claude mcp get/list 在 tools/list 失敗時仍顯示 ✓ Connected；現在會顯示 ! Connected · tools fetch failed 並附上錯誤詳情
+- 修正 /remote-control 殘留過時的「connecting…」行；現在連線成功後會在 transcript 中確認
+- 修正 ExitWorktree 在 Windows 上因無法解析裸 git 而拒絕移除乾淨 worktree 並報「Could not verify worktree state」的問題
+- 修正當 ~/.claude/settings.json 是相對 symlink 且 ~/.claude 本身也是 symlink 時，設定變更（如 /effort 或 /model）因 ENOENT 失敗的問題
+- 修正 IDE context reminders 中的選取行號差一（off by one）問題（IntelliJ 和 VS Code）
+- 修正全螢幕模式中，在原生終端選取（modifier+拖曳）後按 Ctrl+C 會用應用程式先前的選取內容覆蓋剪貼簿
+- 修正剪貼簿包含文字時按 Ctrl+V 顯示「No image found in clipboard」而非正常貼上的問題
+- 修正在 Windows/OneDrive 上 agents 目錄已存在時，建立 agent 失敗並報「EEXIST: file already exists」
+- 修正 AskUserQuestion 預覽內容在對話框邊緣被截斷，而非自動換行（word-wrapping）
+- 修正 AskUserQuestion 多選問題中，手動輸入的「Other」自由文字答案在送出時被無聲丟棄
+- 修正 /stats 的「Most active day」及每日 token 圖表日期在 UTC 負時區顯示早一天的問題
+- 修正 /copy 及選取即複製功能在 Linux 上無法偵測到 Claude Code 啟動後才安裝的剪貼簿工具
+- 修正使用 tab 縮排的程式碼在 Write（create-file）預覽中顯示不正確縮排
+- 修正在回合進行中排隊的使用者 prompt 在 transcript 中未顯示全寬背景高亮
+- 修正 Ghostty 中活動 spinner 的脈衝停在錯誤的字形大小上
+- 修正 Linux sandbox 在 .claude/skills 或 .claude/hooks 是 symlink 時無法啟動的問題
+
 ## 2.1.179
 - 修正串流中途斷線問題：部分回應現在會被保留，不再直接顯示原始錯誤，spinner 也不會再卡在「running tool」狀態
 - 修正在 Windows Terminal 和 VS Code 下的 WSL2 環境中滑鼠滾輪無法捲動的問題（2.1.172 引入的 regression）
