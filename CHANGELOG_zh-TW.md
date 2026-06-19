@@ -2,6 +2,27 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.183
+- 改善 auto 模式安全性：當你沒有要求捨棄本地變更時，破壞性 git 指令（git reset --hard、git checkout -- .、git clean -fd、git stash drop）現在會被擋下；git commit --amend 在該 commit 不是本次 session 由 agent 建立的情況下會被擋下；terraform destroy／pulumi destroy／cdk destroy 除非你明確指定了特定 stack，否則也會被擋下
+- 新增警告：當請求的模型已棄用或被自動升級到較新模型時會顯示警告，在 print 模式（-p）下輸出至 stderr，現在也涵蓋在 agent frontmatter 中設定的模型
+- 新增 attribution.sessionUrl 設定，可在 web 和 Remote Control session 中省略 commit 與 PR 裡的 claude.ai session 連結
+- 新增 /config --help，列出所有可用於 /config key=value 的簡寫 key
+- 變更 /config 切換行為：Enter 和 Space 都能變更所選設定，Esc 現在會儲存並關閉而非還原
+- 移除啟動時 logo 下方的「setup issues」那行提示 — 改用 /doctor 查看設定問題，或使用 --debug
+- 修正 thinking.disabled.display: Extra inputs are not permitted 400 錯誤，發生在 subagent 產生與 session 標題生成時（影響特定設定組合）
+- 修正 WebSearch 在 subagent 中回傳空結果的問題
+- 修正在啟用原生游標的 vim 模式下瀏覽歷史紀錄後，終端游標卡在 prompt 上方的問題
+- 修正 Windows Terminal 在高負載巢狀 subagent 情境下全螢幕 TUI 畫面損壞（statusline 跑到螢幕中間、spinner 行重複、文字合併）
+- 修正當模型只回傳 thinking block 時，turn 會靜默完成且無任何可見輸出的問題；Claude 現在會重新提示一次
+- 修正當啟用多個 plugin 時，使用者層級的 skills 在斜線指令自動完成中重複出現多次
+- 修正需要驗證的 MCP server 在 headless／SDK 模式下將 auth-stub 工具暴露給模型的問題
+- 修正當 shell 的 rc 檔初始化較慢時，tmux teammate 分割視窗無法啟動的問題，以及在 agent 啟動期間輸入的按鍵會洩漏到新的 tmux pane 而非 leader prompt
+- 修正 teammate 結束 turn 時，由該 teammate 啟動的背景任務被終止的問題
+- 修正排程任務與 webhook 觸發的訊息被當作鍵盤輸入處理的問題；這些現在被歸類為任務通知（task notification），無法再核准待處理的動作或在 auto 模式下設定 session 標題
+- 修正 focus 模式在每個回應下方顯示「Ran N PostToolUse hooks」計時行的問題
+
+- Agent teams：移除了 TeamCreate 和 TeamDelete 工具。設定 CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 後，每個 session 現在都有一個隱含的 team — 直接透過 Agent 工具的 name 參數產生 teammate 即可，不需要額外的設定步驟。Agent 工具上的 team_name 參數仍可傳入但會被忽略。
+
 ## 2.1.181
 - 新增 /config key=value 語法，可直接在提示中設定任何設定值（例如 /config thinking=false）——適用於互動模式、-p 模式與 Remote Control
 - 新增 sandbox.allowAppleEvents opt-in 設定，讓沙箱指令可在 macOS 發送 Apple Events

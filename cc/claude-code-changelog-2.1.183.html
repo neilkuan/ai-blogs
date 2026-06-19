@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.183 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.183 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.183</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>改善 auto 模式安全性：當你沒有要求捨棄本地變更時，破壞性 git 指令（git reset --hard、git checkout -- .、git clean -fd、git stash drop）現在會被擋下；git commit --amend 在該 commit 不是本次 session 由 agent 建立的情況下會被擋下；terraform destroy／pulumi destroy／cdk destroy 除非你明確指定了特定 stack，否則也會被擋下</li>
+<li>新增警告：當請求的模型已棄用或被自動升級到較新模型時會顯示警告，在 print 模式（-p）下輸出至 stderr，現在也涵蓋在 agent frontmatter 中設定的模型</li>
+<li>新增 attribution.sessionUrl 設定，可在 web 和 Remote Control session 中省略 commit 與 PR 裡的 claude.ai session 連結</li>
+<li>新增 /config --help，列出所有可用於 /config key=value 的簡寫 key</li>
+<li>變更 /config 切換行為：Enter 和 Space 都能變更所選設定，Esc 現在會儲存並關閉而非還原</li>
+<li>移除啟動時 logo 下方的「setup issues」那行提示 — 改用 /doctor 查看設定問題，或使用 --debug</li>
+<li>修正 thinking.disabled.display: Extra inputs are not permitted 400 錯誤，發生在 subagent 產生與 session 標題生成時（影響特定設定組合）</li>
+<li>修正 WebSearch 在 subagent 中回傳空結果的問題</li>
+<li>修正在啟用原生游標的 vim 模式下瀏覽歷史紀錄後，終端游標卡在 prompt 上方的問題</li>
+<li>修正 Windows Terminal 在高負載巢狀 subagent 情境下全螢幕 TUI 畫面損壞（statusline 跑到螢幕中間、spinner 行重複、文字合併）</li>
+<li>修正當模型只回傳 thinking block 時，turn 會靜默完成且無任何可見輸出的問題；Claude 現在會重新提示一次</li>
+<li>修正當啟用多個 plugin 時，使用者層級的 skills 在斜線指令自動完成中重複出現多次</li>
+<li>修正需要驗證的 MCP server 在 headless／SDK 模式下將 auth-stub 工具暴露給模型的問題</li>
+<li>修正當 shell 的 rc 檔初始化較慢時，tmux teammate 分割視窗無法啟動的問題，以及在 agent 啟動期間輸入的按鍵會洩漏到新的 tmux pane 而非 leader prompt</li>
+<li>修正 teammate 結束 turn 時，由該 teammate 啟動的背景任務被終止的問題</li>
+<li>修正排程任務與 webhook 觸發的訊息被當作鍵盤輸入處理的問題；這些現在被歸類為任務通知（task notification），無法再核准待處理的動作或在 auto 模式下設定 session 標題</li>
+<li>修正 focus 模式在每個回應下方顯示「Ran N PostToolUse hooks」計時行的問題</li>
+</ul>
+
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>Agent teams：移除了 TeamCreate 和 TeamDelete 工具。設定 CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 後，每個 session 現在都有一個隱含的 team — 直接透過 Agent 工具的 name 參數產生 teammate 即可，不需要額外的設定步驟。Agent 工具上的 team_name 參數仍可傳入但會被忽略。</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
