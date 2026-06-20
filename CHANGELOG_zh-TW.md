@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.185
+- 串流停滯提示（stream-stall hint）的文字從「No response from API · Retrying in …」改為「Waiting for API response · will retry in …」，觸發時機也從靜默 10 秒延長到 20 秒
+
 ## 2.1.183
 - 改善 auto 模式安全性：當你沒有要求捨棄本地變更時，破壞性 git 指令（git reset --hard、git checkout -- .、git clean -fd、git stash drop）現在會被擋下；git commit --amend 在該 commit 不是本次 session 由 agent 建立的情況下會被擋下；terraform destroy／pulumi destroy／cdk destroy 除非你明確指定了特定 stack，否則也會被擋下
 - 新增警告：當請求的模型已棄用或被自動升級到較新模型時會顯示警告，在 print 模式（-p）下輸出至 stderr，現在也涵蓋在 agent frontmatter 中設定的模型
