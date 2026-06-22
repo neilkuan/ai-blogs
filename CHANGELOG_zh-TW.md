@@ -2,6 +2,41 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.186
+- 新增 claude mcp login <name> 和 claude mcp logout <name>，可直接從 CLI 驗證 MCP 伺服器，不用打開互動式 /mcp 選單；支援 --no-browser stdin 重導向，方便透過 SSH 完成驗證
+- 新增 /workflows agent 詳細頁的狀態篩選功能（按 f）
+- 新增 /plugin 已安裝分頁中的「Skills」區塊
+- 新增 teammateMode: "iterm2" 設定，當 auto 模式找不到 it2 CLI 時會顯示警告
+- 新增 /login 中的「Claude Platform on AWS - refresh credentials」選項，需設定 awsAuthRefresh
+- ! bash 指令現在會自動觸發 Claude 回應輸出結果；若想維持舊版僅加入 context 的行為，請在 settings.json 設定 "respondToBashCommands": false
+- 修正串流請求在機器從睡眠喚醒後失敗，報「Content block not found」或 JSON 解析錯誤的問題
+- 修正 subagent transcript 的捲動位置在退出時滲透到主 transcript
+- 修正背景任務預覽在 agent 的計畫載入前閃現原始 tool 名稱
+- 修正 Chrome 分頁群組隔離在產品內權限閘道關閉時，對同時執行的 CLI session 未生效的問題
+- 修正背景 session 摘要重複顯示；agent 自己的回合結束摘要現在會作為 recap 行呈現
+- 修正從 claude agents 開啟背景 session 時，前一個畫面殘留在後面
+- 修正 Agent(type) deny 規則和 Agent(x,y) allowed-types 限制未對具名 subagent spawn 生效
+- 修正主回合結束後背景 agent 仍在執行時，Esc 和 Ctrl+C 無回應的問題
+- 修正權限提示中選項文字溢出時，選項編號對不齊
+- 修正在 agent 面板中對已完成的 subagent 按 x 無法關閉的問題
+- 修正恢復舊 session 時，對已刻意停用的工具顯示誤導性的「MCP server disconnected」通知
+- 修正 /plugin 已安裝分頁在已捲到最頂端時仍顯示「more above」指示器
+- 修正 ~~strikethrough~~ 在助理訊息中顯示為原始波浪號而非刪除線
+- 修正 --tools 在冷啟動首次執行時，flags 載入前讓受 feature gate 保護的工具溜進來
+- 修正 claude agents 中背景工作狀態在回覆後仍顯示過時的「needs input」訊息
+- 修正在淺色終端機從 claude agents 開啟背景 session 時閃現深色主題
+- 修正 claude agents 中用滑鼠選取的文字在刪除後仍維持高亮狀態
+- 修正使用量計費制的 Enterprise 和 Team 訂閱者無法顯示 session 費用
+- 修正 agent teams：透過 tmux/pane 後端產生的隊友現在會繼承 leader 的 --effort 層級
+- 修正 Workflow agent({schema}) subagent 在 schema 驗證反覆失敗時無限迴圈，改為嘗試 5 次後中止
+- 改善 claude mcp get 和 claude mcp remove，打錯字時會建議最接近的已設定伺服器名稱，並截斷過長的伺服器列表
+- 改善記憶功能：agent 在接近大小上限時會被提醒壓縮其 MEMORY.md 索引
+- 改善 skill frontmatter：display-name、default-enabled、fallback 和 metadata.* 鍵現在接受 kebab-case、snake_case 和 camelCase
+- 改善格式錯誤的 SKILL.md YAML frontmatter 處理：改為以空 metadata 載入 skill 內容，而非靜默失敗
+- 變更 CLAUDE_CODE_MAX_RETRIES 上限為 15；無人值守 session 請改用 CLAUDE_CODE_RETRY_WATCHDOG
+- 變更背景 subagent 的權限提示改為浮現到主 session，而非自動拒絕；對話框會顯示是哪個 agent 在請求，按 Esc 只會拒絕該工具
+- 變更 /review <pr> 改為使用與 /code-review medium 相同的 review 引擎
+
 ## 2.1.185
 - 串流停滯提示（stream-stall hint）的文字從「No response from API · Retrying in …」改為「Waiting for API response · will retry in …」，觸發時機也從靜默 10 秒延長到 20 秒
 
