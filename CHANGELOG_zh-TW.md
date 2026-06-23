@@ -2,6 +2,29 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.187
+- 新增 sandbox.credentials 設定，可阻止沙箱指令讀取憑證檔案和機密環境變數
+- 新增組織層級的模型限制，適用於 model picker、--model、/model 和 ANTHROPIC_MODEL，當選到被限制的模型時會顯示「受組織設定限制」訊息
+- 新增滑鼠點擊支援，可在全螢幕模式的選單中使用（權限提示、/model、/config 等）
+- 修正 --resume 在原始 -p 執行沒有產生任何 model turn 時會失敗並顯示 "No conversation found"
+- 修正 --json-schema 和 workflow agent({schema}) 的結構化輸出：模型在成功呼叫後不會再無限重複呼叫 StructuredOutput，後續 turn 現在能可靠地回傳結構化輸出
+- 修正遠端 MCP 工具呼叫掛住 5 分鐘沒有回應的問題 — 現在會直接中止並回報錯誤，而不是無限期阻塞（可用 CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT 覆寫）
+- 修正 Claude Code Remote session 在加入 agent proxy CA 系統信任安裝後，啟動多花約 2.7 秒的問題
+- 修正在以逐位元組 extended-key 事件傳送貼上內容的終端機中，貼上韓文/CJK 文字會變成亂碼（mojibake）的問題
+- 修正 /update 透過 Remote Control 執行時，因啟動信任對話框而掛住的問題
+- 修正 agents 檢視中背景工作在 agent 結束 turn 但未產生結構化輸出時，永遠卡在「working」狀態
+- 修正 channel 連線在切換到 agents 檢視再切回後、以及執行 /bg、/tui 或 /update 後會斷線的問題
+- 修正 agent 停止通知未正確顯示是誰停止了 agent 的問題，並改善措辭（改用「finished」/「stopped」取代「came to rest」）
+- 修正 subagent 深度追蹤：恢復的 subagent 現在會還原原始的 spawn 深度，fork 出來的 subagent 現在會計入深度上限
+- 修正洩漏的 agent worktree 註冊：被 kill 掉的 agent 留下的鎖定 .git/worktrees/ 項目現在會自動清理
+- 修正在 macOS Ghostty 全螢幕模式下 Cmd+click 無法開啟 URL 的問題
+- 修正 claude --help 沒有列出 --bg/--background flag
+- 修正 /share 上傳期間 Esc、Ctrl-C 和 Ctrl-D 無法運作的問題
+- 改善 /install-github-app：GitHub Actions workflow 設定現在是選用的 — 你可以只安裝 GitHub App 然後跳過 workflow/secret 步驟
+- 改善 /btw，支援 ←/→ 方向鍵瀏覽先前的回答
+- 改善 /plugin，會顯示你最近沒用到的 plugin 方便你清理
+- [VSCode] 修正在恢復大型 session 時擴充功能會無回應的問題
+
 ## 2.1.186
 - 新增 claude mcp login <name> 和 claude mcp logout <name>，可直接從 CLI 驗證 MCP 伺服器，不用打開互動式 /mcp 選單；支援 --no-browser stdin 重導向，方便透過 SSH 完成驗證
 - 新增 /workflows agent 詳細頁的狀態篩選功能（按 f）

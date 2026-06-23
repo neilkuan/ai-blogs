@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.187 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.187 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.187</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 sandbox.credentials 設定，可阻止沙箱指令讀取憑證檔案和機密環境變數</li>
+<li>新增組織層級的模型限制，適用於 model picker、--model、/model 和 ANTHROPIC_MODEL，當選到被限制的模型時會顯示「受組織設定限制」訊息</li>
+<li>新增滑鼠點擊支援，可在全螢幕模式的選單中使用（權限提示、/model、/config 等）</li>
+<li>修正 --resume 在原始 -p 執行沒有產生任何 model turn 時會失敗並顯示 &quot;No conversation found&quot;</li>
+<li>修正 --json-schema 和 workflow agent({schema}) 的結構化輸出：模型在成功呼叫後不會再無限重複呼叫 StructuredOutput，後續 turn 現在能可靠地回傳結構化輸出</li>
+<li>修正遠端 MCP 工具呼叫掛住 5 分鐘沒有回應的問題 — 現在會直接中止並回報錯誤，而不是無限期阻塞（可用 CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT 覆寫）</li>
+<li>修正 Claude Code Remote session 在加入 agent proxy CA 系統信任安裝後，啟動多花約 2.7 秒的問題</li>
+<li>修正在以逐位元組 extended-key 事件傳送貼上內容的終端機中，貼上韓文/CJK 文字會變成亂碼（mojibake）的問題</li>
+<li>修正 /update 透過 Remote Control 執行時，因啟動信任對話框而掛住的問題</li>
+<li>修正 agents 檢視中背景工作在 agent 結束 turn 但未產生結構化輸出時，永遠卡在「working」狀態</li>
+<li>修正 channel 連線在切換到 agents 檢視再切回後、以及執行 /bg、/tui 或 /update 後會斷線的問題</li>
+<li>修正 agent 停止通知未正確顯示是誰停止了 agent 的問題，並改善措辭（改用「finished」/「stopped」取代「came to rest」）</li>
+<li>修正 subagent 深度追蹤：恢復的 subagent 現在會還原原始的 spawn 深度，fork 出來的 subagent 現在會計入深度上限</li>
+<li>修正洩漏的 agent worktree 註冊：被 kill 掉的 agent 留下的鎖定 .git/worktrees/ 項目現在會自動清理</li>
+<li>修正在 macOS Ghostty 全螢幕模式下 Cmd+click 無法開啟 URL 的問題</li>
+<li>修正 claude --help 沒有列出 --bg/--background flag</li>
+<li>修正 /share 上傳期間 Esc、Ctrl-C 和 Ctrl-D 無法運作的問題</li>
+<li>改善 /install-github-app：GitHub Actions workflow 設定現在是選用的 — 你可以只安裝 GitHub App 然後跳過 workflow/secret 步驟</li>
+<li>改善 /btw，支援 ←/→ 方向鍵瀏覽先前的回答</li>
+<li>改善 /plugin，會顯示你最近沒用到的 plugin 方便你清理</li>
+<li>[VSCode] 修正在恢復大型 session 時擴充功能會無回應的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
