@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.190
+- 錯誤修正與穩定性改善
+
 ## 2.1.187
 - 新增 sandbox.credentials 設定，可阻止沙箱指令讀取憑證檔案和機密環境變數
 - 新增組織層級的模型限制，適用於 model picker、--model、/model 和 ANTHROPIC_MODEL，當選到被限制的模型時會顯示「受組織設定限制」訊息
