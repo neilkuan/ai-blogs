@@ -2,6 +2,28 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.191
+- 新增 /rewind 支援，可以恢復到執行 /clear 之前的對話狀態
+- 修正串流回應時往回閱讀先前輸出，捲動位置會跳到底部的問題
+- 修正背景 agent 被停止後又復活的問題——現在從任務面板停止 agent 是永久性的
+- 修正 /voice 被組織政策停用時只顯示通用的「不可用」訊息——現在會說明限制原因
+- 修正 /login 的 URL 在 Windows Terminal 中跨行時被截斷開啟的問題
+- 修正在 ssh/tmux 下使用 Ghostty 全螢幕模式時 Cmd+click 連結失效的問題
+- 修正 claude agents 把內建斜線指令（如 /usage）當成提示文字送進背景 session，而非顯示提示訊息
+- 修正 claude agents 工作列表中貼上的圖片顯示完整檔案路徑，而非 [Image #N] 佔位符
+- 修正 hooks 使用逗號分隔的 matcher（例如 "Bash,PowerShell"）時會默默失效從不觸發的問題
+- 修正 /permissions 最近拒絕（Recently-denied）分頁：核准一個拒絕項目後，現在關閉時會正確保存，不再被靜默丟棄
+- 修正 agent 面板在名單捲動超過溢位上限時會跳一列的問題
+- 修正歡迎畫面（splash art）在 macOS Terminal 預設 80×24 視窗中溢出的問題
+- 修正託管設定：forceRemoteSettingsRefresh 現在透過 MDM 或檔案政策設定時能正確生效，且 fetch 請求會送出 Cache-Control: no-cache 防止代理伺服器回傳過期回應
+- 改進 sandbox 網路權限對話框：選擇「Yes」允許的 host 現在會在整個 session 期間被記住，不再每次連線都重新詢問
+- 改進 MCP server 可靠性：能力探索（tools/list、prompts/list、resources/list）現在會對暫時性網路錯誤進行短暫退避重試（backoff retry）
+- 改進 MCP OAuth：探索與 token 請求現在會在暫時性網路錯誤後重試一次，且 headless 環境會跳過瀏覽器彈窗、直接進入貼上 URL 的提示
+- 改進 MCP 錯誤訊息：HTTP 404 錯誤現在會顯示 URL 並指向你的 MCP 設定檔
+- 改進 vim 模式的提示歷史搜尋（NORMAL /），加入如何切換到斜線指令的提示
+- 串流回應期間 CPU 使用率降低約 37%，透過將文字更新合併至 100ms 間隔實現
+- 減少長時間 session 中終端輸出快取造成的記憶體增長
+
 ## 2.1.190
 - 錯誤修正與穩定性改善
 
