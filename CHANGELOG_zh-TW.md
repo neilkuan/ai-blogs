@@ -2,6 +2,23 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.193
+- 新增 autoMode.classifyAllShell 設定，讓所有 Bash/PowerShell 指令都經過 auto-mode 分類器判斷，而非只針對任意程式碼執行的模式
+- auto-mode 拒絕原因現在會顯示在 transcript、拒絕提示（denial toast）及 /permissions 的近期拒絕紀錄中
+- 新增 claude_code.assistant_response OpenTelemetry log 事件，內含模型的回應文字。預設會遮蔽內容，除非設定 OTEL_LOG_ASSISTANT_RESPONSES=1；未設定時會跟隨 OTEL_LOG_USER_PROMPTS 的行為，因此原本就有記錄 prompt 內容的部署環境升級後會開始收到回應內容——如果只想保留 prompt 記錄，請設定 OTEL_LOG_ASSISTANT_RESPONSES=0
+- bash 模式（!）新增即時檔案路徑自動補全
+- 當 MCP server 需要驗證時，啟動時會顯示提示訊息並指向 /mcp
+- 新增閒置背景 shell 指令的記憶體壓力自動回收機制（可用 CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1 停用）
+- 修正 /model 及其他依賴 client data 的 UI 在 /login 後立即顯示過期或空白狀態的問題
+- 修正背景化（←←）在所有執行中的任務都已帶入新 session 時，仍錯誤跳出「N 個背景任務將被放棄」的問題
+- 修正被釘選的背景 agent 在每次自動更新後都被重新提示「從上次中斷的地方繼續」
+- 修正將主對話背景化時會產生一個幽靈般的「general-purpose (resumed)」subagent 並重新執行主對話的問題
+- 修正在檢視 subagent 時，agent 面板會隱藏同層級其他 agent 的問題
+- 改善背景 agent：啟動結果不再指示 Claude「結束你的回應」——它會在 agent 執行期間繼續處理其他任務
+- 改善 MCP headersHelper 驗證：當工具呼叫回傳 401/403 時，helper 現在會自動重新執行並重新連線
+- 改善 plugin 自動更名：marketplace 的 renames 對應表現在會自動套用，將你的設定更新為新名稱
+- 改善 /add-dir 在目錄已是工作目錄時的提示訊息
+
 ## 2.1.191
 - 新增 /rewind 支援，可以恢復到執行 /clear 之前的對話狀態
 - 修正串流回應時往回閱讀先前輸出，捲動位置會跳到底部的問題
