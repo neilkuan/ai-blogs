@@ -2,6 +2,20 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.195
+- 新增 CLAUDE_CODE_DISABLE_MOUSE_CLICKS 環境變數，可在全螢幕模式下停用滑鼠點擊／拖曳／懸停事件，同時保留滾輪捲動功能
+- 修正 hook matcher 對含連字號的識別碼（例如 code-reviewer、mcp__brave-search）會意外進行子字串比對的問題——現在改為完全比對。若要匹配某個含連字號的 MCP server 底下所有工具，請使用 mcp__brave-search__.*
+- 修正 macOS 上語音聽寫在長時間執行的 session 中，當預設輸入裝置變更後會錄到靜音的問題
+- 修正語音聽寫的自動送出功能對不使用空格的語言（日文、中文、泰文）永遠不會觸發的問題
+- 修正僅透過專案 .claude/settings.json 啟用的外部 plugin，在每個 loader 路徑都會被要求重新確認安裝授權的問題
+- 修正 /plugin 的啟用／停用功能在 plugin 的 plugin.json 中 name 欄位與 marketplace 上架名稱不同時無法運作的問題
+- 修正背景工作在被較新版本的 Claude Code 寫入後，會從 claude agents 中消失或遺失資料的問題
+- 修正重新開啟已崩潰的背景任務時，會顯示空白畫面長達 5 秒才重啟的問題
+- 修正背景 agent daemon 在 control socket 啟動失敗時仍持續執行但無法連線，導致無法重啟的問題
+- 改善 Linux 上的語音模式：當 SoX 已安裝但沒有音訊擷取裝置時，現在能正確區分「找不到麥克風」和「未安裝 SoX」兩種情況
+- 改善 claude agents 的已完成列表，現在會填滿可用的垂直空間；在較矮的終端機上 header 會自動壓縮，讓進行中的 session 保持可見
+- 改善 Remote session 啟動體驗，在容器啟動期間顯示佈建進度清單（provisioning checklist）
+
 ## 2.1.193
 - 新增 autoMode.classifyAllShell 設定，讓所有 Bash/PowerShell 指令都經過 auto-mode 分類器判斷，而非只針對任意程式碼執行的模式
 - auto-mode 拒絕原因現在會顯示在 transcript、拒絕提示（denial toast）及 /permissions 的近期拒絕紀錄中

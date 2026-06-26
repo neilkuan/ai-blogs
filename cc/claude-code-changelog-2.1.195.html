@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.195 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.195 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.195</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 CLAUDE_CODE_DISABLE_MOUSE_CLICKS 環境變數，可在全螢幕模式下停用滑鼠點擊／拖曳／懸停事件，同時保留滾輪捲動功能</li>
+<li>修正 hook matcher 對含連字號的識別碼（例如 code-reviewer、mcp__brave-search）會意外進行子字串比對的問題——現在改為完全比對。若要匹配某個含連字號的 MCP server 底下所有工具，請使用 mcp__brave-search__.*</li>
+<li>修正 macOS 上語音聽寫在長時間執行的 session 中，當預設輸入裝置變更後會錄到靜音的問題</li>
+<li>修正語音聽寫的自動送出功能對不使用空格的語言（日文、中文、泰文）永遠不會觸發的問題</li>
+<li>修正僅透過專案 .claude/settings.json 啟用的外部 plugin，在每個 loader 路徑都會被要求重新確認安裝授權的問題</li>
+<li>修正 /plugin 的啟用／停用功能在 plugin 的 plugin.json 中 name 欄位與 marketplace 上架名稱不同時無法運作的問題</li>
+<li>修正背景工作在被較新版本的 Claude Code 寫入後，會從 claude agents 中消失或遺失資料的問題</li>
+<li>修正重新開啟已崩潰的背景任務時，會顯示空白畫面長達 5 秒才重啟的問題</li>
+<li>修正背景 agent daemon 在 control socket 啟動失敗時仍持續執行但無法連線，導致無法重啟的問題</li>
+<li>改善 Linux 上的語音模式：當 SoX 已安裝但沒有音訊擷取裝置時，現在能正確區分「找不到麥克風」和「未安裝 SoX」兩種情況</li>
+<li>改善 claude agents 的已完成列表，現在會填滿可用的垂直空間；在較矮的終端機上 header 會自動壓縮，讓進行中的 session 保持可見</li>
+<li>改善 Remote session 啟動體驗，在容器啟動期間顯示佈建進度清單（provisioning checklist）</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
