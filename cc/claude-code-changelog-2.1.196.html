@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.196 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.196 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.196</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增組織預設模型支援 — 管理員在組織控制台設定，當你沒有自己選擇模型時，/model 會顯示「Org default」或「Role default」</li>
+<li>新增 session 啟動時可讀的預設名稱，更容易辨識和傳訊</li>
+<li>新增聊天中可點擊的檔案附件 — Cmd/Ctrl+點擊可在 Finder/Explorer 中顯示檔案</li>
+<li>安全性：claude mcp list/get 不再啟動那些由 repo 透過已提交的 .claude/settings.json 自行批准的 .mcp.json 伺服器；不受信任的工作區現在會顯示 ⏸ Pending approval</li>
+<li>修正喚醒背景任務時永久刪除其對話紀錄並重新執行原始 prompt 的問題——原因是 transcript 探測器誤讀了真實的 transcript；現在該檔案會被移到旁邊，不再刪除</li>
+<li>修正速率限制警告閃爍消失的問題，以及當多個平行請求在觸發用量上限的瞬間同時進行時，速率限制遙測被重複計算的問題</li>
+<li>修正背景 session 回合結束後出現重複摘要行的問題：schema 被拒絕的 StructuredOutput 嘗試不再與其重試結果一起顯示</li>
+<li>修正 PowerShell 中 git diff/git grep、egrep/fgrep，以及包含 | 的引號搜尋模式在 exit 1 時被回報為失敗的問題，現在行為與 Bash 一致</li>
+<li>修正 claude agents 側面板的多個問題：開啟 agent 時鍵盤焦點卡住、背景任務每次開啟都遺失其 subagent 類型、以及 session 在執行中卻顯示錯誤狀態</li>
+<li>修正 claude agents --dangerously-skip-permissions 靜默退回 auto 模式，而非顯示繞過免責聲明並將繞過模式套用到衍生的 agent</li>
+<li>修正 Remote session 在回合中途崩潰的復原問題 — 被伺服器重啟中斷的 session 現在會在下一個 worker 上自動恢復</li>
+<li>修正使用 /cd 移動過的 session 在非正常退出後，仍出現在舊目錄的恢復列表中的問題（當舊路徑包含特殊字元時）</li>
+<li>修正 claude plugin validate 跳過 source 為 &quot;.&quot; 的本地 plugin，且在遇到第一個錯誤類別後就停止的問題</li>
+<li>修正在閒置 prompt 按 Esc Esc 無法開啟倒回選單的迴歸問題；使用 Ctrl+C 或 Ctrl+X Ctrl+K 來停止背景 agent</li>
+<li>修正 MCP OAuth 在未指定 scope 時請求授權伺服器完整的 scopes_supported 目錄，導致在 GitLab self-hosted 及其他企業 IdP 上發生 invalid_scope 錯誤的問題</li>
+<li>修正 /context 在 Bedrock 上所有工具群組都顯示 0 token 的問題</li>
+<li>修正 /deep-research 將驗證失敗誤報為「all claims refuted」而非 unverified 的問題</li>
+<li>修正當 marketplace 以 git repo 支援的本地資料夾路徑加入時，plugin 相依性版本鎖定未被遵守的問題</li>
+<li>修正 claude agents session 狀態：已完成的列不再在「Done」和「Needs your input」之間跳來跳去，停滯的 agent 現在標示為「Needs attention」，提及 PR 的結果會顯示可點擊的連結</li>
+<li>修正語音聽寫吞掉空格的問題，以及在語音模式啟用時快速打字會意外觸發錄音的問題</li>
+<li>改善背景 session 可靠性：長時間執行的指令和工作流現在能在 session 的 process 被停止、重啟或更新後存活 — 包括 Windows 上，背景 shell 會被移交而非直接砍掉</li>
+<li>改善背景 agent：被 daemon 重啟殺掉的 worker 現在會在下次開啟 agents 檢視時，自動從中斷處恢復</li>
+<li>改善 /code-review 工作流：將五個清理 finder 合併為一個，token 用量減少約 25%</li>
+<li>減少終端 UI 每幀的渲染工作量，在串流期間跳過無操作的子樹遍歷</li>
+<li>串流閒置看門狗（watchdog）現在對所有 provider 預設啟用 — 當回應串流超過 5 分鐘沒有事件時，會中止並重試。設定 CLAUDE_ENABLE_STREAM_WATCHDOG=0 可停用。</li>
+<li>當 ANTHROPIC_BASE_URL 指向非 Anthropic 主機時，Remote Control 現在會被停用，與 CLAUDE_CODE_USE_BEDROCK/_VERTEX/_FOUNDRY 下的既有行為一致</li>
+<li>從前景 session 開啟 agents 檢視改為只需按一次 ←，不再需要按兩次，與背景 session 的行為一致</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
