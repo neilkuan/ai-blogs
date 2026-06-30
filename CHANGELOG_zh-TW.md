@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.197
+- 推出 Claude Sonnet 5：現在是 Claude Code 的預設模型，原生支援 1M token 上下文視窗，並提供至 8 月 31 日止的促銷價格 $2/$10 per Mtok。更新至版本 2.1.197 即可使用。https://www.anthropic.com/news/claude-sonnet-5
+
 ## 2.1.196
 - 新增組織預設模型支援 — 管理員在組織控制台設定，當你沒有自己選擇模型時，/model 會顯示「Org default」或「Role default」
 - 新增 session 啟動時可讀的預設名稱，更容易辨識和傳訊
