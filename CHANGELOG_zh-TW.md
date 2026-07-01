@@ -2,6 +2,40 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.198
+- Chrome 版 Claude 正式上線（GA）
+- claude agents 新增背景代理通知 — 當 session 需要輸入或完成時，會觸發 Notification hook（agent_needs_input / agent_completed）
+- 新增 /dataviz 技能，提供圖表與儀表板設計指引，附帶可執行的色票驗證器
+- Gateway：新增 Claude Platform on AWS（anthropicAws）作為上游 provider；model-not-found 回應現在會繼續走 failover 鏈
+- 從 claude agents 啟動的背景代理在 worktree 中完成程式碼工作後，會自動 commit、push 並開 draft PR，而不是停下來問你
+- 內建的 Explore agent 現在繼承主 session 的模型（上限為 opus），不再用 haiku 跑
+- Subagent 和 context compaction 現在會繼承 session 的 extended thinking 設定，改善委派任務的輸出品質
+- 修正回應途中短暫斷網會中斷整個 turn 的問題 — ECONNRESET 等暫時性錯誤現在會用 backoff 重試，而非直接失敗
+- 修正沙箱程序重複存取同一網路主機時，產生過多背景分類器請求的問題
+- 修正 web、桌面版及 VS Code 任務面板中的背景任務在完成或恢復 session 後卡在「Running」狀態
+- 修正 agent teams：隊友因 API 錯誤掛掉時，現在會回報「failed」給 lead，且對卡住的隊友發訊息會喚醒它立即重試
+- 修正切換分支或在 session 外 commit 後 /diff 面板不會重新整理的問題
+- 修正全螢幕模式下 markdown 表格溢出、右邊框換行的問題
+- 修正 Claude Platform on AWS 和 Mantle session 在 STS token 過期時卡在「Please run /login」的問題 — awsAuthRefresh 現在會自動執行
+- 修正 macOS 背景代理 session 中本地網路主機出現「no route to host」的問題，透過宣告 Local Network entitlements 解決
+- 修正進出 worktree 後 /desktop 報錯「Cannot determine working directory」的問題
+- 修正 macOS 上開啟 agents 檢視時，背景代理每約 52 秒重複顯示「Reconnecting…」的問題
+- 修正在 claude attach <id> 中按 ← 會跳回 shell 而非開啟 agent 檢視的問題
+- 修正 claude --bg 搭配 --print/-p 時會靜默建立無法 attach 的 session 的問題；衝突的 flag 現在會提前拒絕
+- 修正 SDK 和桌面版 session 中 workflow 進度檢視會丟掉最早的 agent，但階段計數器維持正確的問題
+- 修正透過 symlink 路徑存取目標檔案時，.claude/rules/ 的條件式規則不會載入的問題
+- 修正 macOS Warp 全螢幕模式下 Cmd+click 無法開啟 URL 的問題
+- 修正全螢幕模式下雙擊選取文字時無法選到完整 URL（含 scheme）的問題
+- 修正 session 以 plan mode 啟動時，唯讀工具呼叫不會自動允許的問題
+- 修正 /branch 從 compaction 摘要而非第一個真正的 prompt 衍生預設 fork 名稱的問題
+- 改善 focus mode：在同一 turn 中啟動的 subagent 現在會出現在活動摘要中，已完成的背景通知會摺疊成單一計數
+- 升級至 highlight.js 11，改善程式碼區塊、diff 及檔案預覽的語法高亮準確度
+- 透過 SSH 從 Mac 連線時，鍵盤快捷鍵提示現在會顯示 opt/cmd 而非 alt/super
+- 改善 API 重試 UX：第二次嘗試後會顯示錯誤原因，API 過載時以 status page 連結取代 spinner 提示
+- /login 現在可以從 claude agents 檢視中開啟登入對話框，不再顯示「不可用」
+- Subagent 現在把啟動它的 agent 傳來的訊息視為正常任務指示；agent 的訊息仍不會被當作使用者的核准
+- 移除 /agents 精靈；請直接請 Claude 建立或管理 subagent，或手動編輯 .claude/agents/
+
 ## 2.1.197
 - 推出 Claude Sonnet 5：現在是 Claude Code 的預設模型，原生支援 1M token 上下文視窗，並提供至 8 月 31 日止的促銷價格 $2/$10 per Mtok。更新至版本 2.1.197 即可使用。https://www.anthropic.com/news/claude-sonnet-5
 
