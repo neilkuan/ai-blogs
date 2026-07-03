@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.200 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.200 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.200</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>將 AskUserQuestion 對話框改為預設不再自動繼續；可透過 /config 設定閒置逾時來啟用自動繼續</li>
+<li>將「default」權限模式在 CLI、--help、VS Code 和 JetBrains 中統一更名為「Manual」；--permission-mode manual 和 &quot;defaultMode&quot;: &quot;manual&quot; 仍可與 default 互通使用</li>
+<li>修正當 .claude.json 中的 disabledMcpServers 或 enabledMcpServers 設為非陣列值時，啟動會崩潰的問題</li>
+<li>修正背景 session 在睡眠/喚醒後或重新開啟停滯的 session 時，會在執行中途靜默停止的問題</li>
+<li>修正背景 session 在停滯重啟後，會重新執行先前已用 Esc 取消的 turn 的問題</li>
+<li>修正背景 agent 崩潰後留下過期的 daemon.lock，且該 PID 被系統重新使用時，agent 就再也無法啟動的問題</li>
+<li>修正背景 agent daemon 交接機制，使重新安裝的舊版 build 無法再接管 daemon；現在改以版本內嵌的 build 時間戳來判斷版本新舊</li>
+<li>修正背景 agent 名冊的多個問題：暫時性損毀會永久停用孤兒清理機制、舊版二進位檔未保留新版寫入的欄位、以及 daemon 重啟時 socket auth token 被移除</li>
+<li>修正 subagent 在產出任何文字前就被 rate limit 截斷時，會回傳空結果而非正確報錯的問題</li>
+<li>修正背景 agent 輸出中的控制位元組（control bytes）會跑到 agent 檢視畫面的終端機中</li>
+<li>修正 claude agents --plugin-dir &lt;dir&gt; 當 flag 放在 agents 之後時，不會在 agent 檢視畫面顯示該 plugin 的 agents 和 skills 的問題</li>
+<li>修正專案範圍的 plugin 從同一 repository 的 git worktree 載入時無法正確運作的問題</li>
+<li>修正 /mcp 伺服器列表未追蹤焦點，導致螢幕閱讀器和放大鏡無法正確使用的問題</li>
+<li>修正語音輸入在錄音未擷取到任何音訊時，會顯示誤導性「Voice connection failed」訊息的問題</li>
+<li>修正在 tmux 3.4+ 下的畫面閃爍問題，改為啟用同步終端輸出（synchronized terminal output）</li>
+<li>改善螢幕閱讀器輸出：裝飾性符號現在會被隱藏、transcript 符號改為朗讀簡短標籤、巢狀表格改以 Header: value. 逐行呈現</li>
+<li>改善安裝腳本，當安裝因系統記憶體不足而被終止時，會顯示說明訊息</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>

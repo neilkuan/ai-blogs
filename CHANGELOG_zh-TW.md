@@ -2,6 +2,25 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.200
+- 將 AskUserQuestion 對話框改為預設不再自動繼續；可透過 /config 設定閒置逾時來啟用自動繼續
+- 將「default」權限模式在 CLI、--help、VS Code 和 JetBrains 中統一更名為「Manual」；--permission-mode manual 和 "defaultMode": "manual" 仍可與 default 互通使用
+- 修正當 .claude.json 中的 disabledMcpServers 或 enabledMcpServers 設為非陣列值時，啟動會崩潰的問題
+- 修正背景 session 在睡眠/喚醒後或重新開啟停滯的 session 時，會在執行中途靜默停止的問題
+- 修正背景 session 在停滯重啟後，會重新執行先前已用 Esc 取消的 turn 的問題
+- 修正背景 agent 崩潰後留下過期的 daemon.lock，且該 PID 被系統重新使用時，agent 就再也無法啟動的問題
+- 修正背景 agent daemon 交接機制，使重新安裝的舊版 build 無法再接管 daemon；現在改以版本內嵌的 build 時間戳來判斷版本新舊
+- 修正背景 agent 名冊的多個問題：暫時性損毀會永久停用孤兒清理機制、舊版二進位檔未保留新版寫入的欄位、以及 daemon 重啟時 socket auth token 被移除
+- 修正 subagent 在產出任何文字前就被 rate limit 截斷時，會回傳空結果而非正確報錯的問題
+- 修正背景 agent 輸出中的控制位元組（control bytes）會跑到 agent 檢視畫面的終端機中
+- 修正 claude agents --plugin-dir <dir> 當 flag 放在 agents 之後時，不會在 agent 檢視畫面顯示該 plugin 的 agents 和 skills 的問題
+- 修正專案範圍的 plugin 從同一 repository 的 git worktree 載入時無法正確運作的問題
+- 修正 /mcp 伺服器列表未追蹤焦點，導致螢幕閱讀器和放大鏡無法正確使用的問題
+- 修正語音輸入在錄音未擷取到任何音訊時，會顯示誤導性「Voice connection failed」訊息的問題
+- 修正在 tmux 3.4+ 下的畫面閃爍問題，改為啟用同步終端輸出（synchronized terminal output）
+- 改善螢幕閱讀器輸出：裝飾性符號現在會被隱藏、transcript 符號改為朗讀簡短標籤、巢狀表格改以 Header: value. 逐行呈現
+- 改善安裝腳本，當安裝因系統記憶體不足而被終止時，會顯示說明訊息
+
 ## 2.1.199
 - 堆疊式斜線技能呼叫（stacked slash-skill invocations）如 /skill-a /skill-b do XYZ，現在會載入所有前導技能（最多 5 個），而非只載入第一個
 - 修正 SSL 憑證錯誤（TLS 攔截代理、缺少 NODE_EXTRA_CA_CERTS、憑證過期）會先燒掉重試次數才顯示可操作的修正建議——現在會立即失敗並附上修正提示
