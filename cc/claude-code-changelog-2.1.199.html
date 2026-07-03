@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.199 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.199 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.199</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>堆疊式斜線技能呼叫（stacked slash-skill invocations）如 /skill-a /skill-b do XYZ，現在會載入所有前導技能（最多 5 個），而非只載入第一個</li>
+<li>修正 SSL 憑證錯誤（TLS 攔截代理、缺少 NODE_EXTRA_CA_CERTS、憑證過期）會先燒掉重試次數才顯示可操作的修正建議——現在會立即失敗並附上修正提示</li>
+<li>修正當 API 在部分輸出後發出串流中途的 overloaded/server error 時，串流回應被整個丟棄——現在會保留已接收的部分內容，並附上回應不完整的通知</li>
+<li>修正 subagent 因速率限制或伺服器錯誤被中斷時，會靜默失敗而非將部分成果回傳給父 agent</li>
+<li>修正 subagent 將 API 錯誤（例如用量上限已達）回報為成功結果——錯誤現在會正確回報給父 agent</li>
+<li>修正 Linux 上的背景 agent daemon 在非正常關機留下損壞的 worker 記錄後，每約 50 秒就把自己和所有執行中的 agent 全部砍掉</li>
+<li>修正背景 agent 在 macOS 上透過 SSH 冷啟動時失敗，出現「Could not switch to audit session」錯誤（2.1.196 引入的回歸問題）</li>
+<li>修正 claude stop 在與背景 agent 重生（respawn）發生競爭條件（race condition）時被靜默撤銷——重生流程現在會尊重 stop 指令</li>
+<li>修正背景工作的進度指示器在執行長時間指令時停滯數分鐘</li>
+<li>修正記憶體不足的機器上背景 session 顯示籠統的錯誤訊息——現在會指出記憶體不足並建議釋放資源</li>
+<li>修正遠端 session 在背景 agent 完成時，於 agent 檢視中短暫在 Working 和 Idle 之間來回跳動</li>
+<li>修正閒置的 subagent 在其他 subagent 仍在工作時從 agent 面板消失；多餘的閒置 agent 現在會收合成可展開的摘要列</li>
+<li>修正在檢視 subagent 時輸入 /model 或 /fast 會靜默開啟主 agent 的模型選擇器——現在會顯示通知說明該指令適用於主 agent</li>
+<li>修正 SessionStart、Setup 和 SubagentStart hook 在以 exit code 2 結束時靜默隱藏 stderr——錯誤現在會顯示在 transcript 中</li>
+<li>修正 claude --dangerously-skip-permissions daemon &lt;subcommand&gt; 被當成聊天提示詞處理，而非執行子命令</li>
+<li>修正 SendMessage 在重生的 agent 重用先前 agent 名稱時靜默路由錯誤——該工具現在會偵測不一致並要求呼叫者重新指定目標</li>
+<li>修正開啟或恢復沒有新訊息的 session 時，不必要地使 transcript 檔案持續增長</li>
+<li>修正用 ← 或 /background 將 session 送入背景時，agent 檢視列會遺失其 /color 設定</li>
+<li>修正從啟動復原對話框重設損壞的設定檔時會不可逆地摧毀該檔——現在會先備份</li>
+<li>修正 Chrome 中的 Claude 在不同 build 或設定目錄執行的 session 時，反覆開啟重新連線頁面</li>
+<li>修正 plan mode 不會對有狀態變更的瀏覽器工具呼叫進行提示確認；唯讀的 browser_batch 呼叫現在能正確自動放行</li>
+<li>暫時性伺服器速率限制錯誤（與你的用量上限無關的 429）現在會對訂閱用戶自動以退避策略（backoff）重試，而非直接讓該回合失敗</li>
+<li>CLAUDE_CODE_RETRY_WATCHDOG 現在將非容量相關的暫時性錯誤預設重試次數提高到 300，並解除 CLAUDE_CODE_MAX_RETRIES 原本 15 次的上限</li>
+<li>claude agents 的 session 列現在將 pull request 連結顯示為簡潔的 #N，不再加上冗餘的「PR」標籤</li>
+<li>Subagent 現在預設在背景執行，讓 Claude 在它們運作時繼續工作，並在完成時收到通知（先前為逐步推出階段）</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>

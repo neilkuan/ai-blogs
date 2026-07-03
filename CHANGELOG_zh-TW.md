@@ -2,6 +2,33 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.199
+- 堆疊式斜線技能呼叫（stacked slash-skill invocations）如 /skill-a /skill-b do XYZ，現在會載入所有前導技能（最多 5 個），而非只載入第一個
+- 修正 SSL 憑證錯誤（TLS 攔截代理、缺少 NODE_EXTRA_CA_CERTS、憑證過期）會先燒掉重試次數才顯示可操作的修正建議——現在會立即失敗並附上修正提示
+- 修正當 API 在部分輸出後發出串流中途的 overloaded/server error 時，串流回應被整個丟棄——現在會保留已接收的部分內容，並附上回應不完整的通知
+- 修正 subagent 因速率限制或伺服器錯誤被中斷時，會靜默失敗而非將部分成果回傳給父 agent
+- 修正 subagent 將 API 錯誤（例如用量上限已達）回報為成功結果——錯誤現在會正確回報給父 agent
+- 修正 Linux 上的背景 agent daemon 在非正常關機留下損壞的 worker 記錄後，每約 50 秒就把自己和所有執行中的 agent 全部砍掉
+- 修正背景 agent 在 macOS 上透過 SSH 冷啟動時失敗，出現「Could not switch to audit session」錯誤（2.1.196 引入的回歸問題）
+- 修正 claude stop 在與背景 agent 重生（respawn）發生競爭條件（race condition）時被靜默撤銷——重生流程現在會尊重 stop 指令
+- 修正背景工作的進度指示器在執行長時間指令時停滯數分鐘
+- 修正記憶體不足的機器上背景 session 顯示籠統的錯誤訊息——現在會指出記憶體不足並建議釋放資源
+- 修正遠端 session 在背景 agent 完成時，於 agent 檢視中短暫在 Working 和 Idle 之間來回跳動
+- 修正閒置的 subagent 在其他 subagent 仍在工作時從 agent 面板消失；多餘的閒置 agent 現在會收合成可展開的摘要列
+- 修正在檢視 subagent 時輸入 /model 或 /fast 會靜默開啟主 agent 的模型選擇器——現在會顯示通知說明該指令適用於主 agent
+- 修正 SessionStart、Setup 和 SubagentStart hook 在以 exit code 2 結束時靜默隱藏 stderr——錯誤現在會顯示在 transcript 中
+- 修正 claude --dangerously-skip-permissions daemon <subcommand> 被當成聊天提示詞處理，而非執行子命令
+- 修正 SendMessage 在重生的 agent 重用先前 agent 名稱時靜默路由錯誤——該工具現在會偵測不一致並要求呼叫者重新指定目標
+- 修正開啟或恢復沒有新訊息的 session 時，不必要地使 transcript 檔案持續增長
+- 修正用 ← 或 /background 將 session 送入背景時，agent 檢視列會遺失其 /color 設定
+- 修正從啟動復原對話框重設損壞的設定檔時會不可逆地摧毀該檔——現在會先備份
+- 修正 Chrome 中的 Claude 在不同 build 或設定目錄執行的 session 時，反覆開啟重新連線頁面
+- 修正 plan mode 不會對有狀態變更的瀏覽器工具呼叫進行提示確認；唯讀的 browser_batch 呼叫現在能正確自動放行
+- 暫時性伺服器速率限制錯誤（與你的用量上限無關的 429）現在會對訂閱用戶自動以退避策略（backoff）重試，而非直接讓該回合失敗
+- CLAUDE_CODE_RETRY_WATCHDOG 現在將非容量相關的暫時性錯誤預設重試次數提高到 300，並解除 CLAUDE_CODE_MAX_RETRIES 原本 15 次的上限
+- claude agents 的 session 列現在將 pull request 連結顯示為簡潔的 #N，不再加上冗餘的「PR」標籤
+- Subagent 現在預設在背景執行，讓 Claude 在它們運作時繼續工作，並在完成時收到通知（先前為逐步推出階段）
+
 ## 2.1.198
 - Chrome 版 Claude 正式上線（GA）
 - claude agents 新增背景代理通知 — 當 session 需要輸入或完成時，會觸發 Notification hook（agent_needs_input / agent_completed）
