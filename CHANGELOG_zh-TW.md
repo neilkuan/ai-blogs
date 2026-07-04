@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.201
+- Claude Sonnet 5 的工作階段不再於對話中途使用 system role 來插入 harness 提醒訊息
+
 ## 2.1.200
 - 將 AskUserQuestion 對話框改為預設不再自動繼續；可透過 /config 設定閒置逾時來啟用自動繼續
 - 將「default」權限模式在 CLI、--help、VS Code 和 JetBrains 中統一更名為「Manual」；--permission-mode manual 和 "defaultMode": "manual" 仍可與 default 互通使用
