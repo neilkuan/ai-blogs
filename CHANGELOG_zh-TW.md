@@ -2,6 +2,45 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.203
+- 新增登入即將過期的警告，讓你可以在背景 session 被中斷前重新驗證
+- 新增灰色 ⏸ 徽章顯示在底部狀態列，當處於手動權限模式時，讓目前的模式隨時可見
+- 將 session 額外的工作目錄加入 MCP 的 roots/list，當目錄集合變更時會發送 notifications/roots/list_changed
+- 修正在 macOS 上開啟或切換背景 agent session 會卡住 15–20 秒的問題，原因是錯誤的低記憶體偵測（2.1.196 引入的回歸）
+- 修正背景 session 在 daemon 的 session token 過期後永久無法回應 attach、回覆和停止的問題 — 現在 session 會自動恢復
+- 修正回到 claude agents 時會靜默停止正在執行的 subagent 並從頭重跑 prompt 的問題 — 現在會保留它們的工作成果
+- 修正互動式 session 中的記憶體和每輪 CPU 回歸問題：context 使用量指標不再在每輪結束後重新分析整份對話紀錄
+- 修正背景 agent 從 daemon 繼承過期的 PATH 而非來自發送端 shell 的問題，這在 Windows 上會導致找不到工具
+- 修正背景和 agent-view session 遺失 shell 匯出的 ANTHROPIC_BASE_URL，導致 API key 被送到預設 endpoint 並回傳 401 錯誤
+- 修正在有大量 git worktree 的 repo 中 Bash 報錯「argument list too long」的問題
+- 修正 worktree 隔離的 subagent 有時會在父 checkout 而非自己的 worktree 中執行 shell 指令
+- 修正在多 repo workspace 中 worktree 建立時拒絕巢狀 repository 的問題，導致背景 session 無法隔離和編輯
+- 修正背景 agent 在工作目錄被刪除、被檔案取代或路徑失效時會反覆 crash 的問題 — 現在只會失敗一次並顯示明確的錯誤訊息
+- 修正背景 daemon 自動升級失敗時會靜默終止所有正在執行的背景 session
+- 修正 TaskStop 和 TaskOutput 無法找到由另一個 agent 產生的背景 agent — 錯誤訊息現在會列出正在執行的 agent 的 id 和描述
+- 修正 claude agents 的輸入框在 slash command 不可用時會丟棄你已輸入的訊息
+- 修正開啟已停止的 session（其對話已在另一個 session 中開啟）時 agent 列表會 crash 的問題
+- 修正背景 session 在問題已被回答後仍在 agent 列表中顯示「Needs input」
+- 修正背景 agent 啟動失敗時只顯示「exit_with_message」而非實際錯誤訊息
+- 修正背景 session 在透過 daemon fork 時忽略 settings.json 中 effortLevel 變更的問題
+- 修正已 attach 的背景 session 忽略 CLAUDE_CODE_DISABLE_MOUSE 和 CLAUDE_CODE_DISABLE_MOUSE_CLICKS 停用設定
+- 修正 /exit 在所有具名 agent 都已完成後仍錯誤警告有正在執行的背景 agent
+- 修正從非 git 目錄啟動的背景 session 在設定了 WorktreeCreate hook 時無法編輯檔案
+- 修正 claude agents 中的 @ 目錄選擇器沒有顯示已註冊的 git worktree
+- 修正 Windows 上背景任務的輸出在 /clear 後被永久替換為空檔案
+- 修正往上捲動長對話紀錄時內容跳動的問題
+- 修正在 bash 模式下打字時，當顯示 shell 歷史建議時終端機會閃爍和跳動
+- 修正重新 attach 到背景 session 時會印出 ^[[I] / ^[[O 跳脫碼（escape code）
+- 修正僅使用 LSP 的 plugin 在其 language server 提供 diagnostics 或回應導覽請求時被錯誤標記為未使用
+- 改善長回應串流時的回應速度：即時預覽更新不再重新渲染整個畫面
+- 改善 subagent 行為：agent 現在比較不會把整個任務再委派給另一個 subagent
+- 減少約 7 MB 的二進位檔大小和約 7 MB 的啟動記憶體，透過延遲載入（lazy loading）一個大型內建依賴而非直接內嵌
+- 變更左方向鍵不再關閉背景任務、diff 和 workflow 詳細檢視 — 改用 Esc 鍵
+- 變更空的 claude agents 畫面，現在會固定顯示分類區塊（Needs input / Working / Completed）及其說明
+- 移除啟動時的「claude command missing or broken」警告 — 現在改顯示在 /doctor 和 /status 中
+- 移除 claude agents 底部狀態列中多餘的導覽提示
+- [VSCode] 新增設定開關「Enable Remote Control for all sessions」
+
 ## 2.1.202
 - 在 /config 新增「Dynamic workflow size」設定，用來控制 Claude 建立動態 workflow 時的規模大小（小/中/大 agent 數量）——這是參考性的指引，不是硬性上限
 - 為 workflow 產生的 agent 所發出的 telemetry 新增 workflow.run_id 和 workflow.name OpenTelemetry 屬性，讓你可以從 OTel 資料重建整個 workflow 執行的活動軌跡
