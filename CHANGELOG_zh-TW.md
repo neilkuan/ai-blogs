@@ -2,6 +2,26 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.202
+- 在 /config 新增「Dynamic workflow size」設定，用來控制 Claude 建立動態 workflow 時的規模大小（小/中/大 agent 數量）——這是參考性的指引，不是硬性上限
+- 為 workflow 產生的 agent 所發出的 telemetry 新增 workflow.run_id 和 workflow.name OpenTelemetry 屬性，讓你可以從 OTel 資料重建整個 workflow 執行的活動軌跡
+- 修正在行內 Ctrl+R 歷史搜尋中，當搜尋仍在掃描歷史檔案時按下接受或取消會導致程式崩潰的問題
+- 修正對背景 session 執行 /rename 後，工作重啟時名稱被還原的問題，導致無法用新名稱定址該 session
+- 修正當設定在憑證原地輪換（in-place client certificate rotation）期間重新套用時，偶發的 mTLS 握手失敗
+- 修正從 Remote Control（手機/網頁）送進互動式 session 的指令出現「Unknown command」錯誤的問題
+- 修正從 Remote Control 手機或網頁 app 傳送沒有附加說明文字的圖片和檔案時，被靜默丟棄的問題
+- 修正 claude auth login 和 claude mcp login --no-browser 印出的登入 URL 在 SSH 環境下因換行導致無法可靠點擊的問題——現在會以單一超連結的形式輸出
+- 修正從 claude agents 開啟聊天時，偶爾出現「currently running as a background agent」錯誤並接著進入 worker 崩潰/重生循環的問題
+- 修正 workflow 腳本中含有 unicode 引號跳脫字元的字串在解析前被損壞的問題；workflow 解析錯誤現在會顯示出問題的那一行，而不是一律怪罪 TypeScript
+- 修正語音聽寫在麥克風或錄音器失敗時無限重試的問題——重複的擷取失敗現在會暫停語音輸入
+- 修正 /remote-control session 在手機和網頁 app 中顯示錯誤的權限模式
+- 修正以名稱恢復 session 或開啟恢復選擇器時，在有大量 git worktree 的 repo 中需要數分鐘且消耗大量記憶體的問題
+- 修正安裝器和更新器的下載在 proxy 或網路中途斷線時立即出現「aborted」失敗的問題——暫時性的連線中斷現在會自動重試
+- 修正重新載入已經載入的 skill 時，會把指令重複附加到 context 中的問題
+- 改善 /workflows agent 列表的排版：更寬的標題欄、獨立的時間欄位、較短的 model 名稱，以及移除每列的 tool-call 計數
+- 改善 MCP 錯誤訊息：當 server 設定有 url 但沒有 type 時，提供更清楚的錯誤提示，建議加上 "type": "http" 而非顯示容易誤導的「command: expected string」
+- 將 /review <pr> 改回快速的單次檢閱；如果需要多 agent 的深度 review，請使用 /code-review <level> <pr#> 並選擇投入程度
+
 ## 2.1.201
 - Claude Sonnet 5 的工作階段不再於對話中途使用 system role 來插入 harness 提醒訊息
 

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.202 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.202 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.202</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>在 /config 新增「Dynamic workflow size」設定，用來控制 Claude 建立動態 workflow 時的規模大小（小/中/大 agent 數量）——這是參考性的指引，不是硬性上限</li>
+<li>為 workflow 產生的 agent 所發出的 telemetry 新增 workflow.run_id 和 workflow.name OpenTelemetry 屬性，讓你可以從 OTel 資料重建整個 workflow 執行的活動軌跡</li>
+<li>修正在行內 Ctrl+R 歷史搜尋中，當搜尋仍在掃描歷史檔案時按下接受或取消會導致程式崩潰的問題</li>
+<li>修正對背景 session 執行 /rename 後，工作重啟時名稱被還原的問題，導致無法用新名稱定址該 session</li>
+<li>修正當設定在憑證原地輪換（in-place client certificate rotation）期間重新套用時，偶發的 mTLS 握手失敗</li>
+<li>修正從 Remote Control（手機/網頁）送進互動式 session 的指令出現「Unknown command」錯誤的問題</li>
+<li>修正從 Remote Control 手機或網頁 app 傳送沒有附加說明文字的圖片和檔案時，被靜默丟棄的問題</li>
+<li>修正 claude auth login 和 claude mcp login --no-browser 印出的登入 URL 在 SSH 環境下因換行導致無法可靠點擊的問題——現在會以單一超連結的形式輸出</li>
+<li>修正從 claude agents 開啟聊天時，偶爾出現「currently running as a background agent」錯誤並接著進入 worker 崩潰/重生循環的問題</li>
+<li>修正 workflow 腳本中含有 unicode 引號跳脫字元的字串在解析前被損壞的問題；workflow 解析錯誤現在會顯示出問題的那一行，而不是一律怪罪 TypeScript</li>
+<li>修正語音聽寫在麥克風或錄音器失敗時無限重試的問題——重複的擷取失敗現在會暫停語音輸入</li>
+<li>修正 /remote-control session 在手機和網頁 app 中顯示錯誤的權限模式</li>
+<li>修正以名稱恢復 session 或開啟恢復選擇器時，在有大量 git worktree 的 repo 中需要數分鐘且消耗大量記憶體的問題</li>
+<li>修正安裝器和更新器的下載在 proxy 或網路中途斷線時立即出現「aborted」失敗的問題——暫時性的連線中斷現在會自動重試</li>
+<li>修正重新載入已經載入的 skill 時，會把指令重複附加到 context 中的問題</li>
+<li>改善 /workflows agent 列表的排版：更寬的標題欄、獨立的時間欄位、較短的 model 名稱，以及移除每列的 tool-call 計數</li>
+<li>改善 MCP 錯誤訊息：當 server 設定有 url 但沒有 type 時，提供更清楚的錯誤提示，建議加上 &quot;type&quot;: &quot;http&quot; 而非顯示容易誤導的「command: expected string」</li>
+<li>將 /review &lt;pr&gt; 改回快速的單次檢閱；如果需要多 agent 的深度 review，請使用 /code-review &lt;level&gt; &lt;pr#&gt; 並選擇投入程度</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
