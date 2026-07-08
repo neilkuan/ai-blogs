@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.204
+- 修正 headless session 中 SessionStart hook 事件未正確串流的問題，這可能導致遠端 worker 在 hook 執行期間被閒置回收（idle-reaped）
+
 ## 2.1.203
 - 新增登入即將過期的警告，讓你可以在背景 session 被中斷前重新驗證
 - 新增灰色 ⏸ 徽章顯示在底部狀態列，當處於手動權限模式時，讓目前的模式隨時可見
