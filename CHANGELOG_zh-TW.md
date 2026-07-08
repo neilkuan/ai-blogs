@@ -2,6 +2,31 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.205
+- 新增一條 auto mode 規則，阻止竄改 session 逐字稿檔案
+- 修正 --json-schema 在 schema 無效時靜默產出非結構化輸出的問題，以及使用 format 關鍵字的 schema 被拒絕的問題
+- 修正當 Claude 正在工作時送出的訊息，在回合因達到 --max-turns 上限而結束時被靜默丟棄的問題
+- 修正 Windows 上移除 worktree 時，若內部存在 NTFS junction 或目錄 symlink，會誤刪 worktree 外部檔案的問題
+- 修正背景 agent 在透過 SendMessage 恢復後，仍在 agent 列表中顯示為「failed」或「completed」的問題
+- 修正背景任務在 agent 回合沒有可讀文字時，於 agent 列表中從「needs input」跳回「working」的問題
+- 修正 claude attach 在背景 agent 正進行升級重啟時報錯，現在會等待其恢復上線
+- 修正 session 與 PR 的連結遺漏：當 PR 是在 Bash 呼叫中建立，且輸出超過 30K 行內上限時未被偵測到
+- 修正 claude mcp add-from-claude-desktop 在伺服器名稱包含不支援字元時卡住的問題；現在會回報無效名稱，其餘伺服器仍正常匯入
+- 修正某個 plugin 的 LSP server 初始化失敗時，會阻擋另一個 plugin 中處理相同副檔名的有效 LSP server
+- 修正 Windows 上當 Claude 啟動所在的目錄在指令執行中被刪除、鎖定或卸載時造成崩潰的問題
+- 修正 file watcher 在目錄掃描仍在進行中時被關閉導致崩潰的問題
+- 修正 project verify skills 在每次 session 都被重寫，而非僅在已記錄的指令變更時才更新
+- 修正 agent 檢視畫面渲染位置偏高一行，且在任務列表略微超出螢幕時裁切 header 的問題
+- 修正 web 和行動版 Remote Control 面板中的背景任務顯示過時的「Running」狀態，現在每次成員變更都會轉發完整的任務狀態
+- 改善 auto mode：在對無法從上下文解析的變數執行 rm -rf 前會先詢問使用者
+- 自動更新的二進位下載現在以串流方式寫入磁碟，不再全部暫存於記憶體中，更新器的峰值記憶體用量減少約 400 MB
+- 背景任務通知現在會明確聲明「無人為輸入」，防止逐字稿中捏造的核准被當作有效指令執行
+- 改善 agent 檢視：編輯、合併、留言或推送至既有 PR 的 session，現在會在 claude agents 中顯示連結
+- 改善 agent 檢視：列表行現在顯示帶顏色的狀態標籤與分類器產生的摘要標題，取代原始的 tool call 文字；展開檢視會顯示完整狀態，包括被阻擋 session 的具體詢問內容
+- /doctor 現在是完整的設定健檢工具，可診斷並修正問題；/checkup 為其別名
+- 預留「Claude Browser」MCP server 名稱（與「Claude Preview」並列），為 Claude Desktop 面板更名做準備；使用者設定的 MCP server 不再允許註冊這兩個名稱
+- 修正 Cowork VM 模式下的 local-agent session 在 CLI 2.1.203+ 上啟動失敗並出現「Not logged in · Please run /login」的問題
+
 ## 2.1.204
 - 修正 headless session 中 SessionStart hook 事件未正確串流的問題，這可能導致遠端 worker 在 hook 執行期間被閒置回收（idle-reaped）
 
