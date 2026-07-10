@@ -2,6 +2,35 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.206
+- /cd 新增目錄路徑建議，行為與 /add-dir 一致
+- /doctor 新增檢查項目：建議精簡已 commit 的 CLAUDE.md 檔案，移除 Claude 能從程式碼庫自行推導出的內容
+- /commit-push-pr 現在除了 origin 之外，也會自動允許 git push 到 repo 設定的推送遠端（remote.pushDefault，或只有一個 remote 時直接用那個）
+- Gateway：/login 現在支援 Anthropic 營運的公開 gateway 端點
+- EnterWorktree 在進入專案 .claude/worktrees/ 目錄以外的 git worktree 前，現在會先要求確認
+- 背景 agent 現在會在 Claude Code 更新後立即於背景升級至新版本，而不是等你 attach 時才付出一次緩慢的舊 session 升級代價
+- 修正登入過期時所有 model 都跳出誤導性的「There's an issue with the selected model」錯誤，而非正確提示你執行 /login
+- 修正 claude --resume 和 --continue 啟動時無法回應鍵盤輸入的問題
+- 修正透過 --mcp-config 或 .mcp.json 設定的 MCP server 忽略各 server 的 request_timeout_ms，導致長時間執行的 MCP 工具呼叫在新 session 中以預設 60 秒逾時的問題
+- 修正 CLAUDE_CODE_EXTRA_BODY 在 claude agents / --bg 背景 worker 中被靜默忽略的問題；從 shell export 的覆寫值現在會跟隨發派的 session
+- 修正 OAuth MCP server 在單次 token 重新整理失敗後就要求手動重新驗證的問題
+- 修正 --permission-prompt-tool 指向 MCP server 時，在 server 連線完成前的冷啟動階段會 crash 並顯示「MCP tool not found」
+- 修正 /model 選擇器的列（row）顯示的價格對應到錯誤的 model，並停止在不按該價格計費的供應商上引用第一方定價
+- 修正 server 提供的 model 列在 /model 選擇器中位置錯亂的問題——當 entitlement 或 allowlist 限制移除了它們原本對齊的列時
+- 修正桌面 session 在 turn 進行中送出斜線指令後卡在「running」狀態的問題
+- 修正 Windows 上在 bare claude --resume 之前出現 setup prompt 時，agents 檢視中鍵盤輸入被忽略的問題
+- 修正 claude rm 移除 job 後仍殘留在 daemon 名冊中，導致該列在 claude agents 中重複出現
+- 修正 /remote-control 在未登入時顯示「Unknown command」——現在會說明如何登入
+- 修正在 workflow 詳細檢視中，左方向鍵無法退回上一層 phase 或 agent 的問題
+- 修正 /status 重複列出同一條安裝損壞警告兩次的問題
+- 修正 LSP plugin 出現錯誤的「未使用 plugin」提示，以及不正確的未使用率遙測資料
+- 修正 /doctor 的更新檢查：Homebrew 安裝現在會比對其 cask 的 channel，而非 settings channel
+- 修正全螢幕的「跳到底部」浮標（pill）在 macOS 上顯示 Ctrl+End 而非正確快捷鍵、不顯示重新綁定的組合鍵、以及文字超出 transcript 範圍的問題
+- Bedrock：修正使用 awsCredentialExport helper 時，在有出站限制（restricted egress）的網路上會卡住數分鐘才啟動的問題
+- 改善 /code-review 在 claude-opus-4-8 上所有 effort 等級的發現品質
+- 改善 agents 檢視：狀態欄位現在使用完整的終端寬度，而非截斷在 64 字元
+- 變更 agents 檢視：Ctrl+X 現在會永久移除已完成的 session，且 session 不再重複 render；刪除的背景 job 會維持已刪除狀態
+
 ## 2.1.205
 - 新增一條 auto mode 規則，阻止竄改 session 逐字稿檔案
 - 修正 --json-schema 在 schema 無效時靜默產出非結構化輸出的問題，以及使用 format 關鍵字的 schema 被拒絕的問題
