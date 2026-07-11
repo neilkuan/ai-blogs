@@ -2,6 +2,32 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.207
+- Auto mode 現在不需要 CLAUDE_CODE_ENABLE_AUTO_MODE opt-in 就能在 Bedrock、Vertex AI 和 Foundry 上使用；可透過設定中的 disableAutoMode 關閉
+- 修正串流回應包含超長列表、表格、段落或程式碼區塊時，終端機凍結和按鍵延遲的問題
+- 修正非互動式執行（claude -p、SDK）中的遠端託管設定被永久記錄為已同意，卻從未顯示過安全同意對話框的問題
+- 修正良性的系統產生對話更新觸發誤報 prompt-injection 警告的問題
+- 修正自動更新程式在每次發布時覆蓋 ~/.local/bin/claude 的自訂啟動腳本或符號連結；/doctor 現在會回報外部管理的啟動器
+- 修正含有 cd 的複合指令在唯一的輸出重導向是 /dev/null 時仍要求權限的問題
+- 修正回應串流結束時，逐字稿跳到答案開頭上方的問題
+- 修正最後一個 worktree.sparsePaths worktree 被移除後，extensions.worktreeConfig 殘留在 repo 的 .git/config 中（導致 go-git 工具如 tea 壞掉）的問題
+- 修正 rules globs、skill paths、.ignore 和 .worktreeinclude 中格式錯誤的括號模式（bracket patterns）導致檔案讀取、檔案建議和 worktree 建立失敗的問題
+- 修正 agent teams 中格式錯誤的隊友信箱訊息導致每秒重複錯誤的崩潰迴圈，直到手動刪除信箱檔案才能解除
+- 修正背景 session 透過接受計畫自動命名後，在 agent 檢視列未顯示該名稱的問題
+- 修正進入 git worktree 的背景 session 從 agent 列表冷重開後恢復為空白的問題
+- 修正 Remote Control 任務狀態更新在連線從網路中斷或憑證刷新恢復時遺失的問題
+- 修正由桌面應用程式託管的 Remote Control session 未在行動裝置和網頁顯示背景 agent 及 workflow 進度的問題
+- 修正 Deep research 執行時每個 Fetch 階段的 agent 都標示為「unknown」的問題——chip 現在會顯示來源主機名稱
+- 修正 Bedrock 在每次 API 請求時都重複向 IAM Identity Center 要求新的 AWS SSO 憑證的問題
+- 改善 agent 檢視：再次貼上相同文字時，現在會展開已收合的 [Pasted text #N] 佔位符，而非新增第二個
+- 改善 agent 檢視：被封鎖的 session peek 現在以問題為首並顯示文字化的過期時鐘（waiting 3m），而非兩次顯示相同時間戳
+- 將 Bedrock、Vertex 和 Claude Platform on AWS 預設模型改為 Claude Opus 4.8
+- 變更 auto mode 不再從 .claude/settings.local.json（存在於 repo 中）讀取 autoMode；請改用 ~/.claude/settings.json
+- 修正 Windows 上 AWS 憑證解析停滯時（例如卡住的 credential_process）無限期掛起的問題：60 秒的停滯防護現在會正確觸發，而非無限等待
+- Plugin hooks/monitors/MCP headersHelper：shell 格式指令中的 ${user_config.*} 現在會被拒絕（shell 注入修正）。Hooks：請使用 exec 格式（args 陣列）或 $CLAUDE_PLUGIN_OPTION_<KEY>；monitors 和 headersHelper：請在腳本內讀取值（設定檔或 server 的 env 區塊）
+- Plugin option 值（pluginConfigs）不再從專案層級的 .claude/settings.json 讀取；僅接受使用者、--settings 和託管設定
+- 修正 /usage-credits 金額輸入時靜默地將格式錯誤的值（例如貼上的時間戳）截斷為數字的問題；格式錯誤的金額現在會回傳錯誤，超過 $1,000 的金額需要手動輸入確認
+
 ## 2.1.206
 - /cd 新增目錄路徑建議，行為與 /add-dir 一致
 - /doctor 新增檢查項目：建議精簡已 commit 的 CLAUDE.md 檔案，移除 Claude 能從程式碼庫自行推導出的內容
