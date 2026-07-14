@@ -2,6 +2,53 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.208
+- 新增螢幕閱讀器模式：為螢幕閱讀器使用者提供純文字渲染（opt-in）。執行 claude --ax-screen-reader、設定 CLAUDE_AX_SCREEN_READER=1，或在設定中加入 "axScreenReader": true 即可啟用。
+- 新增 vimInsertModeRemaps 設定：可在 vim 模式中將兩鍵插入模式序列（如 jj）對應到 Escape
+- 新增 CLAUDE_CODE_PROCESS_WRAPPER：agent 檢視與背景服務現在支援企業啟動器（corporate launcher），所有 Claude Code 的自我啟動都會透過指定的 wrapper 執行檔執行
+- 新增全螢幕模式下多選選單與「Other」輸入列的滑鼠點擊支援
+- 修正 fast mode 在切換回支援該功能的模型後仍維持關閉的問題——現在會在設定啟用時自動恢復
+- 修正輸入給背景 agent 的回覆在傳送失敗時遺失的問題——文字現在會被儲存，並在 session 重啟時重新傳送
+- 修正背景 session 連接永久失敗的問題（「Couldn't start the background daemon」）——原因是更新替換了正在執行的 claude agents 程序所使用的二進位檔
+- 修正 CLI 自動更新後 context window（及 auto-compact 指示器）短暫重設為 200k 的問題，導致恢復長 context session 時出現假的「100% context used」
+- 修正 supervised 和背景 session 在伺服器以 GOAWAY 關閉 HTTP/2 連線時（且有進行中的請求）崩潰的問題
+- 修正從 claude -p pipe 大型回應時 stream-json/JSON 輸出被截斷且缺少結果訊息的問題
+- 修正 CLAUDE_CODE_MAX_OUTPUT_TOKENS 及類似環境變數在使用科學記號值時無聲地只取尾數的問題（1e6 變成 1）
+- 修正非常大的 markdown 表格導致渲染停滯或佔用過多記憶體的問題；超過 200 列的表格現在只顯示前 200 列並附上「… N more rows」提示
+- 修正 Edit 工具在檔案被讀取後遭修改、但目標文字仍可唯一匹配時失敗的問題
+- 修正 Read 將空檔案回報為「shorter than offset」、Grep 對無效正規表達式靜默回傳「No files found」、Grep count 模式在分頁時少算總數、以及 Glob 在 pattern/path/工作目錄包含 null byte 時崩潰並顯示不明錯誤的問題
+- 修正 apiKeyHelper 腳本失敗時在約 10 次靜默重試後隱藏在通用 401 錯誤後面的問題；現在會在 3 次嘗試內顯示腳本自身的錯誤
+- 修正 Bedrock 串流請求在 gateway 轉換回應時失敗並顯示誤導性「Truncated event message received」的問題——錯誤訊息現在會標明 content-type 並指向 proxy
+- 修正 /upgrade 在瀏覽器無法開啟時顯示登入流程而非升級 URL 的問題
+- 修正 stream-json 輸入在收到來自 Windows 風格 SDK host 的空白 CRLF 或純空白行時導致 session 終止的問題
+- 修正 headless stream-json session 在 control_request 帶有非字串 set_model payload 時永久掛起的問題；CLI 現在會回傳錯誤回應
+- 修正 session 恢復時反覆出現「No completion record was found」通知的問題——孤立的背景任務現在會收合為單一摘要
+- 修正 Remote Control 客戶端連接到 terminal 託管的 session 時看不到背景 agent 和 workflow 進度（直到有任務啟動或停止）的問題
+- 修正 Agent 工具在 subagent 的 tools 列表解析為空時無工具啟動的問題——現在會回傳清楚的錯誤並標明無法辨識的項目
+- 修正 /usage 顯示過時的快取進度條覆蓋較新資料、以及 /mcp 在設定編輯後未重新分類 placeholder 伺服器的問題
+- 修正在 SDK host（例如 Claude Desktop）中「Change directory」在有執行中背景任務的閒置 session 上失敗並顯示「A turn is in progress」的問題
+- 修正 workflow 儲存對話框顯示 ~/.claude/workflows/ 而非 CLAUDE_CONFIG_DIR 位置的問題（針對 user-scope 儲存）
+- 修正 /release-notes 將已檢視的筆記加入模型 context 的問題——「Show all」之前會將整份 changelog 注入後續每個請求
+- 修正 agent 檢視中貼上的圖片在送出 peek 回覆後仍被保留整個畫面生命週期的記憶體洩漏
+- 修正 SDK session 在 plugin 重新整理於客戶端連接前執行時，遺失透過 initialize request 定義的 agent 的問題
+- 修正長時間 session 中的多個記憶體洩漏：MCP stdio server 的 stderr 每個 server 可累積高達 64 MB、LSP 文件無限期保持開啟（現在改為 LRU 並設 50 個文件上限）、async hook 輸出在背景化後仍被保留、以及 headless/SDK session 中因大型 tool-result payload 導致的無限制成長
+- 修正讀取含有極長單行的檔案並使用 offset/limit 時造成記憶體暴增的問題——現在會回傳乾淨的錯誤而非載入整行
+- 修正在有大量 permission deny/ask 規則的 session 中每回合多秒延遲的問題——規則比對器現在只編譯一次並快取
+- 改善 agent 任務列表更新時的輸入回應性——任務更新不再重新渲染整個 UI
+- 降低有大量 MCP 工具的 print/SDK session 中每次 tool call 的 CPU 負擔，透過快取 tool-pool 組裝（在高工具數量時最高可達 7 倍的加速）
+- 降低記憶體使用量，將檔案編輯讀取快取上限設為 16 MB，而非固定保留最多 1,000 個完整檔案
+- 縮減 session transcript 大小（在大量編輯的 session 中最高達 79 倍）並限制 checkpoint 磁碟使用量，透過修剪已被取代的檔案歷史備份
+- 降低恢復有背景 agent 或從大型對話 fork 出的 session 時的記憶體使用量
+- 已完成的背景 agent 現在會保留在 /tasks 中直到清理，而非完成瞬間就消失
+- 連接到已停止的背景 agent 時，現在會在 session 暖機期間立即顯示其 transcript，而非空白的「Session is starting」畫面
+- 背景 session：較舊的 daemon 不再靜默地將由較新版本啟動的 worker 重啟到舊版二進位檔上
+- Agent 檢視：Ctrl+X 現在會刪除已重新命名分支的 worktree、不會摧毀未推送的 commit、在保留 worktree 時保留 session 列、且重用的 worktree 名稱會重設為當前 base
+- 在包含 $(…)、反引號、<(…) 的指令中偵測到災難性刪除（例如 rm -rf ~）時，現在在 --dangerously-skip-permissions 和 auto 模式中也會提示確認，與一般形式一致
+- /install-github-app 和 /mcp 設定選單不再於背景 session 中開啟
+- 設定了空 URL 的 MCP server 現在在 /mcp 中顯示為「not configured」而非設定錯誤
+- /usage 在使用量端點被限速時，現在會顯示最後已知的使用量進度條並附上「as of」註記，而非錯誤畫面
+- 修正 Bedrock 驗證在 AWS SSO profile 的 sso_region 與 Bedrock region 不同時失敗並顯示「Session token not found or invalid」的問題（2.1.207 regression）
+
 ## 2.1.207
 - Auto mode 現在不需要 CLAUDE_CODE_ENABLE_AUTO_MODE opt-in 就能在 Bedrock、Vertex AI 和 Foundry 上使用；可透過設定中的 disableAutoMode 關閉
 - 修正串流回應包含超長列表、表格、段落或程式碼區塊時，終端機凍結和按鍵延遲的問題
