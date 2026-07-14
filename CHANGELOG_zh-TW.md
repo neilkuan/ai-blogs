@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.209
+- 修正 /model 及其他對話框在 claude agents 背景工作階段中被阻擋的問題（還原了一個過度廣泛的防護條件）
+
 ## 2.1.208
 - 新增螢幕閱讀器模式：為螢幕閱讀器使用者提供純文字渲染（opt-in）。執行 claude --ax-screen-reader、設定 CLAUDE_AX_SCREEN_READER=1，或在設定中加入 "axScreenReader": true 即可啟用。
 - 新增 vimInsertModeRemaps 設定：可在 vim 模式中將兩鍵插入模式序列（如 jj）對應到 Escape
