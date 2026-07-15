@@ -2,6 +2,43 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.210
+- 在收合的工具摘要列新增即時經過時間計數器，讓長時間執行的工具呼叫看得到秒數在跳，不會像當掉一樣
+- 啟動時對 Write(path)、NotebookEdit(path)、Glob(path) 權限規則顯示警告——請改用 Edit(path) 或 Read(path)
+- 修正 isolation: 'worktree' 子代理（subagent）能對主 repo checkout 執行會改動 git 的指令，而非對自己隔離的 worktree 操作
+- 修正 ultracode 關鍵字 opt-in 被非人為來源的輸入觸發，例如 webhook payload 和轉發的 PR 留言
+- 修正 UI 元件在 styled text element 外回傳內容時，渲染的文字片段洩漏到 crash telemetry
+- 修正從 Claude Code 開啟外部編輯器時，貼上標記（paste marker）跟著帶進去，導致貼上文字周圍出現奇怪的 È/É 字元
+- 修正 claude attach 在 session 轉換期間有時會失敗並報 "job not found" 或 "agent is still starting" 錯誤——attach 現在會等 daemon 穩定後才連接，且在 attach 緩慢時調整的終端機尺寸會在完成後套用
+- 修正工具的結果渲染器回傳 bigint 數值或純文字（而非 UI 元素）時造成 session crash
+- 修正 hook callback 逾時被錯誤回報給模型為「使用者拒絕」，導致無人值守的 session 停下來等待
+- 修正 Claude 假設 cd 已生效，但實際上該指令已被移到背景執行；工具回傳結果現在會明確說明工作目錄未變更
+- 修正 session 中重新同步 MCP server 時，由 plugin 提供的 MCP server 被意外關閉
+- 修正未經編輯的計畫核准被標記為 "(edited by user)" 並以過時的快照覆寫計畫檔案
+- 修正 /doctor 在 Bedrock、Vertex 和 Foundry 上跳過 auto mode 預設提議——這些平台的 auto mode 已不需要 opt-in
+- 修正 Grep content mode 在分頁超出結果末尾時錯誤顯示 "No matches found"
+- 修正 skills 和 commands 中未匹配的 $1/$2 positional placeholder 被靜默移除；現在會原樣保留
+- 修正 plugin cache 寫入失敗時留下暫存檔，且在 Windows 和網路檔案系統上因鎖定檔案重新命名而失敗
+- 修正 client 對背景服務重設連線時，background worker 不斷 crash loop
+- 修正 claude agents --effort ultracode 的值沒有傳到被派發的 session；該值原本被靜默丟棄
+- 修正按 ← 開啟 agents 檢視時，返回 session 後 task tracker 消失
+- 修正 agents dashboard 在 session 被刪除後，仍保留已放棄的回覆草稿中貼上的圖片
+- 修正被 kill 的背景 session 留下永久的 git worktree lock；定期清理現在會釋放所屬 process 已不存在的 lock
+- 修正透過 initialize control request 註冊的 SDK MCP server 要等到下一個 turn 才開始連線
+- 修正在 CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1 環境下，從 session 返回 agents 檢視時殘留重疊的 ghost frame
+- 修正較晚出現的 .claude/* symlink 沒有被同步到 sandbox deny-write 清單中
+- 強化 Agent 工具對間接 prompt injection 的防護，避免子代理讀取的內容被利用
+- 改善 Bash/PowerShell 工具在指令觸及逾時並被自動背景化時的訊息，讓模型能區分是卡住還是明確的背景執行請求
+- 改善 auto mode：權限分類器對外部 session 現在預設使用 Sonnet 5，在 session 的第一個請求時驗證並鎖定
+- 改善內建 dataviz skill 的圖表顏色驗證，採用感知性 OKLab 色彩差異計算，並重新校準色盲閾值
+- Memory 寫入導致 MEMORY.md 索引超過讀取上限時，現在會產生明確的錯誤而非靜默截斷
+- 螢幕閱讀器模式在使用 Shift+Tab 切換權限模式時，現在會語音朗讀模式變更
+- Agents 底部提示現在會顯示有多少背景 agent 正在等你的輸入，數量變動時會短暫以顏色強調
+- Agent 檢視：你按 ← 進入的那個 session 即使在滑鼠 hover 或方向鍵移動選取後，仍會維持可見的標記
+- Fable 在 advisor 選擇器中暫時顯示為不可用，等伺服器端導致 Fable advisor 失敗的問題修正後恢復
+
+- 新增 npm 安裝方式的棄用通知——請執行 claude install 或參閱 https://code.claude.com/docs/en/setup 了解其他安裝選項
+
 ## 2.1.209
 - 修正 /model 及其他對話框在 claude agents 背景工作階段中被阻擋的問題（還原了一個過度廣泛的防護條件）
 
