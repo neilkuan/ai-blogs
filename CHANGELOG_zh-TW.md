@@ -2,6 +2,45 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.211
+- 新增 --forward-subagent-text flag 和 CLAUDE_CODE_FORWARD_SUBAGENT_TEXT 環境變數，可在 stream-json 輸出中包含 subagent 的文字和思考內容
+- 修正權限預覽轉發到聊天頻道時，未中和雙向覆蓋字元（bidirectional-override）、零寬字元和外觀相似的引號字元，導致工具輸入可以在視覺上竄改核准訊息的問題
+- 修正 auto 模式會覆蓋 PreToolUse hook 的 ask 決策（針對未沙箱化的 Bash）— 現在 hook 的 ask 會將決策下限鎖定在提示確認
+- 修正多個平行的 Claude Code session 在從睡眠喚醒後，因共用同一個憑證儲存庫而同時全部登出的問題
+- 修正 plugin MCP server 在閒置的 web session 喚醒後未重新連線，導致 MCP 呼叫持續失敗直到下一則訊息的問題
+- 修正 Claude Code 在 Vertex 和 Bedrock 上啟動時嘗試使用預設的 Opus 模型，並在已明確設定模型的情況下印出多餘的 fallback 通知
+- 修正以明確 model override 產生的 subagent，在被恢復或收到後續訊息時會回退到父層模型的問題
+- 修正巢狀的 .claude/rules/*.md 檔案在設定來源已排除專案設定時仍被載入的問題
+- 修正檔案上傳驗證：檔名以 DOS 裝置後綴結尾（如 .prn）或尾端帶點的檔案現在可被接受，而具有多個硬連結（hard link）的檔案則會被拒絕
+- 修正從遠端和 CLI session 上傳檔案到 Claude in Chrome 的問題
+- 修正輸入內容只剩 "?" 時，編輯被靜默吞掉並觸發快捷鍵面板切換的問題
+- 修正當 Claude in Chrome 擴充功能已啟用但 Chrome 未執行時，啟動時卡住的問題
+- 修正非同步內容（Settings 分頁、Stats、diff 檢視及其他載入狀態）顯示時有 300ms 延遲的問題
+- 修正從 agents 檢視重新開啟剛停止的背景 session 時，會在同一個 session id 下啟動空白對話的問題
+- 修正 /loop 使用一次後就從 /resume 中隱藏該 session 的問題
+- 修正螢幕閱讀器使用者在執行 /terminal-setup 或 onboarding 終端設定後，失去可聽見的終端鈴聲的問題
+- 修正使用 LLM gateway 驗證（ANTHROPIC_AUTH_TOKEN + ANTHROPIC_BASE_URL）的背景工作，在 daemon 重新產生後回報「Not logged in」的問題
+- 修正 claude agents 工作在 git 不再識別其 worktree 時變得永久無法刪除 — 該列現在會顯示刪除被拒絕的原因，而非靜默重新出現
+- 修正 /clear 未重設 session 費用計數器 — 狀態列的費用現在會在 /clear 後從 $0 開始
+- 修正 Claude in Chrome 設定頁面在 Windows 上無法在瀏覽器中開啟的問題
+- 修正 Windows 上的 headless print-mode session 在 stdin 無法讀取時崩潰或靜默退出的問題
+- 修正 agents 檢視中背景 session 標題，在 prompt 包含連結時顯示命名模型的拒絕文字的問題
+- 修正被使用者終止的背景 agent 自動重新啟動，以及被恢復的 agent 重新執行舊 session 過期 prompt 的問題
+- 修正沒有排程的 routines 回報下次執行時間為西元 1 年的問題
+- 強化 Windows 上同步的 skill/plugin 目錄命名，並維持 CCR web fetch/search proxy 在 /clear 後繼續運作
+- 改善終端佈局與渲染效能
+- 改善背景 agent 結果回報 — Claude 現在會回報仍在執行中的 agent 狀態，並等待真正完成而非捏造結果
+- 改善 memory index 超過限制的警告，現在只計算已載入的內容，排除 frontmatter 和 HTML 註解
+- 更新整數環境變數（逾時、token 預算、重試次數）以接受科學記號和數字分隔符寫法，如 1e6 和 64_000
+- 更新文件連結至目前的文件網站
+- 變更「always allow」權限規則改為儲存在 repository 根目錄，使在 git worktree 中授予的核准能跨 session 和 worktree 持續生效
+- 變更 /usage-credits 在向組織管理員發送請求前先要求確認
+- 變更 Vim 模式的 s 和 S（替換字元/行）可在 NORMAL 模式下運作，與 vim 行為一致
+- [VSCode] 更新 Remote Control 橫幅以描述其功能
+- Claude in Chrome：強化檔案上傳路徑驗證
+- Claude in Chrome：截圖動作的 save_to_disk 現在會將圖片寫入磁碟並回傳路徑；先前此功能沒有任何作用
+- 修正 Bedrock、Vertex、Mantle 和 Foundry 上的 prompt-caching 回歸問題，該問題導致尾端的 system context 區塊在每次請求時都被計費為新的 input token。
+
 ## 2.1.210
 - 在收合的工具摘要列新增即時經過時間計數器，讓長時間執行的工具呼叫看得到秒數在跳，不會像當掉一樣
 - 啟動時對 Write(path)、NotebookEdit(path)、Glob(path) 權限規則顯示警告——請改用 Edit(path) 或 Read(path)
