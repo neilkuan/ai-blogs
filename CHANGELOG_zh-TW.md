@@ -2,6 +2,56 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.212
+- /fork 現在會把你的對話複製到一個新的背景 session（在 claude agents 中獨立一行），你可以繼續手邊的工作；原本在 session 內啟動 subagent 的功能改為 /subtask
+- 新增 claude auto-mode reset，可還原預設的 auto-mode 設定，會跳出確認提示（加 --yes 可跳過）
+- 新增 session 層級的 WebSearch 工具呼叫次數上限（預設 200 次，可透過 CLAUDE_CODE_MAX_WEB_SEARCHES_PER_SESSION 調整），避免搜尋迴圈失控
+- 新增每個 session 的 subagent 產生數上限（預設 200，可用 CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION 覆寫），避免委派迴圈失控；/clear 會重置額度
+- MCP 工具呼叫執行超過 2 分鐘時，會自動移到背景執行，讓 session 保持可用；可透過 CLAUDE_CODE_MCP_AUTO_BACKGROUND_MS 設定門檻或停用
+- 在 agent 檢視中輸入 /resume，現在會打開過去 session 的選擇器——包含已從列表刪除的 session——選擇後以背景 session 恢復
+- 修正 plan mode 自動執行會修改檔案的 Bash 指令（例如 touch、rm）時，沒有跳出權限提示或觸發 SDK canUseTool callback 的問題
+- 修正 worktree 建立時，若 .claude/worktrees 是 repository 中已 commit 的 symlink，可能會在 repository 外建立檔案的問題
+- 修正 continue:false hook 的中止訊號在工具失敗或串流中途完成時被丟棄，以及 hook 基礎設施錯誤被誤報為使用者拒絕的問題
+- 修正在 print/SDK 模式下，SIGTERM 期間正在執行的 Bash 工具會讓指令的 process tree 變成孤兒程序；CLI 現在會中止 turn、終止整個 tree，然後以 exit code 143 結束
+- 修正 /background 和 claude --bg 在 Windows 上當 Group Policy 封鎖 PowerShell 5.1 時，出現 "EUNKNOWN: unknown error, uv_spawn" 錯誤；daemon 現在優先使用 PowerShell 7
+- 修正 shell 模式（!）在路徑自動完成彈出視窗開啟時，無法執行包含檔案路徑的指令的問題
+- 修正 auto-mode 拒絕通知在長拒絕理由被截斷到 emoji 中間時，顯示亂碼的問題
+- 修正在具有 extended key reporting 的終端機中，agent 檢視的 dispatch 輸入欄位按 Ctrl+J 無法插入換行的問題，並在 ? 說明面板中顯示換行快捷鍵
+- 修正 /ultrareview 拒絕 #123、PR 123 和貼上的 PR URL 等 PR 參照；錯誤提示現在會顯示你實際輸入的指令名稱
+- 修正 /ultrareview <branch> 在 branch 存在於遠端時沒有從 origin fetch 的問題；打錯字時現在會建議最接近的 branch 名稱
+- 修正 /ultrareview 在 /clear 後的新對話中跳過帳單確認的問題
+- 修正 /ultrareview 在 Claude Desktop 上出現 "not a git repository" 錯誤時，現在會建議專案的 repository 資料夾，而非終端機指令
+- 修正託管（host-managed）session 在啟動時，若 repository 設定配置了 mTLS 憑證、額外 CA bundle 或 OAuth scope 會失敗的問題；這些傳輸設定現在會被忽略並顯示警告
+- 修正在使用 offset/limit 讀取檔案後恢復 session 時，編輯該檔案會出現假性 "File has not been read yet" 錯誤的問題
+- 修正在 print/SDK 模式下使用 --continue/--resume 恢復 session 後，ExitWorktree 出現 "no active EnterWorktree session" 錯誤的問題
+- 修正 Remote Control 客戶端在 session 執行中途加入時，workflow agent grid 維持空白的問題
+- 修正 streaming 模式的 control request 在 handler 完成前就被標記為完成，可能在 session 重啟時遺失 request 的問題
+- 修正以 /fork 建立的背景 session 在 state 寫入失敗後，失去 live-parent 保護的問題
+- 修正從 agent 檢視重新開啟已停止的背景 session 時靜默失敗——現在會恢復 session，或說明無法恢復的原因並讓你強制重啟
+- 修正 agent teams：正在停止的 teammate 在 session 內重新執行 team 初始化時，可能向 leader 送出重複的 idle 通知
+- 修正 plan-approval 對話框底部的 "ctrl+g to edit in <editor>" 在檔案路徑很長時會被拆成兩行的問題
+- 修正 welcome banner 在全螢幕模式下進行寬度+高度同時 resize 後，仍保持舊的面板寬度的問題
+- 修正 diff 預覽在窄版面時遺失行號和 +/- 標記的問題
+- 修正 @-mentions 在部分檔案讀取後什麼都沒附加、plugin 解除安裝指向錯誤的 marketplace、以及 exit code 143 被誤判為 "Command timed out" 的問題
+- 修正 OpenTelemetry HTTP 匯出被 Azure Monitor 及其他不接受 chunked transfer encoding 的端點以 411/400 拒絕的問題
+- 修正 SDK/headless 模式下設定 TRACEPARENT 時，OTLP event log record 缺少 trace_id/span_id 的問題
+- 修正包含多張圖片的對話錯誤地出現 "Request too large" 錯誤，並改善錯誤訊息以說明實際原因
+- 修正 web search 和 web fetch 在 API 過載時，將 "API Error" 文字當成搜尋結果或頁面內容回傳的問題
+- 改善 web search 和 web fetch 的穩定性，針對 529 錯誤和被限速的請求加入有上限的 backoff 重試
+- 改善 prompt caching：mid-conversation system block 現在可在 LLM gateway 和自訂 base URL（Bedrock、Vertex、1P）後面正常運作
+- 改善背景 agent 的 attach 體驗：cold-attach 現在會立即顯示格式化的 transcript，而非空白等待 session 啟動
+- 減少 inter-agent 通訊的 token 用量：SendMessage 的內容不再被複製到重播歷史和工具結果中
+- /fork 在 session 還沒有標題時，現在會用你的 prompt 來命名副本，讓它在 agent 檢視中更容易辨識
+- 單獨輸入 /btw 現在會重新打開你最近一次交流的 side-question 面板，方便瀏覽先前的回答
+- 底部的 ← 提示在背景 agent 完成且目前沒有需要你處理的事項時，會短暫閃爍 N done
+- 棄用 Task 工具的 mode 參數（現在會被忽略）；subagent 預設繼承父 session 的權限模式
+- Enterprise 的 forceLoginMethod 現在也會對 VS Code extension、SDK、setup-token 和 install-github-app 登入強制執行，不再僅限於終端機
+- Session transcript 現在會記錄每個 assistant 訊息的 reasoning effort 等級
+- Headless/SDK session 現在會在 turn 中途套用 set_model control request；下一次 model round-trip 會使用新 model，不再等到下一個 turn
+- Agent 檢視 / claude agents --json：等待 sandbox、MCP 輸入或 managed-settings 提示的 session，現在顯示為 "Needs input" 而非 "Working"
+- 將驗證狀態面板標題從 "Cloud authentication" 更新為 "Authentication"
+- 更正先前版本說明（2.1.200）：tmux 到 3.6 系列都缺少 synchronized output 支援；較新且有支援的 tmux 會被自動偵測
+
 ## 2.1.211
 - 新增 --forward-subagent-text flag 和 CLAUDE_CODE_FORWARD_SUBAGENT_TEXT 環境變數，可在 stream-json 輸出中包含 subagent 的文字和思考內容
 - 修正權限預覽轉發到聊天頻道時，未中和雙向覆蓋字元（bidirectional-override）、零寬字元和外觀相似的引號字元，導致工具輸入可以在視覺上竄改核准訊息的問題
