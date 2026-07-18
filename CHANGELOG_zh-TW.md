@@ -2,6 +2,55 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.214
+- 修正單段 dir/** 允許規則（如 Edit(src/**)）會自動核准對樹中任意位置巢狀 dir/ 目錄的寫入，而非僅限 <cwd>/dir
+- 修正 Windows PowerShell 5.1 工作階段中執行指令時的權限檢查繞過問題
+- 修正 Bash 權限檢查在遇到 bash 解析方式與權限分析器不同的檔案描述符重導向形式時，改為安全失敗（fail closed）
+- 修正 Bash 權限檢查對超長指令的誤判——超過 10,000 字元的指令現在一律提示確認，不再自動執行
+- 修正 Bash 權限檢查將 [[ ]] 比較中的 zsh 變數下標與修飾符視為無害文字——這些指令現在會提示核准
+- 修正 Bash 權限檢查不再自動核准某些可能執行不安全選項、命令替換或反斜線路徑的 help 和 man 指令
+- 修正遠端工作階段的權限提示可能在本地確認對話框出現前就已通過的問題
+- 新增 EndConversation 工具：Claude 可以結束高度辱罵性使用者或越獄嘗試的工作階段，與 claude.ai 自 2025 年起的行為一致——詳見 https://www.anthropic.com/research/end-subset-conversations
+- 新增長時間執行工具呼叫的定期進度心跳（heartbeat），解決先前靜默無回應的問題
+- 新增 ISO 格式的 modified 時間戳到 memory 檔案的 frontmatter
+- 新增 message.uuid、client_request_id 和 tool_source 屬性到 OpenTelemetry log 事件，用於訊息層級關聯與工具來源追蹤
+- 新增 CLAUDE_CODE_OTEL_CONTENT_MAX_LENGTH 環境變數，可設定 OpenTelemetry 內容屬性的 60 KB 截斷上限
+- 新增 reasoning effort 到 subagentStatusLine payload，讓自訂 agent 列可以顯示模型與 effort 資訊
+- 新增對 docker 指令（包含 Podman 的 docker shim）攜帶 daemon 重導向 flag（--url、--connection、--identity 及 Podman 的 remote mode）時的權限提示，先前這些指令不需確認即可執行
+- 修正 GrowthBook feature 評估為 null 時的崩潰，以及格式錯誤的 flag payload 會清除快取 feature flags 的 bug
+- 修正 Bash 工具中 pkill -f 的 pattern 意外匹配到 CLI 自身程序時會終止 Claude 工作階段的問題（Linux）
+- 修正當 --settings 指向裝置檔案或超大檔案時的無限記憶體成長問題；超過 2 MiB 的設定檔現在會在啟動時以清楚的錯誤訊息失敗
+- 修正 Windows 上透過企業 proxy 時串流回合出現「Socket is closed」失敗的問題
+- 修正 stream-json 輸出在結束時對讀取速度慢的 SDK／pipeline 消費者被截斷的問題；退出排空邏輯現在會依排隊位元組量動態調整，而非固定 2 秒上限
+- 修正排程任務拒絕將自身設定的 prompt 視為受信任輸入——觸發的 prompt 現在以工作階段的指派任務身份送達
+- 修正 PowerShell 工具指令在子程序等待標準輸入時會掛起直到逾時的問題（Windows）
+- 修正 PowerShell 工具下的 Python 腳本在從標準輸入讀取非 UTF-8 資料時崩潰並拋出 UnicodeDecodeError 的問題（Windows）
+- 修正透過 PowerShell 工具執行的 Python 腳本在輸出非 ASCII 內容時崩潰並拋出 UnicodeEncodeError，以及 PowerShell 7 錯誤訊息包含原始 ANSI 跳脫序列的問題（Windows）
+- 修正 PowerShell 工具將 where.exe、fc.exe 和 diff.exe 回傳有效的否定答案時誤報為錯誤的問題（Windows）
+- 修正 Windows PowerShell 5.1 下 > 和 >> 透過 PowerShell 工具寫出 UTF-16LE 檔案，導致其他工具無法以 UTF-8 讀取的問題
+- 修正被取代的背景 daemon 在關閉時刪除其繼任者的 control socket，導致下一個 client 終止健康的替代 daemon 的問題
+- 修正以 ← 或 /background 暫停並閒置的背景工作階段會讓背景 daemon 和 worker 程序無限期存活的問題
+- 修正已完成的背景工作階段在背景服務閒置後無法透過 claude rm 或 agent 檢視移除的問題
+- 修正從非 git 資料夾派發的背景工作階段無法從 agents 檢視中刪除的問題
+- 修正重新開啟已停止的背景工作階段時，若工作階段儲存區中存在無法讀取的資料夾，會無法還原已儲存對話的問題
+- 修正 Remote Control 的「session ready」推播通知在未明確啟用 Remote Control 的工作階段也會觸發的問題
+- 修正 /install-github-app 和 /mcp 設定選單在 agent-view 工作階段中被封鎖的問題——現在僅在沒有終端機附接的背景工作階段中才會拒絕
+- 修正透過 --settings CLI flag 啟用的 plugin 未載入的問題（自 v2.1.181 起的回歸）
+- 修正長時間執行的工作階段中 OAuth token 輪替後 feature flags 變得過時的問題
+- 修正 /ultrareview 在沒有 merge base 的 repo 中拒絕執行的問題——現在會提供檢視所有已追蹤檔案的選項
+- 修正 claude update 和 claude doctor 靜默掛起，以及 /status 的 System diagnostics 區段變空白的問題（當 shell-config 路徑是目錄時）
+- 修正 memory frontmatter 值在儲存 memory 檔案時於行內 # 處被靜默截斷的問題
+- 修正工作階段費用與 token 遙測在串流發出多個累計 message_delta 框架時重複計算的問題
+- 修正 advisor 思考期間出現的假性「check your network」警告
+- 修正 exit code 2 的 hook 在其 stdout JSON 未通過 schema 驗證時未如文件所述進行阻擋的問題
+- 修正在回合的 async context 外發出的 OTel log 事件遺失 interaction span 的 trace context 的問題
+- 修正 MCP 在 prompts/resources 重新整理期間的暫時性錯誤會清除伺服器的 slash commands 和 resources 的問題
+- 改善 claude rc 在家目錄中的 workspace-trust 錯誤訊息，現在會說明在該處的信任設定永遠不會被儲存，並建議從專案目錄執行
+- 變更單段 dir/** hook if: 條件改為僅匹配 <cwd>/dir；若需任意深度匹配請寫 **/dir/**。deny／ask 權限規則維持任意深度匹配行為不變。
+- 變更使用 -m／--magic-file 或 -f／--files-from 的 file 指令改為需要權限，不再自動以唯讀方式允許
+- 變更 keep-alive 連線池在遇到過時連線錯誤後停用，使重試時開啟全新 socket
+- 變更 SessionStart hook 在工作階段以 fork 方式開始時回報來源為 "fork" 而非 "resume"
+
 ## 2.1.212
 - /fork 現在會把你的對話複製到一個新的背景 session（在 claude agents 中獨立一行），你可以繼續手邊的工作；原本在 session 內啟動 subagent 的功能改為 /subtask
 - 新增 claude auto-mode reset，可還原預設的 auto-mode 設定，會跳出確認提示（加 --yes 可跳過）
