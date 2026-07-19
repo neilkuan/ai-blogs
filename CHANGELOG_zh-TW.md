@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.215
+- Claude 不再自動執行 /verify 和 /code-review 技能了；需要時請手動輸入 /verify 或 /code-review 來呼叫它們
+
 ## 2.1.214
 - 修正單段 dir/** 允許規則（如 Edit(src/**)）會自動核准對樹中任意位置巢狀 dir/ 目錄的寫入，而非僅限 <cwd>/dir
 - 修正 Windows PowerShell 5.1 工作階段中執行指令時的權限檢查繞過問題
