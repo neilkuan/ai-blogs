@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.217 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.217 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.217</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 prompt 輸入區的 emoji 短碼自動補全：輸入 :heart: 可插入 ❤️，或輸入 :hea 取得建議 — 可透過 emojiCompletionEnabled 設定停用</li>
+<li>新增寫入逐字稿失敗時的警告（例如磁碟已滿），以及因繼承的環境變數導致 session 儲存關閉時的提示，避免逐字稿默默消失</li>
+<li>修正記憶體洩漏問題：被截斷的 MCP 工具輸出會在整個 session 期間將完整未截斷的結果保留在記憶體中</li>
+<li>修正 Windows 自動更新失敗後可能導致 claude.exe 消失的問題；更新失敗時現在會自動還原備份的執行檔</li>
+<li>修正背景 session 隔離機制未正規化符號連結（symlink）工作目錄的問題，這可能讓 session 逃出其工作區資料夾</li>
+<li>修正 auto-compact 在 Bedrock 上使用 Claude Opus 4.8 時永遠不會觸發，以及超過限制後 /compact 失敗的問題</li>
+<li>修正企業 mTLS、TLS 驗證、OAuth scope 及 proxy 設定在 Claude Desktop session 中被忽略的問題</li>
+<li>修正螢幕閱讀器模式的啟動公告被第一次 prompt 渲染截斷的問題，以及思考狀態列每隔幾秒重新渲染以更新經過時間和 token 數的問題</li>
+<li>修正透過 managed settings 設定 OTEL_EXPORTER_OTLP_ENDPOINT 時未能管控所有訊號的問題 — 較低層級的訊號專屬覆寫設定不再能將遙測資料導離受管端點</li>
+<li>修正 --resume/--continue 及 /resume 在逐字稿含有格式錯誤的附件項目時拋出 TypeError 的問題</li>
+<li>修正 Remote Control session 不會對稍後連線的觀看者顯示待處理的權限請求或對話框的問題</li>
+<li>修正背景 shell 在 session 被送到背景（/background 或 ←）或在高負載機器上 session 結束時，有時會變成無法停止的問題，在 Windows 上最為明顯</li>
+<li>修正 CLAUDE.md 或 SKILL.md 的 paths frontmatter 值包含大量大括號群組時會 OOM-kill 或卡住 CLI 啟動的問題 — 大括號展開（brace expansion）現在有預算上限</li>
+<li>修正附加到正在啟動的背景 session 時，逐字稿預覽緊貼輸入區的問題；現在會保留與即時佈局相同的一行間距，讓逐字稿在 session 接手時不再跳動</li>
+<li>改善 footer 的 PR 徽章連結，即使無法偵測終端機支援（例如透過 ssh/tmux），也能顯示為可點擊的超連結；設定 FORCE_HYPERLINK=0 可停用</li>
+<li>將登入過期警告改為到期前 3 天顯示，而非原本的 5 天</li>
+<li>將 frontend-design plugin 建議提示限制為終身最多顯示 3 次，不再無限重複</li>
+<li>新增同時執行的 subagent 數量上限（預設 20，可透過 CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS 覆寫），避免單一訊息無限制地展開背景 agent</li>
+<li>變更 subagent 預設不再產生巢狀 subagent；設定 CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH 可允許更深層巢狀</li>
+<li>修正 --max-budget-usd 未能停止背景 subagent 的問題：一旦達到上限，新的產生請求會被拒絕，且正在執行的背景 agent 會被終止</li>
+<li>變更 Fable 5 用量點數同意提示，預設焦點改為拒絕選項</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>

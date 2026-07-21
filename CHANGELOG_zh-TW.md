@@ -2,6 +2,29 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.217
+- 新增 prompt 輸入區的 emoji 短碼自動補全：輸入 :heart: 可插入 ❤️，或輸入 :hea 取得建議 — 可透過 emojiCompletionEnabled 設定停用
+- 新增寫入逐字稿失敗時的警告（例如磁碟已滿），以及因繼承的環境變數導致 session 儲存關閉時的提示，避免逐字稿默默消失
+- 修正記憶體洩漏問題：被截斷的 MCP 工具輸出會在整個 session 期間將完整未截斷的結果保留在記憶體中
+- 修正 Windows 自動更新失敗後可能導致 claude.exe 消失的問題；更新失敗時現在會自動還原備份的執行檔
+- 修正背景 session 隔離機制未正規化符號連結（symlink）工作目錄的問題，這可能讓 session 逃出其工作區資料夾
+- 修正 auto-compact 在 Bedrock 上使用 Claude Opus 4.8 時永遠不會觸發，以及超過限制後 /compact 失敗的問題
+- 修正企業 mTLS、TLS 驗證、OAuth scope 及 proxy 設定在 Claude Desktop session 中被忽略的問題
+- 修正螢幕閱讀器模式的啟動公告被第一次 prompt 渲染截斷的問題，以及思考狀態列每隔幾秒重新渲染以更新經過時間和 token 數的問題
+- 修正透過 managed settings 設定 OTEL_EXPORTER_OTLP_ENDPOINT 時未能管控所有訊號的問題 — 較低層級的訊號專屬覆寫設定不再能將遙測資料導離受管端點
+- 修正 --resume/--continue 及 /resume 在逐字稿含有格式錯誤的附件項目時拋出 TypeError 的問題
+- 修正 Remote Control session 不會對稍後連線的觀看者顯示待處理的權限請求或對話框的問題
+- 修正背景 shell 在 session 被送到背景（/background 或 ←）或在高負載機器上 session 結束時，有時會變成無法停止的問題，在 Windows 上最為明顯
+- 修正 CLAUDE.md 或 SKILL.md 的 paths frontmatter 值包含大量大括號群組時會 OOM-kill 或卡住 CLI 啟動的問題 — 大括號展開（brace expansion）現在有預算上限
+- 修正附加到正在啟動的背景 session 時，逐字稿預覽緊貼輸入區的問題；現在會保留與即時佈局相同的一行間距，讓逐字稿在 session 接手時不再跳動
+- 改善 footer 的 PR 徽章連結，即使無法偵測終端機支援（例如透過 ssh/tmux），也能顯示為可點擊的超連結；設定 FORCE_HYPERLINK=0 可停用
+- 將登入過期警告改為到期前 3 天顯示，而非原本的 5 天
+- 將 frontend-design plugin 建議提示限制為終身最多顯示 3 次，不再無限重複
+- 新增同時執行的 subagent 數量上限（預設 20，可透過 CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS 覆寫），避免單一訊息無限制地展開背景 agent
+- 變更 subagent 預設不再產生巢狀 subagent；設定 CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH 可允許更深層巢狀
+- 修正 --max-budget-usd 未能停止背景 subagent 的問題：一旦達到上限，新的產生請求會被拒絕，且正在執行的背景 agent 會被終止
+- 變更 Fable 5 用量點數同意提示，預設焦點改為拒絕選項
+
 ## 2.1.216
 - 新增 sandbox.filesystem.disabled 設定，可跳過檔案系統隔離但保留網路出口控制
 - 修正長時間 session 中訊息正規化成本隨對話輪數呈二次方成長的效能問題，導致多秒停頓與恢復緩慢
