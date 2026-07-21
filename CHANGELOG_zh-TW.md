@@ -2,6 +2,48 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.216
+- 新增 sandbox.filesystem.disabled 設定，可跳過檔案系統隔離但保留網路出口控制
+- 修正長時間 session 中訊息正規化成本隨對話輪數呈二次方成長的效能問題，導致多秒停頓與恢復緩慢
+- 修正 auto 模式在 OAuth token 過期或 session 中途輪換後，以「HTTP 401」分類器錯誤拒絕指令的問題
+- 修正 AskUserQuestion 在你的回覆明確要求等待或先解釋時，仍告訴 Claude 繼續的問題——自由文字回覆現在使用中性措辭
+- 修正 Claude Code 網頁版在 session 閒置幾分鐘後重複問同一個問題並丟失你回覆的問題
+- 修正 @-mentions 在檔案修改 hook、vim 以 c-operator 搭配 dot-repeat 與貼上、statusline 在恢復時執行兩次、以及 resume-picker 在失敗時卡住後，靜默附加空內容的問題
+- 修正恢復的背景 agent session 回退到預設 agent 的問題：agent 的 prompt 與工具限制現在會正確還原
+- 修正 worktree 隔離的 subagent 透過 git -C、--git-dir 或 GIT_DIR/GIT_WORK_TREE 將 git 重新導向到共用 checkout 的問題
+- 修正 worktree session 在工作目錄與所選專案不符時，落入另一個專案殘留 worktree 的問題
+- 修正 worktree 沒有 git repository 的背景 session 無法刪除的問題
+- 修正 claude daemon stop --any 可能透過過期的 legacy daemon lockfile 終止不相關 process 的問題
+- 修正在有背景任務的長時間 session 中，於閒置提示下按 Esc-Esc 無法開啟 rewind picker 的問題
+- 修正 Bash 指令權限檢查中，&& 串列或否定語句內含重導向的複合語句處理
+- 修正在 agent 列表中按兩次 Ctrl+X 無法刪除 session，以及背景 worker 已死亡的已刪除 session 重新出現的問題
+- 修正背景 subagent 在啟動窗口期間收到高優先級訊息時被取消的問題
+- 修正從 /memory、/plan、/keybindings 或 Ctrl+G 開啟 GUI 編輯器時，終端機出現滑鼠與焦點亂碼的問題；/memory 不再等待編輯器關閉
+- 修正 Claude-in-Chrome 在重新連線時，session 的 OAuth token 缺少必要 scope 導致 403 迴圈的問題
+- 修正 workflow 儲存與排程任務寫入時跟隨 .claude 的 symlink，可能將寫入重導向到專案外部的問題
+- 修正 MCP 重新認證在新登入成功前就撤銷有效憑證，以及背景 session 中重新連線的 needs-auth 訊息指向無法使用的指令的問題
+- 修正 Windows 上唯讀指令未經權限提示即存取網路路徑的問題
+- 修正 Bash 指令解析中非 ASCII 字元的處理，使其符合真實 shell 的字詞邊界
+- 修正 PowerShell 工具對包含不可見 Unicode 字元的指令進行權限驗證的問題
+- 修正全螢幕模式下對話框超出面板右側邊緣的問題
+- 修正全螢幕模式下 /config 設定列表裁切鍵盤提示 footer 的問題
+- 修正 transcript 模式（Ctrl+O）的 footer 提示在終端機寬度小於 104 欄時換行的問題
+- 修正 Prometheus metrics endpoint（OTEL_METRICS_EXPORTER=prometheus）產生無效 # UNIT 行的問題
+- 修正 session 期間變更的 skill 與 command 在重啟前不會出現在 slash 選單中的問題
+- 修正帶有 name frontmatter 欄位的 plugin skill 在 slash-command 自動完成中遺失 plugin 前綴的問題
+- 修正遙測錯誤回報權限拒絕：失敗的權限提示請求不再被計為使用者拒絕，使用者中斷現在回報為使用者中止而非拒絕
+- 改進 /fork 確認訊息為一行，包含新 session 名稱、claude attach id，以及共用 checkout 時的提示
+- 改進 PowerShell 工具中 git 與 gh 指令參數的驗證
+- 改進 /ultrareview diff 過大錯誤訊息，現在顯示設定的限制、實測 diff 大小與最大貢獻檔案
+- 改進 /code-review ultra 空 diff 訊息，現在指出確切的 base ref 並建議傳入明確的 base
+- 改進花費上限調整提示，在花費上限變更被拒絕時顯示伺服器的原因
+- /context 現在在對話超出 context window 時顯示明確警告，/compact 失敗時顯示為錯誤
+- /rewind 不再透過 symlink 或 hard link 還原或刪除追蹤路徑上的檔案，並回報跳過了多少路徑
+- 背景 session：/mcp 與 /install-github-app 在沒有 client 連接時，現在會在 agent 檢視中放置一個「needs input」請求
+- 更新內建 dataviz skill：重新排列預設圖表調色盤，並修正建議四系列圖表使用直接標籤的指引
+- [VSCode] 修正從右到左文字（阿拉伯文、希伯來文、波斯文）與英文或程式碼混排時以錯誤順序渲染的問題
+- 修正雲端 session 在 container 於 turn 進行中重啟時丟失進行中訊息的問題——被中斷的 turn 現在會在恢復時重新執行，而非讓 session 陷入無回應狀態
+
 ## 2.1.215
 - Claude 不再自動執行 /verify 和 /code-review 技能了；需要時請手動輸入 /verify 或 /code-review 來呼叫它們
 
