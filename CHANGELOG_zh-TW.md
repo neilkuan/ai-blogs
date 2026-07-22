@@ -2,6 +2,45 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.218
+- 將 /code-review 改為以背景子代理（background subagent）執行，審查工作不再佔滿你的對話，且堆疊的斜線指令會作為審查目標
+- 在 --ax-screen-reader 模式中，為單字與整行刪除操作（Option+Delete、Ctrl+W、Cmd+Backspace、Ctrl+U、Ctrl+K）加入螢幕閱讀器的刪除文字播報
+- 修正 Windows 路徑中含有 \u 開頭的片段（如 C:\Users\unicorn）在工具輸入時被損毀成 CJK 字元，導致這些檔案無法存取的問題
+- 修正左方向鍵在沒有復原（undo）的情況下直接丟棄對話：編輯後立即按下現在會要求確認，且在 agent 檢視中按 Esc 會回到被背景化的對話
+- 在 claude mcp list 和 /mcp 中加入 HTTP 狀態碼與錯誤訊息（當伺服器連線失敗時），並在 MCP 設定值含有隱藏的前後空白時顯示警告
+- 修正多行貼上在某些終端機中被壓縮成單行、換行符被替換成 j 的問題（這些終端機會將貼上的換行編碼為 Ctrl+J）
+- 修正 /context 在從訊息選擇器執行壓縮（compact）後，仍回報過期的壓縮前 token 使用量
+- 修正 /ultrareview 在接收描述性參數（如 "review my auth changes"）時失敗的問題——現在會對你的當前分支執行審查，並將該文字作為備註套用到發現結果
+- 修正 /code-review ultra 在非互動式 session 中靜默執行本地審查的問題——現在會正確啟動雲端審查
+- 修正 gateway 消費計量問題：Bedrock application-inference-profile ARN 及其他透過設定對應的上游模型 ID，現在會以所設定模型的費率計價
+- 修正長 IDE 選取內容在 emoji 中間被截斷時產生亂碼，以及工具執行器錯誤被靜默丟棄的情況
+- 修正引擎拆解時的競爭條件（race condition），該問題可能啟動並遺棄一個幽靈回合（phantom turn），同時確保在關閉後推入的輸入會被一致地拒絕
+- 修正中斷工具呼叫後出現假的「[Request interrupted by user]」訊息，以及工具中途中止回應時留下未配對 tool_use 區塊的問題
+- 修正 VoiceOver 在 --ax-screen-reader 模式中，於輸入尾端打空白鍵時讀出 "new line" 而非回音所打字元的問題
+- 修正 plugin 和設定面板未將終端游標移至聚焦列的問題，使螢幕閱讀器與放大鏡能跟隨方向鍵導航
+- 修正當深層巢狀的被監控目錄樹被刪除或移動時，以及渲染深層巢狀 UI 樹時發生崩潰（maximum call stack exceeded）的問題
+- 修正 pull request 事件在 session 建立或連結 PR 後立即結束時偶爾遺失的問題
+- 修正 Bedrock 設定精靈在分區（partitioned）AWS 區域及僅透過 proxy 的網路中，驗證 assume-role profile 失敗的問題
+- 修正系統時鐘調整後出現罕見的負值或錯誤回合持續時間測量，改為使用單調時鐘（monotonic clock）計時
+- 修正「N MCP servers need authentication」啟動通知過度計算未在 claude.ai 中連線的 claude.ai connector 的問題
+- 修正 prompt 歷史記錄在歷史寫入發生競爭或失敗時被丟棄或重複的問題
+- 修正在大 thinking budget 下遇到 context-overflow 錯誤後，重試迴圈重複送出相同注定失敗的請求的問題；Ctrl+B 背景化現在會套用與其他路徑相同的 background-shell 限制
+- 修正 agent frontmatter hook 從未受信任的資料夾執行的問題：hook 現在要求 agent 檔案本身所在的資料夾已接受工作區信任
+- 修正 fork-session 血統（lineage）在 headless 及 SDK session 中壓縮後遺失的問題
+- 修正恢復的 session 在其歷史記錄中含有格式錯誤的 delta 附件時，每回合都失敗或在恢復時崩潰的問題
+- 改善 /ultrareview 的錯誤回饋，讓 Claude 能修正無效參數而非原封不動地重試
+- 改善 auto 模式：危險的 rm、背景 &、以及可疑的 Windows 路徑檢查不再跳出權限對話框，改由 auto-mode 分類器裁決
+- 改善 IDE 互動的沙箱指令限制
+- 改善信任對話框，現在會標示授權涵蓋的 repository 根目錄
+- 將 /deep-research 改為僅在手動呼叫時啟動；Claude 不再自行發起
+- 將 plan 模式搭配 auto 時，不再對靜態分析器無法證明為唯讀的 Bash 指令跳出提示；改由 auto-mode 分類器判斷
+- 當透過 /config model=<x> 或 Remote Control 切換模型導致 fast mode 變更時，加入播報通知
+- 將伺服器管理的設定改為：無害的功能與費用開關不再觸發設定核准提示
+- 將 agent markdown 檔案改為拒絕包含 : 的 agent 名稱，因為該字元保留給 plugin 命名空間使用
+- 將 context: fork 的 skill 改為預設在背景執行；可在個別 skill 中用 background: false 退出
+- 新增 yes/no/on/off/1/0（不分大小寫）作為 skill 和 plugin frontmatter 布林值的可接受值，與原有的 true/false 並列
+- 修正遠端 session 在其 worker 被替換後仍持續發送 heartbeat 的問題，該問題導致長期存活的桌面和 IDE 程序每隔幾秒無限重試一個被拒絕的請求
+
 ## 2.1.217
 - 新增 prompt 輸入區的 emoji 短碼自動補全：輸入 :heart: 可插入 ❤️，或輸入 :hea 取得建議 — 可透過 emojiCompletionEnabled 設定停用
 - 新增寫入逐字稿失敗時的警告（例如磁碟已滿），以及因繼承的環境變數導致 session 儲存關閉時的提示，避免逐字稿默默消失
