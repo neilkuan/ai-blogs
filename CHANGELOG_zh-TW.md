@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.220
+- 修正錯誤與穩定性改善
+
 ## 2.1.219
 - 新增 Claude Opus 5（claude-opus-5），現在是預設的 Opus 模型 — 1M context，fast mode 定價 $10/$50 per Mtok
 - 新增 sandbox.network.strictAllowlist 設定，對沙箱指令中不在白名單的主機直接拒絕連線，不再跳提示
