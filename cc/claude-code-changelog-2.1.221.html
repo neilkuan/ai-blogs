@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.221 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.221 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.221</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>[VSCode] 新增 Focus 檢視：一個聊天選單開關，把工具活動收在每輪可展開的摘要後面，並附帶即時執行中工具指示器，用 Ctrl+Alt+F 或「Claude Code: Toggle Focus view」指令切換</li>
+<li>新增 Linux 與 WSL 上 sandbox 憑證檔案的 mode: &quot;mask&quot; 模式——sandbox 內的指令讀到的是哨兵副本（整個檔案，或由 extract 正規表達式擷取的片段），sandbox proxy 在封包出站時才替換成真實值；macOS 上檔案遮罩會退回到 deny</li>
+<li>新增 claude plugin validate 的警告：當 marketplace 或 plugin 名稱會被 Claude Desktop 的 managed marketplace 同步拒絕時提前告知</li>
+<li>新增 claude-api skill 的 prompt-audit 子指令，用於稽核提示詞與工具描述中針對舊模型撰寫的 pattern</li>
+<li>修正 Bash 工具權限檢查被繞過的問題：zsh 可在 [[ ]] 正規條件式中執行隱藏指令；受影響的指令現在會跳出權限提示</li>
+<li>修正 Windows 上 PowerShell 權限檢查無法正確處理路徑中含有引號字元的問題；這類路徑現在會提示使用者核准</li>
+<li>修正 thinking 開關在以 thinking 關閉狀態啟動的 session 中對後續操作無效的問題；在連線中途停用 MCP server 也不再靜默還原</li>
+<li>修正 print 模式（-p）中，來自 --mcp-config 的 MCP server 在第一輪前未連線的問題，導致模型將 tool call 以純文字輸出</li>
+<li>修正以 @ 提及的檔案在按 Esc 撤回提示後重新送出時被靜默丟棄的問題</li>
+<li>修正當 SDK MCP 工具名稱與內建物件屬性（如 constructor）同名時，準備 API 請求會當掉的問題</li>
+<li>修正 WebSearch 在 thinking 關閉時於 effort xhigh/max 等級回傳 400 錯誤的問題</li>
+<li>修正大檔案上傳在 sandbox 中因 sandbox proxy 的 TLS 錯誤而失敗的問題</li>
+<li>修正 Team 與 Enterprise 花費限額訊息誤指組織月度上限，實際上是你的個人花費限額</li>
+<li>修正 Windows 上 Bedrock 使用 AWS SSO 具名 profile 驗證失敗的問題：desktop-managed session 在機器設了多餘的 HOME 環境變數時會出錯</li>
+<li>修正 CLAUDE_CODE_RESUME_INTERRUPTED_TURN=0 無法停用中斷輪次自動恢復的問題；falsy 值現在會被正確尊重</li>
+<li>修正一個罕見的睡眠喚醒競爭條件（race condition）：兩個 Claude Code 程序可能同時刷新同一個 MCP connector 或 WIF OAuth token，導致強制重新驗證</li>
+<li>修正從 Claude Code Desktop 或 claude.ai 重新命名 session 後 CLI 端名稱未更新的問題；所有重新命名介面的 session 名稱現在都會做 sanitize</li>
+<li>修正 plugin 與組織下發的 skill 若與僅限終端機的內建指令同名（如 /help、/feedback）時，在非互動式 session 中無法呼叫的問題</li>
+<li>修正「Plugins changed」通知在 plugin 重新載入後持續顯示而未清除的問題</li>
+<li>修正 Vim 模式：yank 暫存器現在不會在對話框、歷史搜尋、逐字稿檢視後被靜默清空</li>
+<li>修正 Vim 模式：undo 回到空白提示時，現在會正確觸發「再按一次 ←」確認提示才返回 agent 檢視</li>
+<li>改善 Google Vertex AI 上的工具搜尋：已為 Claude 4.5 世代及更新模型重新啟用</li>
+<li>改善 auto 模式：平行 tool call 的權限檢查現在更有效利用快取，且在檢查進行中切換模式時會可靠地跳出提示，而非套用過期的結果</li>
+<li>降低 auto 模式權限檢查的 prompt-cache 成本：跨決策重複使用已快取的對話前綴</li>
+<li>改善 Stats 面板：token 總量現在包含快取 token，並提供 input、output、cache read、cache write 的細項拆分</li>
+<li>改善 /ultrareview 在 repo 與 base 沒有共同歷史時的錯誤訊息：沒有 branch 的 checkout 現在會提前拒絕並建議建立一個，且拒絕提示不再對已是完整 clone 的情況建議 git fetch --unshallow</li>
+<li>改善 Windows 啟動速度：程序建立時間現在透過原生 kernel32 呼叫讀取，而非啟動 PowerShell，因此會攔截 powershell.exe 的端點安全工具不再跳出提示</li>
+<li>變更背景 session 行為：會 commit 並 push 以保留工作成果，僅在任務需要時才開 draft PR，遵循你的 CLAUDE.md git 指示，並在結束時回報工作所在位置</li>
+<li>變更 /plugin install：在回報找不到 plugin 前，會先刷新過期的 marketplace 目錄並重試</li>
+<li>變更從 /plugin 安裝的 plugin：安全時會立即啟用，不再每次都要求 /reload-plugins</li>
+<li>變更 plugin 接受 &quot;.&quot; 作為 skills 路徑，根層級 SKILL.md 的驗證錯誤現在會建議使用 plugin 根目錄</li>
+<li>變更 /status 顯示 session 類型：interactive，或是 attached 或 unattended 的背景任務</li>
+<li>變更 emoji 自動完成：接受常見替代 shortcode，如 :thumbsup:、:thumbsdown: 和 :love:</li>
+<li>變更以 /fork 分叉的 session：現在會建立自己的 worktree，而非在原始 session 的 checkout 中作業</li>
+<li>變更 Claude in Chrome：開啟的瀏覽器分頁在不再需要時會自動關閉</li>
+<li>變更 fast 模式：當使用額度在 session 中途用完時，會在串流上回報，而非靜默失敗</li>
+<li>變更 Monitor：結束時未產生任何輸出的 watch 現在會明確說明，而非回報「stream ended」</li>
+<li>變更 Gateway model 欄位驗證：非字串值會以 400 拒絕，而非被轉送</li>
+<li>移除核准提示中重複出現的「Permission mode changed while the auto-mode classifier call was queued」通知</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
