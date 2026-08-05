@@ -2,6 +2,29 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.222
+- 修正 worktree 隔離的 session 及其 subagent 能對主 checkout 執行破壞性 git 指令的問題；現在檔案編輯和 Bash 的隔離機制適用於所有 session 類型
+- 修正 PreToolUse 自動允許的 hook 在背景 agent 任務（摘要、壓縮、重新命名）中繞過工具限制的問題
+- 修正 Team 和 Enterprise 方案中 /usage-credits 對曾被駁回請求的成員顯示「你已經送出過 usage credit 請求」，導致他們無法重新送出新請求
+- 修正啟動時的連線檢查在 HTTPS proxy 後方卡住然後失敗的問題；現在使用與 API 請求相同的 proxy-aware transport，並在逾時時顯示清楚的訊息
+- 修正實際上已完成的回應被錯誤回報為「Connection closed mid-response」
+- 修正 /usage 過度歸因用量給 MCP server 的問題：現在 server 的佔比只反映實際消耗其工具結果的請求，而非任何一次呼叫後的所有 turn
+- 修正 session 未連結到 branch 推送後建立的 pull request（包括透過 GitHub REST API 建立的）
+- 修正組織限制下 model: opus 風格的 subagent 和 teammate family 別名會降回父模型，而非降級到該 family 中組織允許的最新模型
+- 修正 stream idle timeout 在自訂 ANTHROPIC_BASE_URL gateway 上誤觸的問題，即使 server keep-alive ping 持續到達
+- 修正 claude.ai connector 在 session token 無效時被錯誤標記為需要授權——現在會改為顯示 /login 提示
+- 修正本地已不可用的工具（例如移除 MCP server 後）未顯示工具錯誤的問題
+- 修正 SendMessage 因摘要過長而拒絕送出——現在會截斷處理，不再因字元限制而失敗
+- 修正 subagent transcript 檢視中 spinner 的 effort 標籤顯示的是 session 的 effort 等級，而非 subagent 自身的 effort: 設定
+- 修正 file watcher 遇到檔案系統錯誤或在 file-watcher 拆卸期間偶發的崩潰
+- 修正 --ax-screen-reader 模式下每次按倒退鍵時螢幕閱讀器會重讀整行輸入——行尾刪除現在只朗讀被刪除的字元
+- 修正當設定了 CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST 時，host 的模型選擇 key 未優先於磁碟上過期的 managed-settings.json
+- 改善 auto 模式安全性：透過 SendMessage 傳送給其他 agent session 的訊息現在會在送出前經過權限分類器（permission classifier）評估
+- 改善 Claude 嘗試在 disable-model-invocation 下調用 skill 時的拒絕訊息：現在會告知 Claude 請你手動執行該 skill，而非複製其工作流程
+- 改善 /diff 檢視、Remote Control workspace diff，以及 Claude Code on the web session 中的檔案編輯 diff，改用原始 git blob 內容，忽略 workspace 設定的 diff driver 和 textconv
+- 變更 Remote Control 自動啟動行為：repo 層級設定（.claude/settings.json 或 .claude/settings.local.json）不再能開啟此功能（仍可關閉）；請透過 /config 在 user scope 啟用
+- 移除 ultraplan 功能
+
 ## 2.1.221
 - [VSCode] 新增 Focus 檢視：一個聊天選單開關，把工具活動收在每輪可展開的摘要後面，並附帶即時執行中工具指示器，用 Ctrl+Alt+F 或「Claude Code: Toggle Focus view」指令切換
 - 新增 Linux 與 WSL 上 sandbox 憑證檔案的 mode: "mask" 模式——sandbox 內的指令讀到的是哨兵副本（整個檔案，或由 extract 正規表達式擷取的片段），sandbox proxy 在封包出站時才替換成真實值；macOS 上檔案遮罩會退回到 deny
