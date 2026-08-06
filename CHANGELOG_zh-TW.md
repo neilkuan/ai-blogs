@@ -2,6 +2,27 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.223
+- 新增擁有者萬用字元項目（"owner/*"）到 strictKnownMarketplaces 和 blockedMarketplaces 管理設定中，可允許或封鎖某個 GitHub org 底下所有 marketplace repo
+- 新增警告：當 workflow agent、forked skill、slash command 或恢復的背景 agent 請求的 subagent model 受到限制時，會提示改用 parent model 執行
+- 新增 /teleport 提示，在 cloud session 中顯示如何用 claude --teleport <session id> 切回本機繼續作業
+- 修正一個 Bash 權限繞過問題，精心構造的指令可以把自身部分內容隱藏起來，躲過權限檢查
+- 修正權限提示，讓用 tab 或不可見 Unicode 字元填充的指令無法再把部分內容藏起來不讓使用者看到
+- 修正 workflow script 可以用動態 import() 跳出 workflow sandbox 執行外部程式碼的問題
+- 修正 agent 定義中的 bypassPermissions 模式會無視組織層級停用 bypass-permissions 的政策
+- 修正在 session 中途執行 /cd 後恢復 session 會回到空白狀態的問題
+- 修正 gateway model 探索會隱藏用 provider 前綴 ID 註冊的 Claude model，例如 vertex_ai/claude-* 或 bedrock/anthropic.claude-*
+- 修正 modelOverrides 中非 Anthropic model ID 的 key 被誤當成 session 的正式 model ID；未知的 key 現在會如文件所述被忽略
+- 修正管理設定：伺服器下發的設定不再覆蓋本機 managed-settings.json 或 MDM profile 中的 env 區塊；admin env 現在改為逐 key 合併
+- 修正在 Linux 上，當 sandbox.filesystem.denyWrite 涵蓋工作目錄時，沙箱指令無法啟動的問題
+- 修正 forked 背景 agent 在恢復時如果重建 fork 的 parent prompt 失敗，會整個 session 都卡在「already resuming」狀態
+- 修正恢復的 session 因為歷史紀錄中包含格式錯誤的 diagnostics attachment，導致每一輪都失敗，或讓互動介面卡在無回應的錯誤畫面
+- 修正解析異常 git push 輸出時偶爾會卡住（hang）的問題
+- 變更 CLAUDE_CODE_DISABLE_1M_CONTEXT：現在會把所有原生 1M 視窗的 Claude model 透過 auto-compaction 限制在 200K，而非只針對一個固定清單；如果 auto-compaction 無法將 session 維持在 200K 以下，啟動時會顯示警告
+- 變更 auto-compact 行為：對無法辨識的 model ID，現在會將 session 維持在假定的 context window 內，而非任其無限增長；設定 CLAUDE_CODE_DISABLE_UNKNOWN_MODEL_WINDOW_ENFORCEMENT=1 可恢復舊行為
+- 變更 /review 為 /code-review 的別名，用來審查目前的 diff 或指定 PR（/code-review <level> <pr#>）；使用 /code-review ultra 可進行深度 cloud 審查
+- 變更 /code-review 在不指定 effort level 時，會沿用上次輸入的等級；輸入像 /code-review high 即可切換等級
+
 ## 2.1.222
 - 修正 worktree 隔離的 session 及其 subagent 能對主 checkout 執行破壞性 git 指令的問題；現在檔案編輯和 Bash 的隔離機制適用於所有 session 類型
 - 修正 PreToolUse 自動允許的 hook 在背景 agent 任務（摘要、壓縮、重新命名）中繞過工具限制的問題
