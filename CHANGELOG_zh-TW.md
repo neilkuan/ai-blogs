@@ -2,6 +2,39 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.224
+- 新增自架環境（self-hosted environments）：claude self-hosted-runner 讓你把自己的機器或容器變成 Claude Code 網頁版、行動版和桌面版 session 的執行環境，適用於 Team 和 Enterprise 方案
+- 新增 archive plugin 來源：透過 HTTPS 從 zip 檔安裝 plugin，不需要 git 或 npm，可選擇性搭配 SHA-256 pinning
+- 新增取消並確認步驟：當移除一個不可用的 paste 導致指令文字被更動時，會先讓你確認
+- 新增 ANTHROPIC_BEDROCK_REGION_PREFIX 環境變數：讓 Bedrock 優先使用指定的跨區域推論 profile，而非從 AWS_REGION 推導的那個
+- 新增 crossSessionInbound 和 dialogExpiry 設定：當跨 session 訊息送到一個已繞過權限的 session 時，會先暫留等你核准；送到其他 session 的訊息則自動投遞
+- 新增 sandbox 憑證遮罩選項：extract 和 onExtractNoMatch 用於結構化環境變數值，decode: "jwt" 搭配 maskClaims 提供 JWT 感知遮罩，awsPairs/sigv4 用於 AWS SigV4 重新簽署；這些需要 network.tlsTerminate 且僅從 user、managed 或 --settings 設定中生效
+- 新增跨 session SendMessage：Claude Code session 之間現在可以互相傳訊息，跨越你的所有機器，用 ListAgents 來探索可用的 session（macOS 和 Linux）
+- 修正過長（超過 200 字元）的專案路徑在共用的 sanitized prefix 下解析到別的專案 session 目錄的問題；session 列表、重新命名、fork、刪除和 /resume 不再跨專案
+- 修正 SendMessage 在寫入對方 inbox 實際失敗時仍回報「Message sent」的問題；投遞失敗現在會正確回報錯誤
+- 修正 sandbox 檔案系統 deny 規則帶有結尾斜線（例如 denyRead: "~/.aws/"）時，在 Linux 和 macOS 上可被靜默繞過的問題
+- 修正 sandbox 違規細節從未出現在 Bash 工具結果中的問題；Claude 現在能看到哪個檔案或網路存取被拒絕以及原因
+- 修正 MCP 工具在 turn 中途連線時，被延遲到工具搜尋階段且名稱未通知模型的問題
+- 修正同一個 plugin 安裝在多個專案時，安裝紀錄被靜默損壞的問題
+- 修正召回或還原的 paste 內容偶爾附上錯誤資料，或在 paste 已過期或 placeholder 編號衝突時靜默遺失文字的問題
+- 修正 Wayland 上的選取即複製有時未正確寫入剪貼簿的問題；兩次 selection 寫入不再產生競爭條件（race condition）
+- 修正回饋問卷的 transcript 分享在長 session 時靜默失敗的問題；分享失敗現在會顯示錯誤訊息而非成功訊息
+- 修正 Remote Control 自動啟動在冷啟動搭配過期登入 token 時，間歇性出現「Remote credentials fetch failed」的問題
+- 修正 Remote Control 和 SDK 客戶端在 /clear 及其他無輸出指令後顯示空白「(no content)」訊息的問題
+- 修正 Remote Control session 在伺服器端 session 過期後重建時，把先前的本機對話歷史上傳到新 session 的問題
+- 改善全螢幕模式：在多次 compaction 後，scrollback 中保留完整的 compaction 前歷史紀錄，而非只有最近一段
+- 改善 Remote Control：連線中的網頁和行動客戶端現在能看到 compaction 進度和 compaction 後的分界線，而非只是靜默暫停；/clear 重置現在會傳播到已連線的客戶端
+- 改善 Remote Control：連線失敗現在顯示持續性的失敗指示器，附帶詳情和重新連線捷徑，而非只有 8 秒的 toast 通知
+- 移除每個 session 200 個 subagent 的生成上限；長時間執行的 session 不再拒絕新的 agent（並行數和深度限制仍然適用）
+- 變更 managed settings：當組織的設定未變動時，核准提示不再在重新登入或切換組織後重複出現
+- 變更回饋問卷的 transcript 分享：經你同意後，現在也會上傳最後一次 request 的模型設定 — 包括 system prompt（其中包含你的 CLAUDE.md 指示）、工具定義和模型參數。秘密資訊一樣會被遮蔽，如果分享內容太大，這些欄位會優先被移除
+- 變更 Bash 工具描述：現在一律註明指令輸出是顯示給模型看的，不一定會可靠地顯示給使用者
+- 變更召回的 paste placeholder 編號：被接受到輸入中時會重新編號
+- 變更 Remote Control：在 compaction 或 /resume 後產生新 session 時，過期的伺服器端 session 會被歸檔，而非留下一個死的項目在列表中
+- [VSCode] 修正擴充套件在連線失敗後仍顯示 Remote Control 為已連線的問題
+- 修正 session resume 在使用者關閉 Remote Control 後仍靜默重新連線的問題（--resume、SDK hosts 和 VS Code 擴充套件）
+- [VSCode] 修正 session 在 remoteControlAtStartup 被明確啟用時未遵守該設定的問題
+
 ## 2.1.223
 - 新增擁有者萬用字元項目（"owner/*"）到 strictKnownMarketplaces 和 blockedMarketplaces 管理設定中，可允許或封鎖某個 GitHub org 底下所有 marketplace repo
 - 新增警告：當 workflow agent、forked skill、slash command 或恢復的背景 agent 請求的 subagent model 受到限制時，會提示改用 parent model 執行
