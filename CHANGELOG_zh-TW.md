@@ -2,6 +2,22 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.225
+- 新增 gateway 花費上限（spend-limit）支援至 Claude Code 的用量警告；達到上限時的訊息現在會顯示額度上限值、重置時間，以及營運者的訊息（需要 gateway 版本 2.1.225）
+- 在 claude agents 中新增工作區信任提示，針對不受信任的目錄，行為與 claude 一致
+- 修正一個暫時性的 401 錯誤會把長效的 CLAUDE_CODE_OAUTH_TOKEN 替換成已儲存登入的短效 token，導致 headless session 在重啟前一直壞掉的問題
+- 修正 macOS 上的 MCP OAuth 伺服器間歇性噴出一堆 401 錯誤（好像從沒驗證過一樣），原因是 keychain 讀取逾時
+- 修正 auto 模式把安全過濾器拒絕自身權限檢查的情況算進連續 block 上限的問題；操作仍然會被拒絕，但模型現在會被告知繼續往下走而非重試
+- 修正跨 session 訊息在 headless session 和啟動期間卡住，沒有通知也沒有過期機制的問題
+- 修正 Remote Control session 在超大對話被壓縮後恢復時，對話歷史會壞掉的問題
+- 修正在 agents 列表中 hover 到另一個專案的 session 時，會改變下一個 agent 啟動目錄的問題
+- 修正 claude self-hosted-runner 在 --base-dir 無法建立或寫入時仍然完成註冊，之後每個 session 都失敗的問題；現在會在啟動時直接報錯退出
+- 修正 Claude Code web session 被誤報為卡住，導致每次重新連線都重送一個越來越大的事件積壓（event backlog）的問題
+- 改善 Remote Control：從 Claude app 附加的照片現在會直接顯示給 Claude，而不是用另一個 tool call 從磁碟讀取
+- [VSCode] 修正 Focus view 把最新的待辦清單、待回答問題的上下文，以及已回答的內容摺疊起來的問題；僅含思考過程的摺疊區塊現在會顯示「Thought for Ns」，並在該輪結束後重新收合
+- SendMessage 現在可以透過名稱對你在其他機器上的 Remote Control session 發起對話（ListAgents 會顯示為 name [ref]），不再只能等對方先傳訊息給你才能回覆
+- SendMessage：你已確認過的 Remote Control 接收者，不會在本機清單無法查詢時被同名的本機 session 替換掉
+
 ## 2.1.224
 - 新增自架環境（self-hosted environments）：claude self-hosted-runner 讓你把自己的機器或容器變成 Claude Code 網頁版、行動版和桌面版 session 的執行環境，適用於 Team 和 Enterprise 方案
 - 新增 archive plugin 來源：透過 HTTPS 從 zip 檔安裝 plugin，不需要 git 或 npm，可選擇性搭配 SHA-256 pinning
