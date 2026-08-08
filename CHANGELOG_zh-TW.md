@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.226
+- 修正錯誤與穩定性改善
+
 ## 2.1.225
 - 新增 gateway 花費上限（spend-limit）支援至 Claude Code 的用量警告；達到上限時的訊息現在會顯示額度上限值、重置時間，以及營運者的訊息（需要 gateway 版本 2.1.225）
 - 在 claude agents 中新增工作區信任提示，針對不受信任的目錄，行為與 claude 一致
