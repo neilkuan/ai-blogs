@@ -2,6 +2,26 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.228
+- 修正互動式 session 在罕見的內部排版錯誤後，可能完全停止重繪畫面，但程序仍持續運行的問題
+- 修正在 Windows 上從 git 安裝目錄的上層資料夾啟動 Claude Code 時，找不到 git / Git Bash 的問題
+- 修正 /tui 在上次回應後曾用 /model 切換模型的情況下，會把 session 還原到舊模型的問題
+- 修正跨 session 訊息在安裝或升級後的第一個 session 中，有時會在沒有收件匣的情況下啟動
+- 修正 Remote Control 的 /resume 在連線狀態下，會將被恢復對話的標題或歷史記錄洩漏到已連線 session 的問題
+- 修正 claude self-hosted-runner session 在全新 runner 上，當 checkout hook 對一個 session 不會推送的 repository 失敗時，每次都會導致 session 失敗的問題；現在該 repository 會被跳過並顯示警告
+- 修正 self-hosted runner 在背景任務結束與後續 turn 開始之間的空檔中提前結束 session 的問題
+- 修正 session 清理時刪除了專案 memory 資料夾中的內容
+- 修正背景 plugin cache 清理在某個 plugin 唯一的版本是 symlink 的開發用 checkout 時，會刪除該 plugin cache 的問題
+- 修正設定合併問題：當 marketplace 項目在較高優先級的設定層級中被重新定義時，可能會繼承其他層級的自訂 headers；marketplace 項目現在會以完整項目為單位進行合併
+- 修正 deferred-tools 提醒在 skill 調用後，偶爾會被重複發送給模型兩次的問題
+- 強化從 claude.ai 同步的 skills 安全性：它們不再覆蓋本地指令或 MCP prompts，其描述會被清理並加上標籤，且在你的機器上其內容不會執行 ! 指令或展開 @ 檔案
+- 改善跨 session 訊息：發送者與內容現在會直接內嵌顯示，而非折疊成一行；傳送到其他機器上 Remote Control session 的訊息，會顯示你的 Remote Control session 名稱作為發送者
+- 改善 Vertex AI 憑證處理：過期或遺失的 Google Cloud 憑證現在會在數秒內失敗，而非重試好幾分鐘
+- 改善壓縮（compaction）進度顯示：重試倒數計時與卡住提示現在會在壓縮期間顯示，而非只有進度條
+- 更新終端標題的忙碌旋轉符號（busy-spinner glyphs），減少在部分終端上分頁列的抖動
+- 調整 Write 工具行為，讓較新的模型可以覆寫本次 session 中尚未讀取過的既有檔案，與 Edit 工具的規則一致；較舊的模型仍然需要先讀取
+- 移除首次使用通知中關於 auto mode session 會稍微多花一點費用的過時說明（適用於 Pro、Max 及 Team 方案）
+
 ## 2.1.227
 - 修正了當 session 以過期的登入 token 啟動時，feature flags 未依使用者訂閱方案層級進行評估的問題，這會錯誤地提示 Max 方案使用者為 Fable 啟用使用額度（usage credits）
 - 修正了在 GitHub-hosted runners 上使用 claude-code-action 搭配 allowed_non_write_users 時，所有 Bash 指令都會失敗的問題
