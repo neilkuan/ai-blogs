@@ -2,6 +2,13 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.227
+- 修正了當 session 以過期的登入 token 啟動時，feature flags 未依使用者訂閱方案層級進行評估的問題，這會錯誤地提示 Max 方案使用者為 Fable 啟用使用額度（usage credits）
+- 修正了在 GitHub-hosted runners 上使用 claude-code-action 搭配 allowed_non_write_users 時，所有 Bash 指令都會失敗的問題
+- 修正了 /tui 會把已經回溯（rewind）到第一則訊息之前的對話重新帶回來的問題
+- 改善斜線指令選單：藍色現在只標記被選取的那一列，匹配的字元改用粗體而非變色，含有 emoji 或帶重音的名稱也能正確顯示字形（glyph）
+- 改善效能：減少在檔案找不到建議與 at-mention 大小檢查時造成的事件迴圈阻塞（event-loop stalls）
+
 ## 2.1.226
 - 修正錯誤與穩定性改善
 
