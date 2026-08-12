@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.229 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.229 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.229</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 claude remote-control --continue 的文件說明，用於恢復最近一次的 Remote Control 工作階段</li>
+<li>新增伺服器端提供的 Claude Code hook 支援，適用於自建 runner 工作階段，行為與託管環境一致</li>
+<li>新增 SSE keepalive ping 機制，在長時間思考暫停期間持續對 gateway 串流回應發送心跳，避免 Vertex 和 Bedrock 上游的閒置逾時斷線</li>
+<li>新增 plugin marketplace 的 command 來源：由本地指令（例如 IDE）輸出 plugin 目錄路徑，每次工作階段重新解析並套用，無需重啟；mode: &quot;link&quot; 則直接以該路徑取代</li>
+<li>ListAgents 現在會將已斷線的 Remote Control 工作階段標示為 offline，並將你的雲端工作階段標示為 cloud</li>
+<li>修正長回應在串流輸出時部分消失、且在終端機重複印出兩次的問題</li>
+<li>修正當 tool call 的 glob、file_path 或 command 值不是字串時，會跳到錯誤畫面的崩潰問題（包括對受影響工作階段使用 --resume 時）</li>
+<li>修正在極窄的終端機視窗中渲染進度條或 markdown 表格時觸發 RangeError 崩潰的問題（也可能導致 claude --continue/--resume 啟動時崩潰）</li>
+<li>修正 Windows 上當 tool call 或訊息引用了延伸長度路徑（\\?\）或 UNC 路徑的檔案時發生崩潰的問題</li>
+<li>修正透過 CLAUDE_CODE_ATTRIBUTION_HEADER 停用 attribution header 的使用者（直連 Anthropic API）在 auto 模式下每次 tool call 都失敗的問題</li>
+<li>修正 /model 對使用自訂 ANTHROPIC_BASE_URL gateway 的 claude.ai 訂閱者拒絕選擇 Sonnet/Opus 1M 的問題</li>
+<li>修正 MCP OAuth 在嚴格的授權伺服器上失敗的問題，改用 127.0.0.1 取代 redirect URI 中的 localhost</li>
+<li>修正在筆電終端機輸入斜線指令後，Remote Control 客戶端顯示卡住的旋轉載入圖示的問題</li>
+<li>修正 /install-github-app 產生的 Claude Code Review workflow 執行完畢卻沒有在 pull request 上張貼 review 的問題</li>
+<li>修正在 IDE 擴充功能連線狀態下，編輯有數千筆 IDE 診斷訊息的檔案後 UI 卡頓數秒的問題</li>
+<li>修正單次執行的 claude plugin 指令會殘留 liveness 檔案，可能阻礙舊版 plugin 清理的問題</li>
+<li>修正在 CPU 受限容器中的動態 workflow 使用了宿主機的核心數而非容器的 CPU 限制的問題</li>
+<li>修正原子化檔案替換後的 file-watcher handle 洩漏問題，以及 Windows 上排程任務 watcher 在網路或虛擬檔案系統上失敗時拋出未捕捉錯誤的問題</li>
+<li>修正 SDK 和 --input-format stream-json 工作階段在送出純空白訊息時收到 400 API 錯誤的問題</li>
+<li>修正當對話訊息本身就超過 API 的 32 MB 請求上限時，在無法剝離圖片或文件的情況下仍反覆重試壓縮的問題；現在會直接失敗一次並給出明確訊息</li>
+<li>修正從 Claude Desktop 工作階段匯出 OpenTelemetry 時，被 Desktop 管理的 gateway 拒絕的問題（當該 gateway 同時也是遙測端點時）</li>
+<li>修正自建 runner 及其他遠端工作階段在部署了 managed-mcp.json 且伺服器提供 MCP server 時啟動即退出的問題；現在會跳過這些 server 並顯示警告</li>
+<li>修正自建 runner 在準備儲存庫時因 Git Credential Manager 提示而卡住的問題；現在 git 在缺少憑證時會立即失敗</li>
+<li>改善 workflow fan-out 機制，交錯啟動同前綴的兄弟 agent，讓後續 agent 能讀取已快取的 prompt prefix 而非重新付費計算（設定 CLAUDE_CODE_WORKFLOW_PREFIX_STAGGER_MS=0 可停用）</li>
+<li>改善「prompt is too long」錯誤訊息，現在會解釋為何自動壓縮無法恢復，而非只建議使用 /compact</li>
+<li>改善 sandbox：網路域名清單中的 IPv6 字面位址現在會加上方括號（[::1]:443），模糊拼寫將以 fail-closed 方式處理並由 /doctor 標記</li>
+<li>更新 /login，在成功登入後會再次顯示 CLAUDE_CODE_OAUTH_TOKEN 覆寫警告</li>
+<li>變更 /commit-push-pr，含有危險 flag（--force、--amend、--no-verify 等）的 git/gh 指令不再自動核准</li>
+<li>變更自建 runner 在 Windows 上的啟動行為，現在必須明確指定 --base-dir；Windows 上不再有預設的 checkout 目錄</li>
+<li>[VSCode] 「回報問題」和 /bug 現在會開啟內建的意見回饋對話框，而非已停用的問卷連結</li>
+<li>[VSCode] /btw 側邊提問面板現在可透過拖曳邊界調整大小，側邊停靠和堆疊佈局皆適用</li>
+<li>[VSCode] 在側邊欄新增工作階段群組功能——右鍵可建立、重新命名或刪除群組；Cmd/Ctrl 點擊或 Shift 點擊可一次移動多個工作階段</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
