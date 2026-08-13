@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.231
+- 修正 MCP OAuth 登入時，對於使用預先註冊 OAuth client 的伺服器（例如 Slack）會出現 redirect URI 不匹配的問題
+
 ## 2.1.229
 - 新增 claude remote-control --continue 的文件說明，用於恢復最近一次的 Remote Control 工作階段
 - 新增伺服器端提供的 Claude Code hook 支援，適用於自建 runner 工作階段，行為與託管環境一致
