@@ -2,6 +2,57 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.232
+- Subagent forking 現在預設啟用：subagent_type: "fork" 的 subagent 會繼承完整的對話內容與 prompt cache，而互動式 session 中非 teammate 的 agent 生成現在預設在背景執行
+- 在提示列輸入 @ 即可透過名稱提及另一個 Claude session；Claude 會使用 SendMessage 直接聯繫該 session
+- SendMessage 現在只要裸名稱完全匹配一個存活中的 session 就會直接送達，不再要求先用 ref 確認
+- 同一台機器上的互動式 session 現在會保持名稱唯一：啟動或重新命名 session 時若撞名，會自動產生 name-word-word 的變體並通知你
+- /config 新增「Dialog expiry」和「Messages from your other sessions」（跨 session 接收策略：accept/hold/refuse）的設定列
+- 新增 GitLab token 家族的機密遮蔽（glrt-、gloas-、glptt-、glagent-、glimt-、glsoat-、glcbt-、glft-、glffct-），以及可路由的 glpat-/gldt- token 的完整遮蔽；glab CLI 設定儲存空間獲得與 gh 相同的 sandbox 和憑證路徑保護
+- 新增 GitLab 對 plugin marketplace 的支援：裸的 gitlab.com repo URL（包含巢狀 subgroup）現在可以像 github.com URL 一樣 clone，clone 認證失敗的提示也會顯示你實際的 git host
+- 設定：additionalMarketplaces 和 allowedMarketplaces 現在作為 extraKnownMarketplaces 和 strictKnownMarketplaces 更友善的別名被接受
+- 企業政策：url 類型的 blockedMarketplaces 條目對裸 repo URL 的封鎖，在 CLI 將其分類為 git clone 時仍然有效
+- Gateway：desktop: overlay 現在接受所有已發布的 Desktop 設定（原本只有 11 個手動列舉的 key），開機時會依據 Desktop 自身的 schema 驗證；未知或無效的 key 會導致啟動失敗
+- Gateway：空的 managed.policies[].match.groups/admin.admin_groups 條目，以及格式錯誤的 email_domain 值（空值、包含 @、空白或逗號）現在會在啟動時失敗，而非靜默地不匹配任何人或授予管理員權限
+- Fable 5 再次在 /advisor 中作為顧問提供給有 Fable 存取權的組織，使用額度同意透過 /model fable 設定
+- 修正 PowerShell 權限繞過問題：可寫入變數的參數原本可以靜默覆寫 $PSDefaultParameterValues 並重新導向後續指令的檔案存取
+- 修正 Windows 權限繞過問題：Git Bash 會跟隨 Cygwin 風格的 symlink，而路徑驗證將其視為一般檔案；透過這些 symlink 的寫入現在需要權限核准
+- 修正巢狀 git repository 從父目錄繼承信任的問題；每個 repository 現在需要各自的信任確認
+- 修正 MCP 連線在伺服器無回應或對 protocol-version 探測回覆格式錯誤時，會卡住整整 30 秒連線逾時的問題
+- 修正由雲端 session 內部 bridge 代管的 Remote Control session 會繼承該 session 的對話紀錄或憑證的問題
+- 修正從 Claude Desktop 或 IDE 啟動的 Remote Control session 每次恢復本地 session 時都會以新的 claude.ai session 出現的問題；現在會重新連接到既有的 session
+- 修正 Remote Control session 在閒置時對新連接的 client 顯示為不可達的問題
+- 修正 Remote Control bridge session 在 session worker 重啟時不會還原對話歷史的問題
+- Remote Control：恢復一個 session 已從 claude.ai 或 app 中刪除的對話，現在會啟動替代 session 而非顯示登入相關的錯誤訊息（v2.1.227 中的回歸問題）
+- 修正 Cloud gateway /login 在 managed settings 載入失敗時靜默退出或在「Press Enter to continue」後留下無回應終端機的問題；現在會顯示原因
+- 修正 native build 上的語音模式在語音服務拒絕連線時卡在「listening…」的問題；拒絕訊息現在會立即顯示
+- 修正 mTLS client certificate 輪換需要重啟的問題；Claude Code 現在會在連線錯誤時自動重新載入輪換後的憑證和金鑰
+- 修正格式錯誤的 AWS 或 Vertex region 值被用來建構請求 URL 的問題；現在會退回使用預設 region
+- 修正串流閒置逾時錯誤在 Bedrock、Vertex 和 gateway 部署上導致請求失敗而非恢復的問題
+- 修正包含截斷文字的 content-sized overlay 渲染時多出一欄寬度的問題，以及起始截斷文字坍縮為省略號的問題
+- 修正長 shell 指令或 agent 描述預覽在 emoji 中間截斷時出現亂碼字元的問題
+- 修正啟動時的競爭條件（race condition）可能因對 known_marketplaces.json 的並行寫入而靜默取消註冊 plugin marketplace 的問題
+- 修正 /update 和 /tui 在有可存續重啟的工作執行中時拒絕重啟的問題
+- 修正使用量限制指引在 SDK 和遠端 session 中建議不可用的 slash command 的問題
+- 修正互動式 --advisor fable 啟動時的同意訊息，原本會告訴你在一個剛結束的互動式 session 中執行 /model fable
+- 改善全螢幕串流：長時間 session 保持回應速度，因為不再於每次更新時重新正規化整個對話內容
+- 改善 managed settings 核准對話框：顯示 endpoint URL、對僅涉及 telemetry 的變更使用更清楚的措辭、跳過例行的 OpenTelemetry 選項，並對伺服器管理的 sandbox binary 覆寫（sandbox.bwrapPath、sandbox.socatPath、sandbox.ripgrep）要求核准
+- /feedback 和 /bug 現在在 Claude 回應中被呼叫時會立即開啟，不再等待該回合結束
+- /plugin install plugin@marketplace 現在會先重新整理 marketplace，讓新發布的 plugin 不需手動更新 marketplace 即可安裝
+- /code-review 在 high、xhigh 和 max effort 層級現在會像其他層級一樣在背景 agent 中執行
+- 貼上和剪貼簿圖片的讀取不再阻塞事件迴圈
+- Remote Control 現在在網路中斷後會持續重新連線約 30 分鐘，不再因一小時內分散的幾次中斷就斷線
+- Remote Control：恢復對話不再會靜默地從同一台機器上仍持有 Remote Control 的另一個 Claude Code 搶走控制權；在那邊執行 /remote-control 即可移轉
+- 更新 agent 面板：完成的 subagent 會立即隱藏並顯示 /tasks 的頁尾提示，「↓ N more」的溢位指示器移至左側以提高可見度
+- Remote Control：終端機現在會說明 session 是被另一台裝置接管、從另一個 app 結束、還是被刪除，並停止建議會撤銷該操作的重新連線
+- Bash 輸入重導向（< file）現在在所有平台上都會像其對應的參數寫法一樣進行權限檢查
+- 縮短恢復已完成的背景 agent 時顯示的訊息
+- Cowork session 不再內聯來自使用者層級記憶檔案的外部 @-import
+- 強化共享 /tmp 上自動生成的跨 session 訊息 socket 目錄：預先放置的 symlink 或其他使用者的目錄現在會被拒絕而非使用
+- 強化 Linux 檔案系統 sandbox 以防禦受保護路徑的繞過
+- 變更 sandbox.ripgrep 為僅接受來自使用者、managed 和 --settings 設定的值；專案設定不再能覆寫 sandbox 的 ripgrep binary
+- 移除啟動時建議建立自訂 subagent 的提示，以及 /powerup 導覽中對應的引導訊息
+
 ## 2.1.231
 - 修正 MCP OAuth 登入時，對於使用預先註冊 OAuth client 的伺服器（例如 Slack）會出現 redirect URI 不匹配的問題
 
