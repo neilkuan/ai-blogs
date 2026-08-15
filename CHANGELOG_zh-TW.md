@@ -2,6 +2,28 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.233
+- 新增 GitLab merge request URL 支援，可用於 --worktree flag 及 claude agents 檢視畫面（MR 會顯示為 !N）
+- 新增 opt-in 的 forward_user_identity apps gateway 設定（適用於 Anthropic upstream），會將已登入使用者的身分以 header 傳送，讓 gateway 背後的 proxy 可以按使用者歸戶計費
+- 新增 opt-in 的 memory cgroup 支援，適用於 Linux 上的 Bash 工具指令（CLAUDE_CODE_TOOL_MEMORY_LIMIT），避免失控的 build 把整個 session 卡住
+- 新增 CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS 環境變數，可設定 WebFetch session URL 快取的 TTL（預設不變：15 分鐘）
+- 修正 cloud session 偶爾在環境關閉時（Claude 正在等待權限提示）被誤標為已失聯的問題
+- 修正 MCP v2 連線對會在固定逾時後終止長連線的 server（例如 serverless 主機）無限重開 subscriptions/listen stream 的問題
+- 修正 Notification hook 在 Claude Desktop 或 VS Code 下執行時，遇到權限提示不會觸發的問題
+- 修正 Linux 上閒置的 session 在啟用 sandboxing 時，偶爾會讓一個 CPU core 跑滿 100% 的問題
+- 修正內建 skill 別名（如 /checkup、/review）在 -p 模式下，或當有 plugin/MCP 載入且使用者或專案 skill 覆蓋了內建 skill 時，回報「Unknown command」的問題
+- 修正 skill/command 參數替換邏輯，防止參數值被重新展開為 template marker
+- 修正 Windows 路徑若使用 NT \??\ device prefix 拼寫時，可繞過 UNC 路徑驗證的問題，封堵了一個 NTLM 憑證洩漏向量
+- 改善 claude self-hosted-runner 的 session 啟動時間：session branch 現在建立時不再重寫 working tree，且兩次 server round trip 不再阻擋 agent 啟動
+- 改善 apps gateway 錯誤轉發：來自 Vertex、Foundry 及 Claude Platform on AWS upstream 的 400/413 錯誤現在會帶上 upstream 原始的錯誤訊息；同時修正了 apps gateway 上 auto-compact 的一個 bug
+- 改善 claude plugin validate，現在可以檢查裸的 .claude/skills 目錄，並回報 frontmatter 無法解析的 SKILL.md 檔案
+- 改善螢幕閱讀器模式：/effort 選擇器現在會呈現為帶編號的清單並提示輸入數字，提示文字與對話框文字不再被截斷
+- 改善 print mode 診斷：當請求送出的 model ID 是 Claude Code 無法辨識的，會在 stderr 寫入 [claude-code:unrecognized_model] 訊息；可透過 modelOverrides 對應來消除
+- 變更：GitHub app 設定提示不再出現在 origin remote 指向 gitlab.com 或 bitbucket.org 的 repo 中；enterprise marketplace 提示現在涵蓋非 GitHub 的內部 git 主機
+- Todo/task-tracking 工具（TaskCreate/Get/Update/List、TodoWrite）在 Opus 4.8、Sonnet 5、Fable 5、Mythos 5 及更新的模型上不再可用；設定 CLAUDE_CODE_ENABLE_TODO_TOOLS=1 可恢復使用
+- Windows：修正 auto 模式在一般的 cd <dir> && <command> > file Bash 指令上反覆停下來要求手動核准的問題（2.1.232 的回歸 bug）
+- 還原 2.1.232 中針對 Windows Cygwin 風格 symlink 及輸入重導向（< file）的 Bash 權限變更；更精確的版本將在後續版本推出
+
 ## 2.1.232
 - Subagent forking 現在預設啟用：subagent_type: "fork" 的 subagent 會繼承完整的對話內容與 prompt cache，而互動式 session 中非 teammate 的 agent 生成現在預設在背景執行
 - 在提示列輸入 @ 即可透過名稱提及另一個 Claude session；Claude 會使用 SendMessage 直接聯繫該 session

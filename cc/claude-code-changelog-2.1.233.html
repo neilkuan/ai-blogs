@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.233 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.233 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.233</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 GitLab merge request URL 支援，可用於 --worktree flag 及 claude agents 檢視畫面（MR 會顯示為 !N）</li>
+<li>新增 opt-in 的 forward_user_identity apps gateway 設定（適用於 Anthropic upstream），會將已登入使用者的身分以 header 傳送，讓 gateway 背後的 proxy 可以按使用者歸戶計費</li>
+<li>新增 opt-in 的 memory cgroup 支援，適用於 Linux 上的 Bash 工具指令（CLAUDE_CODE_TOOL_MEMORY_LIMIT），避免失控的 build 把整個 session 卡住</li>
+<li>新增 CLAUDE_CODE_WEBFETCH_CACHE_TTL_MS 環境變數，可設定 WebFetch session URL 快取的 TTL（預設不變：15 分鐘）</li>
+<li>修正 cloud session 偶爾在環境關閉時（Claude 正在等待權限提示）被誤標為已失聯的問題</li>
+<li>修正 MCP v2 連線對會在固定逾時後終止長連線的 server（例如 serverless 主機）無限重開 subscriptions/listen stream 的問題</li>
+<li>修正 Notification hook 在 Claude Desktop 或 VS Code 下執行時，遇到權限提示不會觸發的問題</li>
+<li>修正 Linux 上閒置的 session 在啟用 sandboxing 時，偶爾會讓一個 CPU core 跑滿 100% 的問題</li>
+<li>修正內建 skill 別名（如 /checkup、/review）在 -p 模式下，或當有 plugin/MCP 載入且使用者或專案 skill 覆蓋了內建 skill 時，回報「Unknown command」的問題</li>
+<li>修正 skill/command 參數替換邏輯，防止參數值被重新展開為 template marker</li>
+<li>修正 Windows 路徑若使用 NT \??\ device prefix 拼寫時，可繞過 UNC 路徑驗證的問題，封堵了一個 NTLM 憑證洩漏向量</li>
+<li>改善 claude self-hosted-runner 的 session 啟動時間：session branch 現在建立時不再重寫 working tree，且兩次 server round trip 不再阻擋 agent 啟動</li>
+<li>改善 apps gateway 錯誤轉發：來自 Vertex、Foundry 及 Claude Platform on AWS upstream 的 400/413 錯誤現在會帶上 upstream 原始的錯誤訊息；同時修正了 apps gateway 上 auto-compact 的一個 bug</li>
+<li>改善 claude plugin validate，現在可以檢查裸的 .claude/skills 目錄，並回報 frontmatter 無法解析的 SKILL.md 檔案</li>
+<li>改善螢幕閱讀器模式：/effort 選擇器現在會呈現為帶編號的清單並提示輸入數字，提示文字與對話框文字不再被截斷</li>
+<li>改善 print mode 診斷：當請求送出的 model ID 是 Claude Code 無法辨識的，會在 stderr 寫入 [claude-code:unrecognized_model] 訊息；可透過 modelOverrides 對應來消除</li>
+<li>變更：GitHub app 設定提示不再出現在 origin remote 指向 gitlab.com 或 bitbucket.org 的 repo 中；enterprise marketplace 提示現在涵蓋非 GitHub 的內部 git 主機</li>
+<li>Todo/task-tracking 工具（TaskCreate/Get/Update/List、TodoWrite）在 Opus 4.8、Sonnet 5、Fable 5、Mythos 5 及更新的模型上不再可用；設定 CLAUDE_CODE_ENABLE_TODO_TOOLS=1 可恢復使用</li>
+<li>Windows：修正 auto 模式在一般的 cd &lt;dir&gt; &amp;&amp; &lt;command&gt; &gt; file Bash 指令上反覆停下來要求手動核准的問題（2.1.232 的回歸 bug）</li>
+<li>還原 2.1.232 中針對 Windows Cygwin 風格 symlink 及輸入重導向（&lt; file）的 Bash 權限變更；更精確的版本將在後續版本推出</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
