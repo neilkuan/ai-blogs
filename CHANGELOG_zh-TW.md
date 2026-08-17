@@ -2,6 +2,59 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.234
+- 新增可選的 CLAUDE_CODE_PROJECT_DIR_NAME 環境變數：為每個 session 分配獨立設定目錄的主機可以為每個專案的 transcript 目錄指定一個簡短名稱
+- 新增 selection:clear 快捷鍵動作，可以綁定按鍵來清除應用程式內的文字選取；也適用於 agents 檢視
+- 新增 GitLab merge request 徽章顯示於頁尾與狀態列：設有 GitLab remote 且已認證 glab CLI 的 repo 會顯示 MR !N 及 draft/pending/green 狀態
+- Claude Code 現在會在 claude.ai 用量限制重置時自動繼續你的 session；可在 /config 中關閉（「Continue automatically at usage limit」）
+- Claude 現在被告知只能用你的帳號 email 來識別你的身份，不會將其傳送給無關服務，除非你主動要求
+- 安全性：遠端檔案讀取、session 還原、CLAUDE.md 引入、workflow 腳本及檔案上傳現在會拒絕 Windows NT-namespace（\??\）路徑，強化剩餘的預核准檔案存取以防禦 NTLM 憑證洩漏（credential-leak）攻擊向量
+- 修正在極長 session 中 auto mode 反覆重新檢查並拒絕沙箱指令的網路存取（在對話已被壓縮之後）
+- 修正 session 範圍的權限回答（包含拒絕）在回應背景 subagent 工具權限提示時被丟棄的問題
+- 修正當 API 回應走非串流 fallback 路徑（通常透過第三方 gateway）時，若 thinking block 缺少 thinking 欄位或 text block 缺少 text 欄位會導致崩潰的問題
+- 修正某些包含特殊 Unicode 序列的訊息導致 markdown 渲染變得極度緩慢的問題
+- 修正 SendMessage 在 session 名稱達到 200 字元上限或含大量 emoji 時，拒絕從 ListAgents 複製過來的收件者的問題
+- 修正 repository 偵測在 git remote 含有不尋常 userinfo 時錯誤解讀主機名稱，導致連結與 repo 相關行為指向錯誤主機的問題
+- 修正 MCP 診斷訊息印出已解析的 secret：scope 衝突警告現在顯示設定的 ${VAR} 形式，連線失敗詳情只顯示 server origin
+- 修正 strictKnownMarketplaces 白名單接受 SCP 風格 git marketplace 來源，其 host 與 git 實際連線的不同的問題
+- 修正全螢幕模式下 modal 文字（如 /login OAuth URL）在複製時遺失字元的問題
+- 修正渲染後的 markdown 中 --- 水平線跑進下一行的問題
+- 修正連續的 shell 指令在 todo/task 更新穿插其間時被拆成多個「Ran 1 shell command」列的問題
+- 修正在 ! shell 指令執行中開啟 /permissions 等對話框時，指令完成後對話框被關閉的問題
+- 修正佇列中的 ! shell 指令在按上方向鍵編輯佇列輸入後，被當作純文字送給模型的問題
+- 修正佇列中的訊息在仍在排隊時就重新出現在提示歷史紀錄中；在選取佇列中訊息時按 Esc 不再中斷回合；! 模式不再在回合中途送出後持續生效
+- 修正接受「Try the new fullscreen renderer?」提示後，session 重啟時丟失其權限模式（例如 --dangerously-skip-permissions）、工具 allow/deny 規則、model 或 effort flag 的問題
+- 修正 /tui 在重啟時丟棄啟動時的 --allowed-tools/--disallowed-tools 規則；現在當 session 有無法攜帶的限制時會拒絕切換並說明原因
+- 修正信任提示在目錄首次被發現時（repo 尚未存在於該處之前）遺漏 repository 範圍警告的問題
+- 修正 IDE diff 分頁在權限重新提示期間關閉時，可能以先前的輸入回答新提示的問題
+- 修正：Remote Control session（由 Claude Code Desktop 或 VS Code 主持）中傳送給使用者的檔案現在會正確上傳，在手機和網頁上可以開啟，不再顯示空白卡片
+- 修正：在 CLAUDE_CODE_OAUTH_TOKEN 已設定的情況下執行 /login 後，過期 token 提醒不再洩漏到 Claude 自動恢復的回合中——現在只會顯示給你
+- 修正：權限預覽現在只轉發給通過 inbound trust gate 的 channel server，且 server 明確的 permission-capability opt-out 會被尊重
+- 修正：轉發權限預覽時的憑證遮罩不再能夠對核准者隱藏指令、路徑或目的地；過大的 private-key 區塊現在會以完整強度遮罩進行刪減
+- 修正：在權限預覽中會被遮罩的 provider API token，即使直接跟著 shell 分隔符號也會正確遮罩
+- 修正 Claude Desktop 跨 session 訊息在接收端 session 將跨 session 訊息讀取為停用時被靜默丟棄，導致發送端的查詢「思考中」好幾分鐘的問題
+- Remote Control：在這台電腦登入不同的 claude.ai 帳號或組織時，現在會在幾秒內停止執行中的 session 並說明原因，而非數小時後才顯示誤導性的 HTTP 404
+- 從 Claude Code Desktop 或 VS Code 啟動的 Remote Control session 現在會即時同步 session 的權限模式（以及 claude.ai/code 上的 model）變更到手機與 claude.ai/code
+- Remote Control：在手機或 claude.ai/code 上選擇的 effort 現在會套用到 terminal 及 Desktop/VS Code 主持的 session，且 session 會將其 effort 等級發布給已連線的客戶端
+- SendMessage 和 ListAgents 現在會告知你的帳號 session 列表過長而無法完整檢查，而非將未見到的 session 視為不存在
+- 過期的 Anthropic profile 憑證現在會在 claude.ai 登入優先時指引你使用 /login
+- 改進 transcript：你自己的提示現在也會以 markdown 渲染（語法高亮的程式碼區塊、行內程式碼、列表），和回覆相同
+- 改進「API returned an empty or malformed response」錯誤訊息，現在會顯示回傳內容（content type、body 類型、大小、request ID）以及原始串流請求失敗的原因
+- 改進自動產生的 session 標題，現在會是簡短且具體的名稱（例如「Login button bug」）而非重述你的請求的句子（例如「Fix the login button on mobile」）
+- 將載入內建 claude-api skill 的 context 成本從約 200k+ token 降至約 25k，改為按需載入參考文件
+- /permissions 現在可以在 Claude 工作中開啟——規則變更會套用到當前回合的剩餘部分
+- /add-dir <path> 現在可以在 Claude 工作中使用；/add-dir、/autocompact、/theme、/help、/config 和 /advisor 對話框可在全螢幕 TUI 中於回合進行時開啟
+- /goal 現在會在回合因無法復原的錯誤（例如認證被撤銷、額度用盡、context 溢出）而中止時自動清除並顯示通知，而非持續保持啟用狀態
+- /goal：當背景任務讓 goal 等待超過 30 分鐘時，Claude 現在會主動去確認進度而非無限等待（設定 CLAUDE_CODE_GOAL_CHECKIN_MINUTES=0 可停用）
+- claude setup-token 現在會拒絕多餘的引數而非靜默忽略
+- 變更全螢幕模式下 Esc 的行為，不再清除滑鼠文字選取：它照常中斷或關閉，選取保持高亮
+- 移除 auto mode 在每個 Agent 工具呼叫下顯示的多餘「Allowed by auto mode classifier」行
+- 移除 /config 中的「Default teammate model」設定；agent-team 隊友現在使用 leader 的 model，除非 spawn 時指定
+- 淡化執行中工具標題上的經過時間計數器，使其不再與粗體計數搶眼
+- 在回合之間送達的背景任務通知現在以 <system-reminder> 標籤傳送給模型，與回合中途的傳送方式一致
+- Mantle：當 main-loop model 已選定時，啟動時跳過 admin-pin 可用性探測
+- Windows：當 ~/.claude.json 為唯讀時，啟動不再因重複的 rename 重試而卡住
+
 ## 2.1.233
 - 新增 GitLab merge request URL 支援，可用於 --worktree flag 及 claude agents 檢視畫面（MR 會顯示為 !N）
 - 新增 opt-in 的 forward_user_identity apps gateway 設定（適用於 Anthropic upstream），會將已登入使用者的身分以 header 傳送，讓 gateway 背後的 proxy 可以按使用者歸戶計費
