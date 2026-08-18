@@ -2,6 +2,27 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.235
+- 新增可選的 spellcheck 設定，在你輸入提示時會即時用底線標示拼錯的字，使用你系統已安裝的 aspell、hunspell 或 ispell
+- 修正當 language server 在工作階段中途斷線或重新連線時，整個 prompt cache 被錯誤地作廢的問題
+- 修正巢狀 markdown 清單項目在第 3 層以上對齊跑掉的問題，並在終端機 UI 中為換行的清單項目加入懸掛縮排（hanging indent）
+- 修正提示輸入中的高亮（斜線指令、關鍵字、mentions）在某些多行提示中偏移一個或多個字元的問題
+- 修正在權限提示的留言欄位中按 Shift+Tab 會意外批准編輯並授予整個工作階段的編輯權限，而不是關閉欄位的問題
+- 修正 Agent 工具在該 agent 不可用的工作階段中仍宣傳通用預設值的問題：省略 subagent_type 時現在會回傳清楚的錯誤，列出可用的 agents
+- 修正 notebook cell 刪除/取代的批准對話框在無法讀取 notebook 或 cell 時，靜默省略現有 cell 內容的問題；對話框現在會說明原因
+- 修正在 Claude 回應中執行斜線指令時，顯示 HTML entities 而非實際字元的問題
+- 修正提示底部列在背景自動更新完成後沒有顯示「已安裝更新」重啟通知的問題
+- 修正展開的任務清單（ctrl+t）在恢復或重新啟動仍有未完成任務的工作階段時，總是以收合狀態開始的問題
+- 改善雲端工作階段（如 /ultrareview 或 /autofix-pr）在背景執行時的記憶體和 CPU 使用量 — 它們的事件串流不再於每次更新時被重新掃描和重新渲染
+- 改善權限對話框：顯示文字和「不再詢問」選項現在一律與授權涵蓋的範圍一致，且當內容無法完整顯示時不會提供「不再詢問」
+- 改善原生 macOS/Linux 建置中內嵌的 grep：病態模式（pathological patterns）現在會快速失敗而非耗盡記憶體，且 -m N 搭配 -A/-C 能正確印出上下文
+- 改善 context 上限錯誤訊息，會在 auto-compact 關閉時告知使用者，並指引到 /config 重新啟用
+- Vim 模式：切換詳細 transcript 檢視（ctrl+o）或關閉面板時，NORMAL 模式和游標位置現在會被保留
+- 對話框：快速連續按方向鍵和 Enter 時，現在會選擇你導航到的選項，而非先前被高亮的那個
+- SendMessage 現在會在前端就拒絕過大而無法跨工作階段傳送的訊息，而非靜默丟棄
+- Remote Control：claude rc 現在會套用與互動式啟動相同的企業閘道（enterprise-gateway）可用性檢查
+- [VSCode] 修正當有多個 Claude 面板的視窗被還原或重新載入時，焦點會自己在開啟的 Claude 分頁之間亂跳的問題
+
 ## 2.1.234
 - 新增可選的 CLAUDE_CODE_PROJECT_DIR_NAME 環境變數：為每個 session 分配獨立設定目錄的主機可以為每個專案的 transcript 目錄指定一個簡短名稱
 - 新增 selection:clear 快捷鍵動作，可以綁定按鍵來清除應用程式內的文字選取；也適用於 agents 檢視
