@@ -2,6 +2,41 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.236
+- 新增 ANTHROPIC_DEFAULT_MODEL 環境變數：設定新 session 啟動時預設使用的模型，但透過 /model 選擇的模型仍會覆蓋它，且跨重啟持續生效（不同於 ANTHROPIC_MODEL）
+- 新增 notify_when_idle 到跨 session 的 SendMessage：可以請同一台機器上的另一個 Claude Code session 在下次閒置時發送一次通知——需主動啟用、一次性、不輪詢（macOS 與 Linux）
+- Sandbox：在 macOS 上，萬用字元讀取拒絕規則（例如 **/.env）現在在允許讀取的區域內優先生效，涵蓋匹配目錄的內容，且無法透過重新命名被拒絕的檔案來繞過
+- 修正剪貼簿複製、背景維護工作、背景 session 及本地 MCP 日誌在 session 切換到的目錄被刪除後壞掉的問題（自 2.1.229 起）
+- 修正全螢幕渲染器在單次啟動失敗後永久故障的問題：現在會退回傳統渲染器，而非每次後續啟動都直接退出
+- 修正 /model 選擇器渲染高度超過終端機的問題：現在只顯示視窗能容納的模型數量，其餘可捲動檢視
+- 修正 SendMessage 呼叫因格式錯誤的閉合標籤導致訊息文字殘留在 summary 欄位中而被拒絕的問題
+- 修正子程序啟動失敗時的未處理 promise rejection，例如在停用 Windows interop 的 WSL 上執行 powershell.exe（2.1.234 的回歸問題）
+- 修正全螢幕模式下有時新送出的訊息要等到終端機調整大小後的下次更新才顯示
+- 修正全螢幕模式下清除多行提示後上方可能殘留空白區塊，以及終端機調整大小後再切回時面板未重繪的問題
+- 修正受管理設定（managed-settings）的核准提示有時在啟動時未出現，但仍捕捉了第一次按鍵作為核准的問題
+- 修正終端機標籤標題在 tmux（iTerm tmux 整合）中跳動的問題：現在只在標題文字實際變更時才寫入，而非每 960ms 動畫更新一次
+- 修正雲端環境清單回傳空白或格式錯誤時出現不明確錯誤訊息的問題
+- 修正使用 Remote Control 時 Fable 5 首次使用額度提示在 60 秒無回應後自動選擇備用模型的問題
+- 修正 spinner 提示從未出現、且背景持續報錯的問題——成因為 ~/.claude.json 中快取的 guest-pass 獎勵格式錯誤
+- 修正 SDK/VS Code session 中 skills 熱重載在 session 工作目錄被刪除後每次 skills 變更都拋出錯誤的問題（2.1.229+）
+- 修正自架 runner 的 session 在閒置釋放、退役或啟動逾時後，偶爾在 post-session hook 尚未完成前就在另一個 runner 上恢復的問題
+- 修正 Clawd 吉祥物的眼睛和腳在 iTerm2 某些字體大小下渲染不均勻的問題
+- 修正偶發的 session 摘要暴走問題：摘要文字（自動生成及 /recap）現在限制為 400 字元，在字詞邊界處截斷
+- 改善啟動效能：session 計數器現在於背景寫入
+- 改善 auto mode：Monitor 允許規則在 auto mode 啟用期間會被暫時擱置，讓 Monitor 指令與 Bash 指令以相同方式審核
+- 改善 Bedrock、Vertex AI 及 Foundry 上的 auto mode，以及遙測停用時的行為：分類器現在使用與 Claude API 相同的預設值，包含嚴重性評分分類
+- 改善 auto mode：git status 檢查不再會被 repo 的 status.showUntrackedFiles=no 設定欺騙，誤報為乾淨的工作樹
+- 變更 /model 選擇器為僅高亮最新模型的名稱，讓高亮標記新版本而非清單中的任意子集
+- /goal：閒置中的 session 若目標被長時間背景工作擋住，現在會在 30 分鐘後自動回報（之後間隔 1 小時、2 小時），而非等你回來
+- /usage 現在為 Team 和 Enterprise 成員顯示使用額度花費列，且在尚未花費任何額度時顯示 0% 的上限列
+- 在 print/SDK 模式下收到 SIGTERM 時不再記錄中斷的 turn 或合成的工具拒絕就直接退出；執行中的指令仍會被終止，程序仍以退出碼 143 結束
+- 在斜線指令打字錯誤或指令在此 session 中不可用時按 Enter，現在會回報錯誤而非執行最接近的模糊匹配；前綴和別名仍可正常執行
+- Remote Control 現在會在 CLI 退出或終端機關閉後數秒內將 session 標記為離線
+- SendMessage 現在會在快速連發訊息即將超過該 session 收件匣容量時預先拒絕後續訊息，而非回報已送出但實際被丟棄
+- 將 session 標題膠囊對齊提示邊框與 footer 的右緣
+- 右對齊的 footer 項目（goal 指示器、session 狀態、背景 agent 狀態）及截斷的通知現在與提示區域的其餘部分共用一致的右邊距
+- [VSCode] 新增螢幕閱讀器對逐字稿的支援：回覆、權限請求、錯誤及狀態變更的即時播報，加上按 turn 的標題導覽
+
 ## 2.1.235
 - 新增可選的 spellcheck 設定，在你輸入提示時會即時用底線標示拼錯的字，使用你系統已安裝的 aspell、hunspell 或 ispell
 - 修正當 language server 在工作階段中途斷線或重新連線時，整個 prompt cache 被錯誤地作廢的問題
