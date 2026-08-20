@@ -2,6 +2,47 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.238
+- 新增 keybindingFlavor 設定：設為 "readline" 可讓提示列中的 Ctrl+W 刪除到前一個空白字元（如同 Bash 行為）；預設值（"classic"）維持不變
+- Plugin 市集：url marketplace 或 catalog 項目上的 headersHelper 會執行指令來產生 HTTP headers（例如短效 token），供 catalog 及同源 archive 請求使用
+- Catalog 項目的 headersHelper 只在你安裝或更新該 plugin 時執行，且會先顯示其指令；claude plugin install/update 會詢問 [y/N]（或傳入 -y 跳過）
+- 新增 claude self-hosted-runner --defer-shutdown-max-min <minutes>：收到 SIGTERM 時繼續服務已連接的 session，超過指定分鐘後將剩餘工作暫停（park），然後退出
+- 新增 claude self-hosted-runner --proxy-authorization-command / --proxy-authorization-file，供需要每次連線都帶新鮮 Proxy-Authorization header 的 egress proxy 使用
+- 修正長時間互動 session 中記憶體無限增長的問題：subagent 工具結果在離開最近顯示視窗後會被釋放
+- 修正自訂、專案及 plugin 的輸出風格在 session 中途飄回預設語氣的問題
+- 修正 CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=true 在帳號接近（但未超過）用量上限時沒有持續顯示提示建議的問題
+- 修正 worktree 隔離模式下 Bash 拒絕執行時，錯誤訊息叫你移除一個根本不存在的重導向（redirect）
+- 修正 self-hosted runner 偶爾因單一緩慢或遺失的 poll 請求就被伺服器移除，導致其健康的 session 被交給另一個 runner
+- 修正 MCP elicitation 對話框在 URL 超過 4,096 字元時什麼都不顯示，以及權限提示在專案路徑塞不進終端機寬度時遺失「不再詢問」選項的問題
+- 修正 Bash 指令被終止、逾時或中斷時留下的 /tmp/claude-*-cwd 暫存檔
+- 修正在以 Ctrl+H 代表 Backspace 的終端機上，長按 Backspace 在按鍵大量湧入時（慢速 SSH/mosh 連線）被忽略的問題
+- 修正權限提示 diff 中的文字換行：包含寬多碼位字元（如 emoji）或 tab 的行不再被截斷
+- 修正終止被暫停（Ctrl+Z）的 session 時，有時會讓終端機留在 bracketed-paste 模式且游標隱藏的問題
+- 修正 stdio MCP server 在 initialize 之前收到 server/discover 請求，迫使 lazy server 每次開啟 session 都啟動其後端
+- 修正 proxy 拒絕連線時被報告為一般網路錯誤，而非指名是哪個 proxy 拒絕的問題
+- 修正 /model 和 /effort 的快取未命中警告在 prompt cache 已過期時仍然出現的問題
+- 修正 Remote Control tasks 面板中的「按任務停止」（per-task Stop）在 CLI 託管的 session 上無效的問題
+- 修正遠端 session 在客戶端送出缺少有效 role 的使用者訊息時直接退出
+- 修正由 claude remote-control 啟動的 Remote Control session 繼承了啟動 shell 中 session 範圍環境變數的問題
+- 修正 Remote Control session 的程序當掉後，該 session 一直處於不可用狀態直到重啟 claude remote-control；現在下次傳送訊息時即可重新使用
+- 修正從網頁或 Desktop 在 Claude 回覆中途送出的 Remote Control 訊息，在該回合結束後從對話記錄中消失的問題
+- 修正從手機或網頁切換的 Remote Control model 選擇沒有更新終端機中顯示的 model
+- 修正 Remote Control 在短暫網路中斷延遲了登入續期時，以「登入過期」斷線的問題；現在會重試並保持連線
+- 修正 Remote Control 在登出時回報重新連線失敗；登出現在會以清楚的訊息結束 session
+- 修正 ListAgents/SendMessage 在由 claude remote-control（server 模式）或 Desktop/IDE host 執行的 session 中回報「Remote Control is not connected」；現在可正常列出並觸達 Remote Control peers
+- 修正 ListAgents 和 SendMessage 暴露了 agent view 為你下一個背景 session 預熱的閒置 worker；現在只在有任務認領時才會出現
+- 跨 session 訊息：傳送給本機上拒絕接收訊息的 session（例如 crossSessionInbound: "refuse"）時，現在會向發送方回報「refused」，而非靜默成功
+- 跨 session 訊息：當一個 session 的收件匣丟棄你的訊息（速率限制或佇列已滿）時，現在會通知你的 session，而非訊息無聲消失
+- 改善啟動速度：macOS 上直接執行 claude 啟動更快
+- 改善 Bash 工具對 zsh 特定語法在 shell 條件式中的權限檢查
+- 改善 Remote Control 連線韌性：來自網路邊緣、VPN 或 proxy 的短暫 HTTP 403 拒絕現在可容忍最多 3 分鐘，持續封鎖時會指名是哪一方拒絕的
+- 改善啟動回應速度：自動更新檢查現在在啟動約 10 秒後才執行，不再與啟動程序搶 CPU
+- 更新內建的 claude-api skill，對應 Managed Agents 8 月 19 日發佈：web search/fetch 網域設定及 self-hosted sandbox 上的 memory store
+- 變更 fullscreen 模式下 Ctrl+L 和 Cmd+K 為只重繪畫面——雙按觸發 /clear 的捷徑已移除，1 行高的 nvim 終端機也不再觸發自動 /clear 迴圈
+- 變更 claude mcp list 和 claude mcp get 將已停用的 server 顯示為 ⊘ Disabled，而非嘗試連線進行健康檢查
+- 專案 .mcp.json 中的 MCP headersHelper，以及專案或 --add-dir agent 檔案中的 inline MCP server，現在需要該資料夾的信任對話框已被接受（claude -p 下亦同）
+- 來自專案 .mcp.json、plugin 或 agent 檔案的 MCP headersHelper 執行時不再繼承 credential 環境變數；user、managed 及 claude.ai 範圍的 helper 則從 Claude config 目錄執行
+
 ## 2.1.237
 - 修正了透過 LLM gateway 或自訂 base URL 進行的 session 無法正確使用 prompt caching 的問題
 - 新增內建「簡潔」輸出風格：Claude 會直接給結果、省略開場白和過程描述，但工作一樣做得很徹底。可以在 /config 的 Output style 中選擇

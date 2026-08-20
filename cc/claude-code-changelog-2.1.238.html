@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.238 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.238 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.238</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 keybindingFlavor 設定：設為 &quot;readline&quot; 可讓提示列中的 Ctrl+W 刪除到前一個空白字元（如同 Bash 行為）；預設值（&quot;classic&quot;）維持不變</li>
+<li>Plugin 市集：url marketplace 或 catalog 項目上的 headersHelper 會執行指令來產生 HTTP headers（例如短效 token），供 catalog 及同源 archive 請求使用</li>
+<li>Catalog 項目的 headersHelper 只在你安裝或更新該 plugin 時執行，且會先顯示其指令；claude plugin install/update 會詢問 [y/N]（或傳入 -y 跳過）</li>
+<li>新增 claude self-hosted-runner --defer-shutdown-max-min &lt;minutes&gt;：收到 SIGTERM 時繼續服務已連接的 session，超過指定分鐘後將剩餘工作暫停（park），然後退出</li>
+<li>新增 claude self-hosted-runner --proxy-authorization-command / --proxy-authorization-file，供需要每次連線都帶新鮮 Proxy-Authorization header 的 egress proxy 使用</li>
+<li>修正長時間互動 session 中記憶體無限增長的問題：subagent 工具結果在離開最近顯示視窗後會被釋放</li>
+<li>修正自訂、專案及 plugin 的輸出風格在 session 中途飄回預設語氣的問題</li>
+<li>修正 CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION=true 在帳號接近（但未超過）用量上限時沒有持續顯示提示建議的問題</li>
+<li>修正 worktree 隔離模式下 Bash 拒絕執行時，錯誤訊息叫你移除一個根本不存在的重導向（redirect）</li>
+<li>修正 self-hosted runner 偶爾因單一緩慢或遺失的 poll 請求就被伺服器移除，導致其健康的 session 被交給另一個 runner</li>
+<li>修正 MCP elicitation 對話框在 URL 超過 4,096 字元時什麼都不顯示，以及權限提示在專案路徑塞不進終端機寬度時遺失「不再詢問」選項的問題</li>
+<li>修正 Bash 指令被終止、逾時或中斷時留下的 /tmp/claude-*-cwd 暫存檔</li>
+<li>修正在以 Ctrl+H 代表 Backspace 的終端機上，長按 Backspace 在按鍵大量湧入時（慢速 SSH/mosh 連線）被忽略的問題</li>
+<li>修正權限提示 diff 中的文字換行：包含寬多碼位字元（如 emoji）或 tab 的行不再被截斷</li>
+<li>修正終止被暫停（Ctrl+Z）的 session 時，有時會讓終端機留在 bracketed-paste 模式且游標隱藏的問題</li>
+<li>修正 stdio MCP server 在 initialize 之前收到 server/discover 請求，迫使 lazy server 每次開啟 session 都啟動其後端</li>
+<li>修正 proxy 拒絕連線時被報告為一般網路錯誤，而非指名是哪個 proxy 拒絕的問題</li>
+<li>修正 /model 和 /effort 的快取未命中警告在 prompt cache 已過期時仍然出現的問題</li>
+<li>修正 Remote Control tasks 面板中的「按任務停止」（per-task Stop）在 CLI 託管的 session 上無效的問題</li>
+<li>修正遠端 session 在客戶端送出缺少有效 role 的使用者訊息時直接退出</li>
+<li>修正由 claude remote-control 啟動的 Remote Control session 繼承了啟動 shell 中 session 範圍環境變數的問題</li>
+<li>修正 Remote Control session 的程序當掉後，該 session 一直處於不可用狀態直到重啟 claude remote-control；現在下次傳送訊息時即可重新使用</li>
+<li>修正從網頁或 Desktop 在 Claude 回覆中途送出的 Remote Control 訊息，在該回合結束後從對話記錄中消失的問題</li>
+<li>修正從手機或網頁切換的 Remote Control model 選擇沒有更新終端機中顯示的 model</li>
+<li>修正 Remote Control 在短暫網路中斷延遲了登入續期時，以「登入過期」斷線的問題；現在會重試並保持連線</li>
+<li>修正 Remote Control 在登出時回報重新連線失敗；登出現在會以清楚的訊息結束 session</li>
+<li>修正 ListAgents/SendMessage 在由 claude remote-control（server 模式）或 Desktop/IDE host 執行的 session 中回報「Remote Control is not connected」；現在可正常列出並觸達 Remote Control peers</li>
+<li>修正 ListAgents 和 SendMessage 暴露了 agent view 為你下一個背景 session 預熱的閒置 worker；現在只在有任務認領時才會出現</li>
+<li>跨 session 訊息：傳送給本機上拒絕接收訊息的 session（例如 crossSessionInbound: &quot;refuse&quot;）時，現在會向發送方回報「refused」，而非靜默成功</li>
+<li>跨 session 訊息：當一個 session 的收件匣丟棄你的訊息（速率限制或佇列已滿）時，現在會通知你的 session，而非訊息無聲消失</li>
+<li>改善啟動速度：macOS 上直接執行 claude 啟動更快</li>
+<li>改善 Bash 工具對 zsh 特定語法在 shell 條件式中的權限檢查</li>
+<li>改善 Remote Control 連線韌性：來自網路邊緣、VPN 或 proxy 的短暫 HTTP 403 拒絕現在可容忍最多 3 分鐘，持續封鎖時會指名是哪一方拒絕的</li>
+<li>改善啟動回應速度：自動更新檢查現在在啟動約 10 秒後才執行，不再與啟動程序搶 CPU</li>
+<li>更新內建的 claude-api skill，對應 Managed Agents 8 月 19 日發佈：web search/fetch 網域設定及 self-hosted sandbox 上的 memory store</li>
+<li>變更 fullscreen 模式下 Ctrl+L 和 Cmd+K 為只重繪畫面——雙按觸發 /clear 的捷徑已移除，1 行高的 nvim 終端機也不再觸發自動 /clear 迴圈</li>
+<li>變更 claude mcp list 和 claude mcp get 將已停用的 server 顯示為 ⊘ Disabled，而非嘗試連線進行健康檢查</li>
+<li>專案 .mcp.json 中的 MCP headersHelper，以及專案或 --add-dir agent 檔案中的 inline MCP server，現在需要該資料夾的信任對話框已被接受（claude -p 下亦同）</li>
+<li>來自專案 .mcp.json、plugin 或 agent 檔案的 MCP headersHelper 執行時不再繼承 credential 環境變數；user、managed 及 claude.ai 範圍的 helper 則從 Claude config 目錄執行</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
