@@ -2,6 +2,10 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.237
+- 修正了透過 LLM gateway 或自訂 base URL 進行的 session 無法正確使用 prompt caching 的問題
+- 新增內建「簡潔」輸出風格：Claude 會直接給結果、省略開場白和過程描述，但工作一樣做得很徹底。可以在 /config 的 Output style 中選擇
+
 ## 2.1.236
 - 新增 ANTHROPIC_DEFAULT_MODEL 環境變數：設定新 session 啟動時預設使用的模型，但透過 /model 選擇的模型仍會覆蓋它，且跨重啟持續生效（不同於 ANTHROPIC_MODEL）
 - 新增 notify_when_idle 到跨 session 的 SendMessage：可以請同一台機器上的另一個 Claude Code session 在下次閒置時發送一次通知——需主動啟用、一次性、不輪詢（macOS 與 Linux）
