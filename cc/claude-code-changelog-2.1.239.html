@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.239 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.239 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.239</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>費用估算（/cost、狀態列、--max-budget-usd）現在會包含資料駐留（data-residency）工作區的 1.1 倍美國限定推論加成</li>
+<li>在 Bedrock、Vertex、Foundry 及其他先前被排除的設定中新增一次性全螢幕渲染器邀請；這些環境的全新安裝現在預設以全螢幕啟動</li>
+<li>新增 /claude-api upgrade 指令，可將 Python 專案從 anthropic 0.x 遷移到 1.x，並更新技能的 Python 參考文件至 1.x（逾時改用 anthropic.Timeout 而非 httpx.Timeout）</li>
+<li>雲端工作階段：從 claude.ai 同步的 plugin 現在顯示為 name@synced，可用 claude plugin enable/disable &lt;name&gt;@synced 操作，且不會覆蓋你自己安裝的同名 plugin</li>
+<li>Alpine/musl 建構：原生圖片貼上、剪貼簿及錄音外掛現在可正常載入（改用 musl 建構的二進位檔，取代被 runtime 拒絕的 glibc 版本）</li>
+<li>月度消費上限已用完時顯示的用量限制訊息，現在也會告訴你工作階段或每週限制何時重設</li>
+<li>修正 Bedrock 串流在會剝除回應 Content-Type header 的 proxy 後面運作時，會靜默地重複計費 API 呼叫的問題（因為每個 turn 被以非串流方式重新執行）</li>
+<li>修正使用 Bedrock 搭配 SSO profile 及 awsAuthRefresh 時，Claude Code 在 HTTPS proxy 後面啟動會卡住的問題 — 憑證預檢現在會遵守 HTTPS_PROXY</li>
+<li>修正從已不存在的目錄啟動 Claude Code 時會噴出原始 crash dump 的問題；現在會印出清楚的錯誤訊息</li>
+<li>修正在 JetBrains IDE 終端機中，當 Claude Code plugin 已連線時，Edit 和 Write 呼叫會暫停約 5 秒的問題</li>
+<li>修正一個競爭條件（race condition）：在有 prompt 排隊時按 Esc 可能讓下一個 turn 提前結束，導致工作階段閒置而 Claude 仍在運作，之後的重新送出會重複執行動作</li>
+<li>修正 WebFetch 在整個工作階段期間保留過期頁面內容的問題，原本設計只應快取 15 分鐘</li>
+<li>修正雲端工作階段（網頁版、桌面版及行動版 Claude Code）在閒置 worker 重啟後恢復時脫離 plan mode 的問題</li>
+<li>修正 MCP elicitation 表單高度超過終端機時在全螢幕模式被裁切的問題：表單現在會適應視窗大小，隱藏的欄位可透過捲動存取，Accept/Decline 按鈕始終可見</li>
+<li>修正遠端 MCP server 在雲端工作階段或透過 SDK setMcpServers() 進行中途重連時遇到暫時性 5xx 錯誤後持續處於失敗狀態的問題</li>
+<li>修正自訂工作階段標題在重新命名後寫入超過約 64 KB 對話內容後從 /resume 消失的問題</li>
+<li>修正 claude -c/resume 撈到不同目錄的工作階段，當路徑差異僅在於 _、- 或 . 等字元時</li>
+<li>修正 /resume 和 agents 檢視畫面將僅被碰觸檔案或僅被重新開啟的工作階段顯示為最近有變更（並重新排序）的問題</li>
+<li>修正 /resume 在全專案模式下指示你 cd 進入已刪除的目錄（例如已移除的 worktree）；這類工作階段現在會在目前目錄恢復</li>
+<li>修正 dark-ansi 主題在全螢幕模式下將展開的工具結果渲染為與背景相同顏色文字的問題</li>
+<li>修正全螢幕渲染器提示在永遠無法被回應時每次啟動都重新出現的問題；現在顯示三次後就會停止</li>
+<li>修正 .worktreeinclude 中以 **/ 開頭的 pattern 在目標位於 gitignored 目錄時靜默地什麼都不匹配的問題</li>
+<li>修正 agents、skills 和 commands 的 .md 檔案以 UTF-8 BOM 開頭時被靜默忽略的問題</li>
+<li>修正 /insights 在某些模型上回應中輸出字面 &lt;message&gt; 標籤的問題</li>
+<li>修正 marketplace metadata.pluginRoot 無效的問題：裸 plugin 來源名稱現在如文件所述會在該路徑下解析</li>
+<li>修正在瀏覽器終端機中滑鼠移動時插入類似 &quot;35;150;7M&quot; 文字到 prompt 的問題，原因是 mouse report 被拆分成多次寫入</li>
+<li>修正自訂主題覆寫 effort/ultracode 狀態徽章顏色被忽略的問題</li>
+<li>修正 OpenTelemetry trace 碎片化問題：被 PreToolUse hook 延遲的工具執行現在會在原始 turn 的 trace 中恢復，而非開啟新的 trace</li>
+<li>修正 agent 檢視中的 vim mode：Escape 現在會切換到 NORMAL mode 並保留你的文字，而非清除 prompt</li>
+<li>修正 selection:copy 快捷鍵靜默丟棄以 Shift+方向鍵延伸的文字選取的問題</li>
+<li>修正 /voice 啟動提示在已透過 voice.enabled 設定啟用語音輸入後仍然顯示的問題</li>
+<li>修正 shell mode（!）Tab 補全會去掉 ./script 路徑中的 ./ 的問題，導致 shell 無法執行該指令</li>
+<li>修正全螢幕模式在你點擊終端機視窗僅為了讓它重新取得焦點時就回答權限提示或觸發按鈕的問題</li>
+<li>修正全螢幕模式中斜線指令面板（如 /config、/model）蓋住最新訊息的問題；對話現在會固定在面板上方</li>
+<li>修正 /workflows 詳情對話框在 Claude 仍在回應時開啟會溢出終端機並將 header 推出畫面的問題</li>
+<li>修正 Linux sandbox 將不存在的 .git/config.worktree 設為不可讀取，導致在設有 extensions.worktreeConfig 的 repo 中所有沙箱內 git 指令都壞掉的問題</li>
+<li>修正 hooks 在工作階段的工作目錄被刪除後以 &quot;posix_spawn ENOENT&quot; 失敗的問題；現在會改從專案根目錄或家目錄執行</li>
+<li>修正 claudeMdExcludes 在 pattern 指定的是 rules 目錄或 symlink 本身而非其目標時，未能排除 symlinked .claude/rules 檔案的問題</li>
+<li>修正當兩個 Claude Code 程序共用同一背景任務狀態時，工作階段標題同步到 Remote Control 失控的問題（2.1.232 回歸）；標題更新現在會去重複並限流</li>
+<li>修正標題以 / 開頭的工作階段無法被 SendMessage 定址且在 ListAgents 中顯示為 &quot;(untitled)&quot; 的問題</li>
+<li>修正 Ctrl+W、Ctrl+U、Ctrl+K、Option+Backspace、Option+D 及 vim df/dt 在游標位於 [Pasted text #N] 佔位符內時留下損壞佔位符的問題</li>
+<li>修正遮罩輸入（密碼樣式）如登入代碼欄位的文字可被 Ctrl+Y 貼到其他地方，或在雙擊 Esc 清除時被存入 prompt 歷史的問題</li>
+<li>修正 Ctrl+Backspace 在搜尋框中只刪除一個字元而非一個單字的問題</li>
+<li>修正被組織政策檢查拒絕的請求在拒絕訊息顯示前就被重新送出的問題</li>
+<li>改善壓縮（compaction）後顯示的提醒，避免技能的原始參數被當作新請求重新執行</li>
+<li>工具使用列上過長的檔案路徑現在會從中間截斷以保持在一行內</li>
+<li>遠端工作階段在長時間執行 SessionStart 或 Setup hook 期間會持續發送 keep-alive，避免容器在 hook 執行中途被閒置回收</li>
+<li>/goal：對長時間運行的背景工作的重複確認現在會退避（30 分鐘、1 小時、之後每 2 小時），而非每 30 分鐘重複一次</li>
+<li>/goal：從 claude --resume 選擇器恢復工作階段時，現在會還原其作用中的 goal</li>
+<li>ListAgents 現在會告訴工作階段自己的名稱（其他 peer 用來傳訊的名稱），對自己名稱使用 SendMessage 會明確告知而非顯示 &quot;no agent named …&quot;</li>
+<li>ListAgents 和 /list-agents 現在會列出你的線上隊友（之前只顯示 subagent 和其他工作階段，所以可連線的隊友看起來像不存在）</li>
+<li>keybindingFlavor: &quot;readline&quot; 現在也會匹配 Bash 的 word 按鍵行為：Alt+F 和 Ctrl/Option+→ 停在單字結尾、Alt+D 刪到該處（Ctrl+Y 可貼回），標點符號會分隔單字</li>
+<li>持久重試模式（CLAUDE_CODE_RETRY_WATCHDOG）在遇到組織消費上限及額度用完的錯誤時，現在會立即失敗而非無限等待重設</li>
+<li>Claude in Chrome：/clear 現在會關閉該工作階段的 Chrome 分頁群組，空的群組會在 /resume 及 Claude Code 結束時被關閉</li>
+<li>遠端工作階段：從行動裝置上傳的圖片現在會包含其儲存的檔案路徑，讓 Claude 可以將它們複製到建立的檔案中</li>
+<li>網頁版 Claude Code：來自 Bash 和其他工具對非 API anthropic.com 主機（如 www、docs）的請求現在會通過工作階段的網路 proxy，你環境中的允許網域規則會生效</li>
+<li>Remote Control：在帳號未啟用 Remote Control 時，訊息和 claude doctor 的措辭更清楚</li>
+<li>Windows：跨工作階段訊息傳遞現已可用，你不同機器上的 Claude Code 工作階段可以像 macOS 和 Linux 一樣透過 SendMessage 互相傳訊並透過 ListAgents 找到彼此</li>
+<li>[VSCode] 用量限制橫幅中的「View usage」現在與警告文字排列在同一行，而非浮在橫幅中間</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
