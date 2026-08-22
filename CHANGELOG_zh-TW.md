@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.240
+- 錯誤修正與穩定性改善
+
 ## 2.1.239
 - 費用估算（/cost、狀態列、--max-budget-usd）現在會包含資料駐留（data-residency）工作區的 1.1 倍美國限定推論加成
 - 在 Bedrock、Vertex、Foundry 及其他先前被排除的設定中新增一次性全螢幕渲染器邀請；這些環境的全新安裝現在預設以全螢幕啟動
