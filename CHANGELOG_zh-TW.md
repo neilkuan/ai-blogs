@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.245
+- 修正在搭載 glibc 2.44 的 Linux 發行版（例如 Arch Linux、CachyOS 和 Fedora Rawhide）上啟動時閃退的問題
+
 ## 2.1.243
 - 在 /usage 新增了 Loops 分析：每個 loop 的執行次數、總 token 數、每次執行的 token 數，以及最後一次執行時間，讓失控或話太多的 /loop 任務一目了然
 - 新增 modelPicker 設定：可以用排序過、帶標籤的模型清單來自訂 /model 選擇器（支援任何 id 拼法，包括 Vertex/Bedrock id），可附加在內建清單後面或直接取代
