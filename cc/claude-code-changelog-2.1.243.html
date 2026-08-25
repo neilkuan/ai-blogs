@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.243 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.243 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.243</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>在 /usage 新增了 Loops 分析：每個 loop 的執行次數、總 token 數、每次執行的 token 數，以及最後一次執行時間，讓失控或話太多的 /loop 任務一目了然</li>
+<li>新增 modelPicker 設定：可以用排序過、帶標籤的模型清單來自訂 /model 選擇器（支援任何 id 拼法，包括 Vertex/Bedrock id），可附加在內建清單後面或直接取代</li>
+<li>新增 promptCacheTtl 和 subagentPromptCacheTtl 設定，讓 API key 和雲端供應商用戶可以把主對話的 prompt cache 保留 1 小時，同時 subagent 維持 5 分鐘</li>
+<li>新增 modelPricing 託管設定，讓組織的合約每模型費率和折扣乘數套用到 /cost、狀態列和遙測成本數據，而不是用公開牌價</li>
+<li>在 /login → Anthropic Console 新增了免 key 登入方式：「Sign in with your Console account」（推薦），與建立 API key 並列，讓不允許使用 API key 的組織也能登入</li>
+<li>在 /status 新增 Skipped sources 行，列出有存在但未套用的託管設定來源（例如 managed-settings.json），因為有更高優先序的託管來源正在生效</li>
+<li>在 /mcp 和 /plugins 對 claude.ai connector 新增 managed 標記，表示其驗證由你的組織管理</li>
+<li>新增提示，引導尚未連結 GitHub 的 claude.ai 用戶前往 /web-setup 設定 Claude Code on the web</li>
+<li>在 /status 新增一行顯示 GitHub 是否已連結 Claude Code on the web（Pro/Max），未連結時指向 /web-setup</li>
+<li>在 /tasks 和 agent 詳細對話框中新增每個 subagent 執行時使用的模型（及 effort 等級）</li>
+<li>修正遠端 MCP server 在非互動模式（-p）和 SDK session 中斷線後永遠無法恢復的問題；現在會自動重連或回報失敗</li>
+<li>修正從桌面應用啟動的 MCP server 登入在支援 client ID metadata document 的伺服器（例如 Linear）上出現「Invalid redirect URI」錯誤</li>
+<li>修正 auto mode 在啟動時因暫存了暫時性的伺服端停用旗標、且後續旗標拉取失敗而一直無法使用的問題</li>
+<li>修正 auto mode 工具呼叫在 API 短暫過載要求 client 重試後，等待約一分鐘後被拒絕為「temporarily unavailable」的問題</li>
+<li>修正 /model 選擇器靜默忽略 Ultracode 選取的問題；現在選擇 Ultracode 會正確套用到當前 session</li>
+<li>修正 /resume 只列出最近 50 個 session 的問題；選擇器現在會隨捲動載入更多</li>
+<li>修正雲端 session 在中途重啟後恢復時，把待處理的 hook 或背景任務通知當作 prompt 重送，而非正常的接續訊息</li>
+<li>修正跨 session 訊息傳遞在 user namespace 和 rootless container 內因 2.1.232 的 socket 目錄強化而靜默關閉的問題</li>
+<li>修正超出容器邊界的文字（例如 /login 中的登入 URL）在畫面其他部分重繪時遺失前導欄位</li>
+<li>修正 spellcheck 在 emoji 後面直接輸入拼錯的字時沒有畫底線的問題</li>
+<li>修正背景 subagent 在最後一個背景 Bash 任務完成時沒有被喚醒的問題</li>
+<li>修正當 Anthropic API 完全沒有開始回應時 session 靜默超過 10 分鐘的問題：現在請求會在約 3 分鐘後逾時，重試一次，然後顯示 API Error: No response from API</li>
+<li>修正驗證、模型可用性及其他 client 端產生的錯誤訊息被渲染成模型輸出而非錯誤行的問題</li>
+<li>修正 CI 中的 workload identity federation：同一 job 內的 process 共享已交換的 token，不再重複交換一次性 token；被拒絕的交換會立即失敗並顯示伺服器訊息</li>
+<li>修正 server 託管的 companyAnnouncements 在以登入開始的 session（例如 /logout 後首次啟動）中不會在啟動時顯示的問題</li>
+<li>修正 hook if 條件如 Bash(cat *) 在不相關的 Bash 指令包含 $() 或反引號命令替換後面接更多參數時誤觸發的問題</li>
+<li>修正宣告了 marketplace 欄位的 plugin 依賴在兩個 plugin 透過 --plugin-dir 一起載入時永遠無法解析的問題</li>
+<li>修正 /reload-plugins 在最後一個 LSP plugin 停用後仍保留 LSP 工具的問題；現在也會在 LSP plugin 變更會導致重新讀取對話前發出警告</li>
+<li>修正 --agents 靜默忽略無效 JSON 或無效 agent 定義的問題；現在會像 --mcp-config 一樣以明確的錯誤訊息退出</li>
+<li>修正 /status 在 ~/.claude.json 有無效 MCP server 項目時顯示「Found invalid entries in: .」但沒有檔名的問題</li>
+<li>修正 /clear 從 prompt bar 移除 /rename session 名稱的問題，即使該名稱已保留給新 session</li>
+<li>修正 ~/.claude/history.jsonl 包含格式錯誤項目時 Ctrl+R 歷史搜尋和上箭頭歷史壞掉的問題</li>
+<li>修正 Ctrl+[ 在使用 modified key 編碼的終端機（modifyOtherKeys / kitty protocol）中無法離開 vim INSERT mode 的問題</li>
+<li>修正本機 IDE 連線在 localhost 列在 NO_PROXY 但沒有列在小寫 no_proxy 時被路由到 HTTPS_PROXY（有時導致失敗）的問題；現在兩種大小寫都會被認得</li>
+<li>修正 sandbox 網路違規細節在被阻擋的指令仍以 exit 0 結束時（例如 curl 印出 proxy 的 403 頁面）被從 Bash 工具結果中丟棄的問題</li>
+<li>修正狀態列的 rate_limits 欄位和 /usage 在速率限制視窗重設後、session 閒置期間仍顯示重設前使用百分比的問題</li>
+<li>修正 claude --teleport &lt;session&gt; 在有未提交變更時直接退出，而非像 session 選擇器一樣提議 stash 後繼續的問題</li>
+<li>修正 /web-setup 在較舊的 GitHub CLI（沒有 gh auth token）已經驗證時重複要求登入的問題</li>
+<li>修正 Claude in Chrome 在自動更新清理了它原本設定的版本後與 Claude Code 斷線的問題；native host 現在透過穩定的 claude launcher 啟動</li>
+<li>[VSCode] 修正在 feature flag 首次取得前啟動的 session（例如安裝後馬上開）以預設權限模式開啟而非 auto mode 或你設定的預設模式的問題</li>
+<li>[VSCode] 修正 Focus view 中你展開的區塊在 subagent 工具活動期間自己摺回去的問題</li>
+<li>改善啟動速度：sandbox 和 MCP 啟動不再阻擋第一幀，裸啟動跳過子指令註冊，workflow 探索、設定和信任儲存的工作更輕量</li>
+<li>改善原生安裝和自動更新的下載大小：binary 現在使用 zstd 壓縮（Linux x64 約 75 MB，原本 340 MB）</li>
+<li>改善使用 ANTHROPIC_AUTH_TOKEN 直接對 Anthropic API 驗證的 session 的使用遙測歸屬，讓其資料處理設定正確套用到你的組織</li>
+<li>改善原生 binary 大小：透過更緊湊地儲存內建 skill 和 prompt 文字，縮小約 2 MB</li>
+<li>改善原生建置的記憶體使用：程式碼現在按需載入，而非把整個 bundle 常駐記憶體（每個 session 大約少 40–70 MB）</li>
+<li>改善長時間執行 session 的尖峰記憶體使用（runtime 現在在 heap 成長時更早觸發垃圾回收）</li>
+<li>改善透過 SSH 使用 /login 的體驗：登入 URL 立即顯示，按 c 會回報 URL 是如何被複製的而非總是宣稱成功，並有提示說明如何在全螢幕中選取文字</li>
+<li>改善在關閉 thinking 時使用 effort xhigh/max 的錯誤訊息：現在會指出等級名稱、停用 thinking 的設定，以及 /effort high 作為修正方式</li>
+<li>改善 /loop：連續喚醒但 Claude 沒事做的情況現在會在終端機中摺成一行，而非每次都印出來</li>
+<li>變更 sandbox Bash 工具的提示，不再列出允許的網路主機，讓 Claude 嘗試發出請求（然後你可以核准新主機），而非假設未列出的主機都被封鎖</li>
+<li>更新 /model 選擇器和內建的 claude-api skill，將 Sonnet 5 的 $2/$10 per Mtok 定價顯示為標準牌價，而非限時優惠價</li>
+<li>變更 macOS 上的 computer use，點擊桌面、Dock 或 Finder 視窗現在需要透過存取對話框授權 Finder，就像其他 app 一樣</li>
+<li>變更 /model、/fast 和 /effort 在 Bedrock、Vertex、Foundry 以及遙測停用時也會立即執行，而非排隊等到回合結束</li>
+<li>修正 claude remote-control 在伺服器中途丟棄環境時退出並拋棄已連接的 Remote Control session 的問題；現在會恢復</li>
+<li>修正由 claude remote-control 提供服務的 Remote Control session 在停止後重啟時有時卡住的問題（影響沒有 admin 或 owner 角色的 Team 和 Enterprise 成員）</li>
+<li>變更跨 session 訊息傳遞的 inbox socket，會關閉 30 秒內未送出完整行的連線；向其發送資料的腳本應在資料準備好後再連線</li>
+<li>改善恢復其 Remote Control 被另一個終端持有的對話時的通知：現在會說明其他機器上的 session 無法從這台看到或連接到</li>
+<li>[VSCode] 改善長 session 中的歷史修剪：較舊的工具活動列會先被丟棄，讓你的訊息和 Claude 的回覆保持可見</li>
+<li>[VSCode] 改善當你以 Claude 帳號登入時擴充功能本身的使用遙測歸屬到你的組織，讓其資料處理設定正確套用</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
