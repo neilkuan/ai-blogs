@@ -2,6 +2,69 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.246
+- 新增啟動警告：當 Bash 允許規則在子命令前使用萬用字元時（例如 Bash(git * main)），因為這也會匹配插在子命令前面的選項
+- 在 /permissions 新增 Auto mode 分頁，可檢視和編輯 auto mode 分類器規則
+- 在每回合結束的耗時行末尾加上完成時間，例如 ✻ Sautéed for 23s · done 6:05 PM
+- 修正全螢幕模式在調整終端機大小並跳到底部後，顯示空白對話紀錄直到下次按鍵才恢復
+- 修正當 diff 包含超長單行（例如 base64 字串）時，對話紀錄嚴重變慢的問題；此類行現在會截斷顯示並加上標記
+- 修正全螢幕模式在定位於較早訊息時，捲動行為異常的問題，包括跳到底部卡在對話紀錄中間
+- 修正背景 session 在 45 秒後無法開啟的問題，發生於 Claude Code 的啟動目錄已被刪除、機器曾進入睡眠、或主機啟動程序較慢時
+- 修正背景 session 因「Couldn't start the background service … EACCES」而無法開啟的問題，發生於另一個 Claude Code 程序正在重新安裝 npm 套件時
+- 修正當訊息前 500 個字元不含 markdown 時，整則訊息的 markdown 渲染被停用的問題，也修正了 +/N) 列表和 setext 標題的渲染
+- 修正在 headless/remote session 中，被收到的訊息中斷的 MCP tool 呼叫，回報給模型時顯示「completed with no output」而非明確的中斷錯誤
+- 修正當參數的 schema 為空（{}）時，MCP tool 引數被當作 JSON 字串送出，而非其真實型別
+- 修正指令在執行中被中斷時顯示「Ran 1 shell command」卻沒有任何被截斷的跡象
+- 修正在動態 workflow 期間按 ← 或執行 /background 會重啟已完成的 subagent 的問題；現在會先詢問並告知有多少 subagent 會被重啟
+- 修正在 claude agents 中開啟一個剛啟動的 session（其 worker 仍在啟動中，Windows 上常見）時，會以「was stopped while the respawn was in flight」停止的問題
+- 修正 claude agents 將已背景化的具名 session 列出兩次的問題；對同一對話再次背景化現在會為新列編號（例如 my-session (2)）
+- 修正背景保留清掃機制會移除 .claude/worktrees/ 下你自己建立的 git worktree 的問題，發生於舊的背景 session 記錄指向它們時
+- 修正在超大 session 上 auto mode tool 呼叫被拒絕為「temporarily unavailable」的問題，透過根據 prompt 大小調整安全檢查期限
+- 修正 plugin 快取為同一個 plugin 建立重複的 SHA 命名目錄
+- 修正 plugin skill 的 frontmatter name 已包含 <plugin>: 前綴時，在斜線選單中顯示重複前綴的問題（例如 /plugin:plugin:skill）
+- 修正 claude plugin update 在給定裸名稱時失敗的問題（之前只有完整限定名稱有效）
+- 修正當 plugin.json 以 UTF-8 位元組順序標記（BOM）儲存時，plugin 安裝失敗
+- 修正 /reload-plugins 對於將 skill 定義在 skills/*/SKILL.md 下的 plugin 回報 0 個 skill
+- 修正 hook 錯誤訊息顯示字面的 ${CLAUDE_PLUGIN_ROOT} 而非解析後的 plugin 路徑
+- 修正 /rename 將主題的提示邊框顏色（包括自訂主題的 promptBorder）替換為預設青色；現在邊框會保持你主題的顏色，除非你用 /color 另選一個
+- 修正自訂主題 diff 顏色（diffAdded/diffRemoved 及其暗色變體）在 diff 和 /theme 預覽中被忽略
+- 修正 keybindings.json 中綁定了未知 action 名稱時會靜默地讓該按鍵失效的問題；現在會跳過該綁定讓預設綁定繼續運作，並在 --debug 下記錄警告
+- 修正 /stats 活動熱圖在 UTC 以東時區中，每天的活動偏移了一格（週日的計數顯示在週一下方）
+- 修正從已 fork 或已背景化的 session 執行 /fork 時，新 session 以空對話開始
+- 修正以 /-- 開頭的提示（例如 Lean 文件註解）被誤判為未知斜線命令而非送給 Claude
+- 修正 @ 檔案選擇器在輸入文字不再匹配任何真實路徑後仍保持開啟
+- 修正切換到 agents 視圖再切回後，狀態列的花費和耗時歸零
+- 修正全螢幕模式在你點擊終端機視窗（僅為了讓它重新獲得焦點）時，將鍵盤焦點移到指標下方的控制元件
+- 修正當補全 token 或工作目錄包含 null byte 時，路徑補全失敗
+- Windows/macOS：修正 headless session 未清理 ~/.claude/sessions 中由非正常退出的 session 留下的過期項目
+- 修正當第三方 Anthropic 相容端點（ANTHROPIC_BASE_URL）串流的 tool_use 區塊缺少 id 時，UI 在第一次 tool 呼叫就停止並顯示 render 錯誤
+- 修正 Write tool 在覆寫超大現有檔案後回報「Out of memory」或長時間凍結的問題，即使檔案已經寫入
+- 修正 claude plugin install <name> 在 ~/.claude/plugins/known_marketplaces.json 為空或損壞時，靜默退出（或在終端機中卡住）而非回報錯誤
+- 修正當儲存的歷史紀錄包含 Anthropic API 不接受的 tool 區塊（通常由第三方 API proxy 寫入）時，恢復的 session 每回合都 400 錯誤
+- 修正 curl -fsSL https://claude.ai/install.sh | bash 對某些有伺服器管理設定的 Team/Enterprise 使用者失敗並顯示「Raw mode is not supported」
+- 修正以 plan mode 結束的 session 在 VS Code 擴充功能中恢復時脫離 plan mode，以及在未設定權限模式時 claude -p --continue/--resume 出現權限提示 tool 的問題
+- 修正 sandbox「Network request outside of sandbox」權限提示等待中時，Notification hook 未觸發
+- 修正 Bash 權限檢查，對帶有懸掛 && 或 || 運算子的畸形命令一律要求核准
+- 修正 --strict-mcp-config session 提示核准它們永遠不會載入的 .mcp.json server，導致背景 session 在啟動時卡住等待
+- 修正遙測和指標請求傳送給 Anthropic 時夾帶了為第三方閘道器（ANTHROPIC_BASE_URL）設定的 API key；現在憑證只會送往其所屬的主機
+- 修正 apiKeyHelper 回傳短效 JWT 時，閒置後首次提示出現可見的 API 錯誤：過期的快取 token 現在會在送出前重新整理，且 401/403 驗證錯誤會靜默重試
+- 修正全螢幕和 Ctrl+O 對話紀錄視圖中記憶體隨 session 長度持續增長的問題：每個渲染的訊息列不再保留對話紀錄層級 tool 查詢的完整副本
+- 修正 /ultrareview 和從同一 repository 同時啟動的雲端 session（例如從多個 worktree）有時會以另一次啟動的未提交變更開始
+- 修正背景雲端 session（如 /autofix-pr）顯示的任務進度計數（例如 3/5）偶爾遺漏任務
+- 修正 Remote Control session 在 claude.ai 和 Claude app 中保持佔位名稱直到第二次提示；自動產生的標題現在在第一次提示後就會出現
+- 修正標記為 requiresUserInteraction 的 MCP tool 在權限提示中仍提供「Yes, and don't ask again」選項；該選項寫入的允許規則會被 tool 忽略
+- 修正自架 runner 在 work-poll 回應格式異常（例如攔截 proxy 的 HTML 頁面）時，結束其活躍 session 或退出的問題；現在會重試 poll
+- 改善 /cd：新目錄的專案設定、hook、.mcp.json server（經過慣常的核准提示）、skill 和 agent 現在在移動後立即生效，而非等到 --resume
+- 改善 Bash tool 延遲：在 bash shell 上重播快照函式時不再對每個函式使用 base64 子 shell
+- 改善 subagent 結果：達到 maxTurns 限制而停止的 subagent 現在會將其輸出標記為部分完成，並提示可透過 SendMessage 繼續，而非看起來像已完成
+- 改善非互動式 session（-p、SDK、雲端 session）：當回應被伺服器錯誤、連線中斷或停滯截斷時，現在會自動繼續，而非以錯誤結束
+- 改善工作負載身分聯邦 session 的使用量遙測歸屬至你的組織，包括啟動時 apiKeyHelper 執行期間送出的事件，以及登入 token 在閒置時過期後的事件
+- 變更 /code-review：Claude 現在也能在 Bedrock、Vertex AI 和 Foundry 上、透過 Claude apps 閘道器、以及在遙測或非必要流量停用時自行啟動
+- /goal：變更閒置 session 對長時間背景工作每個目標最多啟動三次主動檢查；你的下一則訊息會再允許三次
+- 變更 claude install 和 claude update：將待處理的受管設定同意提示延遲到下一個互動式 session，而非在命令執行中途提示
+- 變更 OpenTelemetry plugin 事件（針對從 claude.ai 同步的 plugin）：plugin_id_hash 現在反映 plugin 的真實 marketplace，管理員安裝的 plugin 其 enabled_via 為 admin-install
+- 修正命令 sandbox 的檔案系統設定未尊重 --setting-sources
+
 ## 2.1.245
 - 修正在搭載 glibc 2.44 的 Linux 發行版（例如 Arch Linux、CachyOS 和 Fedora Rawhide）上啟動時閃退的問題
 
