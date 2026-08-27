@@ -2,6 +2,41 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.247
+- 新增 SendFeedback 工具：當 session 出問題時，Claude 可以幫你草擬一份 feedback 報告，讓你審閱後從 /feedback 送出（可用 feedbackDrafts 設定關閉）
+- 在 spinnerTipsOverride 新增 {id, text, cooldownSessions, priority} 項目、tipsFile 以及 label，讓組織可以讓自己的提示跟內建提示一起輪播
+- 在 Bash 權限提示上新增一個小提示指向 auto mode，並提供一鍵「Yes, and switch to auto mode」選項
+- 新增 /claude-api cost-optimize，用來分析現有專案的 Claude API 花費，並一次一個經過測量的改動來逐步處理各種成本槓桿（快取、token 精簡、batch、effort、模型選擇）
+- 更新 /claude-api skill，加入 Admin API 涵蓋範圍（組織成員、邀請、workspace、API key、速率限制報告、workload identity federation、CMEK）
+- 修正快速按方向鍵＋Enter 的連續操作，在歷史搜尋、/config、/mcp、/skills、背景任務和 /model 中會作用到你導覽到的那一列的上一列
+- 修正 sub-agent 在第一次呼叫模型遇到 404 時直接掛掉：它們現在會改用 session 的 fallback 模型鏈，而且回傳給父層的錯誤會包含錯誤類型、status、request id 和模型
+- 修正 hook 或背景 agent 印出好幾 MB 的錯誤輸出時，可能塞爆對話並讓 session 卡在「Prompt is too long」
+- 修正在 kitty-protocol 終端機下，非拉丁字母（例如 Cyrillic）鍵盤配置時 Ctrl 快捷鍵不會觸發的問題
+- 修正在跳脫前綴（escape prefix）後，滑鼠回報訊息剛好跨兩次讀取被切開時，會把像 <35;150;7M 這樣的文字插入到 prompt 裡
+- 修正 Bash sandbox 的指令執行後清理程序，會刪掉由 dotfile 管理的 ~/.claude/settings.json symlink（nix/home-manager、stow），當它被重新指向 sandbox 可寫區域之外時
+- 修正 /terminal-setup 會直接覆蓋你整份 Zed 的 keymap.json，而不是把它的按鍵綁定合併進去
+- 修正 /rename 在 session 註冊表無法更新時卻默默顯示成功；現在它會告知其他 session 可能仍顯示舊名稱
+- 修正用 --agent 啟動的 session 中，/compact 和「Summarize from here」會用預設 system prompt 來摘要，而不是用對話自己的 system prompt
+- 修正背景 session 在其終端機宿主 process 掛掉後，於 claude agents 中永遠顯示「opening…」；現在那一列會在幾秒內失敗並附上原因，按 Enter 可重新啟動
+- 修正當 hook 或背景任務的輸出檔無法寫入時，記憶體會無限成長；現在該檔案會註明輸出遺失在哪裡
+- 修正透過 SSH 使用 /install-github-app 的問題：複製捷徑現在會說明登入 URL 是怎麼被複製的，而不是每次都宣稱成功，而且在無法開啟瀏覽器時 URL 會立刻顯示
+- 修正從前景帶過來的 shell 指令，在背景 session 中完成時會記錄內部錯誤，或顯示誤導人的 [exited with code -1] 訊息
+- 修正沒有版本號的 marketplace plugin，其即時快取目錄在第二個 scope 安裝時會被刪除並重建，這可能會干擾正在使用它的 session
+- 修正用 /remote-control 啟動的 Remote Control session 沒有把工作樹（working-tree）的 diff 回報給已連線的用戶端
+- 修正 self-hosted runner session 在 Claude Code 還沒啟動前就回報 running，這可能會從 Claude 桌面 app 觸發過早的「Claude is waiting for your input」通知
+- 修正當 managed settings 設定了 Claude apps gateway 登入、而 Anthropic 端點無法連線時，首次執行的設定流程會以「Unable to connect to Anthropic services」結束
+- 修正雲端 session（網頁版 Claude Code、桌面和行動 app）在你送出訊息後立刻切換模式時，有時會顯示前一個權限模式
+- 修正雲端 session 在某一輪之間 session 的容器重啟、而背景 agent、shell 或 monitor 仍在執行時會陷入靜默——恢復後的 session 現在會回報遺失的工作
+- 改善 plugin marketplace 的防護：含有控制字元或隱形字元的名稱會被拒絕，而且 /plugin 和 claude plugin 輸出中由 marketplace 提供的文字現在會做跳脫安全處理
+- 改善 Bedrock、Vertex 和 Foundry session（以及任何關閉 telemetry 的 session）：現在當設定的 MCP server 連線失敗時會告訴 Claude，而不是讓它以為那些工具不存在
+- 變更 Sonnet 5 的預設 auto-compact 視窗為完整的 1M context，所以在 1M 視窗上的 session 現在會在大約 967K tokens 時 auto-compact，而不是大約 934K
+- 變更跨 session 的 peer 訊息，預設收合成一行 Message from @<sender>: <first line> 預覽；按 Ctrl+O 可展開完整內容
+- 變更渲染後 markdown 中的終端機超連結：指向網路或自動掛載（automounter）路徑、含有控制字元、或以隱形字元開頭的連結目標，現在會以純文字呈現
+- 變更 prompt 頁尾的 PR 標記，當最後一次檢查距今不到一分鐘時，會在終端機重新聚焦時略過 GitHub 的重新檢查
+- 變更 analytics，在 managed settings 強制 gateway 登入或設定了自訂 OAuth 部署時，從啟動起就保持關閉，而不是只在登入後才關閉
+- 變更 Claude apps gateway 登入請求以標明自己是 Claude Code（一個 surface=claude_code device-authorization 參數以及 claude-code/<version> User-Agent）
+- 變更組織登入強制機制，當管理員的 managed settings 無法讀取時，即使有宿主提供或每位使用者的 Windows registry 設定存在，也會在啟動時直接結束
+
 ## 2.1.246
 - 新增啟動警告：當 Bash 允許規則在子命令前使用萬用字元時（例如 Bash(git * main)），因為這也會匹配插在子命令前面的選項
 - 在 /permissions 新增 Auto mode 分頁，可檢視和編輯 auto mode 分類器規則
