@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.250
+- 修正一些 bug，並提升穩定性
+
 ## 2.1.248
 - 新增 --restricted（或 CLAUDE_CODE_RESTRICTED=1）：移除會執行指令或程式碼的內建工具以及 WebFetch（除非有在 --tools 中指定），保留工作目錄內的檔案工具，拒絕 bypassPermissions，並忽略使用者、專案與本機的設定檔
 - 在 agent frontmatter 新增 experimental.cacheTtl（"5m" 或 "1h"）：這是每個 agent 各自的 prompt cache TTL，會在沒有設定 subagent TTL 時套用
