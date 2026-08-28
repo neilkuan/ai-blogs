@@ -2,6 +2,57 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.248
+- 新增 --restricted（或 CLAUDE_CODE_RESTRICTED=1）：移除會執行指令或程式碼的內建工具以及 WebFetch（除非有在 --tools 中指定），保留工作目錄內的檔案工具，拒絕 bypassPermissions，並忽略使用者、專案與本機的設定檔
+- 在 agent frontmatter 新增 experimental.cacheTtl（"5m" 或 "1h"）：這是每個 agent 各自的 prompt cache TTL，會在沒有設定 subagent TTL 時套用
+- 新增 claude self-hosted-runner --client-label <label>（或 SELF_HOSTED_RUNNER_CLIENT_LABEL），用來覆寫 runner 註冊時使用的標籤（預設為 hostname）
+- 新增伺服器管理設定的診斷功能：設定載入失敗時會在啟動時跳警告，/doctor 和 /status 也會多一行說明載入失敗的原因，或是為什麼沒去抓設定（Bedrock/Vertex/第三方 provider、自訂 ANTHROPIC_BASE_URL）
+- 在 /web-setup 新增警告：當 GitHub CLI token 缺少 workflow scope 時會提醒，因為沒有它的話推送到超大型 repo 可能會被拒絕
+- 為透過 AWS Marketplace 計費的 Enterprise 組織、自助式 Enterprise 以及 Enterprise 試用方案新增 /usage-credits，讓成員可以向管理員申請提高用量上限
+- 新增跨 session 訊息傳遞（SendMessage / ListAgents），可在同一台機器上的多個 session 之間互通，支援 Bedrock、Vertex、Foundry，以及停用 telemetry 的情況
+- 修正長時間 session 中大約每小時會發生一次的 prompt cache 未命中（連帶遺失 extended-thinking 的上下文），這是因為 OAuth token 刷新後工具定義被重新渲染所導致
+- 修正 ScheduleWakeup 工具定義在帳號進入用量超額（usage overage）狀態時，會在 session 與其 --resume 之間發生變化，導致 resume 的 session 第一輪就完全 prompt cache 未命中
+- 修正 Claude Desktop 和 Cowork session 在 30 天後消失的問題：現在 transcript 清理會保留還在 app 裡的桌面端 session（除非組織政策有管理保留期限）；新的 desktopSessionCleanupPeriodDays 設定則可限制這個豁免期
+- 修正當另一個 Claude Code process 持有 token 刷新鎖、而當前 session token 又剛好過期時，會被送去登入畫面的問題；現在這個請求會改為以可重試的錯誤失敗
+- Windows：修正 claude agents 清單在從 session 卸離後、或在停留於 win32-input-mode 的終端機分頁中啟動時，鍵盤沒反應的問題
+- 修正在無法使用推薦的 Console 登入方式的機器上（例如有設定 ANTHROPIC_API_KEY 或 API key helper 時），/login 會在顯示登入 URL 之前就以 OAuth 錯誤失敗的問題；現在會退回改用 API key 登入
+- 修正 /model 中的模型名稱以及快速模式（fast-mode）切換提示的渲染方式，改為以程式碼呈現，讓像 [1m] 這類後綴照字面顯示，而不是變成連結
+- 修正當設定了 CI 環境變數時，claude agents 會跳過 workspace 信任提示的問題
+- 修正當 PR 狀態快取存有格式錯誤的項目時，claude agents 啟動會當掉的問題
+- 修正 agent view 在機器關機後又把數週前的背景 session 復活的問題：這種 session 現在會顯示為在它真正結束的時間點停止，而開啟它時會先詢問是否要恢復其已儲存的對話
+- 修正 agent view 在啟動新 session 時，有時會開到較舊的對話、並且把已經輸入的 prompt 弄丟的問題
+- 修正 claude agents：開啟一個你已經在另一個終端機中恢復過的已停止 session 時，不會再對同一個對話啟動第二個 process；該列現在會標示它已在某個終端機中開啟
+- 修正 claude agents 和 claude rm 拒絕刪除 session（顯示「has commits that are not pushed anywhere」）的問題，這發生在該 session 的 worktree 分支已經合併進你當前 checkout 的預設分支（例如本機的 main）但尚未推送時
+- 修正背景 session 在 PermissionRequest 或 PreToolUse hook 印出無效答案時默默卡住的問題：claude agents 那一列現在會標明是哪個 hook 以及 schema 錯誤
+- 修正 hook 默默把不是有效 JSON 的 stdout {…} 物件當成純文字處理的問題；現在會回報為 hook 錯誤並附上解析訊息
+- 修正 /mcp 把宣告了 claude.ai connector 類型的專案 .mcp.json 項目列在受信任的「claude.ai」標題下的問題；現在它會出現在它真正的 scope 底下
+- 修正由 headersHelper 提供 Authorization header 的 MCP server 在遇到 401 時，會落入 OAuth discovery，而不是照文件所述重新執行 helper 並重試該呼叫的問題
+- 修正當需要出現受管理設定的安全核准對話框時，透過 /login 登入 Claude apps gateway 會卡住的問題
+- 修正當 apiKeyHelper 是唯一憑證時，gateway 模型探索（CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY）從來不會執行的問題
+- 修正 claude logs 在執行它的終端機中留下 mouse tracking、bracketed paste 和 alternate screen 開著沒關的問題
+- 修正信任對話框中的 repo 權限規則清單，在一條很長的規則正好從 emoji 中間被截斷時會顯示亂碼字元的問題
+- 修正在按下 ctrl+c 後緊接著按 shift+tab 時，權限模式指示器會被「Press Ctrl-C again to exit」提示擋住而藏起來的問題
+- 修正 /ultrareview 以及在本機播種的雲端 session 會把 prod.env 之類和 *.tfvars 檔案的未提交編輯、或憑證檔案的編輯器暫存檔、temp 檔和備份檔（例如 key.pem.tmp、id_rsa.swo）上傳出去的問題；現在這些會留在你的機器上
+- 修正 Remote Control session 在 CLI 默默重新連線後，偶爾會在連線的裝置上一直不顯示權限提示或最新訊息的問題
+- 修正雲端 session 偶爾會在啟動時因為容器的 session 憑證還讀不到而失敗的問題
+- 修正當全域 flag 或 wrapper 注入的選項出現在子指令前面時，claude remote-control 會拒絕自己的 flag（例如 --spawn、--name）的問題
+- 修正啟動警告（例如「N MCP servers need authentication」）比 transcript 其他內容往右偏一欄渲染的問題
+- 修正被背景化的 worktree session 弄丟自己 checkout 的問題：背景 session 現在會在執行期間持有該 worktree 的鎖，這樣清理作業和 git worktree remove 就不會去動它
+- 修正對其他 session 的 @-mention 無法比對到用非拉丁字元輸入的名稱（例如透過 IME 輸入的韓文）的問題
+- 修正無效的 crossSessionInbound 值被默默忽略的問題：現在會跳警告並先扣住跨 session 訊息（使用者設定），或直接拒絕（受管理設定），直到修正為止
+- 修正 rate-limit、用量和 fast-mode 訊息在你的組織其實無法使用 /usage-credits（例如被 DISABLE_EXTRA_USAGE_COMMAND 隱藏）時，還叫你去執行該指令的問題
+- [VSCode] 修正聊天分頁在其 session 從未被儲存時卡在「No conversation found」的問題；現在它會改為開啟新對話
+- 改善 Workflow 工具的 prompt 佔用量：它的描述現在大約 1k tokens，而不是 5.7k，撰寫 script 的參考資料則移到了一個隨附的 workflow-authoring skill 裡
+- 改善 prompt footer 的 PR 徽章：在 pull request 沒變動時降低查詢 GitHub 的頻率；有推送或執行 gh pr 指令時仍會立刻刷新
+- 改善受管理設定：用戶端逾時、MCP 啟動模式（startup-mode）和 stream-watchdog 的環境變數不再觸發設定核准提示
+- 改善 /ultrareview <PR#>：在啟動前先檢查與你 Claude 帳號連結的 GitHub 帳號是否能存取該 repo，並說明如何修正，而不是等雲端 session 啟動後才失敗
+- 改善跨 session 訊息傳遞：當預設目錄無法使用時，會退回改用每位使用者私有的 /tmp 目錄，而提示訊息和 /status 會標明要修正的目錄
+- 變更 agent view 派工輸入框中 shift+enter 的行為，改為插入換行（與 prompt 一致）；ctrl+enter 現在則是派工並附加
+- 變更 /loop：自訂節奏的動態模式以及無 prompt 的自主預設模式現在隨時都可用，包含在 Bedrock/Vertex/Foundry 上
+- 變更 Anthropic telemetry 匯出失敗的記錄方式，改以 debug 層級記為 [Anthropic telemetry]，而不是 [3P telemetry] OTEL diag error，這樣就不會被誤認為是你的 OTel collector 出問題
+- 變更 Linux user namespace 中的跨 session 訊息傳遞：對未映射擁有者給予的 root 等級信任，現在僅限於標準的系統目錄
+- 變更從 subagent 對另一個 session 發送 SendMessage 的行為：結果現在會註明任何回覆都會送到父 session 的對話中，而不是送給該 subagent
+
 ## 2.1.247
 - 新增 SendFeedback 工具：當 session 出問題時，Claude 可以幫你草擬一份 feedback 報告，讓你審閱後從 /feedback 送出（可用 feedbackDrafts 設定關閉）
 - 在 spinnerTipsOverride 新增 {id, text, cooldownSessions, priority} 項目、tipsFile 以及 label，讓組織可以讓自己的提示跟內建提示一起輪播
