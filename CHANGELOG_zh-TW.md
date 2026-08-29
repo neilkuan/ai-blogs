@@ -2,6 +2,79 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.251
+- 新增 PreModelSwitch 和 PostModelSwitch hook 事件（可以阻擋、確認或註記模型切換）；SessionStart resume hook 現在會收到 session 的過時程度（staleness）以及重新快取（re-cache）的預估成本
+- 新增前景 subagent 的工具呼叫與結果即時串流到 Remote Control 用戶端（背景 subagent，也就是預設狀態，仍然只顯示狀態而已）
+- 在 /usage 加入花費上限（Spend limit）進度條，並為在有花費上限的 Claude apps gateway 後方的開發者新增 rate_limits.spend_limit 狀態列欄位
+- 在 /cost 加入每個 session 的 prompt-cache 資訊（命中率、未命中數、重新快取的 token、warm/cold），並提供對應的 prompt_cache 物件給狀態列腳本使用
+- 在 claude --help 加入 attach、logs、stop、respawn 和 rm；執行中背景 session 的 --resume 訊息現在會明確寫出 claude attach <id> 指令
+- 修正檔案工具（Read、Write、Edit）在權限檢查後跟隨了工作目錄內被替換掉的 symlink，可能導致在核准位置之外讀取或寫入
+- 修正 marketplace 項目中宣告的 plugin 指令可以指向 plugin 目錄之外；這類路徑現在會被拒絕並回報路徑穿越（path-traversal）錯誤
+- 修正專案設定可以啟用詳細的 beta tracing 或原始 API body 記錄，以及較低權限範圍的 beta tracing 端點繞過被 managed settings 或 host app 固定（pinned）的 OTLP collector
+- 修正 Workflow 工具在權限檢查執行前就讀取（並在錯誤訊息中引用）了 session 不該讀取範圍之外的 scriptPath
+- 修正 Grep 和 Glob 沒有對透過 symlink 搜尋路徑找到的檔案套用 Read(...) 拒絕規則
+- 修正對話在某一輪模型只產生了 thinking 內容後，卡在「text content blocks must be non-empty」錯誤
+- 修正全新安裝後首次啟動時，對於啟動預設應為 auto mode 的帳號，卻是以 default mode 而非 auto mode 開始
+- 修正 Opus 5 請求在 effort 為 xhigh/max 且 thinking 被關閉時，出現「effort … is not supported when thinking is disabled」而失敗；這種情況下 effort 現在會以 high 送出
+- 修正回覆 Claude Desktop 從另一個 session 送來的訊息：對該 session id 的 SendMessage 現在會透過 Claude Desktop 送達，而不是以「not reachable」失敗
+- 修正大量平行 subagent 造成的 TUI 延遲：每秒的進度更新現在會取代前一個，而不是在對話記錄裡越堆越多
+- 修正 agent teams：隊友（teammate）的最終答案沒有傳到團隊領導（team lead）——現在會出現在閒置通知裡，而不是一則沒有內容的「available」通知
+- 修正背景 subagent 無法回覆來自未命名的同層（sibling）或上層（parent）agent 的訊息（from 是 agent 類型，而不是一個地址）
+- 修正 managed-settings 的 disableAutoMode 在 session 進行中才送達時，沒有把已經在跑的 auto-mode session 切回 default mode
+- 修正「switch to Opus 1M for 5x more context」的提示，即使目前的 Opus 模型已經有 1M context window 時也會出現
+- 修正 Claude apps gateway session 把已儲存的 Anthropic 設定檔（例如 Console 登入）當成使用中：在 /status 裡列出它、並用它重試 gateway 的 401，儘管請求其實從不會用到它
+- 修正雲端 session 在 host 只是設定 session 初始模型時，卻告訴 Claude 模型已經變更
+- 修正 Remote Control 在組織政策停用它時回報為失敗；現在改為顯示一則安靜的通知
+- 修正在 Remote Control 上執行 /mcp reconnect 時，當某個 server 在另一個 session 被停用，顯示的是通用的隱藏細節錯誤，而非真正的解決方式
+- 修正 --input-format stream-json：由用戶端注入、且沒帶 message id 的 assistant 工具呼叫會被合併進第一個裡，且其結果遺失，包含在恢復（resume）較舊 session 時
+- 修正目錄變更把 session 搬移到既有的相同 ID 的 transcript 上時，session transcript 被無聲覆寫
+- 修正背景 session 及其 subagent 無法編輯它們用 git worktree add 建立的 git worktree 裡的檔案
+- 修正背景 session 及其 subagent 在另一個 Claude Code 程序同時正在重新整理 plugin marketplace 那一刻，偶爾會在沒有任何 plugin skills 的狀態下啟動（而且維持這樣）
+- 修正在 tmux 裡透過 SSH 開啟的背景 session 選取文字的問題：現在會像前景 session 一樣複製到 tmux buffer，而不是退回使用 OSC 52
+- 修正 SDK 與雲端 session 在某個 SDK MCP server 的 handshake 確認訊息遺失時無限期卡住；現在等待會在 70 秒後逾時，並只把那個 server 標記為失敗
+- 修正 self-hosted runner 在 session 被強制停止後，仍讓卡住 session 的 Bash 工具程序繼續執行
+- 修正 Team 和 Enterprise 成員（其管理員把組織的 usage-credit 上限設為 $0）的 /usage-credits：現在會提議去詢問管理員，而不是說已達到上限
+- 修正 --worktree --tmux 搭配 gitlab.com origin 上的 merge-request 編號時，會先嘗試註定失敗的 GitHub 風格 fetch，而不是直接抓取 GitLab 的 ref
+- 修正 Ctrl+G 在背景 session 中對於會開啟 /dev/tty 的編輯器（例如 emacs -nw 和 micro）以「Emacs quit unexpectedly」失敗
+- 修正含有 null byte 的 additionalDirectories 項目造成啟動崩潰，或當它來自 SDK host、IDE 或 hook 時破壞 /add-dir 及後續的設定更新；現在會直接略過
+- 修正 MCP server 選單的複製快捷鍵：現在會說明登入 URL 是怎麼複製的，而不是永遠都宣稱成功
+- 修正斜體文字（例如 session 回顧那一行）在 GNU screen 以及使用 screen 終端機類型的 tmux session 中被渲染成反白的區塊
+- 修正 claude mcp add --header 和 claude mcp add-json 的說明文字寫錯了 transport 名稱
+- 修正 claude ultrareview 和 /ultrareview 在雲端 session 啟動失敗時仍等滿整整 30 分鐘；現在會提早停止並回報原因
+- 修正 Bash 權限檢查會自動核准把算術運算式指派給整數 shell 變數的指令（例如 OPTIND=1/0、RANDOM=2+2）；這些現在會跳出核准提示
+- 修正被背景化的 session（←、/background、--bg）遺失在 shell 中匯出的 Vertex/Bedrock gateway（ANTHROPIC_*_BASE_URL + CLAUDE_CODE_SKIP_*_AUTH），導致每個請求都失敗
+- 修正 Max 方案上的 claude --bg --model fable 會停下來索取 usage credits，而同一帳號上的互動式 session 明明還有 Fable 額度
+- 修正一次性的「把 auto mode 設為預設」提議出現在無人看管的 session（例如 agent-team 隊友的面板）中，這時一個誤觸的按鍵可能在沒讀到的情況下就接受了它
+- 修正在重新登入同一個 Claude apps gateway 後，即使設定沒變，managed-settings 的核准提示還是又跳出來
+- 修正被停用的 /bug 和 /share 回報說 /feedback 被停用；當組織政策或環境變數關閉 /feedback 時，提示、/help 和拒絕訊息不再建議使用 /feedback
+- 修正雲端 session 建立在遇到暫時性的 GitHub 連線失敗後建議進行 GitHub 設定——訊息現在改為請你重試
+- 改善互動式 session 在每一輪期間的 CPU 使用率，做法是減少多餘的 UI 重新渲染
+- 改善安裝大小：原生 binary 縮小了約 5 MB
+- 改善雲端 session：當 session 的網路 proxy 在 Bash 指令執行期間中斷連線時，工具結果現在會寫出主機名稱和原因，而不只是「connection reset」
+- 改善 /schedule，會說明在 Claude Code 中設定的 MCP server 無法掛接到雲端例行任務（cloud routines），而不是只給一句空泛的「No MCP connectors」訊息
+- 改善來自你自己 subagent 的訊息呈現方式：Claude 現在會被告知寄件者是這個 session 內部的一個 worker，而不是一個不相關的 Claude session
+- 改善 prompt 的預留提示文字：在檢視從 subagent 面板或 /tasks 開啟的背景 subagent 或 fork transcript 時，會顯示為「Message @name…」
+- 改善 MCP server 名稱在錯誤訊息、選單和指令結果中的清理（sanitization）
+- 改善在 CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST 下（例如 Claude Desktop）的 Amazon Bedrock session 啟動：拿到 Bedrock 模型 ID 或 ARN 的 session 不再等待 inference-profile 探索
+- 改善 managed settings 核准對話框，只列出自你上次核准後有變更的設定
+- 改善模型工具呼叫格式錯誤時的重試：損壞的輸出現在會從重試 context 中被移除，包含在 Bedrock、Vertex 和 Foundry 上
+- 變更 /radio，讓它在 Bedrock、Vertex AI、Foundry 和 AWS 上的 Claude Platform 都能使用，以及在 telemetry 停用時也能用
+- 變更 Claude in Chrome，讓瀏覽器動作永遠都經過 Claude Code 的權限檢查，包含在 telemetry 停用的 session 中（這類 session 先前是用 Chrome extension 自己的提示）
+- 變更 CLAUDE_CODE_SUBAGENT_MODEL，讓它設定的是預設 subagent 模型，而非覆蓋一切：agent 定義裡的 model: 以及每次 spawn 明確指定的模型現在都會優先於它
+- 變更預設的 commit trailer，當使用中的模型不是已知的 Claude 模型時（例如自訂 ANTHROPIC_BASE_URL 後方的第三方模型），改為 Co-Authored-By: Claude Code
+- 變更以座位計價（seat-based）的 Enterprise 訂閱的預設模型為 Opus 5，與其他 premium 方案一致
+- 變更 /effort，讓它按模型分別儲存你的預設 effort 等級，這樣切換模型時每個模型都會保留自己的設定
+- 變更 analytics，讓它不再僅僅因為 managed settings 強制 gateway 登入（或無法讀取）就在登入前關閉；一旦登入 gateway 或透過 DISABLE_TELEMETRY，它們就維持關閉
+- 變更 Bedrock、Vertex 和 Foundry 上，以及 telemetry 關閉時的頁尾 PR 標章，改為直接呼叫 GitHub API（透過 gh auth token、GH_TOKEN 或 GITHUB_TOKEN），而不是用 gh pr view
+- 變更 Bash 指令輸出檔案在指令於 sandbox 中執行時的建立與讀回方式，讓 sandbox 內的指令無法重新導向或替換它們
+- 變更 plugin/LSP 安裝建議與 auto-mode 預設提議，會等到你把正在輸入的內容送出或清掉之後才出現，這樣送出 prompt 的那個 Enter 就不會順便回答到它們
+- 變更會終止 sandbox TLS、把 sandbox 流量導向你自己的 proxy、注入憑證，或削弱 sandbox 隔離的 server-managed settings，在套用前都需要核准
+- 變更來自 managed 或 project settings 的 ANTHROPIC_CUSTOM_HEADERS，當它設定憑證、org/tenant、routing 或 API 行為相關的 header 時（例如 Authorization、Host）需要核准
+- 變更專案層級 .claude/settings.json 的 env，讓它不再設定 CLAUDE_CONFIG_DIR、CLAUDE_CODE_TMPDIR 或 TMPDIR/TMP/TEMP；請改在你的 shell、user 或 managed settings 中設定它們
+- 移除六種很少用到的語言的語法高亮（1c、gml、isbl、mathematica、maxima、sqf）；binary 因此縮小 2.5 MB
+- [VSCode] 修正登入畫面的「Bedrock, Foundry, or Vertex」按鈕開啟的是文件頂端，而不是第三方 provider 設定的段落
+- [VSCode] 變更 Remote Control 橫幅為頁尾的膠囊按鈕（pill）（在 Remote Control 開啟或失敗時顯示），點擊會在 claude.ai/code 開啟該 session；可用 /remote-control 開啟或關閉它
+
 ## 2.1.250
 - 修正一些 bug，並提升穩定性
 
