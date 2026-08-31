@@ -2,6 +2,12 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.252
+- 修正在部分 Mac 上執行 Bash 指令時失敗並出現「task output swap refused (tasks dir moved or linked)」的問題
+- 修正在還沒有 .claude/settings.local.json 的專案中，「always allow」無法儲存的問題
+- 修正由 Claude Desktop 或 VS Code 代管的 Remote Control 工作階段，在連往 claude.ai 的連線品質不佳時，工具執行完後會卡住好幾分鐘的問題
+- 修正當背景任務通知帶有非常大量的失敗輸出（例如磁碟寫滿時的 git 錯誤）時，會導致對話超出 API 請求大小上限的問題
+
 ## 2.1.251
 - 新增 PreModelSwitch 和 PostModelSwitch hook 事件（可以阻擋、確認或註記模型切換）；SessionStart resume hook 現在會收到 session 的過時程度（staleness）以及重新快取（re-cache）的預估成本
 - 新增前景 subagent 的工具呼叫與結果即時串流到 Remote Control 用戶端（背景 subagent，也就是預設狀態，仍然只顯示狀態而已）
