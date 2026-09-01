@@ -2,6 +2,112 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.257
+- 新增 Claude Fable 5.1（claude-fable-5-1），現在是預設的 Fable 模型 —— 1M context，每 Mtok $10/$50，cache 讀取每 Mtok $0.25
+- 新增「時間格式」（timeFormat）與 timeZone 設定：12 小時制、24 小時制、24 小時制 UTC，或用 strftime 格式來顯示回合結束時鐘與 transcript 檢視的時間戳
+- 在 auto 模式新增了 Containment Escape 規則，所以雲端 metadata 憑證抓取、egress 規避（egress evasion）與跨租戶存取（cross-tenant reach）不再自動核准，除非你的環境把它們標記為預期行為
+- 新增 CLAUDE_CODE_SUBAGENT_MODEL_FORCE，可把 CLAUDE_CODE_SUBAGENT_MODEL（或主模型）套用到每個 subagent，忽略單次 spawn 與 agent 定義的模型覆寫設定
+- 在 /effort 新增 s，只更改當前 session 的 effort，跟 /model 一致
+- 新增 /doctor 警告，用來提示被 kill 掉的 session 留下的過期 sandbox mask 檔案
+- 在 auto 模式下，第一次讀取工作目錄外的檔案前會出現一次性提示，並可選擇封鎖這類讀取（permissions.blockReadsOutsideWorkingDirectories）
+- 新增對 gateway 提供的 description 支援，會顯示在探索到的 /model 選單項目上（CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY）；沒有 description 的項目仍顯示「From gateway」
+- 修正啟動後才建立的 .claude/ 資料夾中的設定，要重啟才會被讀到的問題
+- 修正從用 ← 開啟的 agent 檢視派發的 session 總是以原始 session 的權限模式啟動，蓋過了目標目錄的 defaultMode 與 agent 的 permissionMode
+- 修正 claude agents 中 keybindings.json 對 Ctrl+G 的重新綁定被忽略的問題；它的 Ctrl+S / Ctrl+T 現在可透過新的 Agents context 重新綁定
+- 修正背景 session 在 macOS npm 安裝進行自我更新時無法啟動，以及在 Windows 上當過期的 daemon 鎖檔指向被重複使用的 process id 時無法啟動的問題
+- 修正在 slash-command 面板後方有回應正在串流時，工作中的 spinner 會停住的問題
+- 修正背景 session 的 state.json detail 在排程喚醒後重複自己派發 prompt 的問題
+- 修正 claude agents 在你重新對某個背景 session 下 prompt、它再次完成後，仍把它埋在 Completed 裡的問題；Completed 現在會依最新完成時間排序
+- 修正在剛被刪除的目錄執行 claude --bg 會回報「backgrounded」並留下一個崩潰 session 列的問題；現在它會印出原因並以 exit 1 結束
+- 修正 Remote Control 在 session 進行中連線時會重送 Bash 工具定義，導致 prompt-cache miss 的問題
+- 修正在 Bedrock、Mantle、Vertex 與 WIF 上重複列出的自訂 Authorization header 蓋過已設定憑證的問題，以及 Vertex 設定精靈會撿到 ~/.config/anthropic 中殘留 Anthropic profile 的問題
+- 修正 Claude apps gateway 送出多餘的 host Authorization 或 profile header 到 Foundry、Vertex 與 Bedrock 的問題，以及設定了 ANTHROPIC_FOUNDRY_API_KEY 時 Foundry Entra ID 上游無法啟動的問題
+- 修正在 API-key 模式下，殘留的 Anthropic API key 或 auth token 會跟你的 Foundry 訂閱金鑰一起被送出的問題
+- 修正 /schedule 例行工作在 prompt 儲存時沒有 message role，執行時就沒事可做的問題
+- 修正 claude agents 沒有告知某個背景 session 正在等你核准來自另一個 session 的訊息，也沒說是誰送的問題
+- 修正在已開啟的背景 session 內用 Ctrl+S 暫存的 prompt，在 session 進入 idle、或被停止後重新開啟時會遺失的問題
+- 修正透過 server 管理設定推送的 telemetry（OTEL）設定在 warm start 時被忽略的問題，包含桌面 app 的 Code session
+- 修正在 leader 的 mailbox 寫入短暫被鎖住時，隊友的權限請求被回答兩次的問題
+- 修正在指令自動接續的回應正在串流時，正在進行的回合下方會多渲染一個幽靈重複 slash-command 列的問題
+- 修正 policyHelper 的 timeoutMs 與 refreshIntervalMs 值超過計時器上限（2147483647）時，會導致失敗或每毫秒重跑一次的問題；現在會被夾在範圍內（clamp）
+- 修正切換到另一個 subagent 的 transcript 後 token 計數器凍結或爬行的問題，並讓背景 subagent 與隊友的計數器在回應串流時即時更新
+- 修正寫成帶結尾點號（example.com.）的 sandbox 網路主機問題:deniedDomains 項目沒能在 sandbox 內封鎖該主機,而且對這類主機選「don't ask again」仍會一直跳提示
+- 修正關掉 Remote Control 同意提示（Esc,或在 claude remote-control 按 n）被當成同意的問題,導致下一個請求不詢問就直接連線
+- 修正 /mcp 重新連線與啟用時,仍會連上一個 settings 檔案的 MCP server 的問題,而這個 server 應該被啟動後才載入的 managed MCP allow/deny 清單或 strictPluginOnlyCustomization 擋掉
+- 修正 claude mcp remove 在 strictPluginOnlyCustomization 把 MCP 鎖定為僅 plugin server 時,會留下遠端 server 已儲存的 OAuth 憑證的問題
+- 修正從 Claude app 啟動的 Remote Control（claude remote-control）session 忽略所選模型、改用機器預設模型執行的問題
+- 修正在啟用 allowManagedPermissionRulesOnly 時,--disallowedTools 與 session deny 規則在第一次設定重載後被丟棄的問題
+- 修正 --resume 把一個背景化的對話列出兩次,以及 --continue 重新開啟其停滯的背景前副本的問題;--continue 現在也會開啟已完成的背景 session
+- 修正全螢幕模式下無法點擊 ! shell 指令輸出來展開它的問題
+- 修正留著跑舊 Claude Code 執行檔的背景 session 在多次自動更新間不斷堆積、而非被淘汰的問題
+- 修正 claude agents --json 會短暫把終端機切到 raw 模式、並在結束時覆蓋掉另一支程式終端機設定的問題
+- 修正 Proactive 輸出風格的 session 在它啟動的背景指令或 Monitor 仍在執行時,會用填充訊息和重複讀 log 空轉,而非乖乖 idle 的問題
+- 修正 subagent 在回應被電腦睡眠、連線中斷或 server 錯誤中途截斷時會停止的問題;它們現在會自動接續,而非以不完整回應結束
+- 修正在 claude agents session 內的 /btw 面板中按 ← 沒反應的問題:它現在會回到 agents 清單(即使在回答到一半),而且重新開啟 session 時面板會回來
+- 修正設定了 advisor 模型的 session 在背景請求（compaction、/recap、prompt 建議）時 miss 掉 prompt cache、每次都未經 cache 重送整段對話的問題
+- 修正 claude -p 在它最終結果出來後約 5 秒就結束、而模型啟用的 Monitor 仍在執行的問題;它現在會等 watch 觸發或逾時
+- 修正在 auto 模式下,當符合的指令是在複合指令或 subshell 內執行時,permissions.ask 規則被跳過的問題,讓它沒經過確認提示就執行
+- 修正 plugin 可透過宣告的 command、agent、skill、hook 或其他元件路徑（若該路徑是 symlink）讀取自己目錄外檔案的問題;這類路徑現在會被拒絕並回報錯誤
+- 修正 /add-dir 拒絕當前工作目錄內某個目錄的問題;它現在會像 --add-dir 在啟動時那樣,載入該目錄的 skill、command 與 agent
+- 修正當你從 subagent 的 transcript 檢視停止它、再恢復時,主 agent 沒被告知的問題
+- 修正把 ANSI 上色文字（例如 CI log）貼進 /feedback 這類對話框時的崩潰問題
+- 修正當專案的 .mcp.json 是 FIFO 或裝置檔 symlink 時,claude mcp add/remove 會卡住或耗盡記憶體的問題;它現在會快速失敗並給出可操作的訊息
+- 修正把非 JSONL 資料 pipe 進 claude -p --input-format stream-json 時記憶體無限增長的問題;它現在會快速失敗並給出清楚的錯誤
+- 修正在 subagent 或其他工具執行中把某回合背景化（← 或 Ctrl+B）時,背景 session 偶爾會把該工具當成被拒絕、而非重跑它的問題
+- 修正 Bash Read()/Edit() deny 規則沒套用到 < file 重導向與 tac、egrep 這類讀取指令的問題;現在任一參數或重導向目標命中 deny 規則就會拒絕該指令
+- 修正恢復或傳訊給 transcript 已超過 5 MB（例如讀了很多圖片後）的 subagent 時會以「No transcript found」失敗的問題
+- 修正 worktree 隔離的 session 把從不碰 git 的 Bash 迴圈、$VAR 讀取、"$(…)" 與 heredoc 當成「太複雜、無法驗證是否停留在 worktree 內」而拒絕的問題
+- 修正把對話倒回到空白後,/model 與 /effort 顯示 prompt-cache 警告的問題
+- 修正在充滿截圖的長 session 中,一旦圖片超過每個請求的大小上限就每回合都 prompt-cache miss 的問題
+- 修正 Edit 權限提示的 diff 檢視,把 emoji 與多碼位字元的寬度渲染錯誤的問題
+- 修正 WebSocket MCP server 連線失敗被記錄成「[object ErrorEvent]」而非底層錯誤的問題
+- 修正在另一個 Claude Code process 正在下載 npm 更新時,背景 session 會以「Couldn't start the background service」開啟失敗的問題;現在啟動會等它下載完
+- 修正從 shell 分離出去的背景指令（例如在 timeout 或 setsid 下）在任務停止或 Claude Code 結束後仍存活的問題
+- 修正當你從任務面板或連線的 client 停止某個背景指令時,Claude 沒被告知的問題
+- 修正停止背景 subagent 時留下它的 monitor 還在跑的問題
+- 修正 linked worktree 內的 sandboxed git 指令在 cd 進子目錄後,失去對 repo 共用 .git 目錄寫入權限的問題
+- 修正 Bedrock 與 Bedrock Mantle 請求在 Opus 4.7 以後的長時間隱藏思考階段會靜默、讓 idle 逾時切斷連線的問題;串流現在會帶進度事件
+- 修正在 Claude apps gateway 過期或撤銷你的 session 後啟動 Claude Code 的問題:它現在會說 session 已結束並提供 /login,而非回報網路錯誤
+- 修正雲端 session 在 session 的網路 proxy 啟動失敗時,整個 session 剩下時間都會失去 git/GitHub 憑證的問題;它現在會在背景重試並復原
+- 修正背景 daemon 啟動被中斷後,系統暫存目錄留下 cc-daemon-* 資料夾的問題;cleanupPeriodDays 保留期清掃現在會移除它們
+- 修正 Bash 權限檢查自動核准某些 zsh 解析方式與 bash 不同的 [[ ]] 條件式的問題;這些指令現在會跳出核准提示
+- 修正 managed-settings 核准提示在設定同時關閉詳細追蹤或原始 API body 記錄、或開啟 trace 匯出時,顯示的是通用警告而非其 telemetry 用語的問題
+- 修正 agent-team 隊友在 tmux/iTerm2 pane 中,確認關閉請求後有時仍保持開啟的問題
+- 修正無金鑰的 Console 登入（「Sign in with your Console account」）沒套用你組織的 server 管理設定,以及 /status 沒為該登入顯示 Organization 的問題
+- 改善渲染效能:長對話中每回合的重新渲染工作變少、串流不再隨回覆變長而變慢,而且背景 agent 更新不再重新渲染整個畫面
+- 改善 prompt 輸入的反應速度,減少每次按鍵的渲染工作
+- 改善 policy helper 診斷 —— refresh 失敗現在會顯示在 /status、拒絕 managed-settings 對話框會印出 Claude Code 為何結束、helper 逾時會回報為 timeout
+- 改善 /code-review --comment,現在會透過 glab mr note 把發現的問題貼到 GitLab merge request,而非回報目標不支援
+- 改善通知:排在另一個對話框下的 MCP elicitation 或權限詢問,現在會以跟可見詢問相同的延遲送出 idle 桌面通知
+- 改善 verbose/transcript 輸出:同時抵達的 async hook 完成通知現在會顯示在同一行,而非每個 hook 一行
+- 改善 claude self-hosted-runner --configure-git,現在也會啟用 git push 協商,讓從過期 clone 首次推送新分支時只上傳新 commit,而非整棵樹
+- 改善對 SDK host 的存活回報,當回應被 gateway keep-alive 撐住時,提高的 CLAUDE_STREAM_IDLE_TIMEOUT_MS 下的長時間等待就不會被誤認為卡死的 session
+- 改善 MCP 連線與 OAuth debug/error log,讓 server URL 或請求 header 中夾帶的憑證被遮蔽
+- 改善 /fork,讓新背景 session 保留原對話的 prompt cache:它的 worktree 簡報現在以訊息形式送達,而非用 system-prompt 變更的方式
+- 改善 emoji 自動完成,接受其餘的 GitHub/Slack shortcode 別名（:satisfied:、:telephone:、:collision:…）
+- 更改 --effort,讓解除新模型的預設 effort 保留只對該 session 生效,而非永久;在 claude.ai 上為 Remote Control session 選的 effort 現在會在保留期間套用
+- 更改在 MDM 或 managed-settings.json 中、啟動時被快取的 server 管理設定遮蔽的 policyHelper,在 fetch 回報這些設定已移除時就立即執行(或結束),而非等到下次啟動
+- 更改 managedSourcesBehavior: "merge",讓 sandbox.credentials.awsPairs 與 sandbox.ripgrep 整組取自最高層設定它們的 managed source,而非合併各 source 的值
+- 更改 gateway 模型探索（CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1）,即使設了 CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC 也會執行,因為它只會查詢你的 gateway
+- 更改 claude --resume <session-id> --bg,當沒有東西在跑該 session 時,以它自己的 ID 接續,而非默默啟動一份副本;現在啟動副本時會公告
+- 更改 /btw 歷史瀏覽,從 ←/→ 改為 Shift+←/Shift+→(或 [/]),用來瀏覽你最近的側邊問題並回到即時答案
+- 更改 .claude/settings.json 或 .claude/settings.local.json 中的 defaultMode: "bypassPermissions",使其被忽略,就像 "auto" 一樣;請改在 user 或 managed 設定中設定,或傳入 --permission-mode
+- 更改 Claude apps gateway session 中的 fable 與 best,目前仍解析為 Fable 5,因為尚未為 Fable 5.1 設定的 gateway 會拒絕它;請在 /model 選 Fable 5.1 來使用它
+- 更改 --add-dir、/add-dir 與 additionalDirectories,在碰到網路路徑（UNC 共用、/net/<host> automount）前就以訊息拒絕它們;在 Windows 上請使用對應的磁碟機代號
+- 更改 Claude apps gateway 登入與 token refresh 請求,現在會驗證 gateway 釘選的 TLS 憑證,就像 managed settings fetch 已在做的那樣
+- 更改 Cowork 與 claude.ai 雲端 session:讀取不屬於你的 artifact 現在一律會先詢問你,即使在 auto 模式下也一樣
+- 移除 Bash 與 PowerShell 權限提示上的 Ctrl+E 指令說明
+- [VSCode] 在 session 清單面板新增可摺疊的 ACCOUNT & USAGE 與 SESSION MANAGER 區段標題,含帳號 email、用量計量表,以及一個開啟用量對話框的 View details 連結
+- [VSCode] 在輸入區頁尾新增一個模型 pill,顯示當前模型並可開啟模型選單,含 Effort 列與「More models」頁
+- [VSCode] 在 session 清單的 Ungrouped 區段新增摺疊切換
+- [VSCode] 在指令選單新增輸出風格選擇,含自訂風格
+- [VSCode] 修正第三方 provider 部署（Bedrock、Vertex 等）仍顯示 claude.ai 專屬功能（remote session、聽寫、用量）並帶著殘留登入去呼叫 claude.ai 的問題
+- [VSCode] 修正 session 清單面板的用量計量表在面板載入後仍空白的問題;它現在會立即顯示最後已知的用量
+- [VSCode] 修正「Enable Remote Control for all sessions」切換,讓它開啟或關閉時會套用到已開啟的 session,而非只有新的
+- [VSCode] 修正螢幕閱讀器朗讀:fence 或標題前的控制字元不再讓可見行從語音中被略過,而且跨越標題的粗體標記不再配對錯誤
+- [VSCode] 更改動作選單,改在可篩選的「Slash commands」對話框中列出 slash 指令,而非內嵌顯示;選一個就會執行它;MCP servers 對話框也加了相同的篩選框
+- [VSCode] 把「Delete session」改為「Archive session」:封存的 session 會移到清單底部一個可摺疊的「Archived sessions」群組,並附帶 Unarchive 動作
+
 ## 2.1.252
 - 修正在部分 Mac 上執行 Bash 指令時失敗並出現「task output swap refused (tasks dir moved or linked)」的問題
 - 修正在還沒有 .claude/settings.local.json 的專案中，「always allow」無法儲存的問題
