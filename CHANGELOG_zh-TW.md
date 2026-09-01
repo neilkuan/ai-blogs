@@ -2,6 +2,10 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.258
+- 修正 Claude Code 在 macOS 12（Monterey）上無法啟動的問題，這是 2.1.255 引入的迴歸（regression）
+- 修正遠端與排程 session 因為重送的權限核准無法套用，而以「user messages must have non-empty content」失敗的問題
+
 ## 2.1.257
 - 新增 Claude Fable 5.1（claude-fable-5-1），現在是預設的 Fable 模型 —— 1M context，每 Mtok $10/$50，cache 讀取每 Mtok $0.25
 - 新增「時間格式」（timeFormat）與 timeZone 設定：12 小時制、24 小時制、24 小時制 UTC，或用 strftime 格式來顯示回合結束時鐘與 transcript 檢視的時間戳
