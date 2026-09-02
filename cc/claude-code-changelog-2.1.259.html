@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.259 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.259 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.259</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 managedMcpServers 管理設定：組織可以提供 HTTP/SSE MCP servers 給每一位使用者（entry 格式跟 .mcp.json 一樣）；如果 entry 裡指定了要執行的 command 就會被略過</li>
+<li>新增 --permission-prompts none 給無人值守的 headless 主機用：任何會跳出提示的操作都會自動被拒絕，同時目前啟用的權限模式（包含 auto mode）仍然繼續做決定</li>
+<li>新增對 glab mr create/merge/close/reopen/note/update 的辨識，所以 GitLab merge requests 會在收合的工具摘要裡顯示成 MR !N，並更新頁尾的 MR 標記（badge）</li>
+<li>claude plugin validate 新增 --json，可以輸出機器可讀的驗證報告</li>
+<li>修正多個並行 session 會默默把彼此對 ~/.claude.json 的變更蓋掉的問題——同時跑很多 session 時，workspace trust 不會再被重置，MCP/專案狀態也不會再遺失</li>
+<li>修正一段對話的 thinking 只要被拒絕過一次，之後每一輪都會再被拒絕的問題</li>
+<li>修正 Bash Read() 的 deny 規則沒涵蓋到以下情況：檔案是以選項值形式給的（--ignore-revs-file=.env、-f.env、@file）、git diff/git grep 的檔案運算元、以及 cd DIR &amp;&amp; cat FILE 這種複合指令；現在 grep -r/cp -r 掃過含有被拒絕檔案的目錄時會先詢問</li>
+<li>修正在停用遙測（telemetry）的 session 中，OAuth token 更新時會導致 prompt cache 失效的問題</li>
+<li>修正全螢幕模式在一輪跑了好幾百個工具呼叫的長回合之後，會顯示空白對話的問題</li>
+<li>修正 auto mode 會在它不支援的 model 上跑一整回合的問題（起因是某個 command 或 skill 的 frontmatter model: 指定了該 model）；現在這一回合會維持 session 原本的 model</li>
+<li>修正 CLAUDE_CODE_MAX_CONTEXT_TOKENS 在 Vertex 風格 model ID（@YYYYMMDD 後綴）且屬於 Claude Code 不認得的 model 版本時被忽略的問題</li>
+<li>修正正在執行的 shell 指令，其即時輸出預覽在較早的某一行換行折疊時，會把最新幾行藏起來的問題</li>
+<li>修正 claude.ai 使用者每次啟動都會跑一次背景 GitHub 連線檢查的問題；現在檢查結果會跨啟動記住</li>
+<li>修正當儲存的 session 含有一個沒有 payload 的附件（attachment）entry 時，--resume 會失敗（而 --continue 會開出一個空白對話）的問題</li>
+<li>修正互動式 session 中，自訂 command 和 skill 的 frontmatter model: 被忽略的問題</li>
+<li>修正從舊版本延續下來的對話中，Artifact 發佈會出現一次 &quot;unexpected parameter note&quot; 錯誤的問題</li>
+<li>修正當 MDM 或管理設定檔設定的 policy helper 已經先跑過時，啟動時管理設定 forceRemoteSettingsRefresh 會被忽略的問題</li>
+<li>修正在 git rev-parse 失敗且訊息不是 &quot;not a git repository&quot; 的機器上，worktree 隔離會拒絕由 hook 建立的 worktree 的問題</li>
+<li>修正雲端 session 的 OpenTelemetry metrics 和 events 缺少 user.email、organization.id 和 user.account_uuid 屬性的問題</li>
+<li>修正 MCP servers 在啟動列出其工具期間斷線時，會顯示成已連線但沒有工具，而不是回報錯誤的問題</li>
+<li>修正檔案編輯權限對話框有時候會把變更的某一行截斷顯示、卻沒有任何提示的問題</li>
+<li>修正在一次短暫的 git 探測失敗之後，repository 偵測會把已知的 repo 身分弄丟的問題</li>
+<li>修正當管理設定檔、drop-in、MDM plist 或 HKLM 的值無法解析時，管理設定會默默地沒被強制執行的問題：現在 Claude Code 會拒絕啟動並指出是哪個來源</li>
+<li>修正 remote-control session 中 Stop 沒有真的停掉背景 agents 和 workflows 的問題：被終止的任務現在會維持可見、而且在其 process 結束前都可以再次停止</li>
+<li>修正在前一次已停止的 workflow run 還在結束的過程中，就去重新啟動該 workflow run，可能導致它的 agents 跑出重複副本的問題</li>
+<li>修正 github.com 上尾端有斜線或多出 ?/# 的 marketplace repo URL，會產生一個無法使用的 .git clone URL 的問題</li>
+<li>修正會阻擋的 Stop hooks 導致被阻擋後的那一回合，會弄丟該回合裡 model 的 reasoning，而且在某些 model 上還會漏掉 prompt cache 的問題</li>
+<li>修正 remote（claude.ai）session 在一個由瀏覽器託管的 MCP server 頁面消失之後，要花 60 秒才能開始一個回合的問題</li>
+<li>修正 worktree 隔離的 session 會拒絕那些無法連到主 checkout 的常見 Bash 迴圈、xargs pipeline 和 launcher 包裝過的指令的問題</li>
+<li>透過重複利用文字量測結果，改善了長回應時的終端機縮放（resize）和首次繪製效能</li>
+<li>改善 /workflows 的 agent 細節：JSON 結果現在會用語法顏色和真正的換行做美化排版（pretty-print），過長的結果則會摺疊在一個展開切換鈕後面</li>
+<li>改善 headless/SDK session 的啟動：當 MCP servers 完成連線時，第一個回合最多可以提早 50 毫秒開始</li>
+<li>改善 /install-github-app：現在會說明它只支援 GitHub，並在 GitLab repo 內執行時指向 GitLab CI/CD 的文件</li>
+<li>改善巢狀背景 subagent 的結果，讓它們會被存進上層 subagent 的 transcript，這樣被延續的 subagent 就能保留它們，共享的 transcript 也能顯示這筆遞送</li>
+<li>變更 allowedMcpServers，讓它只管理使用者自己加入的 servers：以前你的 allowlist 會過濾掉的 managed-mcp.json server，現在升級後會照常載入；要繼續把它擋掉的話，請改用 deniedMcpServers</li>
+<li>[VSCode] 在 session 清單側邊欄新增了一個 Active 快速篩選，以及一個狀態篩選選單（Needs input、Working、Completed）</li>
+<li>修正在 session 暫停期間核准了 connector 工具的權限提示後，remote 和 scheduled session 卻什麼都沒做的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
