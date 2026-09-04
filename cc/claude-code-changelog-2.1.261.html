@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.261 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.261 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.261</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>/status 和 claude doctor 新增了一行「Organization policy」，會說明為什麼你組織的政策無法載入，例如 proxy 沒有把 endpoint 轉發過去</li>
+<li>新增 bashOutputMaxChars 和 taskOutputMaxChars 設定，可以拉高指令和背景任務的輸出在存進檔案前直接內嵌給 Claude 的量，最多到 128K 字元</li>
+<li>新增 --append-subagent-system-prompt-file，可以從檔案讀取 subagent 的 system prompt，適合太大、沒辦法直接放在命令列上的 prompt</li>
+<li>新增 /skill-doctor，會顯示哪些載入的 skill 根本沒在用、以及它們吃掉多少 context，方便你清掉</li>
+<li>修正快速輸入或按鍵重複時，打字或貼上的字元偶爾會亂序或掉字的問題</li>
+<li>修正當工作目錄位於 /net automount 上時，/add-dir &lt;subdirectory&gt; 會印出假的「couldn&#x27;t be resolved」錯誤的問題</li>
+<li>修正 Bedrock 設定精靈（setup wizard）在 AWS 或 AWS 憑證輔助程式一直沒回應時卡住的問題（現在會逾時並給出清楚的錯誤），以及它的模型檢查在會檢查 TLS 的 proxy 後面失敗的問題</li>
+<li>修正 cloud session 在受管理設定（managed settings）於 enabledPlugins 中強制啟用某個從 claude.ai 同步過來的 plugin 時，反而把它丟掉、然後退回去用一個可能會失敗的 marketplace 複製品的問題</li>
+<li>修正在 prompt 輸入框裡沒辦法刪掉緊接在行內 [Image #N] chip 前面那個字元的問題</li>
+<li>修正恢復（resume）session 時，會弄丟並行工具呼叫（parallel tool calls）周邊的 hook 輸出和其他 context，導致恢復後的請求內容跑掉的問題</li>
+<li>修正 Remote Control 在手機、瀏覽器或 claude.ai app 連上終端機 session 時，或在終端機裡切換模式之後，顯示過時的權限模式的問題</li>
+<li>修正從連上的手機或瀏覽器停止某一輪（turn）之後，或執行像 /clear 這類本機 slash 指令之後，Remote Control session 還顯示成在運作中（卡住的轉圈圈和 Stop 按鈕）的問題</li>
+<li>修正 SDK 和 cloud session 會忽略在第一個 prompt 之後、但該輪還沒開始前送出的 Stop 或中斷的問題；現在這一輪會停下來，而不是跑到跑完</li>
+<li>修正 Remote Control 會把用 /teleport 拉下來的 session 上傳到已連線的 session，在手機和網頁上看起來像是接在原本那個後面的問題</li>
+<li>修正 Remote Control 的入站事件串流在原生 Windows 上、會檢查 TLS 的公司 proxy 後面會失敗的問題</li>
+<li>修正 Remote Control session 在 claude.ai 上顯示預設 effort 等級、但實際上 effort 是來自設定的問題</li>
+<li>修正 gcpAuthRefresh 在 Google 憑證檢查很慢時，即使憑證其實還有效，卻還是在啟動時開瀏覽器的問題</li>
+<li>修正啟動時的 connector 抓取逾時，導致 claude.ai connector 整個 session 都不見的問題——現在 CLI 會在背景重試</li>
+<li>修正當背景 agent 無法恢復、而它的喚醒又在一個緊湊迴圈裡不斷重試時，導致 CPU 持續飆高的問題</li>
+<li>修正原本限定給較新版本的 feature flag，偶爾會套用到同一台機器上跑的較舊版 Claude Code 的問題</li>
+<li>修正 /usage 和 VS Code 用量面板在用量 endpoint 被限流（rate limited）時、或剛啟動後馬上打開時，會漏掉某個模型專屬的每週限額列的問題</li>
+<li>修正 claude -p --resume &lt;file&gt; 會採用 transcript 裡記錄的一個格式錯誤的 session ID 的問題；現在改用一個全新的 session ID 來恢復</li>
+<li>修正終端機進度指示器（iTerm2、Ghostty、ConEmu）在背景工作流程或 agent 還在跑的時候，就把 session 顯示成已完成的問題</li>
+<li>修正一個罕見的排版小問題：容器在列（row）和欄（column）方向之間切換後，box 可能會用錯誤的高度渲染</li>
+<li>修正 Claude apps gateway 在受信任的 proxy 於 X-Forwarded-For 後面加上 port 時判斷 client IP 的問題；如果有設定存取清單（access list），無法讀取的項目現在會回 403</li>
+<li>修正 Claude apps gateway 叫 Claude Desktop 用 JSON 匯出 OpenTelemetry、但終端機 CLI 其實用的是 protobuf 的問題，這會導致只吃 protobuf 的 collector 拒收 Desktop 的資料</li>
+<li>修正 Desktop 和網頁在 session 其實只是在盯著某個 artifact 等更新時，卻把它顯示成忙碌中的問題</li>
+<li>修正在 Claude Desktop app 裡跑的本機 Cowork session 中，Claude in Chrome 的 file_upload 會出現「paths: expected array, received undefined」而失敗的問題</li>
+<li>修正對另一台機器上離線的 Remote Control session 執行 SendMessage 時，會被判讀成已送達的問題；現在結果會說明送達會排隊等到那台機器重新連線為止</li>
+<li>修正在背景 Bash 指令裡跑的 CLI 所產生的 plugin 安裝提示：現在會被偵測到，而且原始的 &lt;claude-code-hint&gt; 標籤不會再洩漏到對話裡</li>
+<li>修正行內（in-process）的 agent-team 隊友會在第二輪重送它們第一輪的工具和 skill 宣告的問題，這會改到請求前綴、進而錯過 prompt cache</li>
+<li>改善 /model 選單和 VS Code 的 model pill：當 Claude Code 認得某個模型時，會顯示模型名稱，而不是它原始的 Bedrock、Vertex AI 或 LLM gateway ID</li>
+<li>改善在 Google Vertex AI 上、且有設定 GOOGLE_APPLICATION_CREDENTIALS 時的啟動：建立 API client 不再重跑 Google Cloud 專案探索、也不再多開額外的 gcloud 程序</li>
+<li>改善串流效能：已經渲染過的區塊不會再每次更新時被 layout 重新檢查</li>
+<li>改善危險 rm 的安全提示，現在也會抓到針對位置參數（positional parameters）的 rm -rf、以及包在雙引號 sh -c 腳本裡的</li>
+<li>改善 API 沒回傳任何 response header 時的處理：重試現在最多會等到 API_TIMEOUT_MS（預設 10 分鐘），而不是再等 3 分鐘，而且訊息會說明該改什麼</li>
+<li>把受管理設定載入時（啟動時或 /login 之後）Claude apps gateway 回的 403，從原本建議重新登入，改成說明該組織可能沒有啟用 Claude Code</li>
+<li>把受管理設定釘住 forceLoginMethod: &quot;gateway&quot; 的機器改成：忽略殘留的 API key 或 claude.ai 登入，改要求 /login；Bedrock、Vertex AI 和 Foundry session 不受影響</li>
+<li>把 auto mode 改成：對於那種把內容打包進某個公開圖表渲染器 URL 裡的連結，一律當成是上傳到那個網站——除非你主動要求，否則不再自動核准</li>
+<li>把 prompt 的字詞編輯按鍵改成和 Bash 一致：Ctrl+W 往回刪到空白處，Alt+F 和 Alt+D 停在字尾，標點符號會分隔字詞；keybindingFlavor 現在已經沒有任何作用</li>
+<li>把 /context 的 token 計算改成在 token 計算 API 不可用時採用本機估算，而不是額外去發小模型請求</li>
+<li>[VSCode] 在 Output styles 選單新增了一個「Build a custom style」導覽流程，會寫出一個自訂 output style 檔案並馬上把它列出來</li>
+<li>[VSCode] 在 MCP servers 對話框新增了一個 Add server 表單和一個 Remove 動作，這樣不用離開 IDE 就能新增和移除 MCP server</li>
+<li>[VSCode] 在 session 清單裡，替那些正在終端機、另一個 VS Code 視窗或 Claude Desktop 開著的 session 加上一個空心圓環，這樣它們就不會看起來像已關閉</li>
+<li>[VSCode] 替權限和問題提示加了一個摺疊按鈕，這樣不用關掉提示就能讀到它後面的對話；提示旁邊的空間現在可以捲動對話</li>
+<li>[VSCode] 在 session 清單的右鍵選單新增「Archive session」，並給 Unarchive 專屬的圖示</li>
+<li>[VSCode] 修正從 Claude Code on the web 傳送（teleport）過來的 session，會把一個因為 cloud session 關閉而被截斷的問題當成是被拒絕的問題</li>
+<li>[VSCode] 修正 session 分頁的 Rename 框在分頁隨視窗還原時開啟卻是空的問題；現在會帶入目前的名稱</li>
+<li>[VSCode] 修正 session 清單面板裡摺疊的區段，每次面板載入時會短暫顯示成展開的問題</li>
+<li>[VSCode] 修正 Focus 檢視在 Claude 已經往下進行後，還把某個工具呼叫顯示成執行中的問題，例如在某個問題正在等你回答的時候</li>
+<li>[VSCode] 修正當一個沒被聚焦的 Claude 分頁的 session ID 被修正時，session 清單的作用中列（active-row）高亮會變過時的問題</li>
+<li>[VSCode] 修正 Cmd/Ctrl+Shift+T 重新開啟以及 deep-link 開啟時，在有 Claude 分頁被聚焦的情況下，會把 Claude 分頁放到 Claude 編輯器群組外面的問題</li>
+<li>[VSCode] 修正 session 分頁的「Add to group」會把一個從 Claude Code on the Web 開啟的 session 放進兩個群組的問題；現在會移動 session 清單所顯示的那個項目</li>
+<li>[VSCode] 修正 model 選擇器會一直顯示組織後來已停用的模型、直到把視窗重新載入兩次為止的問題</li>
+<li>[VSCode] 修正在 VS Code 重新載入分頁檢視後，從 session 清單開啟的分頁會跳回那個 session、而從 Web session 開啟的分頁會重跑 teleport 或一直空白的問題</li>
+<li>[VSCode] 修正 /btw 側邊問題（side-question）歷史在剛重新載入視窗後、或在某個設定檔有錯誤時馬上發問，會覆蓋掉先前 session 歷史的問題</li>
+<li>[VSCode] 修正用 Claude.ai 或 Console 帳號登入時，待處理的問題卡片在 Claude 面板重新載入後沒有重新出現的問題</li>
+<li>[VSCode] 修正當某個 Claude 面板從設定檔採用了第三方 provider 後，claude.ai 專屬功能還一直顯示在同一視窗其他 Claude 面板裡的問題</li>
+<li>[VSCode] 修正即使開了 Disable Login Prompt 設定，當 Claude Code 回報沒有登入、或某個請求因為缺少登入而失敗時，登入畫面還是會冒出來的問題</li>
+<li>[VSCode] 修正下一個排隊中的權限提示，會沿用上一個提示打的文字、還會接受馬上按下的第二次點擊的問題</li>
+<li>[VSCode] 修正在只顯示過 session 清單的視窗裡，install-plugin 連結會開啟 Claude 側邊欄卻沒帶出安裝對話框的問題</li>
+<li>[VSCode] 修正側邊欄用量計量表在新視窗裡會一直空白、直到打開 Account &amp; usage 對話框為止的問題，以及 0% 用量限額被漏掉沒放進計量表的問題</li>
+<li>[VSCode] 修正「Start new session in this group」在 New conversation 後弄丟群組的問題，以及某個在側邊欄未讀清單載入前就結束的 session 少了未讀圓點的問題</li>
+<li>[VSCode] 修正編輯器分頁標記在某一輪執行中卻顯示未讀、或在從 session 清單開啟的分頁上卻沒顯示的問題，以及「Add Session Tab to Group」對已封存的 session 沒作用的問題</li>
+<li>[VSCode] 修正「Enable Remote Control for all sessions」，讓切換它時也會馬上套用到其他 VS Code 視窗裡開著的 session</li>
+<li>[VSCode] 修正 session 清單的 Open 篩選器，處理那些從 claude.ai 接續過來、但分頁還記錄在 web session 底下的 session，並替篩選選單的區段加上給螢幕報讀軟體用的標籤</li>
+<li>[VSCode] 把 model 選擇器改成一份包含所有模型的扁平清單，並把舊的模型拼法保留成列放在最後面</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
