@@ -2,6 +2,74 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.260
+- 新增 diff 面板，在全螢幕模式下會開在對話旁邊，隨著 Claude 編輯即時顯示你尚未 commit 的變更；用 /diff 切換開關
+- 在 /cost 和狀態列的 prompt_cache 欄位加上 prompt cache 未命中的可能原因（例如：工具定義或 system prompt 有變動、閒置超過 TTL）
+- 讓 headless 工作階段也能用 /reload-plugins，所以它現在會出現在 Claude Code Desktop 和 SDK 的指令清單裡
+- 為桌面應用程式、Remote Control 以及其他 headless（-p／Agent SDK）工作階段新增了文字版的 /advisor（/advisor、/advisor <model>、/advisor off）
+- 為 Claude apps gateway 新增 oidc.scope_on_refresh，用於那些只在重新請求 openid 時才在 refresh 回傳 id_token 的 IdP
+- 讓 Claude apps gateway 支援 desktop policy 區塊裡較新的 Claude Desktop key，包含 userPluginMarketplacesEnabled 和 userPluginUploadsEnabled
+- 修正路徑含括號的 Edit／Write／Read 權限規則被當成無效而丟棄、或被 Bash sandbox 忽略的問題，這會讓原本應該「唯讀」的資料夾變得可寫入
+- 修正某個檔案權限規則帶有無法編譯的 pattern（例如少了一個 [ 的結尾）時，會讓每次檔案編輯都以 Invalid regular expression 失敗；現在這種 deny 規則會針對它字面上寫出的路徑生效
+- 修正 Bash 權限檢查會自動核准把命令替換（command substitution）藏在 REPORTTIME、REPORTMEMORY 或 DIRSTACKSIZE 賦值裡的 zsh 指令；這些現在會跳出核准提示
+- 修正當企業根 CA 只安裝在作業系統憑證儲存區時，Bedrock 的模型探索、token 計數以及 AWS SSO/STS 憑證呼叫會以「unable to get local issuer certificate」失敗的問題
+- 修正 macOS 上的 permissions.blockReadsOutsideWorkingDirectories 會把使用者的 git config 對 sandbox 中的 git 藏起來、也會把 worktree 隔離的 sub-agent 自己的 checkout 藏起來的問題
+- 修正同時擁有 claude.ai Enterprise／Team 帳號、又留著先前 /login 遺留 API key 的使用者無法載入受管理設定（managed settings）的問題
+- 修正 /status 會把已登入的 claude.ai 帳號和已設定的 API key 兩者都列成生效中的問題；現在沒在使用的那組憑證會被標示出來
+- 修正以某個內建 skill 別名為 key 的受管理 skillOverrides 項目（例如用 checkup 對應 /doctor）沒有生效，以及 Skill(name) deny 規則沒涵蓋以 <dir>:name 列出的巢狀 skill 的問題
+- 修正 model: fable 的 agent 會忽略 ANTHROPIC_DEFAULT_FABLE_MODEL pin 上的 [1m] 標籤、默默地以 200K 的 context window 執行的問題
+- 修正 /model 選單沒有對可使用的組織顯示 Fable 5.1 的問題，之前只有打成 /model claude-fable-5-1 才會被接受
+- 修正 Claude Fable 5.1 的 prompt caching 沒有涵蓋接在工具結果之後附上的 context，導致每個工具呼叫回合都把它當成未快取的輸入重新送出
+- 修正在 plugin hook 載入失敗後，切換模型會在整個工作階段剩下的時間都被卡住的問題；現在每次切換都會重新檢查，而且拒絕訊息會指出原因
+- 修正當組織管理的 plugin marketplace 無法載入時，整個工作階段的模型切換都被卡住的問題
+- 修正 SDK 提供的 MCP server（例如 Desktop 連接器）有時在第一回合會不見、要到下一回合才出現的問題
+- 修正雲端託管的 claude.ai 工作階段在任務進行到一半新增或移除連接器時，Claude in Chrome 工具會以「Not connected」失敗的問題
+- 修正旗標（flag）、組合 emoji 和帶重音的字母在自動換行時被拆開，以及當旗標或組合 emoji 落在終端機最後兩欄時舊文字會殘留在畫面上的問題（現在改以 … 顯示）
+- 修正 Remote Control 會接受一個不是有效模型名稱的模型選擇的問題；現在會直接以錯誤拒絕，而不是等到下一則訊息才失敗
+- 修正 /rewind 和 --rewind-files 在 checkpoint 備份檔案不存在、實際上什麼都沒還原時卻回報成功的問題
+- 修正 /rewind 會留下被 rewind 掉的那些回合的過期檔案讀取追蹤紀錄，導致外部編輯後出現「File unchanged since last read」的 stub 以及整個檔案被重新注入的問題
+- 修正 -p --resume／--continue（桌面應用程式會用到）在某個工作階段的 worktree 目錄失去 git metadata 後，每次重試都失敗的問題；現在會先失敗一次，接著就會不帶 worktree 繼續
+- 修正透過 SendMessage 恢復另一個 agent 的 subagent，永遠不會在那個 agent 完成時被喚醒的問題（通知跑去主對話那邊了）
+- 修正 agent 團隊的問題：在長時間 API 重試等待期間（例如在 CLAUDE_CODE_RETRY_WATCHDOG 下），in-process 隊友的 transcript 會掉訊息或整個變空白，因為重試通知把真正的訊息擠掉了
+- 修正被移到背景的工作階段會在 ListAgents 中出現兩次（其中一個是同名的幽靈「interactive」分身）、還會在檢視器裡收到 SendMessage 投遞的問題
+- 修正多個工作階段共用同一個專案目錄時，會間歇性出現「task output swap refused」錯誤的問題
+- 修正在全螢幕模式下按 Ctrl+Z 會讓 shell 停留在替代畫面（alternate screen）上，覆蓋在暫停的介面之上的問題
+- 修正在長時間的 context 壓縮（compaction）還在進行時，Workflow 工具的 subagent 會被當成卡住而重新啟動的問題
+- 修正當宿主應用程式（例如 Claude Desktop）把來自 URL marketplace 的 plugin 存成一個目錄時，安裝會以「marketplace entry path does not stay inside the marketplace directory」失敗的問題
+- 修正在你從 claude.ai、桌面應用程式或手機（Remote Control）操控的工作階段中發布 artifact 時，會多開一個瀏覽器分頁的問題
+- 修正在某些 Cowork 工作階段中，Artifact 工具的第一次呼叫會以「Invalid tool parameters」驗證錯誤失敗的問題
+- 修正執行 skill 或 slash command 時，IDE 的行選取會被丟掉的問題（現在「N lines selected」的 context 會傳到 Claude）
+- 修正對巢狀子群組（subgroup）中的 GitLab 專案（例如 gitlab.com/group/subgroup/project）的儲存庫偵測問題
+- 修正在 GitLab 儲存庫中工作時，渲染輸出裡的 owner/repo#123 issue 參照會連到 github.com 的問題；現在會連到 gitlab.com 的 issue
+- Glob/Grep：修正搜尋路徑會在權限檢查之前就先去磁碟探測的問題；現在跟 Read 一樣，路徑不存在會在權限決定之後才回報
+- 還原 2.1.259 那個把 Read() deny 規則套用到 Bash 參數的變更；它會在所有模式下讓 npm run build 因為 Read(./**/build/**) 規則被拒絕，還會讓 cd … && grep 連在 auto 模式下都跳提示
+- 改善結構化輸出：Workflow 的 agent({schema}) 會在一開始就拒絕永遠無法滿足的 JSON Schema，而且重試上限（retry-cap）的錯誤現在會包含最後一次驗證失敗的內容
+- 改善刪除 worktree 有未 push commit 的背景工作階段：訊息現在會指出分支名稱和 commit 數量，再刪一次就會捨棄該 worktree
+- 改善 Claude apps gateway 的 refresh 失敗日誌，讓它指出是哪個步驟失敗
+- 改善非互動式（-p／SDK）工作階段的閒置 CPU 使用量
+- 改善 Amazon Bedrock 上的 Claude apps gateway：中止（aborted）請求的輸入 token 現在會用 AWS 免費的 CountTokens API 計算（需授予 bedrock:CountTokens），而不是發一個只有一個 token 的請求
+- 改善像 Edit(C:\dir\(name)\**) 這種規則的設定錯誤訊息，這裡的 \( 會被讀成跳脫的括號、而不是路徑分隔符號，現在會建議一個沒有歧義的寫法
+- 改善 1M context 模型的 auto-compact：Opus 和 Fable 工作階段現在會在快到 1M-token 上限前就進行壓縮，而且在非常大的 context 上的復原壓縮不再會在 10 分鐘時逾時
+- 改善 /ultrareview 和 claude ultrareview，讓它們對長時間執行的雲端 review 最多等待 45 分鐘（之前是 30 分鐘）
+- 改善 Claude Fable 5.1 上的 /effort，讓工作階段中途改變 effort 不再會讓 prompt cache 失效
+- 更新內建的 claude-api skill，讓它的 Go、Java 和 C# 範例改用當前世代的模型 ID，並釐清較便宜的 worker 或 sub-agent 模型也應該用當前世代的
+- 把全螢幕模式下的 ctrl+l／cmd+k 改成像終端機的 clear 一樣清空 transcript 檢視畫面；往上捲動就能看到先前的訊息
+- 把在右括號後面還有文字的權限規則（例如 Bash(ls) x，這種永遠不會匹配到任何東西）改成回報為無效設定，而不是默默忽略
+- 更改 server 端管理的設定，讓受管理的 CLAUDE.md（claudeMd）不再觸發安全核准對話框；hook、shell 指令、sandbox 以及不安全的 env 設定仍然需要核准
+- 把 Claude in Chrome 改成遵循你所屬組織的 Claude in Chrome 管理員設定；當管理員把它關掉時，--chrome、/chrome 和瀏覽器工具都會無法使用
+- 把 Claude apps gateway 改成以 Claude Desktop 1.15200.0 及更新版本會讀取的清單形式送出 orgPluginSettings；較舊的桌面版會忽略它
+- 把 Claude apps gateway 改成當某個 desktop policy 在 managedMcpServers 或 orgPluginSettings 項目的巢狀物件裡拼錯欄位時，也會拒絕啟動並指出該欄位
+- 把在 ! bash 模式提示字元下輸入的指令，改成即使開了嚴格 sandbox 模式（sandbox.allowUnsandboxedCommands: false）也會在 sandbox 外執行，就像在你自己的終端機裡打字一樣
+- 把自架 runner 的 --kill-session-after-min 改成：對於只是在等待使用者的工作階段（已暫停、下一則訊息就能恢復），會釋放它而不是把它殺掉並回報失敗
+- 移除了 subagent 啟動的背景指令的一小時時間上限；它們現在會一直執行到自己結束或被停止為止，跟主工作階段一致
+- [VSCode] 在頁尾的模型 pill 上加入所選的 effort 等級、修正切換模型後 effort 等級過期不更新的問題，並把頁尾的 pill 恢復成先前較精簡的大小
+- [VSCode] 在工作階段清單的狀態篩選選單中加入 Open 和 Closed
+- [VSCode] 修正 Remote Control 自動開啟時，新工作階段的歡迎畫面會消失的問題
+- [VSCode] 修正工作階段歷史選單在某個工作階段已經開在另一個分頁時會再載入一次的問題；現在會直接切換到那個分頁
+- [VSCode] 修正工作階段分頁的 Rename 指令在該分頁檢視畫面重新載入時會默默沒作用的問題；現在一定會套用
+- [VSCode] 修正 Claude Code 重試被丟棄的回應後，畫面上會殘留半截訊息、空的工具卡片或多出一行「Thought for」的問題
+- [VSCode] 修正「Enable Remote Control for all sessions」沒有套用到切換開關時還在啟動中的工作階段分頁的問題
+
 ## 2.1.259
 - 新增 managedMcpServers 管理設定：組織可以提供 HTTP/SSE MCP servers 給每一位使用者（entry 格式跟 .mcp.json 一樣）；如果 entry 裡指定了要執行的 command 就會被略過
 - 新增 --permission-prompts none 給無人值守的 headless 主機用：任何會跳出提示的操作都會自動被拒絕，同時目前啟用的權限模式（包含 auto mode）仍然繼續做決定
