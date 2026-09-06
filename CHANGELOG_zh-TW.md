@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.263
+- 修正一些 bug，順便提升穩定性
+
 ## 2.1.261
 - /status 和 claude doctor 新增了一行「Organization policy」，會說明為什麼你組織的政策無法載入，例如 proxy 沒有把 endpoint 轉發過去
 - 新增 bashOutputMaxChars 和 taskOutputMaxChars 設定，可以拉高指令和背景任務的輸出在存進檔案前直接內嵌給 Claude 的量，最多到 128K 字元
