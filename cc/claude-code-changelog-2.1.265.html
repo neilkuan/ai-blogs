@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.265 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.265 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.265</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>Claude Desktop 和 Cowork 透過 Claude apps gateway 送出的 telemetry 現在會帶上 user.email 和 user.groups，跟終端機 session 一致</li>
+<li>新增支援讓 --plugin-dir 指向一整個 plugin 資料夾：每個含有 manifest 的子資料夾都會載入，執行期間新增或移除的子資料夾也會即時被抓到</li>
+<li>存到磁碟的工具結果現在有 1 GB 上限；對話中的預覽會標示存檔何時被截斷</li>
+<li>修正在前景啟動（foreground-spawned）的 subagent 恢復時會改變它的工具清單和 system prompt 前綴，導致該 agent 的 prompt-cache 無法重用</li>
+<li>修正 agent 隊友和恢復的 subagent 在後續回合會把 SubagentStart hook context 和預載的 skill 移出 prompt 前綴，導致 prompt-cache 無法重用</li>
+<li>修正上一個 process 在工具執行中死掉後的恢復：最後一則 prompt 不再被改寫，被中斷的工具呼叫會保留並標記為已中斷</li>
+<li>修正 /model opusplan[1m] 被拒絕並顯示「Model not found」</li>
+<li>修正權限提示（permission prompt）和訊息中語法高亮的程式碼，有時會在 Ruby 的 ?、Erlang 的 $ 或 Perl 的 $ sigil 之後漏掉一個字元</li>
+<li>修正每次 slash-command 或 @-file 建議清單開啟或關閉時，全螢幕 transcript 會跳動一行</li>
+<li>修正在 macOS 和 Linux 上，含有反斜線的 plugin 路徑會繞過 symlink 圍堵檢查</li>
+<li>修正名稱以兩個點開頭的 plugin 資料夾被錯誤地當成在 plugin root 之外而拒絕載入</li>
+<li>修正 VS Code 和 SDK session 在重新整理 token 時被關閉，偶爾會需要重新登入</li>
+<li>修正 Remote Control session 在回覆的最後一則訊息之前就送出 end-of-turn 訊號，可能導致 Claude app 在回覆最後一段還沒到之前就顯示成已完成</li>
+<li>修正背景（--bg）session 偶爾會在回合進行中被回收，只因為訊息剛好在閒置逾時前一刻抵達</li>
+<li>修正 Claude Code 自己的 git status 和 diff 探測會執行工作目錄內巢狀 repository 所設定的 clean filter</li>
+<li>修正 advisor 工具及其指示每次請求都會依請求的 model 重新決定；現在只決定一次，並在變動時於對話中公告</li>
+<li>修正 artifact 發布會接受 connector 並未公開的工具名稱；現在若宣告的工具全都不存在就會拒絕發布，只有部分不存在則會警告</li>
+<li>修正 /add-dir &lt;subdirectory&gt; 在 managed settings 只把 skill 鎖定給 plugin 時會拒絕載入子目錄的 agent，而只鎖定 agent 時又會誤允諾 agent</li>
+<li>修正雙鍵鍵盤快速鍵在第二個按鍵超過一秒才抵達時會靜默取消（在 tmux 裡就會這樣）；現在會等 3 秒，逾時則顯示通知</li>
+<li>修正 fork 的 skill（context: fork）沒有把它的 kickoff prompt 串流出來，而且在 --forward-subagent-text 下也沒把它的文字回合當成 progress event 在 stream-json 裡串流</li>
+<li>修正 plugin 的預設元件資料夾若作業系統無法檢查（例如 symlink 迴圈）會被靜默略過；現在會在 /plugin 裡連同錯誤代碼一起回報</li>
+<li>修正 Claude apps gateway 的 OTLP telemetry 中繼在拒絕了幾個格式錯誤或過大的 payload 之後，會暫停對 collector 的所有轉發長達 30 秒</li>
+<li>修正 /plugin 的 Discover/Browse 和 claude plugin list --json --available 對於 metadata 只存在於 plugin.json 的 marketplace plugin 不顯示描述或顯示名稱</li>
+<li>修正在由 managed settings 設定的 Claude apps gateway 登入的 session 中重新執行 /login 時會顯示「no gateway URL is configured」</li>
+<li>修正 /model 在設定檔無法寫入時仍宣稱 model「saved as your default」；現在會說存檔失敗以及原因</li>
+<li>修正從 Remote Control 執行 /clear 時會卡在等待 SessionStart hook 和開啟中的終端機對話框才完成</li>
+<li>修正 /config 對話框在不同分頁間切換時高度會改變</li>
+<li>修正在 container 重啟後恢復 workflow 執行；現在若恢復時 run journal 遺失，會直接以清楚的錯誤失敗，而不是重跑每個 agent</li>
+<li>修正 claude-api skill 的錯誤代碼參考：model 存取失敗回傳 404、不可用的 beta header 回傳 400，而非 403</li>
+<li>修正非互動式 session（-p 搭配 stream-json 輸入、Agent SDK、cloud session）在每則新的使用者訊息都會重設 shell 工作目錄；現在 cd 會跨回合保留</li>
+<li>修正設定為 http 但只支援舊版 HTTP+SSE transport 的 MCP server 永遠連不上；Claude Code 現在會照 MCP spec 所述回退到 SSE</li>
+<li>修正 cloud session 中某些 claude.ai connector 明明在 claude.ai 已連線卻顯示成需要驗證（這些 server 會對不支援的請求回應 HTTP 401）</li>
+<li>修正遠端 session 在 connector 核准或登入連結等待你操作時仍讓 sandbox container 保持存活</li>
+<li>修正恢復的 session 在「background task didn&#x27;t finish」通知中顯示冗長的、給 model 看的復原指示，而不是簡短的狀態列</li>
+<li>Windows：修正在 AppContainer 或受限 token sandbox 裡執行時，Read、Write 和 Edit 對每個檔案都拒絕（「symlink resolution changed after permission was checked」）</li>
+<li>改善大型 repository 上的 --worktree 啟動：新的 worktree 現在會平行 checkout（需 git 2.32+）</li>
+<li>改善 /workflows 的 agent 細節：工具呼叫會標記為執行中、失敗或完成，subagent 有 task list 時會顯示出來，按 Enter 可展開列出的呼叫連同其輸入與結果</li>
+<li>改善在 prompt 中途輸入的 slash command：符合的項目現在會以清單顯示（Tab 可在全螢幕外開啟）而非單一建議，而且 plugin skill 現在用它的裸名稱就能找到</li>
+<li>改善需要登入的遠端 MCP server：Claude Code 在你真正驗證之前不再向它們註冊 OAuth client</li>
+<li>改善恢復讀取大量檔案的長 session 所需的時間</li>
+<li>改善圖片超過大小上限而無法解碼時顯示的錯誤：現在會指出原因以及如何修正，而非只引用上限值</li>
+<li>改善 Artifact 工具讀取他人所寫 artifact 的方式：摘要現在會把該頁面當成不可信內容，並標示其中內嵌的指示，而不是照著轉述</li>
+<li>更新 .claude 資料夾權限選項的說明，讓它說出實際允許的事：在本次 session 中編輯專案 .claude 資料夾（或 ~/.claude）內的檔案</li>
+<li>更改 managed settings 中設有 forceLoginGatewayUrl 的機器，讓它從啟動起就是 Claude apps gateway session，跟 forceLoginMethod: &quot;gateway&quot; 一樣；殘留的 claude.ai 登入或 API key 不會被使用</li>
+<li>更改圖片處理改用 runtime 內建的圖片支援；CLI 不再把原生圖片模組解壓到暫存目錄</li>
+<li>更改 plugin 的顯示 metadata，在 Installed 分頁和 claude plugin details 中優先採用 marketplace 項目而非 plugin.json，缺漏處再從 plugin.json 補齊</li>
+<li>更改 Claude apps gateway session 改為直接把 OpenTelemetry 匯出到 gateway 的 managed settings 在 OTEL_EXPORTER_OTLP_ENDPOINT 指名的 collector，而非透過 gateway 的中繼；沒有指名 collector 的 session 仍走中繼</li>
+<li>[VSCode] 新增自動封存閒置一段時間的 session（新的「Archive inactive sessions」設定，預設 14 天）</li>
+<li>[VSCode] 修正側邊欄聊天在 Reload Window 或重啟後、且對話已開啟超過 10 分鐘時會變成空白</li>
+<li>[VSCode] 修正「Remote Control is active」訊息上的時間軸圓點落在文字下方的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
