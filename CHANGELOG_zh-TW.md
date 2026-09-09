@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.266
+- 修正了 2.1.265 影響 LLM-gateway 和 proxy 設定的回歸問題（regression）：那個沒寫在文件裡的 CLAUDE_CODE_USE_GATEWAY 環境變數，以前除非同時設定 ANTHROPIC_BASE_URL 和 ANTHROPIC_AUTH_TOKEN 否則會被忽略，但在 2.1.265 開始它會自己強制走 Cloud-gateway 登入，導致那些把它跟 API key、apiKeyHelper 或自訂 auth headers 一起設定的組態，每個 request 都失敗並跳出「Not signed in to the Cloud gateway」。現在這個變數單獨存在時又會被忽略了；不需要更動任何組態
+
 ## 2.1.265
 - Claude Desktop 和 Cowork 透過 Claude apps gateway 送出的 telemetry 現在會帶上 user.email 和 user.groups，跟終端機 session 一致
 - 新增支援讓 --plugin-dir 指向一整個 plugin 資料夾：每個含有 manifest 的子資料夾都會載入，執行期間新增或移除的子資料夾也會即時被抓到
