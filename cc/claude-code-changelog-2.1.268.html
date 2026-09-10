@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.268 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.268 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.268</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>在 Claude apps gateway 新增功能：在 gateway.yaml 設定 pricing: 後，已登入的 Claude Code 客戶端會透過 managed settings 收到相同費率，所以 /cost 和 telemetry 會跟花費計量表對得起來</li>
+<li>為 gateway 新增啟動警告：當 access_control.allow_cidrs 為空時會提醒，並在第一次收到來自公開位址的請求時跳一次性警告</li>
+<li>新增 gatewayInternalNetworks managed setting，讓管理員可以允許在組織自己的公開 IPv4 區段上對 Claude apps gateway 執行 /login</li>
+<li>新增 claude self-hosted-runner --remove-session-state（預設關閉）：session 結束時刪除 &lt;base-dir&gt;/_sessions/ 底下各 session 的專屬目錄</li>
+<li>在 claude auth status --json 的輸出中新增 configDirectory</li>
+<li>為 claude plugin install、uninstall、update、enable 和 disable 新增 --json，並在 claude plugin list --json 的每一列加上 errorDetails/noteDetails</li>
+<li>為已發布的 artifact 新增瀏覽器分頁圖示，由 Claude 挑選以符合每個頁面</li>
+<li>修正自 2.1.265 起在第三方 Anthropic 相容端點（ANTHROPIC_BASE_URL）上每一輪都以 HTTP 400 失敗的問題：起因是 Artifact 工具輸入 schema 裡有個那些端點會拒絕的 regex</li>
+<li>修正 WebFetch 在伺服器一直開著回應卻不結束時無限卡住的問題；現在 fetch 會在 300 秒後失敗。設定 CLAUDE_CODE_WEBFETCH_DEADLINE_MS 可覆寫這個逾時（設 0 則關閉）</li>
+<li>修正重新啟動的 in-process 隊友（teammate）會從你尚未信任的資料夾中，同名 agent 檔案裡撿到工具或 system prompt 的問題</li>
+<li>修正持續高 CPU 使用率的問題：長時間閒置 session 裡的忙迴圈（busy loop）不再把某個 CPU 核心吃滿，session recap 期間快速的終端機焦點回報也不再讓 CPU 一直很高</li>
+<li>修正 Claude 在 MCP 工具呼叫後有時回覆「your message came through empty」的問題</li>
+<li>修正 symlink 目錄（macOS 上的 /etc、/tmp、/var；Linux 上的 /bin）的 deny 和 ask 權限規則在路徑以真實位置給定時沒有套用的問題，以及 Bash 指令忽略寫在 symlink 路徑拼法上的 deny 規則的問題</li>
+<li>修正當同一行有 env -C、eval 或類似權限檢查器無法分析的指令時，Read 或 Edit 的 deny 規則沒有套用的情況</li>
+<li>修正 plugin 和 marketplace 錯誤會顯示 git 來源 URL 裡的 token 或密碼的問題</li>
+<li>修正 /mcp 和 /plugin 的伺服器細節、claude mcp list/get，以及 MCP 登入錯誤會顯示從 MCP 設定裡 ${VAR} 佔位符解析出來的機密的問題</li>
+<li>修正使用 excludeDynamicSections 的 SDK session 在對話中途 prompt caching 和 extended thinking 壞掉的問題：第一則訊息不再每次請求都重新算繪</li>
+<li>修正有權限的使用者在重新啟動後，或在 Desktop Code 分頁中，因為快取的 model-access 拒絕已過時而被告知某個模型受限的問題</li>
+<li>修正當另一個 Claude Code 程序刷新了過時的 model-access 項目時，執行中的 session 會默默切換到組織預設模型的問題</li>
+<li>修正 Fable 模型的 long-context 429 在 Pro 和 Team 方案上顯示用量點數同意提示、而不是 1M-context 訊息的問題</li>
+<li>修正透過 profile 進行的 workload identity federation（如 claude-code-action 的設定方式）：共用同一 profile 的程序可能在執行途中以 401 … jti reused 失敗</li>
+<li>修正 MCP 伺服器 OAuth 登入在本機 callback port 範圍綁不起來時，以「No available ports for OAuth redirect」失敗的問題</li>
+<li>修正 /compact 和 auto-compact 產生的對話摘要會弄亂含有 $ 序列文字的問題</li>
+<li>修正回復（resume）以 /compact 結尾的對話時：其還原檔案的備註現在每次回復都以相同順序載入</li>
+<li>修正 SDK prompt suggestions、side questions 和 /rename 會送出壓縮（compaction）之前的對話的問題</li>
+<li>修正用上方向鍵叫回先前的 prompt 並編輯後，@ 檔案和 / 指令建議不出現的問題</li>
+<li>修正 claude agents：以自然節奏再按一次 ← 想回到 agent 清單時，不再被忽略到你停超過一秒為止</li>
+<li>修正 claude agents session 刪除在 worktree 無法移除時卡住的問題：訊息現在會指出原因和下一步，若是 git worktree 再按一次 ctrl+x 就會照樣刪掉該目錄</li>
+<li>修正 agents 面板裡的背景 agent 和 workflow 列在文字含有換行時展開成很多行的問題</li>
+<li>修正 Claude in Slack session 在組織 managed settings 設了 MCP allowlist 時失去 Slack 工具的問題</li>
+<li>修正 Claude in Chrome 在導覽 URL 有 scheme 但 host 無法解析時，會要求允許主機「https」的問題</li>
+<li>修正目前任務的標籤很長時 spinner 換行成好幾行的問題；標籤和「Next:」任務列現在都會維持在一個終端機列內</li>
+<li>修正 /bug 和 /feedback 的描述欄位在終端機原生游標啟用時看不到游標的問題</li>
+<li>修正由 claude remote-control 提供的 Remote Control session 在 ListAgents 中顯示產生的名稱、而不是其 session 標題的問題</li>
+<li>修正 claude plugin validate 拒絕目錄名以兩個點開頭的 plugin 路徑的問題，這種路徑其實 plugin loader 是接受的</li>
+<li>修正 plugin 默默略過無法檢查的預設 monitors 檔案或根目錄 SKILL.md 的問題</li>
+<li>修正 WebFetch 對 localhost 和其他不含點的主機名的錯誤訊息，讓它說明為何拒絕該 URL 並建議改用 curl</li>
+<li>修正 PermissionRequest hook 在 --print 模式下不觸發的問題</li>
+<li>修正 policy-helper 警告在無介面（-p）執行時不列印的問題</li>
+<li>修正 /resume 把 /fork 背景 session 列在其父 session 名稱下、而非自己的 ⑂ fork 名稱下的問題</li>
+<li>修正 /remote-control 和其他受 claude.ai 管控的指令：登出時現在會建議 /login，而不是顯示 Claude for Enterprise 遷移訊息</li>
+<li>修正 CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS 沒有延長那些沒有各自 timeout 的 SessionEnd hook 的問題（它們原本還是會在 1.5 秒後被取消）</li>
+<li>修正 /autofix-pr 和其他 cloud-session 指令在沒有連接 GitHub 帳號時叫你重試或安裝 Claude GitHub App 的問題；現在會改指向 /web-setup 或網頁連接頁面</li>
+<li>修正 /teleport 和 /remote-env 等 cloud-session 指令：當組織政策把它們關掉時會說明原因，而不是回「Unknown command」</li>
+<li>修正 Bash sandbox 說明誇大隔離範圍的問題：檔案系統隔離關閉時不再列出未強制執行的路徑清單，strict 模式也不再宣稱指令永遠不會在未沙盒化的情況下執行</li>
+<li>改善全螢幕模式：新增或移除一行 prompt（Shift+Enter）現在重繪的速度跟打一個字一樣快，而不是重新算繪可見的對話記錄</li>
+<li>改善 --continue / --resume：對話現在會立即出現，而不用等 SessionStart hook，第一則訊息也不再重讀整份對話記錄</li>
+<li>改善工具密集輪次的反應速度：不再為了一個隱藏的 per-tool-batch 提醒而重繪對話記錄</li>
+<li>改善含有 .claude/workflows/ 腳本的專案的啟動時間：列出這些腳本時不再逐一解析每個腳本</li>
+<li>改善 auto 模式的拒絕：Claude 收到的訊息現在會指名擋下該動作的規則，並要求 Claude 嘗試更安全的方法、先完成無關的工作再停下來問你</li>
+<li>改善 Claude in Chrome：長頁面的讀取現在會保留在行內（inline），而不是存成檔案再讀回來</li>
+<li>改善 MEMORY.md 截斷警告，說明砍了幾行以及從哪裡開始砍</li>
+<li>改善 artifact 的終端機權限提示：現在會先帶出這次詢問要問的問題</li>
+<li>改善 prompt footer：編輯器或 /diff 的選取現在會顯示在 prompt 輸入框內，全螢幕模式則在標頭（header）顯示 Remote Control 狀態，而非在頁尾（footer）</li>
+<li>改善「Usage credits required for 1M context」訊息，說明中途開啟的用量點數要在重新啟動 Claude Code 後才生效</li>
+<li>改善 /plugin：安裝、啟用或停用 plugin 現在在你關閉選單時就會生效；之後不再需要 /reload-plugins</li>
+<li>變更 Bedrock、Vertex 和 Foundry 上的 system prompt，改以附件（attachment）方式傳遞環境、模型和設定細節，跟第一方 session 一致</li>
+<li>變更 Bedrock、Vertex 和 Foundry session，讓工具清單在整段對話中維持位元組穩定（byte-stable）（晚連上的工具改為延遲載入而不是重寫清單），跟第一方 session 一致</li>
+<li>變更任務追蹤工具（TaskCreate/Get/Update/List、TodoWrite），只在 Claude 3.x、Opus 4.0–4.7、Sonnet 4.0–4.6、Haiku 4.5 上提供；其他情況請設定 CLAUDE_CODE_ENABLE_TODO_TOOLS=1</li>
+<li>變更終端機裡的 artifact 資料編輯權限提示，改成一張卡片，顯示文件數量以及誰可以開啟該 artifact</li>
+<li>變更設定為略過所有核准的本機 Cowork session：Artifact 工具現在會拒絕 session 資料夾以外的本機檔案，或藏在 symlink 後面的檔案，而不是不問就讀取</li>
+<li>變更純 WebFetch 的 deny 和 ask 規則，讓它們不再套用到 Artifact 工具的讀取和更新；要擋或控管這些請改用 Artifact 規則（或 WebFetch(domain:claude.ai)）</li>
+<li>變更「N MCP servers need authentication」啟動通知，改成每個伺服器只宣告一次，而不是每次啟動都跳</li>
+<li>[VSCode] 修正當 CLAUDE_CONFIG_DIR 在設定檔或 environmentVariables 設定中被設定時，session 清單、設定切換和聊天分頁的問題</li>
+<li>[VSCode] 修正登入、登出或切換帳號後,開啟的分頁中 model pill、model picker 和指令選單空白幾秒的問題</li>
+<li>[VSCode] 修正當專案或本機設定覆寫了 ~/.claude/settings.json 裡指定的模型時，Auto 在新分頁或剛重新載入的對話中從模式選擇器消失的問題</li>
+<li>[VSCode] 修正設定了 SessionStart hook 時，session 名稱在視窗重新載入後又還原成最後一則 prompt 的問題</li>
+<li>[VSCode] 修正頁尾的 model pill 和 Remote Control pill 在同一視窗中已有另一個分頁啟動時，仍等待新分頁的 Claude 程序啟動的問題</li>
+<li>[VSCode] 修正當某 session 分頁的啟動在讀取設定後超過半秒才到達時，第二個 Claude 程序會跑完完整啟動流程的問題</li>
+<li>[VSCode] 修正從 session 清單回復 session 時忽略 claudeCode.preferredLocation: &quot;sidebar&quot;（它總是開一個 panel）的問題，以及程式化開啟會把該設定重設為「panel」的問題</li>
+<li>[VSCode] 修正 Windows 問題：WSL 安裝提示不再出現在沒裝 WSL 的機器上，而且裝了 WSL 時 Windows 檔案的 IDE 診斷現在能正確回傳</li>
+<li>[VSCode] 修正當 CLAUDE_CONFIG_DIR 透過設定被設定時，自訂樣式建構器把 User 層級的樣式存到 CLI 讀不到的資料夾的問題</li>
+<li>[VSCode] 新增用左右方向鍵改變 always-allow 權限規則儲存位置的功能，方便鍵盤和螢幕閱讀器使用者</li>
+<li>[VSCode] 新增「Claude Code: Focus last message」指令，把鍵盤焦點移到對話中最新的訊息，方便鍵盤和螢幕閱讀器使用者</li>
+<li>[VSCode] 變更 Manage plugins 對話框，讓安裝、啟用、停用和解除安裝套用到開啟中的 session 而不用重新啟動</li>
+<li>[VSCode] 變更部分 artifact 權限提示，拿掉「不要再問」選項，跟終端機一致</li>
+<li>[Claude Code on the web] 修正執行超過約六小時的 cloud session 默默丟失存到持久化 session 資料夾的檔案的問題；儲存內容現在最多可保留一天</li>
+<li>[Claude Code on the web] 修正當 routine 回復 session、或在管理員限制了某模型 effort 的組織裡以未設定 effort 啟動 session 時出現「Invalid effort level」錯誤的問題</li>
+<li>[Claude Code on the web] 改善從對話建立 routine：當新 routine 沒有 connector 時，Claude 現在會說明這件事以及如何新增，而不是只確認建立完成</li>
+<li>[Claude Tag] 修正管理員設定頁在短暫載入失敗後卡在載入骨架（loading skeleton）或變空白的問題；載入失敗的區塊現在會顯示 Retry 按鈕</li>
+<li>[Claude Tag] 新增從 Slack 頻道的設定頁連回組織 Claude in Slack 管理員設定的連結</li>
+<li>[Claude Tag] 修正 Slack Enterprise Grid 頻道在 Slack 管理員把它移到另一個 workspace 後失去 Claude 設定（repository、環境、存取權）的問題</li>
+<li>[Claude Tag] 改善 Claude 對被擋動作的說明：現在會說明是權限檢查、它自己決定要先確認、還是缺少存取權而停下來的</li>
+<li>[Claude Tag] 改善回覆速度：Claude 現在會同時執行多個唯讀查詢（搜尋 Slack、讀取 thread、找人），而不是一個接一個</li>
+<li>[Claude Tag] 改善比較內容的格式：句子長度的比較現在改用清單呈現，而不是會左右捲動的寬表格，長表格儲存格也會換行</li>
+<li>[Claude Tag] 修正在有自己 session 的 thread 裡 @Claude !restart 有時還會多貼一則自相矛盾的「this thread is handled by the channel session」通知的問題</li>
+<li>[Claude Tag] 改善當你的 Claude 帳號跟 Slack workspace 屬於不同組織時顯示的訊息：現在會說明如何把 workspace 連到你的組織</li>
+<li>[Claude Tag] 修正 URL 以角括號（&lt; &gt;）包起來的 Markdown 連結在 Slack 中顯示成字面的括號文字、而不是可點連結的問題</li>
+<li>[Claude Tag] 修正在允許來賓使用 Claude 的頻道中，workspace 來賓的頂層 @mention 有時會得到「your Slack account isn&#x27;t connected」回覆、而不是答案的問題</li>
+<li>[Claude Tag] 修正頻道的長時間執行 session 在對話中途被換成全新 session 的問題；排定的刷新現在會等到頻道及其 thread 安靜下來才進行</li>
+<li>[Claude Tag] 修正頻道設定卡片被點超過一次時，會告訴提議的 session 該變更被拒絕、即使它其實早已套用的問題；結果現在只送一次</li>
+<li>[Claude Tag] 變更公開頻道的記憶：每個頻道現在各自保留自己的筆記，Claude 不再回想它在其他公開頻道存的筆記；workspace 筆記仍為共用</li>
+<li>[Code Review] 在後續審查的未解決發現清單下新增一則說明：解決某發現的 thread（而不只是回覆它）才能讓後續審查不再把它算成未解決</li>
+<li>[Code Review] 修正審查有時在其中一個負責驗證某發現的 agent 中途失敗時以未完成收場的問題；審查現在會替換掉那個 agent 並得出結論</li>
+<li>[Code Review] 修正排在執行中審查之後的 push 觸發審查，在 pull request 已轉為草稿後仍會發布的問題</li>
+<li>[Code Review] 修正審查在 PR 編輯了某個只是跟 CLAUDE.md 列出的檔案同名的根目錄檔案（例如 README.md）時，忽略某目錄 CLAUDE.md 慣例的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
