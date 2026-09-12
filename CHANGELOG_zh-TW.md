@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.270
+- 修正 Bash 裡唯讀的 git 指令在 session 跑了一陣子後，會意外跳出來要求授權的問題（2.1.269 引入的 regression）
+
 ## 2.1.269
 - 新增 `claude plugin eval`：針對 Claude Code 跑 plugin 的 eval 測試套件，取得評分過、可重現的結果（JSON + HTML 報告）；詳見 `claude plugin eval --help`
 - 新增 `/output-style [name]` 可列出並切換 output style，包含透過 Remote Control 以及在雲端與其他 headless session 中使用
