@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.272
+- 修正了一些 bug，並提升穩定性
+
 ## 2.1.271
 - 在 Claude Code Remote 工作階段（雲端和自架 runner）中新增了快速模式（fast mode）：主機的快速模式設定，或在工作階段中輸入的 /fast，會在你的組織允許的情況下生效
 - 為全螢幕模式下的 /config 面板新增滑鼠支援：滾輪可捲動設定清單、點擊設定值可修改它，指標下方的那一列會被高亮顯示
