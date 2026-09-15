@@ -2,6 +2,72 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.273
+- 新增 x-claude-code-request-class、x-claude-code-agent-type、x-claude-code-prev-tool-durations、x-claude-code-compaction 和 x-claude-code-context-compacted 這幾個給 LLM gateway 用的 request header；用 CLAUDE_CODE_GATEWAY_HINT_HEADERS=1 來啟用
+- 新增當 MCP server 在 session 中途斷線、而自動重連也放棄時的通知，會指引你去看 /mcp
+- 新增從 Claude app 分叉（fork）用 claude --remote-control 或 /remote-control 啟動的 session 功能；分叉出來的 session 會在你電腦上以背景 session 執行
+- 修正在 permissions.blockReadsOutsideWorkingDirectories 下，權限檢查器無法完整分析的 Bash 指令會跳過提示的問題，以及 subshell 在 bypass 模式下藏了一個危險的 rm 的問題
+- 修正從 claude.ai 同步過來的 skills 在你的組織關掉 Skills 後仍然可用的問題；現在它們會移到可復原的垃圾桶
+- 修正透過 MDM 或 managed-settings.json 設定的 allowManagedMcpServersOnly、deniedMcpServers 和 disableClaudeAiConnectors，在同時存在 server 端管理的設定時會被忽略的問題
+- 修正 Bedrock、Vertex 和 Foundry 上的 401/403 錯誤，以及 Claude app gateway 的 403 錯誤，會叫你去執行 /login；現在訊息會指名要更新哪個憑證，或指引你聯絡 gateway 管理員
+- 修正 /login、/upgrade 和 /extra-usage 會丟掉對話中先前的 thinking，導致下一次 request 被迫整個重寫 prompt cache 的問題
+- 修正在雲端或 Remote Control session 中，當 Artifact 工具上傳你附加到聊天的檔案時，auto 模式會停下來等你核准的問題
+- 修正長時間執行的 session 在 repository 的 .git 目錄被移除或搬走後，會重新建立一個殘缺的 .git/info/exclude 的問題
+- 修正在 shell 模式下，主 prompt 會把開頭打的 ! 吃掉的問題，這樣像 ! grep … 這種取反的指令就能正常輸入了
+- 修正 macOS 上 Read 拒絕讀取拖進來的截圖、或任何系統回報在第二個路徑下的檔案的問題，錯誤訊息是「symlink resolution changed after permission was checked」
+- 修正 permissions.blockReadsOutsideWorkingDirectories：由 repository 設定選定的 memory 目錄，現在不會再被載入到 prompt、被回想、被索引，或被 memory 擷取功能使用
+- 修正 sub-agent 和背景 agent 在最終串流回覆漏掉 token 用量、或沒帶 model id 時，會被回報為失敗且結果永遠送不出來的問題
+- 修正 context 計量表和 auto-compact 把 advisor 工具的回合算成大約實際 context 大小的兩倍，導致 auto-compact 在大約實際視窗一半的時候就觸發的問題
+- 修正 /tui 因為一個已經完成工作、且已不再顯示在 agents 面板上的 agent-team 隊友而拒絕重啟的問題
+- 修正儲存的排程任務在 .claude/scheduled_tasks.json 被複製到另一個資料夾（例如新的 worktree）後，會在錯誤的 session 中執行的問題
+- 修正 SDK 和 --output-format stream-json 的輸出，在 subagent 執行到一半被移到背景（例如被 CLAUDE_AUTO_BACKGROUND_TASKS 移動）後，會漏掉它剩下的訊息和最終報告的問題
+- 修正 /install-github-app 把 SAML single sign-on 的阻擋回報成「admin permissions required」的問題
+- 修正連到 Claude Desktop、VS Code 或 JetBrains session 的 Remote Control 用戶端，在詢問該 session 的 context 視窗用量時被拒絕的問題
+- 修正 spinner 在壓縮狀態列（例如「Running PreCompact hooks…」）上顯示重複刪節號（「……」）的問題
+- 修正在讀取或發佈 Artifacts 後，會誤報一個建議使用 frontend-design plugin 的 spinner 提示的問題
+- 還原 2.1.268 的一項變更，該變更會對權限檢查器無法分析的 Bash 行（eval、env -C）檢查 Read 和 Edit 的拒絕規則；像 time -p make build 這種指令現在會再次跳出提示，而不是被拒絕
+- 改善長時間 session 的反應速度：hook 進度和 sub-agent 活動不再每次更新都重新處理整個對話
+- 改善 Artifact 工具在發佈內容包含 artifacts 不提供的檔案類型時的錯誤：現在會告訴 Claude 有哪些類型是可以提供的、以及該怎麼改，而終端機只顯示一行純文字
+- 改善 Artifact 工具的頁面讀取，會列出 artifact 服務對該頁面所持有的能力和資料庫規則，讓任何能發佈到該頁面的人都看得到
+- 改善 artifact 資料庫寫入：現在更新可以只移除單一欄位，而不用重寫整份文件
+- 改善 artifact 發佈：一個到達 claude.ai 之後才斷線的發佈，現在會安全地重送，而不是失敗或建立重複的版本
+- 改善雲端 session 的 GitHub 錯誤，針對 IP allow list、被停用的 app 安裝或 SAML single sign-on，會顯示原因，而不是一句通用的安裝提示
+- 改善 /autofix-pr：當 gh pr view 失敗時，現在會顯示 gh 自己的錯誤（登入、SAML、rate limit），而不是一句通用的 exit-code 訊息
+- 改善 /autofix-pr，會說明為什麼無法為該 PR 設定 GitHub webhook 傳遞（例如沒有連結的 GitHub 帳號），而不是一句通用的警告
+- 改善 /web-setup 的錯誤：被拒絕的 GitHub token 現在會列出可能的原因和修正方式，而連線失敗會指名是設定的 proxy 或 TLS 憑證問題
+- 改善 session 內的 SSL 憑證和 proxy 連線錯誤，會指名錯誤代碼和要修什麼，例如針對不受信任的企業 CA 用 NODE_EXTRA_CA_CERTS
+- 改善當雲端 session 因為你的 Claude 登入逾期或被撤銷而無法建立時的錯誤：現在會叫你去執行 /login
+- 改善當 MCP server 的登入在 session 中途逾期時所顯示的錯誤，會說明如何重新驗證（/mcp）
+- 變更 Bedrock、Vertex 和 Foundry 上的 auto 模式，目前預設改用本機分類器；設定 CLAUDE_CODE_AUTO_MODE_SERVER=1 可改用平台的 server 端分類器
+- 變更 OTEL_LOG_TOOL_DETAILS=1，讓成本和 token 指標上也會包含真實的 agent、skill、plugin 和 MCP server 名稱
+- 變更用 Claude 帳號登入時，也會一併請求存取你 claude.ai 上的 plugins
+- 變更 /bug 和 /feedback 回報，只納入上一次 API request 的模型行為參數（model、system prompt、tools），省略 request metadata 和 CLAUDE_CODE_EXTRA_BODY 欄位
+- [VSCode] 修正對於停用產品意見回饋的組織，「Report a problem」仍會出現、且 /bug / /feedback 仍會開啟回報表單的問題
+- [VSCode] 修正在 Windows 上完成回合後會出現紅色「Claude Code process exited with code 4294967295」橫幅的問題
+- Windows：改善當用 --add-dir 加入映射網路磁碟機時，UNC 路徑的網路路徑權限檢查
+- [Claude Code on the web] 修正 routines 在管理員移除並重新加入某個組織 connector 後，會失去對它的存取權、且仍呼叫舊的那個的問題
+- [Claude Code on the web] 修正從組織設定建立 self-hosted 環境時偶爾會因為 server 錯誤而失敗、並留下一個建到一半的環境的問題
+- [Claude Code on the web] 變更管理員的「Share cloud sessions」設定，現在改放在 Data and privacy 底下，而不是 Claude Code 頁面，Data and privacy 的管理員也能在那裡管理它
+- [Claude Code on the web] 新增在 New routine 頁面或 Edit routine 對話框丟棄你輸入的 routine 名稱、prompt 或編輯之前，會先跳出「Discard unsaved changes?」確認
+- [Claude Code on the web] 移除了 Mac 和 Windows 上，沒有雲端環境的新使用者會看到的整頁桌面版下載畫面；現在他們會直接進到設定
+- [Claude Code on the web] 改善 routine 詳細頁面：麵包屑（breadcrumb）裡有選單和重新命名，開/關切換和 Run now 移到頂端，而執行歷史就放在 routine 設定旁邊
+- [Claude Tag] 修正在 Enterprise Grid 已中斷連線、但它其中一個 workspace 仍保持連線時，重新安裝 app 幾分鐘後 Claude 會沉默不語的問題
+- [Claude Tag] 修正在組織共享的私人 Slack 頻道中設定的排程任務會默默地一直不發文的問題；現在它們會在建立時所在的討論串裡持續執行
+- [Claude Tag] 修正在 Claude 執行任務到一半時，於較舊的 Slack 討論串裡回覆，有時會讓它從頭重啟、並弄丟還沒推送出去的成果的問題
+- [Claude Tag] 修正在你的帳號 token 更新後，Claude 偶爾會丟出一則帶有錯誤「couldn't find a Claude Code environment」提示的訊息的問題
+- [Claude Tag] 修正 AWS 連線拒絕像 Budgets、Savings Plans、WAF Classic 和 Import/Export 這類沒有 region 的 endpoint 的問題；Global Accelerator 的 request 現在也能正確簽章
+- [Claude Tag] 改善 AWS 連線失敗的處理：當一個 request 無法被簽章時（例如主機名稱沒有 region），會告訴 Claude 原因和修正方式，而不是一個乾巴巴的錯誤
+- [Claude Tag] 修正 OAuth client-credentials 和 JWT-bearer 連線在遇到回傳小寫 token type 的 provider 時會失敗的問題；現在 request 會送出標準的 Bearer scheme
+- [Claude Tag] 修正在 Enterprise Grid 共享頻道、Claude 尚未使用過的頻道，以及舊版私人頻道上，新增頻道管理員會被拒絕的問題
+- [Claude Tag] 變更 Claude，讓它會自己開始關注相關的公開頻道，例如某段對話所依賴的事故（incident）頻道，而不是只有被要求時才關注
+- [Claude Tag] 修正管理員 Memory 頁面沒有列出 Claude 自己設定、即使已存有 memory 的 Slack 頻道的問題；管理員現在可以開啟、編輯和刪除那些 memory
+- [Code Review] 修正把 base branch 併入一個先前 review 曾列出「Additional findings」的 PR 會觸發整個重新 review 的問題；這些推送現在會改用較輕量的後續 review
+- [Code Review] 修正整份 REVIEW.md 會因為一個 @-mention、一段跨行折行的 code span，或一個用反引號包起來的 HTML tag 而被忽略的問題；現在只有連結到已變更檔案的那幾行會被保留不用
+- [Code Review] 改善建議的修正，會說明當其他程式碼依賴被改動的行為時，這個修正必須讓什麼繼續正常運作
+- [Code Review] 改善指向第二個受影響位置的 review 留言，會用完整句子敘述該位置的問題，而不是被切掉的殘句
+- [Code Review] 修正 /ultrareview --post，讓遇到 GitHub 錯誤後的重試會剛好張貼一次 findings 留言，而不是完全沒貼或貼兩次；該留言現在會指名被 review 的 commit
+- [Code Review] 修正在 owner 或名稱含大寫字母的 GitHub repository 上，空的或內容完全相同的推送會被重新 review 的問題；現在這些推送會被略過
+
 ## 2.1.272
 - 修正了一些 bug，並提升穩定性
 
