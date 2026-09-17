@@ -2,6 +2,116 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.274
+- 新增記憶體使用量到達危急狀態時的明顯警告，並附上釋放記憶體或安全重啟的步驟
+- 新增 `CLAUDE_CODE_MCP_STARTUP_WAIT_MS`，用來限制第一個非互動回合等待連線中 MCP 伺服器的時間上限（`0` = 不等待）
+- 在 `claude_code.llm_request` OpenTelemetry trace span 加上 `effort` 屬性，與 `api_request` 事件一致
+- 新增 `claude_code.managed_settings_resolved` OTel 事件：managed-settings 來源與政策 helper 狀態；設定經去識別化，摘要 (digest) 則需搭配 `OTEL_LOG_MANAGED_SETTINGS=1`
+- 在 Claude apps gateway 設定中新增 `store.connect_timeout_seconds`，可拉長 Postgres 連線逾時（預設 5 秒）；同時改善資料庫無法連線時的開機錯誤訊息，會指向 `store.postgres_url` 與設定的逾時值
+- 在透過 Claude apps gateway 送出的 Claude Desktop 與 Cowork 遙測資料中，加上 IdP subject `enduser.sub`
+- 新增 Claude apps gateway 警告：當某個 replica 開啟的請求數超過它一次向上游送出的 256 個上限時會發出警告，並在啟動日誌顯示該上限
+- 全螢幕模式下，摺疊起來的隊友與 agent 訊息新增點擊展開功能
+- 修正 session 卡在無止盡重試「unexpected tool_use_id」400 錯誤的問題：損毀的 transcript 現在會盡可能自我修復，若無法修復則以明確錯誤訊息（附上 `/rewind` 提示）中止迴圈
+- 修正設定為 `http` 但只支援舊版 HTTP+SSE 的 MCP 伺服器，在第一個請求回傳 422 或其他 4xx 錯誤時無法連線的問題
+- 修正 Streamable HTTP MCP 工具呼叫即使設定了較長的個別伺服器 `timeout`，仍在約 5 分鐘後逾時的問題
+- 修正伺服器送出 list-changed 通知但未宣告 `listChanged` 時，MCP prompt 與 resource 未重新整理的問題
+- 修正 MCP 工具呼叫被拒（403 insufficient_scope）卻被回報為登入逾時的問題：錯誤訊息現在會指出缺少的權限，並指向 `/mcp` 重新驗證
+- 修正由 hook 驅動的 session（例如進行中的 `/goal`）在反應式壓縮 (compaction) 後 context 再次溢位時，出現「Prompt is too long」而非進行壓縮的問題
+- 修正在恢復（`--continue` / `--resume`）一個曾壓縮過的 session 時，進行中的 `/goal` 遺失的問題
+- 修正 `claude agents` 在 auto-update 重新啟動後，`--model`、`--effort`、`--permission-mode`、`--allow-dangerously-skip-permissions` 與 `--agent` 遺失的問題
+- 修正 language server 為數千個檔案發布整個專案的診斷 (diagnostics) 時，每回合都變慢的問題
+- 修正在 Bedrock、Vertex 或 Foundry 上設定 `model: "opus"` 的 subagent，當其 id 無法辨識出對應的 model family 時會脫離 session model 的問題（除非有設定 `ANTHROPIC_DEFAULT_OPUS_MODEL`）
+- 修正 self-hosted runner session 在幾次 token 更新失敗後，每回合都以 401 失敗直到下次排程更新的問題；runner 現在會持續重試，並在遇到 401 後抓取新 token
+- 修正指向本機檔案路徑的可點擊連結，在 VS Code 及其他需要 `file://` URI 的終端機中點了沒反應的問題
+- 修正 transcript 會重新編號你自己訊息中的有序清單（輸入「3. 2. 1.」卻顯示成「3. 4. 5.」）的問題；數字與「N)」標記現在會照你打的樣子顯示
+- 修正 AskUserQuestion 的預覽備註被附加到先前選定選項、而非目前反白選項的問題
+- 修正 AskUserQuestion 預覽模式在用 Enter 送出備註時，遺失反白選項的問題
+- 修正恢復的背景 agent 在其中一個呼叫被連同訊息一起核准時，保留半批被中斷工具批次的問題
+- 修正以 `CLAUDE_CODE_RESUME_INTERRUPTED_TURN` 啟動的本機 `claude -p --resume`，未回報前一個 process 留下未完成的背景任務的問題
+- 修正雲端 session 的第一個回合，有時會在 SDK-hosted MCP 伺服器仍在連線中就開始、導致缺少其工具的問題
+- 修正背景 agent 通知宣稱 agent 沒有進行中的背景工作，但其實它還在等自己的背景任務、之後會恢復的問題
+- 修正 Claude Desktop session 的錯誤提示，改為建議 `/usage-credits` 之類的斜線指令，而非那裡無法使用的 CLI flag
+- 修正當 Claude 以列出 routine 時回傳的格式撰寫 routine 時，`/schedule` 儲存 routine 的 prompt 卻遺漏 message role 的問題
+- 修正 `/status` 未顯示 `apiKeyHelper` 失敗的問題，而它自己的錯誤橫幅才剛叫你去檢查那個
+- 修正非互動 session 中的 `/fast on` 會先回報開啟、然後又在組織的 managed fast mode 政策下關閉的問題；現在會直接說組織已停用此功能
+- 修正 Artifact 工具要你核准對某個 artifact 的更新，但之後又因 session 尚未讀取最新版本而拒絕的問題
+- 修正 Cowork 與 claude.ai 雲端 session 在網路存取開啟時，卻把讀取隊友 artifact 當成網路存取關閉來處理的問題
+- 修正沒有自己 git repository 的 plugin 或 marketplace 目錄，會沿用外層 git repository（例如受 git 管理的 `~/.claude`）版本的問題
+- 修正搭配空 `--mcp-config` 的 `--strict-mcp-config`，會讓第一個非互動回合為無關的 MCP 伺服器卡住長達 `MCP_TIMEOUT` 的問題
+- 修正 Stop prompt hook 在對話中每次擋下都重送整個 prompt 的問題；重複的擋下現在會用 500 字的標籤標明條件
+- 修正在 Cursor 或 VS Code 終端機中、於 Linux Wayland 下啟動時，多開空白編輯器視窗的問題
+- 修正 Claude apps gateway 在 spend check 期間 Postgres 中斷連線時，出現未處理的 promise rejection 的問題
+- 修正 Claude apps gateway 在收到 SIGTERM 時切斷所有開啟中串流的問題：現在會讓進行中的請求最多完成 25 秒後才退出（`CLAUDE_GATEWAY_DRAIN_TIMEOUT_MS`）
+- 修正當 plugin 政策來自遠端 managed settings 時，`installed_plugins.json` 幾乎每次啟動都被重寫的問題，這會讓 Claude Desktop 重新載入每個開啟 session 的 plugin
+- 修正 headless 與 SDK session 為每個完成的背景任務各發一次 model 呼叫的問題；已排入佇列的完成項現在會由單一呼叫一併回應
+- 修正 Bash 工具在每次 plugin 重新載入後都重新載入 shell profile（下個指令會卡好幾秒）的問題；現在只有在 plugin 的 `bin/` 目錄有變動時才這麼做
+- 修正 `hooks/hooks.json` 中含頂層 `$schema` 的 plugin 出現「unknown key」提示的問題
+- 修正 MCP 連線錯誤與 MCP 登入工具的說明，會顯示從 MCP 設定中 `${VAR}` placeholder 解析出的機密的問題
+- 修正對會迴圈處理或指派某些特殊 shell 變數的指令所做的 Bash 權限檢查；這類指令現在會要求授權
+- 修正 worktree 隔離的 session 會接受帶有某些巢狀 shell expansion 的 Bash 指令的問題；這類指令現在會被拒絕
+- 修正在含多位元組字元的檔案中，Edit 權限提示的預覽有時顯示與實際核准編輯不同位置的問題
+- 修正在記憶體輕微吃緊的機器上，背景指令在閒置 30 分鐘後就被停止的問題；現在只有在記憶體危急不足時才會停止，且 debug 日誌會說明原因
+- 修正 subagent 送給主 session 的訊息，在重新啟動後從 Claude Desktop transcript 消失的問題
+- 修正從 `.zip` 載入的 plugin，在數次重疊的重新載入後被以過時的解壓內容提供的問題
+- 修正 sub-agent 的進度摘要被暴走的多段落回覆蓋掉的問題
+- 改善 `--input-format stream-json` session 的啟動：第一個回合不再為 tool search 延後其工具的、仍在連線中的 MCP 伺服器等待最多 2 秒；這些工具會在之後的回合抵達
+- 改善 Monitor 工具通知：腳本的最終輸出與其結束現在會合併成一則通知而非兩則，省下一個 model 回合
+- 改善 Artifact 工具錯誤：當你尚未登入 claude.ai 時，終端機現在會在第一次嘗試就告知，而 Claude 也會被要求更早停止重試被拒的呼叫
+- 改善 artifact 發布：基於舊版本的發布會在送出前就被擋下，並附上要合併的較新頁面
+- 改善移除含 submodule checkout 的 agent worktree 前的安全檢查
+- 改善 `OTEL_LOG_RAW_API_BODIES=file:<dir>` 的輸出：新增 `index.jsonl` 以及 `request_body_id` / `message.id` 事件屬性，把每個回應連結到它的請求檔案與 transcript 訊息
+- 改善 Claude apps gateway 開機：現在會在退出前最多嘗試第一次 Postgres 連線三次，所以晚幾秒才可連線的資料庫不再導致開機失敗
+- 改善 Claude apps gateway 在負載下的 spend-limit 檢查：現在只需一次資料庫往返而非四次，所以繁忙的 gateway 上逾時的檢查更少
+- 改善 Claude apps gateway 的登入速率限制錯誤：`/login` 現在會說明被拒的原因，gateway 日誌則會指出撞到哪個限制、要改哪個設定
+- 將 Bedrock、Vertex、Foundry 與停用遙測的安裝改為預設對直連 HTTP 伺服器使用 v2 MCP client 與 MCP 2026-07-28 協商，與其他安裝一致（要退出：`MCP_SDK_GENERATION=v1` 或 `MCP_PROTOCOL_NEGOTIATION=legacy`）
+- 將 `/code-review` 改為對每個沒有自己調校設定的 model 使用更精簡的 inline review prompt，而非產生一堆 review subagent
+- 將 `.mcp.json`、設定、plugin 與 agent 檔案中 `"type": "sdk"` 的 MCP 項目改為跳過並發出警告：只有 SDK 主應用程式能註冊 in-process 伺服器
+- 更改本機 session 中的 artifact watching：在別處發布的新版本不再啟動一個回合；Claude 會從之後的 Artifact 工具結果得知
+- 將 plugin 與 marketplace clone 改為把 Git LFS 檔案留作 pointer 而非下載；在 checkout 中執行 `git lfs pull` 才會抓取它們
+- 將 self-hosted runner 改為跳過 git host 在存取檢查時拒絕的唯讀 repository，而非讓 session 啟動失敗
+- 把 `/status` 的 GitHub 那一行改為「Cloud sessions」，並把 `/web-setup`、`/ultrareview` 與 teleport 訊息改為說「cloud session」而非「Claude Code on the web」
+- [VSCode] 新增對視窗重新載入所中斷步驟的接續功能，會在聊天中標示，並提供 Claude Code: Continue After Reload 設定可關閉
+- [VSCode] 在 Customize 選單新增 Memory 與 Instructions 項目：Memory 顯示自動記憶的開關、已儲存的記憶與記憶資料夾，Instructions 則用來編輯 CLAUDE.md 檔案
+- [VSCode] 新增 `claudeCode.lockEditorGroups` 設定，可阻止 Claude 鎖定它開啟時所在的 editor group
+- [VSCode] 修正在新對話開始幾秒內問的 `/btw` 側邊問題，偶爾會顯示另一個 session 側邊問題歷史的問題
+- [VSCode] 修正擴充功能第一次查詢你的全域 gitignore 檔案時短暫卡頓的問題
+- [VSCode] 修正在 Claude 執行工具期間送出的訊息，於視窗重新載入後從對話中消失的問題
+- [VSCode] 修正 Manage Plugins 的啟用切換與 MCP servers 對話框各列無法用鍵盤操作的問題
+- [VSCode] 修正在 Environment Variables 設定中變更 `CLAUDE_CONFIG_DIR` 後，於終端機進行的登入與登出要重新載入才顯示的問題
+- [VSCode] 修正聊天中的 Edit diff 在某些面板寬度與長換行行下、底部被截斷的問題；diff 框現在會貼合顯示的列數
+- [VSCode] 修正擴充功能重疊的設定寫入，導致 `~/.claude/settings.json` 無法解析或掉了某個設定的問題
+- [VSCode] 修正 Open in New Tab（Ctrl/Cmd+Shift+Esc）有時讓新分頁的訊息框未取得焦點，導致打字沒反應、要點一下才行的問題
+- [VSCode] 修正重新開啟已關閉的 Claude 分頁時，若其鎖定的 group 仍含另一個 Claude 分頁與一個檔案，會分割編輯器版面的問題
+- [VSCode] 修正只要有檔案分頁與你的 Claude 分頁共用同一 group，New session 就會另開一個鎖定 editor group 的問題
+- [VSCode] 修正在 session 挑選器中輸入搜尋字串時，session 名稱會橫向位移的問題
+- [VSCode] 修正 plan review 卡片在計畫有多筆留言時，截掉其 Send feedback 按鈕與 reason 欄位的問題；留言清單現在可捲動
+- [VSCode] 修正聊天回覆中的 inline code 與程式碼區塊在 High Contrast 主題下難以閱讀的問題
+- [VSCode] 改善對話的螢幕報讀器導覽：每則訊息會被報讀為「You」或「Claude」，工具步驟則附上工具名稱
+- [VSCode] 當 `XDG_CONFIG_HOME` 為絕對路徑時，將預設全域 gitignore 檔案改為 `$XDG_CONFIG_HOME/git/ignore`
+- [Claude Code on the web] 為雲端 session 的 diff 檢視新增「Compare against」分支挑選器，讓你可以拿它的變更跟任何分支比對，而不只是 base 分支
+- [Claude Code on the web] 修正 GitHub token 續期短暫出錯時，雲端 session 中的 git 操作以「service unavailable」失敗的問題
+- [Claude Code on the web] 修正編輯 routine 偶爾會讓它觸發兩次、或重新啟用一個剛暫停的 routine 的問題
+- [Claude Code on the web] 修正雲端 session 的 commit，在 session 憑證更新後的幾分鐘內偶爾以簽章錯誤失敗的問題
+- [Claude Code on the web] 修正儲存 GitHub 觸發器無法連結的 routine 後，那則 toast 只顯示「edit to retry」的問題；現在會顯示原因，例如每個 repository 的觸發器數量上限
+- [Claude Code on the web] 修正 session 在你標為已讀後、有時又跳回未讀的問題
+- [Claude Code on the web] 將 routine 改為在擁有者的 GitHub 連線缺失時，跳過該次執行並重試最多 72 小時，而非在第一次檢查失敗就把 routine 關掉
+- [Claude Code on the web] 更改 routine 的暫緩通知：當你的訂閱暫停時，現在會告訴你要自己把 routine 重新開啟，而非承諾自動恢復
+- [Claude Tag] 在 Claude Tag 管理設定的 Add channel 與 Add workspace 表單中新增 Guests 設定，讓擁有者可以事先選擇 Inherit、Allow、Channel only 或 Restrict
+- [Claude Tag] 修正當另一個 Slack app 或 bot @提及 Claude 時 Claude 不回應的問題；現在 tag 會得到回覆，並在 Claude 停止關注多日的頻道中喚醒它
+- [Claude Tag] 修正在新 Slack 頻道剛建立後、另一個 app 的訊息 tag 了 @Claude 卻被漏掉的問題；現在會在 Claude 加入後送達
+- [Claude Tag] 修正 Claude 把它上一則 Slack 訊息幾分鐘後才送出的後續內容，摺進去當成無聲編輯的問題；像是 blocker 這類的晚到更新，現在會以會發通知的新回覆張貼
+- [Claude Tag] 修正 Claude 在單一頻道內搜尋 Slack 時每次都以錯誤失敗的問題；現在會回傳該頻道的相符訊息
+- [Claude Tag] 修正在沒人等待時，safety-filter 中止會無聲重設 Slack 討論串 context 的問題；Claude 現在一定會說明，也不再取消仍在執行的背景工作
+- [Claude Tag] 修正 Claude 的 Slack 回覆中電子郵件位址顯示可見 `mailto:` 前綴的問題；現在會顯示為純粹、可點擊的位址
+- [Claude Tag] 修正從 grid 中另一個 workspace 詢問時，Claude 拒絕關注與整個組織共享的 Enterprise Grid 頻道的問題
+- [Claude Tag] 修正 Claude Tag 管理設定中的 Environment 挑選器，對已封存或由 app 建立的環境顯示原始環境 ID 而非環境名稱的問題
+- [Claude Tag] 改善 Claude 在 Slack 的即時進度檢查清單：上限 2,000 字，繁忙討論串中最多每 15 分鐘重貼一次，並更新較舊的「Latest task list」連結
+- [Claude Tag] 移除 Claude 在使用「Channel only」guest 設定的頻道中，每次編輯 Slack canvas 都附上的重複 guest 歸屬備註
+- [Code Review] 修正重新審查時，若新審查在某個已修正發現底下又提了較低嚴重度的備註，偶爾會讓該已修正發現的討論串保持開啟的問題
+- [Code Review] 修正當 GitHub 或某個內部服務在啟動時短暫失敗，導致罕見審查以「Code review encountered an error」結束的問題；現在會等待並重試
+- [Code Review] 改善 Code Review 對每則張貼發現的措辭方式：用簡短的白話句子，開頭就講清楚誰受影響、程式碼哪裡出錯以及修正方式
+- [Code Review] 改善審查因組織限制而被略過時的 check-run 卡片與 PR 留言：每個原因現在都會連到可修正的管理頁面
+
 ## 2.1.273
 - 新增 x-claude-code-request-class、x-claude-code-agent-type、x-claude-code-prev-tool-durations、x-claude-code-compaction 和 x-claude-code-context-compacted 這幾個給 LLM gateway 用的 request header；用 CLAUDE_CODE_GATEWAY_HINT_HEADERS=1 來啟用
 - 新增當 MCP server 在 session 中途斷線、而自動重連也放棄時的通知，會指引你去看 /mcp
