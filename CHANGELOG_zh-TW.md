@@ -2,6 +2,95 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.277
+- 新增 AGENTS.md 支援：在沒有 CLAUDE.md 的專案中，Claude Code 會改讀 AGENTS.md；可在 `/config` 的「Project instructions」底下修改（Bedrock、Vertex 或 Foundry 暫時還沒有）
+- 新增 `CLAUDE_GATEWAY_PROXY_IS_EGRESS_BOUNDARY=1`，給那些唯一對外出口是 forward proxy 的 Claude apps gateway 用：每個對外請求都會把 hostname 交給 proxy，而不是在本地解析
+- 在 Claude apps gateway 的 upstream 上新增可選的 `headers:` map，可以對你架在 provider 前面的 proxy 送出靜態 header
+- 新增一行提示：當背景任務在 `/tasks` 之類的面板開著時完成，會顯示它的更新正在等候
+- 修正 `claude -p` 和 Agent SDK session 在遇到內部錯誤後可能卡住且沒有結果的問題；現在它們會回報錯誤並以 exit code 1 結束
+- 修正對話因為稍早的 assistant 回合裡有一個空的 text block 跟其他內容並存，導致每個請求都以「text content blocks must be non-empty」失敗的問題（包含 `--resume` 之後）
+- 修正當一個較舊的 Claude Code 版本（例如某個 IDE 擴充套件內附的 CLI）跟目前版本在同一台機器上執行時，會意外被登出的問題
+- 修正當 `~/.claude.json` 裡的 `customApiKeyResponses` 值格式錯誤時，`ANTHROPIC_API_KEY` 使用者互動式啟動會卡住或顯示錯誤的問題
+- 修正當設定了最低或最高版本、而 proxy 回傳了無效版本時，更新檢查每 30 分鐘就報錯、`claude update` 卡住的問題；格式錯誤的 `minimumVersion` 現在會被忽略
+- 修正在 winget 或 apk 管理的安裝上，版本查詢失敗時 `claude update` 卻回報「up to date」的問題
+- 修正 `claude plugin install` 在重新安裝某個正被 session 或其他程式使用的 plugin 版本時，有時會失敗並弄壞已安裝副本的問題；現在會保留沒變動的副本不去碰它
+- 修正 Grep 和 Glob 因為系統的行程、記憶體或 file handle 用完而無法啟動搜尋時卻回報「找不到符合項目」的問題；現在它們會回傳一個說明原因的錯誤
+- 修正 Write 工具在目標路徑是既有目錄時，靜靜地當成拒絕權限結束回合的問題；現在會回報一個明確的錯誤
+- 修正 Edit 工具把「跳脫的反斜線後面接著 `uXXXX` 文字」當成 `\uXXXX` 跳脫序列處理的問題，這可能導致編輯一個非 ASCII 字元時，反而改寫了跳脫的反斜線序列
+- 修正 Edit 工具在一個包含非 ASCII 文字的超大編輯無法比對到檔案時，回報「Invalid regular expression: regular expression too large」而非「String not found in file」的問題
+- 修正當工具呼叫的檔案路徑包含以跳脫序列寫成的 `\u0000` 時，回合會提早以「Path contains null bytes」結束的問題；跳脫的控制字元現在會保留為字面文字
+- 修正背景 session（`claude --bg`）在某個 plugin 的 LSP server 結束或關閉其 stdin 時跟著結束的問題
+- 修正當 `~/.claude.json` 裡的 `claudeAiMcpEverConnected` 值格式錯誤時，開啟 `/mcp` 或 `/plugin manage` 會當機（「Type error」）的問題
+- 修正當 `~/.claude.json` 裡的 `theme` 值格式錯誤時，啟動當機的問題
+- 修正當提示裡含有終端機色碼的文字時當機（「unrecoverable interface error」）的問題，例如從歷史紀錄叫回的提示，或從外部編輯器載入的文字
+- 修正在恢復一個「saved history 裡有被存成純字串的 assistant 訊息」的 session 時當機的問題
+- 修正在較慢或負載很重的機器上，session 有時會在第一個 spinner 出現時以「Claude Code exited after an unrecoverable interface error」結束的問題
+- 修正一種罕見情況：在發生內部 render 錯誤後，畫面可能在該 session 剩下的時間都停止更新
+- 修正 Windows 上一種罕見情況：在 Claude 剛回覆後，回合可能以「Out of memory」之類的錯誤中止，導致那次回覆的工具呼叫都沒跑到
+- 修正在 `/clear` 之後繼續的 session（restart、`--continue`、`--resume`）在 SessionStart hook 有輸出時漏掉第一則訊息的一部分，造成整個 prompt-cache 完全 miss 的問題
+- 修正來自其他 agent 的訊息（例如某個 subagent 的 SendMessage）在回合中途抵達時，顯示在「Ran N shell commands」那一列底下、而不是它們實際抵達位置的問題
+- 修正在全螢幕 `/resume` 選擇器和其他蓋住提示區的面板中，拖曳選取文字後「copied」提示沒出現的問題
+- 修正在啟用沙盒（sandbox）時，於沙盒外執行的 Bash 指令中 `$TMPDIR` 展開成空字串的問題
+- 修正 Cowork 雲端 session 中的 WebFetch 和 WebSearch 沒告訴 Claude 請求為何被拒絕的問題，例如 fetch 額度用完或管理員政策
+- 修正 Claude apps gateway 的 telemetry relay 在有設 proxy 時，忽略了 `NO_PROXY` 裡列出的 collector hostname 或網域的問題
+- 修正一個格式錯誤的 `strictKnownMarketplaces` 或 `blockedMarketplaces` 項目就默默停用整個企業 marketplace 政策的問題
+- 修正自動更新失敗後，把大量已暫存的下載內容遺留在 `~/.cache/claude/staging` 的問題
+- 修正 `/plugin` 沒有把 Installed 分頁上訊息裡的終端機控制字元去掉的問題，例如某次 plugin 更新失敗的錯誤
+- 修正當某個 skill 或舊版 command 的名稱跟內建 Object 屬性（例如 `constructor` 或 `toString`）相同時，`/plugin` → Installed 和 `/skills` 當機的問題
+- 修正在一個多選安裝全部失敗時，`/plugin` 沒有任何訊息就關閉的問題
+- 修正已解除安裝的 plugin 又以「failed to load」的列重新出現在 `/plugin` Installed，而且 Remove 清不掉這種列的問題
+- 修正來自官方 marketplace 的 plugin 在 `installed_plugins.json` 裡被記錄時沒帶上它的 commit，以及更新一個 pinned-commit plugin 後 `installed_plugins.json` 仍保留舊 commit 的問題
+- 修正 plugin 重新載入的預覽會把每個預覽過的 plugin archive 副本解壓後一直留到結束，並在 `--plugin-url` archive 下載失敗、reload 要退回使用它時覆蓋了那份快取 archive 的問題
+- 修正當 `~/.claude.json` 裡有格式錯誤的 placeholder 記錄時，Remote Control 的 session 記帳失敗的問題
+- 修正 claude.ai 登入被撤銷後的錯誤把責任怪到過期的 Anthropic profile 頭上的問題；現在會以 `/login` 作為開頭引導
+- 修正在按鍵重複或極快速輸入時，`claude agents` dispatch 輸入框裡打字或貼上的文字偶爾會錯亂的問題
+- 修正在恢復一個「saved transcript 裡含有一份沒有格式正確 hook 清單的 stop hook 摘要」的 session 時當機（「unrecoverable interface error」）的問題
+- 修正當 `keybindings.json` 在 Chat context 重新綁定了 Enter（例如綁到 `chat:queueSubmit`）時，在選定的 agent 面板列上按 Enter 沒有反應的問題
+- 修正 Windows 上當工作資料夾的路徑很長（大約 120 個字元以上）時，PDF 頁面讀取失敗的問題
+- 修正 headless resume（`claude -p --resume`、SDK、VS Code 擴充套件視窗重新載入）會讓 session 的成本與用量總計從零開始的問題；headless session 現在會在結束時儲存它們的總計
+- 修正當 `.claude/skills` 未被追蹤（untracked）時，來自主 repo 的專案 skill 在 `--worktree` session 中無法載入的問題
+- 修正一個 `sandbox.excludedCommands` glob 在只有其中一部分符合時，就把整個複合 Bash 指令排除在沙盒外的問題；現在每一部分都必須符合
+- 修正恢復的 subagent 和 teammate 會重新 render 它們載入過的 MCP 工具定義，導致那個 agent 的 prompt caching 失效的問題
+- 修正被限速（rate-limited）的 artifact 發佈叫 Claude 停止重試的問題；現在會告訴 Claude 什麼都還沒發佈，以及何時該重送同一次發佈
+- 修正對話稍早記錄的附件在 resume 或重新啟動後被重新 render，導致捨棄了 extended thinking 並 miss 掉 prompt cache 的問題
+- 修正 Console 登入在 server 拒絕建立 API key 時只顯示「Request failed with status code 400」的問題；現在會顯示 server 的訊息
+- 修正在 Claude 還在工作時打的訊息有時會被模型忽略的問題
+- 改善 SDK 和 headless（`-p`）用法的 session 啟動：第一個回合不再等候各目錄的 CLAUDE.md 查找
+- 改善 Claude apps gateway 的 loopback 錯誤訊息，會指名 `CLAUDE_GATEWAY_ALLOW_LOOPBACK`
+- 改善 `/plugin` Installed：一個跟它所屬 plugin 分開列出的 MCP server 現在會顯示它屬於哪個 plugin
+- 改善 `claude plugin install` 在 plugin 已安裝的情況下：現在會說明 marketplace 有沒有更新的版本，並指名 `claude plugin update` 指令
+- 改善 logo 底下的啟動通知溢位那一行：現在會顯示「N more notices hidden」而不是「+N more · /status」
+- 改善提示處理：提示裡不可見的 Unicode 格式化字元與 tag 字元會被移除，並在送出前顯示清理後的提示供你檢視
+- 改善 `/ultrareview` 在沒有東西可 review 時的行為：訊息會說明你屬於哪種情況、提供一個 review 你最新 commit 的指令，而新 repo 的第一個 commit 會被完整 review
+- 改善 artifact 連結處理，讓 Claude 在 Artifact 工具可用時改用它來讀 claude.ai 的 artifact 連結，而不是用 WebFetch
+- 改善 dangerous-rm 權限提示，會指名被標記的 rm 指令並建議加上 `${VAR:?}` 防護，讓 headless 執行能夠復原
+- 改善 Artifact 工具的權限提示：句子更短、頁面與 artifact 以標題或檔名指稱，連結列在文字後面
+- 變更 Fable 讓它在 Anthropic API 上永遠出現在 `/model` 中；只有當你組織的設定停用它時才會被灰掉
+- 變更 Bedrock、Vertex 和 Foundry 上的 Bash 沙盒說明為第一方措辭，把沙盒定位成「任務所賦予範圍」的邊界
+- 變更 `/ultrareview` 在非互動式 session 的行為：當 repo 沒有 base branch 或共同歷史時會拒絕執行
+- 變更 subagent 結果送到主 agent 的方式：會帶上一個標明它們是 subagent 輸出的標頭、結果以縮排呈現，這樣 subagent 結果裡的文字就無法冒充成 session 自己的指令
+- 變更 Bedrock、Vertex 和 Foundry 上 workflow script 計算出的 `agent()` 提示，讓它送到 subagent 時被框定成 script 撰寫的文字，這樣安全分類器就不會把它們讀成使用者
+- 移除在 SDK 或 IDE 之外啟動的 `claude -p` 執行中，背景 Haiku 自動下標題的請求
+- 移除已棄用的 TaskOutput 工具；Claude 改用 Read 讀取背景任務的輸出檔，而 `taskOutputMaxChars` 設定與 `TASK_MAX_OUTPUT_LENGTH` 不再有任何作用
+- [VSCode] 在面板選單新增一個 Sign out 列，並在輸入指令選單中加入 `/logout`
+- [VSCode] 把背景 shell 和其他執行中的任務加進 agent map，每個都有 Stop，並可用輸入的 `/tasks` 開啟
+- [VSCode] 在回應上新增一個 Copy response 按鈕，以及輸入的 `/copy`
+- [VSCode] 新增一個一次性通知，說明閒置 session 已被自動封存，並在 Archived sessions 群組上新增「Unarchive all」動作
+- [VSCode] 把 session 的成本與 token 用量加進 Account & usage 對話框，以及在方案限制不適用的地方加進 session manager（Vertex、Bedrock、Foundry、API key）
+- [VSCode] 修正「General config」選單列顯示 `/config` 用法文字而非開啟設定的問題，並讓輸入的 `/mcp`、`/hooks`、`/memory`、`/rewind` 等類似指令開啟它們的對話框
+- [VSCode] 修正在一個已用 `/effort` 存過等級的模型上，effort 滑桿的等級沒有延續到後續 session 的問題
+- [VSCode] 修正當儲存的 model 設定是大小寫不同的別名（例如「Sonnet」）時，在已使用過的面板開啟的對話從 mode 選擇器裡少了 Auto 的問題
+- [VSCode] 修正 `/fast` 沒把 fast mode 存成預設值的問題，導致擴充套件重新啟動 Claude Code 時就弄丟了
+- [Claude Code on the web] 在 Team 和 Enterprise 方案的環境選擇器上新增 Personal 和 Organization 區塊，且管理員現在可以把個人環境分享給組織
+- [Claude Code on the web] 變更組織環境在 Team 和 Enterprise 方案上從 Code 分頁以唯讀摘要開啟，編輯改在 Admin settings → Cloud environments 底下進行
+- [Claude Code on the web] 修正一個以 Custom network access 且沒有網域儲存的雲端環境會默默還原成 Trusted 的問題；對話框現在會要求至少一個網域
+- [Claude Code on the web] 把標示為「Web」的管理員 Claude Code 設定改名為「Cloud sessions」，並移除其下方多餘的唯讀 Mobile 列
+- [Claude Tag] 修正在 Enterprise Grid 全組織安裝下、於某個 Slack 頻道建立的 routine，執行時無法讀取同 workspace 內其他公開頻道的問題
+- [Claude Tag] 修正 Claude Tag access bundle 裡憑證預設集上的「Learn more」連結，改為開啟各廠商的憑證設定頁面，而不是通用的 API reference
+- [Claude Tag] 變更 Claude Tag access bundle 裡的 Pylon 憑證預設集，讓管理員可以把它指向 Pylon 的 EU host
+- [Claude Tag] 修正 Claude Tag access bundle 裡的 Google Cloud 憑證表單：被拒絕的 key file 現在會說明原因、網站與 scope 會維持鎖定，而被駁回的 rotation 會保留貼上的 key
+- [Claude Tag] 修正 Claude Tag 管理員設定裡的網路事件日誌，對於透過使用 AWS 簽章、client certificate 或自訂 CA 的連線所發出的請求，沒顯示回應狀態的問題
+
 ## 2.1.276
 - 修正當 `ANTHROPIC_BASE_URL` 指向 proxy 或 gateway 時，每個請求都失敗並回報 `400 … Input tag 'advisor_20260301'` 的問題（2.1.275 引入的 regression）
 
