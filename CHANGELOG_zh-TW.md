@@ -2,6 +2,107 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.276
+- 修正當 `ANTHROPIC_BASE_URL` 指向 proxy 或 gateway 時，每個請求都失敗並回報 `400 … Input tag 'advisor_20260301'` 的問題（2.1.275 引入的 regression）
+
+## 2.1.275
+- 在 Claude apps gateway 登入流程中加上已登入帳號的顯示：當 gateway 回報帳號名稱時，你要先確認才會儲存憑證，之後 `/status` 也會顯示它
+- 新增立即送出的按鍵（ctrl+enter，或 ctrl+x ctrl+s），會中斷當前這一輪並一次送出所有排隊中的訊息；已送出和排隊中的訊息在模型收到前會以灰色顯示
+- 當設定的 `otelHeadersHelper` 執行失敗時，新增啟動警告，這樣就不會有 session 默默地完全沒匯出 telemetry 卻沒人發現
+- 新增把你 claude.ai 帳號上啟用的 skills 和 plugins 同步到用該帳號登入的終端機 session；可用 `syncClaudeAiSkills: false` 或 `syncClaudeAiPlugins: false` 關掉
+- 新增 `/plugin install <plugin> --marketplace <source>`，會在安裝 plugin 前先詢問是否要加上該 marketplace
+- 修正還原的 memory 檔案的時間標註（age note）在壓縮（compaction）或 resume 後會在不同請求間變動，導致 prompt cache 未命中
+- 修正 `--forward-subagent-text` 的 stream-json 和 SDK 輸出會漏掉由 `context: fork` skill 產生的 subagent 訊息，以及由 subagent 或另一個 forked skill 呼叫的 forked skill 的訊息
+- 修正使用自訂 `fileSuggestion` 指令或輸入 `@.`／`@./` 時，@-mention 檔案建議被埋在 MCP resources 下面的問題
+- 修正全螢幕模式把背景工作的完成通知放在某一長輪次收合工具列的下方，而不是通知實際抵達的位置；現在每則通知都會關掉該展開的工具列
+- 修正 `claude plugin marketplace update` 在抓取失敗、且 marketplace 名稱剛好與其 repository 同名時，刪掉 GitHub marketplace 本機副本的問題
+- 修正 plugin 和 marketplace 的訊息、logs 以及 `claude plugin marketplace list` 會顯示存在 git、ssh 或 marketplace URL 裡的密碼或 token
+- 修正 resume 的雲端 session 在排隊訊息取代了某個問題後，transcript 裡仍留著一個沒回答的問題開著
+- 修正 vim 模式在用 dot-repeat 重複「!」或快速輸入「i!」把非空的 prompt 切換成 shell 模式後，游標會多跑到右邊一個字元的問題
+- 修正全螢幕模式在往上捲過一大段檔案 diff 時會凍結或空白好幾秒
+- 修正回應中偶爾會冒出像 `</ccmemory>` 這種多餘的結尾標籤
+- 修正 plugin 訊息、logs 和 VS Code plugin 對話框對某些 git 位址顯示錯誤 server 的問題
+- 修正在會改寫 API 錯誤回應的 network gateway 後面的使用者，每一輪都出現終端機 `API Error: 400` 的問題（起因是某個 beta 請求 header 被拒絕）
+- 修正 Linux 上沙箱化（sandboxed）的 Bash 指令在 shell 是 zsh 時，失敗的指令卻回報 exit code 0 的問題
+- 修正在記憶體壓力下，大檔案的某部分無法解碼時，Read 工具會卡住而不是回報錯誤
+- 修正 `--resume`、resume 選擇器的預覽、resume 的背景 agent 和 transcript 檢視在 session 儲存的歷史含有格式錯誤的 task-reminder 或 @-file 附件項目時會失敗
+- 修正 resume 一個 transcript 含有格式錯誤訊息項目的對話時會 crash，以及這類對話在往上捲時收到新訊息會導致全螢幕 crash 的問題
+- 修正當儲存的 transcript 含有格式錯誤的訊息內容區塊（content block）時，session 無法 resume 或啟動的問題
+- 修正 Grep、Glob 和 @-file 建議在搜尋結果超過 20MB 輸出上限時卡住或耗盡記憶體，以及系統 ripgrep 在一堆警告之後回報「no matches」而不是錯誤的問題
+- 修正在 forked 或背景 session 中執行 `/rewind` 時，若該 session 的檔案歷史備份無法完整複製，會還原成一個補零或被截斷的檔案
+- 修正全螢幕 session 在快速打字、或按住某個鍵且 slash 指令下拉選單開著時，偶爾會以「Claude Code exited after an unrecoverable interface error」結束
+- 修正背景 session 在透過 stdin 餵入的指令跑在一台已用光 file descriptor 的機器上時，會 crash 並重啟其 worker
+- 修正 `~/.claude.json` 含有格式錯誤的 `mcpNeedsAuthNoticed` 值時，啟動會 crash 的問題
+- 修正 `--resume` 和 `--continue` 在對話一開始所用的內建工具已被 server 端 flag 關掉時，會丟掉對話較早的 thinking 內容
+- 修正在全螢幕 `claude --resume` 的 session 選擇器中用滑鼠選取的文字永遠進不了剪貼簿的問題
+- 修正 plugin 重新載入的預覽在該 plugin 是從 `--plugin-dir` 或 `--plugin-url` 壓縮檔載入時，會替換掉執行中 session 已解壓的 plugin 檔案
+- 修正帶 `--drain-wait-sec` 的 self-hosted runner 會遺失在 SIGTERM 排空（drain）期間完成的那一輪的最終結果；現在 runner 會短暫等待該輪結果被回報
+- 修正帶特定 `matcher` 的 `SubagentStop` hook 會對每個 agent type 為空的停止中 subagent 都觸發的問題
+- 修正沙箱化的 Bash 指令無法寫入名為 `hooks/` 或 `config/` 的專案目錄
+- 修正 session 在另一台機器 resume、或其 scratchpad 被清空後，Artifact 更新失敗並出現「File not found」的問題：現在會還原該頁面最後發布的版本
+- 修正 `/update-config` 寫入的是 `Write(path)` 權限規則（檔案權限檢查並不會比對到它），而不是 `Edit(path)` 規則
+- 修正內建 claude-api skill 的 live-sources 表格中四個失效的文件 URL（Pricing、Computer Use、Skills、CLI）
+- 改善含有 `__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__` 這一行的 `--system-prompt` 的 prompt caching：現在該行以上的文字會全域快取，就跟 SDK 的陣列形式本來就有的做法一樣
+- 改善 Claude Desktop 打不開時的 `/desktop` 錯誤訊息：現在會說明原因和下一步該怎麼做
+- 改善 Artifact 工具的發布與讀取結果：現在會說明誰能開啟該頁面，以及擁有者的 Share 選單提供哪些選項
+- 改善 artifact 發布結果：會標明送出的分頁圖示、在頁面含有 NUL byte 時提出警告，並在 stale 發布後重試那次不穩定的較新頁面抓取以進行合併
+- 改善貼上和附加的圖片：現在會存在 Claude 能以檔案開啟而不需權限提示的位置，Desktop 和 VS Code 也一樣
+- 改善 Artifact 工具的指引，讓 Claude 在你被授予某個共享 artifact 的編輯權限時，就地更新它，而不是另外發布一份副本
+- 改善方案用量（plan-usage）的讀取：現在同一台機器上的編輯器視窗和非互動 session 會共用最近一分鐘內做過的讀取，而不是各自呼叫用量端點
+- 改善 `ListPlugins` 工具的說明，讓 Claude 知道它列出的是你 claude.ai 帳號上啟用的 plugins，而不是用 `/plugin` 在本機安裝的 plugins
+- 改善終端機緩慢或暫停時的反應速度：輸出不會在終端機追趕的同時愈落愈遠
+- 改善同步帳號 skills 資料夾中檔案的 Write 和 Edit 結果：現在會說明該變更並未存到你的帳號，以及該怎麼儲存
+- 更新 Claude apps gateway 登入的 `/logout`，讓它在有宣告 token 撤銷（token revocation）的 gateway 上也會一併結束該 session
+- 變更 hosted session，讓沒回答的權限提示在容器重啟後仍保留著，而不是再問一次
+- 變更 Artifact 工具，讓它在首次發布時改為詢問一個單字的分頁圖示，而不是 emoji favicon
+- 變更 auto 模式下的 Claude in Chrome，對於通過分類器核可的呼叫略過擴充功能的逐站點檢查（跟 bypass 模式一樣），修正重新導向後 `browser_batch` 出現「Permission denied」的問題
+- 變更從 npm 來源安裝的 plugins，改用 `npm pack --ignore-scripts` 抓取並做完整性驗證，這樣套件的安裝腳本就不會再執行
+- 變更排程和 Run now routine 的執行，讓它可以存資料到、並重新發布你有編輯權限的 artifact 頁面而不需詢問；公開 artifact、首次發布和刪除仍會詢問
+- 移除那則告訴你自上次 session 以來有一個一次性排程 routine 已執行過的啟動通知
+- [VSCode] 新增在 Memory 對話框內檢視、編輯和刪除已儲存 memory 的功能
+- [VSCode] 新增不用打任何文字就能送出已附加圖片的功能
+- [VSCode] 在 MCP servers 對話框的 server 清單載入失敗時，新增 Retry 連結
+- [VSCode] 在提議變更（proposed-change）的 diff 分頁中，於每項變更下方新增接受與拒絕按鈕，這樣一次編輯就能逐項檢視
+- [VSCode] 修正在權限卡片等待、內容又持續抵達時，transcript 會一小步一小步往下爬的問題
+- [VSCode] 修正 rewound 和 forked 對話沒有保留你為原對話選的權限模式
+- [VSCode] 修正 `environmentVariables` 設定裡有空的 `CLAUDE_CONFIG_DIR` 項目時，會讓 Claude Code 把它的檔案留在 workspace 裡
+- [VSCode] 修正 plugin 安裝連結對於無法用在連結中的 plugin 名稱和 marketplace 位址，會開啟 Manage plugins 對話框的問題
+- [VSCode] 修正 Remote Control 在 Claude Code 回報關閉失敗後仍顯示為已連線；現在會正確顯示為關閉
+- [VSCode] 修正送出時捲到底的動作，在回覆於捲動過程中開始抵達時會停在還沒到回覆的地方
+- [VSCode] 修正 session 重新開啟後，agent map 把 crash 留下未完成的 agent 顯示為已停止，而不是失敗
+- [VSCode] 修正在背景工作仍執行中的 crash 之後重新載入時，「Continuing the step」通知不出現、且 continue 上限被重置的問題
+- [VSCode] 修正 session 清單顯示的是 session 上次被重新開啟的時間（例如視窗重新載入後），而不是最後一則訊息送出的時間
+- [VSCode] 修正「Fork conversation from here」在某則訊息（緊接在 Claude 工作中送出的訊息之後那一則）上會失敗的問題
+- [VSCode] 修正重新開啟一個含有 Claude 工作中送出訊息的 session 後，prompt cache 時鐘顯示的分鐘數太少的問題
+- [VSCode] 修正一個在 Claude 執行工具時完成的背景 agent，在視窗重新載入後會遺失它的完成通知，以及在 agent map 上的結果
+- [VSCode] 修正一種罕見情況：在擴充功能停止回應數秒之後，被 git 忽略檔案中選取的文字可能會被送給 Claude
+- [VSCode] 修正重新命名執行中 session 後名稱會退回自動產生名稱的問題（2.1.269 引入的 regression）
+- [VSCode] 修正某些 claude.ai/code session 在 VS Code 中開啟成沒有訊息的空對話
+- [VSCode] 修正在 Claude 回應期間輸入的 slash 指令被當成文字送給模型，而不是在回應結束後才執行
+- [VSCode] 修正 High Contrast Light 主題下，方案預覽以及 Hooks 和 Permission rules 對話框中程式碼看不清楚的問題
+- [VSCode] 修正 Remote Control 還在連線中時 `/remote-control` 被忽略的問題：現在再執行一次會立刻把 Remote Control 關掉
+- [VSCode] 修正你往上捲之後、回覆串流時對話又把你拉回底部的問題，並新增 `claudeCode.scrollToBottomOnSend` 設定來關掉送出時的跳動
+- [VSCode] 修正 Manage plugins 對話框會顯示打進 marketplace URL 裡的密碼或 token 的問題
+- [VSCode] 改善 agent map：那顆藥丸（pill）會計算執行中的 agent 數量並在失敗後轉紅、主 agent 在 map 捲動時仍留在畫面中，且 agent 會先依狀態再依結束時間排序
+- [VSCode] 變更在 Claude 編輯器分頁中的 New session，當 Preferred Location 設為 Sidebar 時改在側邊欄開啟，而不是總是再開一個分頁
+- [VSCode] 變更在 Claude 工作中送出的訊息，讓它等在對話底部直到 Claude 開始處理它
+- [Claude Code on the web] 在 routine 連結已無法解析時所顯示的頁面上，新增一個「New routine」按鈕，就放在回到你 routines 清單的連結旁邊
+- [Claude Code on the web] 修正 routine 的「paused」和「on hold」通知講到一半被切斷的問題；暫停訂閱的通知現在會說要你自己把 routine 重新開啟
+- [Claude Code on the web] 修正 allowed-domains 清單非常長的雲端環境會儲存正常、卻在每次 session 啟動時都失敗的問題；現在會在儲存時就先失敗，並告訴你要刪掉多少
+- [Claude Code on the web] 修正個人帳號上的雲端 session 被拒絕 GitHub 存取時 Claude 的指引：現在會連到 claude.ai/connect-github，而不是某個管理員設定頁面
+- [Claude Code on the web] 改善當你要求 Claude 編輯、刪除或執行一個不是它建立的 routine 時它給你的說明：現在會連到該 routine 的頁面，讓你可以自己動手
+- [Claude Tag] 在 Claude Tag 設定中為 access bundle 新增 attach 條件：Owner 可以讓某個 bundle 也套用到有 guest 的頻道或 Slack Connect 頻道，而不只限成員專屬的頻道
+- [Claude Tag] 在 Claude Tag 管理設定中的 access bundle Credentials 分頁新增 Amazon CloudWatch、CloudWatch Logs、Amazon SNS、Google Cloud Monitoring 和 Cloud Logging 的預設項
+- [Claude Tag] 為 US3、AP1、AP2 和 US1-FED 站點新增 Datadog 預設項；新的 Datadog 連線現在僅限 Datadog 的 read 和 query API 路由
+- [Claude Tag] 修正近期版本的 AWS CLI 和 SDK 透過 AWS 連線送出的 S3 上傳會出現 502 錯誤的問題
+- [Claude Tag] 修正 Claude 在自己還在某頻道透過 routine 或 thread 發文時，卻把該頻道當成不活躍、並跳過那裡未被 tag 的訊息的問題
+- [Claude Tag] 修正 thread 背後的 session 被刷新或重啟後，thread 的「Claude [task]」顯示名稱退回單純「Claude」的問題
+- [Claude Tag] 修正你在 Slack thread 中切換到的模型，在那個 thread 的 session 被重啟或刷新後會默默退回頻道預設值的問題
+- [Claude Tag] 修正當其他 app 或 bot 在頂層頻道訊息中 @mention Claude 時，Claude 有時會回覆兩次的問題
+- [Claude Tag] 改善 Claude 在跨 workspace 共享的 Enterprise Grid 頻道中的提示：現在會說明何時尚未設定任何 workspace，或為何只套用組織預設值
+- [Code Review] 修正當某個審查中的 agent 以非預期格式回傳其發現時，reviews 偶爾會漏掉部分分析的問題
+- [Code Review] 修正超過 100 次 Claude review 的 pull request，在每次從 base branch 乾淨合併後都會被完整重審，而不是走較輕量、聚焦於合併的審查
+
 ## 2.1.274
 - 新增記憶體使用量到達危急狀態時的明顯警告，並附上釋放記憶體或安全重啟的步驟
 - 新增 `CLAUDE_CODE_MCP_STARTUP_WAIT_MS`，用來限制第一個非互動回合等待連線中 MCP 伺服器的時間上限（`0` = 不等待）
