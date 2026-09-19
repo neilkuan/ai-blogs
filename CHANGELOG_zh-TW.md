@@ -2,6 +2,12 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.278
+- 修改了 Claude API 與 Enterprise 使用者的 auto mode，以及在 Bedrock、Vertex、Foundry 和 gateway 上的行為，改為預設使用 server 端的 classifier，這樣就不會針對 classifier 的額外開銷收費（在 Bedrock、Vertex、Foundry 和 gateway 上可用 CLAUDE_CODE_AUTO_MODE_SERVER=0 選擇退出）；當 fallback 到會計費的模式時會發出警告。詳見 https://code.claude.com/docs/en/auto-mode-classifier-billing
+- 在 /status 新增了一列 Auto mode server，顯示這個 session 的 auto mode classifier 是否跑在 server 上
+
+- 把超過 10,000 字元的 hook 輸出改成存到磁碟，附上檔案路徑加上 2,000 字元的預覽，而不是直接注入到 context 裡
+
 ## 2.1.277
 - 新增 AGENTS.md 支援：在沒有 CLAUDE.md 的專案中，Claude Code 會改讀 AGENTS.md；可在 `/config` 的「Project instructions」底下修改（Bedrock、Vertex 或 Foundry 暫時還沒有）
 - 新增 `CLAUDE_GATEWAY_PROXY_IS_EGRESS_BOUNDARY=1`，給那些唯一對外出口是 forward proxy 的 Claude apps gateway 用：每個對外請求都會把 hostname 交給 proxy，而不是在本地解析
