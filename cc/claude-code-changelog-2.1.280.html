@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.280 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.280 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.280</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 Claude Opus 5.5（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude-opus-5-5</code>），現在是預設的 Opus 模型 —— 1M context，每 Mtok $4/$20，cache 讀取每 Mtok $0.20</li>
+<li>在全螢幕模式下更多清單支援滑鼠操作：滾輪可捲動 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/skills</code> 清單，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code> 裡某個 skill 的狀態選項也可以用點的</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH</code>，可調整 session 中每個 MCP server 的 MCP 工具描述與 server 指示的 2,048 字元上限</li>
+<li>在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">hook_execution_complete</code> OpenTelemetry 事件中加入 hook 輸出大小，以及被存到檔案的過大輸出數量</li>
+<li>修正透過 symlink 路徑寫入時，會以路徑在目錄樹內的寫法來判斷的問題：現在提示會顯示寫入實際落點的位置，而 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">acceptEdits</code>、allow 規則和 auto 模式不再核准落到目錄樹外的寫入</li>
+<li>修正 auto 模式在安全檢查拒絕審查某個動作時，會不斷重試該動作的問題；現在該動作會被拒絕一次，並註明重試也沒用</li>
+<li>修正 auto 模式在安全檢查沒有回應時，會毫不停頓地一直拒絕動作的問題；現在重試會逐步退避（back off），連續十次後該回合會停下並顯示訊息</li>
+<li>修正當模型傳送 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">path</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">file_text</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">file_content</code> 或多餘的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">description</code> 而非 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">file_path</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">content</code> 時，Write 呼叫驗證失敗的問題</li>
+<li>修正在大多數對話框（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/model</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/effort</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/config</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/status</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/sandbox</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/permissions</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/artifacts</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/mobile</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/login</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/upgrade</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage-credits</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/install-github-app</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/setup-bedrock</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/setup-vertex</code>）中按兩次 Ctrl+C 或 Ctrl+D 會直接關閉 Claude Code，而不是關閉對話框的問題</li>
+<li>修正只是把終端機視窗帶到最前面的點擊，卻同時觸發游標下方項目的問題 —— 出現在搜尋選單、分頁列、agent/workflow 列、slash command 連結和建議下拉選單中</li>
+<li>修正多餘的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">n</code> 會關閉對話框、多餘的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">y</code> 會確認對話框的問題；現在由 Enter 和 Esc 負責接受和取消（想恢復舊行為，可在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">keybindings.json</code> 把 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">y</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">n</code> 綁定到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">confirm:yes</code>/<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">confirm:no</code>）</li>
+<li>修正對話框裡的文字欄位，會因為某個按鍵綁定而吃掉你輸入的字母、數字或空格的問題</li>
+<li>修正在 Windows 終端機上，Enter 移除隱形字元後提示列仍維持錯亂的問題；現在畫面會重新繪製，讓你檢視實際會送出的文字</li>
+<li>修正隱形字元清理時，誤刪波斯文和阿拉伯文用來把後綴接到拉丁文單字或數字上的零寬不連字（zero-width non-joiner）的問題，例如「PDF」的複數形</li>
+<li>修正語音聽寫（voice dictation）在 Ctrl+C 時不會停止（提示已清空但麥克風仍在錄音）、在處理逐字稿時 Esc 無法取消，以及在逐字稿檢視和 vim NORMAL 模式下按住空格會開始聽寫的問題</li>
+<li>修正 Claude 工作期間，從 host app（Claude Desktop、VS Code、SDK）切換模型，導致下一個提示發生 prompt-cache 未命中的問題</li>
+<li>修正恢復（resume）的分岔 subagent 會重建工具清單，而不是重新送出最初使用的那份，導致該 agent 的 prompt caching 失效的問題</li>
+<li>修正 subagent 交回（hand-back）訊息在非 verbose 模式下展開時，會顯示內部來源（provenance）前言的問題</li>
+<li>修正從追蹤某個分支或 tag 的 GitHub repo 或 git URL 更新 plugin 後，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">installed_plugins.json</code> 仍保留安裝當下 commit 的問題</li>
+<li>修正當 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/skills/</code> 資料夾裡的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">manifest.json</code> 列出某些 skill 名稱時，這些 skill 會被移到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/skills/.trash/</code> 的問題</li>
+<li>修正 session 意見回饋問卷在 light 和 ANSI 主題下沒有 hover 高亮的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/workflows</code> 在開啟唯一一筆執行之前，會短暫顯示只有一列清單的問題</li>
+<li>修正在全螢幕模式下，滑鼠滾輪無法捲動含有隱藏選項的選取清單（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/model</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/permissions</code>）的問題</li>
+<li>修正你關掉的 skill 會在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/skills</code> 顯示成跟載入失敗 plugin 一樣的紅色 ✘ 的問題；現在關閉狀態會顯示暗色的 ◯</li>
+<li>修正多選（multi-select）選項描述縮排在選項編號下方，而非標籤下方的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/skills</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/mcp</code> 的搜尋框在全螢幕模式下失去右邊框的問題</li>
+<li>修正同一個 server 在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/mcp</code> 的 server 清單顯示 △、但在詳細檢視顯示 ⚠ 的問題；現在清單、詳細檢視和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code> 都統一顯示 ⚠</li>
+<li>修正 Home 和 End 在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/config</code> 設定清單，以及 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/model</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/memory</code> 和權限提示等選取清單中沒有作用的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/skills</code> 選單裡 PgUp/PgDn 會越過第一個或最後一個 skill 繞回，而非停在該處的問題</li>
+<li>修正 Tab 在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/config</code> 清單中會默默改掉所選設定的值的問題；現在它在那裡不會有任何作用</li>
+<li>修正對話每個回合都失敗、出現「role &#x27;system&#x27; must precede an &#x27;assistant&#x27; message」API 錯誤的問題</li>
+<li>修正在不支援 advisor 的 proxy 或 gateway 後方時，開啟 advisor 的對話每個回合都以 API 錯誤 400「Input tag &#x27;advisor_20260301&#x27;」失敗的問題；現在請求會不帶它重試</li>
+<li>修正當 session 儲存的歷史中，含有一則格式錯誤、關於無法載入 MCP 工具的通知時，該 session 每個回合和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/compact</code> 都失敗的問題</li>
+<li>修正恢復 session 時，其儲存的逐字稿含有格式錯誤的系統訊息、或缺少檔案清單的記憶已儲存通知，會導致當機的問題</li>
+<li>修正長時間執行的全螢幕 session 以「Claude Code exited after an unrecoverable interface error」退出的其中一個原因：現在會重建損毀的快取訊息清單</li>
+<li>修正當設定檔、或編輯後會重新讀取的檔案，在讀取中途被具名管道（named pipe）取代時，Claude Code 會卡住的問題</li>
+<li>修正當一個已移到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">settings.json</code> 的偏好設定，在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude.json</code> 裡仍保有像 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">null</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">&quot;false&quot;</code> 這類值時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/config</code> 當機、以及某些開/關偏好被誤讀的問題</li>
+<li>修正恢復含有未完成背景 agent、shell 或 workflow 的 session 時，會在你還沒輸入任何東西前就自行開始一個模型回合的問題</li>
+<li>修正在 headless 和 SDK session 中，當 subagent 正在結束其回合時，送給該背景 subagent 的訊息會被默默丟失的問題</li>
+<li>修正當啟動某個 subagent 的對話在其報告被讀取前就被壓縮（compact），導致該完成 subagent 的報告遺失的問題</li>
+<li>修正當有 LSP plugin 啟用時，背景 subagent 無法使用 LSP 工具的問題</li>
+<li>修正背景 shell 任務把良性的非零退出（例如 grep 沒有比對到結果）回報為失敗的問題</li>
+<li>修正當交給 session 的環境變數含有 NUL 字元時，背景 session（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude --bg</code>）無法執行 git、hook、plugin 和其他輔助程式的問題</li>
+<li>修正背景 subagent 執行時，需要按三、四次 Ctrl+C 才能退出的問題；現在按兩次即可退出</li>
+<li>修正當已送出的提示回到輸入框時（例如按 Esc 編輯它、倒回到它，或在啟動 hook 執行時按 Esc），IDE 選取內容會被丟棄的問題</li>
+<li>修正用 Ctrl+S 暫存的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">!</code> shell 模式提示，還原時會變回一般提示的問題，以及暫存後立刻用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/</code> 會列出檔案路徑的問題</li>
+<li>修正當暫存目錄已滿、不可寫入或屬於其他使用者時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude agents</code> 會顯示空白、無回應的畫面而非錯誤的問題</li>
+<li>修正在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude mcp remove</code> 之後又以相同名稱重新加入的 MCP server，仍顯示為需要驗證而非重新連線的問題</li>
+<li>修正背景 plugin marketplace 自動更新忽略 git 憑證輔助程式（credential helper），導致私有 repo 的 marketplace 每次執行都重新 clone 或從不更新的問題</li>
+<li>修正當官方 marketplace 的快照檔是連結或過大時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin update</code> 會清掉 plugin 記錄的 commit、並把它移到版本「unknown」的問題</li>
+<li>修正當你組織的政策無法載入時（例如在 web proxy 後方），Artifact 工具會默默消失的問題；現在 Claude 會說明是什麼在阻擋它</li>
+<li>修正 artifact 重新發布時，當某項能力被重送但未附帶資料時，會默默重設已儲存的資料庫存取規則、或丟掉檢視者設定檔範圍（scope）的問題；現在這類重送會被拒絕</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/ultrareview</code> 把已停止的雲端審查回報為已完成、或回報為可重試的錯誤，以及當其 session 被刪除或登入帳號變更時仍苦等到逾時的問題</li>
+<li>修正 Claude app 在 /compact 或 /clear 後，對 Remote Control 和雲端 session 顯示缺失或過期的 context 使用量數字的問題</li>
+<li>修正 Claude app 對 Remote Control 和雲端 session 的 diff 檢視，在同時有未提交變更時會漏掉某分支已提交檔案的問題</li>
+<li>修正雲端和自架 runner session，在撐過一段長時間過載（session 的存取權杖在此期間輪替過）後以「Authentication failed」失敗的問題</li>
+<li>修正 Cowork session 的記憶寫入衝突時，只給 Claude 看超過約 10,800 字元記憶檔的開頭和結尾，導致重試寫入時漏掉中間的問題</li>
+<li>自架 runner：修正在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--configure-git</code> 下 lifecycle-hook commit 無法簽章的問題</li>
+<li>Windows：修正背景清理誤刪用來重新定位 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude/session-env</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">image-cache</code> 或其他被清理資料夾的目錄 symlink 或 junction 的問題</li>
+<li>自架 runner：修正一個剛好在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--retire-at</code> 釋出時結束的回合會遺失其完成訊號的問題；現在 runner 會在停止 session 前，短暫等待該回合被回報</li>
+<li>還原了全螢幕模式下 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ctrl+l</code> / <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cmd+k</code> 清除逐字稿檢視的行為（於 2.1.260 加入）；它們現在恢復為重繪畫面</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/permissions</code>：檢視、新增或刪除規則後，焦點會回到規則清單，而刪除規則和移除目錄的確認現在預設為 No</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/permissions</code> 的分頁導覽：在規則清單中按 ←/→ 和 Tab 現在會切換分頁，而不會把焦點移到分頁列</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/cost</code> 的 cache 未命中原因說明，會點名 thinking 模式和 thinking 顯示的變更</li>
+<li>改善 Artifact 工具，當 Claude 無法讀取拿到的 artifact 連結時，會在繼續之前先告知使用者</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/install-github-app</code>：GitHub CLI 檢查和 repo 選取步驟現在會顯示「Esc to cancel」</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/artifacts</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/workflows</code> 清單：右側邊緣的捲軸會顯示長清單有多少被隱藏，以及你目前在其中的位置</li>
+<li>改善 workflow 進度樹：執行中的 agent 和階段現在顯示暗色圓點，而非 ⟳</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code> 全螢幕的 Add Marketplace 表單：它不再於窗格內畫一個框，而且文字和按鍵提示會與 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code> 其餘部分對齊</li>
+<li>改善全螢幕的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/workflows</code> 詳細檢視：它不再於窗格分隔線下方畫第二條水平線</li>
+<li>改善未指定語言的程式碼區塊：現在會以行內程式碼的顏色上色，讓指令從周圍文字中凸顯出來</li>
+<li>改善在工具還在執行時詢問的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/btw</code>：這則旁問現在知道該呼叫仍在進行中，而不會把它讀成失敗的呼叫</li>
+<li>改善 UserPromptSubmit hook 逾時通知和 debug log，會點名是哪個 hook 指令逾時</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@</code> 檔案建議：名稱含有查詢字串的檔案現在排在只靠資料夾名稱比對到的檔案上面</li>
+<li>改善 artifact 頁面：不再有 Print 按鈕、確認對話框或檢視者封鎖的裝置功能，email 和電話細節以純文字顯示，且深色模式會延伸到表單控制項和捲軸</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/ultrareview</code> 上傳：重新命名過的重要檔案副本，例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">id_rsa copy</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">kubeconfig (1).yaml</code>，現在也會留在你的機器上</li>
+<li>改善跨 session 傳訊的啟動警告，說明 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--debug-file</code> 會把 debug log 寫到你選擇的路徑</li>
+<li>將 Pro 和 Team Standard 方案的預設模型從 Sonnet 改為 Opus，與 Max、Team Premium 和 Enterprise 一致</li>
+<li>變更了在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/effort</code> 變成各模型獨立設定之前所儲存的 effort 等級，使其不再套用到新發布的模型（例如 Opus 5.5）；這些模型會從各自的預設值開始，直到你自己選一個等級</li>
+<li>變更 Opus 4.7、Opus 4.8 和 Fable 5，使其在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">-p</code> 或 Agent SDK、專案、受管或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--settings</code> 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">effortLevel</code>、或各模型等級中，不再固守其發布時的預設 effort</li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/autocompact</code> 的頁尾提示，會點名 ←/→ 這些調整其他有序值的按鍵</li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/fast</code> 的頁尾，會點名空格作為切換鍵</li>
+<li>自架 runner：變更 lifecycle hook 中的 git，使其忽略在 runner 共用 git 檔案中所列的 hook 資料夾和程式；那裡的 local-path 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">git://</code> remote 現在需要 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">GIT_ALLOW_PROTOCOL</code></li>
+<li>變更了名稱模仿保留 marketplace 名稱的 plugin marketplace，使其在加入時被拒絕，若已加入則停止載入</li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">PermissionRequest</code> hook：agent 類型的 hook 不再在此執行，因為它的回答永遠無法允許或拒絕該請求；現在會顯示錯誤，指向 command 或 http hook</li>
+<li>[VSCode] 新增了 Status 對話框，可用輸入 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/status</code> 開啟，顯示 session 的版本、帳號、模型和 server 細節</li>
+<li>[VSCode] 新增了 Sandbox 對話框，顯示 sandbox 模式、非 sandbox 的後備方案和排除的指令，可從面板選單或輸入 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/sandbox</code> 開啟</li>
+<li>[VSCode] 新增了 Claude in Chrome 對話框（擴充功能狀態、安裝、重新連線和權限頁面、預設啟用的設定），可從面板選單或輸入 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/chrome</code> 開啟</li>
+<li>[VSCode] 新增了 Export conversation，可用輸入 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/export</code> 把對話複製或儲存成純文字</li>
+<li>[VSCode] 在 Slash commands 對話框中加入各 skill 的來源、token 估計值和開/關狀態，可點擊變更狀態，並可用輸入 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/skills</code> 開啟它</li>
+<li>[VSCode] 新增了輸入 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plan</code>，可切換到 plan 模式、送出第一個規劃提示，或顯示 session 的計畫</li>
+<li>[VSCode] 改善聊天框的貼上文字處理：超過 800 字元或超過 2 個換行的貼上內容現在會被標記，讓 Claude 能區分它和你打的字</li>
+<li>[VSCode] 改善聊天框的提示處理：貼上文字中的隱形 Unicode 格式和標籤字元會被移除並附上通知，而其他任何內容也會在送出前被移除</li>
+<li>[VSCode] 將「Open in New Tab」改為在你正在工作的 editor group 旁邊開啟 Claude，而非在最後一個 group 之後</li>
+<li>[VSCode] 修正 effort 標籤（chip）顯示過期的已儲存 effort 等級，而非 session 實際執行等級的問題</li>
+<li>[VSCode] 修正當 Python 擴充功能在啟用時卡住，導致 Claude Code 一直無法啟動的問題；現在會在 60 秒後不等 Python 環境就啟動</li>
+<li>[VSCode] 修正計畫核准卡片從不提供 auto 模式的問題：當 auto 模式可用時，它的第一個選項現在是「Yes, and use auto mode」，與終端機一致</li>
+<li>[VSCode] 修正在 session 清單中用鍵盤封存或取消封存某個 session 後，方向鍵導覽會停止運作的問題</li>
+<li>[VSCode] 修正重新開啟 session 後，你自己的訊息中會顯示貼上標記列的問題</li>
+<li>[Claude Code on the web] 將管理員的 Routines 開/關設定改為位於 Admin settings → Capabilities → Remote sessions 底下；Claude Code 管理頁面現在會連到它</li>
+<li>[Claude Code on the web] 修正在 GitHub Enterprise Server repo 的雲端 session 中，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">gh</code> 和 GitHub API 呼叫約八小時後會失敗的問題；現在權杖會自動更新</li>
+<li>[Claude Code on the web] 修正當某個恢復現有 session 的 routine，在排定執行開始前不久被編輯時，卻以舊的提示和名稱執行的問題</li>
+<li>[Claude Code on the web] 修正雲端 session 逐字稿中指向 session 工作目錄外的檔案連結，會開啟一張永遠載不出來的檔案卡片的問題；現在這些連結會被停用並說明原因</li>
+<li>[Claude Code on the web] 修正 auto 模式拒絕重試工具呼叫的問題，原因是一個未回應就過期、或被較新訊息取代的核准提示，被記錄成了你的拒絕</li>
+<li>[Claude Code on the web] 改善在 Claude app 中檢視的雲端 session：Claude 現在會把要給你的檔案存到 app 能開啟的位置</li>
+<li>[Claude Code on the web] 移除了在管理員關閉 GitHub 的組織中，於自架環境啟動 session 時所顯示的空白 repo 選取器</li>
+<li>[Claude Tag] 為 Claude 在頻道中的 thread 加入 Slack 原生的 Working 指示器、Stop 按鈕和 thread 標題；指示器會一直顯示到 Claude 完成，Stop 則會中斷任務</li>
+<li>[Claude Tag] 在 Restrict 或 Channel only 訪客設定下，當有訪客加入、或最後一位訪客離開而改變 Claude 在該處的回應方式時，在 Slack 頻道加入一則簡短通知</li>
+<li>[Claude Tag] 修正在工作區加入其 Enterprise Grid 之前就已連接 Claude 的 Slack 工作區中，排定的 routine 會默默不執行的問題</li>
+<li>[Claude Tag] 修正當只是短暫的檔案掃描中斷（而非檔案本身）出問題時，Claude 卻要你重新上傳 Slack 檔案的問題；現在它會重試掃描，並在掃描器故障時被告知</li>
+<li>[Claude Tag] 修正 Claude 的 Slack 回覆中，文字以 +、- 或 * 開頭的項目符號會呈現為空項目符號並多出一個巢狀子項的問題；現在它會顯示為一個項目符號並保留該字元</li>
+<li>[Claude Tag] 修正雲端環境設定腳本失敗時的 Slack 通知，有時只是個籠統的「mention me to retry」的問題；現在它會點名該設定腳本，並提示要先修好它</li>
+<li>[Claude Tag] 改善 Claude Tag 管理員設定中的 GitHub 橫幅，說明 GitHub 未連接的原因：未登入、app 未連結或未安裝、登入已過期，或 SSO 未授權</li>
+<li>[Code Review] 改善 Code Review 的 check run，當 REVIEW.md 指示因超過大小限制而被截斷或排除在審查之外時會加以說明，並點名該檔案和限制</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
