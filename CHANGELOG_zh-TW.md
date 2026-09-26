@@ -2,6 +2,105 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.283
+- 新增 `x-claude-code-prompt-id` 到 gateway 提示標頭（hint headers），讓 LLM gateway 可以把服務同一個使用者 prompt 的請求分組在一起；用 `CLAUDE_CODE_GATEWAY_HINT_HEADERS=1` 來啟用
+- 新增 `availableModelsMatch` 管理設定：設成 `"exact"` 時，`availableModels` 項目只允許它明確指名的那個模型版本，所以新版本在被列入之前都會維持封鎖
+- 新增 `deniedModels` 管理設定，用來封鎖特定模型，即使 `availableModels` 有允許它們也一樣
+- 當 `OTEL_LOG_TOOL_CONTENT=1` 時，把 MCP tool、WebFetch 和 WebSearch 的輸出加進 `tool.output` OpenTelemetry span 事件裡
+- 新增 `/doctor prompt-audit`（也可用 `/checkup prompt-audit`），用來稽核你的 CLAUDE.md 檔案、skill、agent 和指令裡是否還有寫給舊模型的 prompt 寫法
+- 新增全螢幕模式下對其他 session 傳來的被截斷訊息「點擊展開」功能
+- 在 stream-json `system/init` 的 `plugin_errors` 裡，替 `--plugin-dir` 的載入失敗項目加上 `path`，標明是哪個目錄沒載入成功
+- 替 Claude apps gateway 設定新增一個可選的 `load_test_mode` 區塊：請求會被建構並簽署，但不會真的送往上游，用戶端會拿到一個罐頭回覆，這樣就能對部署做壓力測試
+- 替 Claude apps gateway 新增一個 `mantle` 上游供應商，對應 Amazon Bedrock 的 Mantle 端點
+- 修正 SDK session 在以下狀況會弄丟東西：一個 turn 提早結束時遺失延遲的 tool 呼叫或已完成的 tool 結果、worker 重啟後懸置的核准提示、以及非串流 fallback 的 `result.usage`
+- 修正長時間執行的 tool 呼叫移到背景後，MCP 進度通知會被丟棄的問題；背景任務現在會顯示最新進度
+- 修正 stdio MCP server 在還在啟動中就結束 session 時，會被留著繼續執行的問題
+- 修正無狀態的遠端 MCP server 短暫回一個 HTTP 404（例如 proxy 正在重新部署）時，會導致該 server 在剩下的 session 都無法使用，卻還被顯示為已連線的問題
+- 修正對沒有有效 URL 的 server 做 MCP 登入時，會噴出一個看不懂的 SDK 錯誤；`/mcp` 現在對這類 server 不再提供 Authenticate 選項
+- 修正遙測關閉時，每週的 Fable 用量上限不會出現在 `/usage` 和 VS Code 用量計量表的問題
+- 修正 `/model` 在 id 帶有日期或 `-v1:0` 後綴時，會接受帶 `[1m]` 的 Sonnet 4.6 或 Sonnet 5 的問題（在純 id 被拒絕的情況下）
+- 修正當 `ANTHROPIC_DEFAULT_HAIKU_MODEL` 指定了不同模型時，`/model` 選擇器卻顯示寫死的 Haiku 版本和價格的問題
+- 修正在 model fallback 期間啟動的動態 workflow，會讓每個 agent 都跑在 fallback 模型上，而不是重試原本設定的模型
+- 修正當 Haiku 是 session 的主要模型時，`DISABLE_PROMPT_CACHING_HAIKU` 沒作用的問題
+- 修正 `claude plugin validate` 會說 Claude Code 接受一個它其實裝不了的 plugin 或 marketplace 名稱；`marketplace.json` 裡這類名稱現在會驗證失敗
+- 修正 `claude plugin validate` 會放行那些 `outputStyles`、`themes`、`monitors` 或 `lspServers` 路徑遺失或指向 plugin 目錄外的 plugin
+- 修正 `claude plugin details` 對那些在 `plugin.json` 裡宣告 server 的 plugin 顯示 0 個 MCP server 的問題
+- 修正 `claude plugin marketplace remove` 沒說明它連著 marketplace 一起卸載了哪些已安裝 plugin 的問題；現在會把它們列出來
+- 修正 `claude plugin uninstall` 的問題：當兩個已安裝 plugin 的 id 只差在大小寫、且被指名的那個在該 scope 沒有 `enabledPlugins` 項目時，會把另一個連同它的選項和密鑰一起移除
+- 修正沒有宣告版本的 plugin，在快取檔案遺失時會被悄悄還原成來源最新的 commit、而不是已安裝的那個版本
+- 修正使用者安裝的 plugin 和 marketplace 在 home 或 config 目錄被搬動後（例如在 bind-mount 的 devcontainer 裡），會以 "cache-miss" 載入失敗的問題
+- 修正 `installed_plugins.json` 在含有一筆位於無效 plugin id 底下的記錄時，會顯示沒有任何 plugin 的問題；這類檔案現在可以正常載入
+- 修正 `installed_plugins.json` 在含有這個版本讀不懂的記錄時會被重寫、導致記錄遺失的問題；`claude plugin` 指令現在會指出那筆記錄並說明如何復原
+- 修正 screen-reader 模式下的權限對話框，會把加引號的指令和路徑當成對話框自己的文字來讀出來的問題
+- 修正 `/context` 沒有計入 MCP server 指示（instructions）的問題：它們現在會以自己的一列出現，並計入總量
+- 修正 Warp 終端機裡的 markdown 連結被渲染成純文字、而不是可點擊超連結的問題
+- 修正 `claude mcp add`、`add-json` 和 `remove` 在使用者或本機設定檔無法寫入時（例如在 sandbox 裡）卻回報成功的問題
+- 修正雲端 session 中，回覆的開頭幾個字有時會晚一點才出現、而不是隨著 Claude 書寫即時串流出來的問題
+- 修正 Claude 內建鍵位（keybindings）指南寫錯的地方：把和弦（chord）逾時說成 1 秒（其實是 3 秒），又把 `cmd` 講成 `meta` 的別名，這可能產生大多數終端機根本送不出來的 `cmd+` 快捷鍵
+- 修正 `keybindings.json` 會默默接受拼錯的修飾鍵（例如 `ctl+k`）的問題；現在會在 debug log 裡警告並建議正確寫法
+- 修正在 `keybindings.json` 裡重新綁定或解除綁定 `footer:openSelected` 後，footer 提示還繼續顯示「Enter to view」的問題
+- 修正快速連打的按鍵（type-ahead、按鍵重複、透過 ssh 或 tmux 的爆量輸入）有時會用過期狀態來處理的問題
+- 修正當 CA 憑證是以 `GIT_CONFIG_COUNT` 環境變數配對傳給 git 時，worktree checkout 會憑證驗證失敗（例如在 Git LFS 下載時）的問題
+- 修正在 sandbox 裡的 `git` 會要求憑證輔助程式（credential helper）儲存 sandbox proxy 的登入資訊，因而印出 "failed to store" 的問題
+- 修正受管理的 `sandbox` 設定在其中一個巢狀值無效時，整個都被忽略的問題；無效的值現在會 fail closed，而區塊的其餘部分照常套用
+- 修正在 git 儲存庫的子目錄裡啟動 Claude Code 時，Claude 對自己自動記憶（auto-memory）筆記的編輯會被當成敏感檔案寫入而被擋下的問題
+- 修正用 `DISABLE_TELEMETRY` 或 `DO_NOT_TRACK` 關閉遙測時，付費方案卻無法使用 Remote Control 的問題
+- 修正 `/remote-control` 選單在窄終端機裡把 QR code 提示切在字中間的問題
+- 修正 vim mode 的 `.` 會弄丟 Shift+Enter 換行、把游標留在重音字母裡面、以及在最後一行按 `3J` 或 Visual mode `J` 之後會重複套用較舊變更的問題
+- 修正 vim mode 的游標定位問題：在 normal 模式下重新叫回超過 10,000 字元的 prompt 不再把游標留在結尾之外，而 `V` 再 `p` 現在會落在第一個非空白字元
+- 修正 vim mode 的 `J` 合併行時空格處理跟 Vim 不同（例如 `)` 前的空格或 tab 後的空格），以及在最後一行按 `3J` 或 Visual mode `J` 時游標不像 Vim 那樣移動的問題
+- Windows：修正 PowerShell 工具會讓 `cmd /c rd`、`rmdir`、`del` 或 `erase` 刪除磁碟根目錄、home 資料夾和其他 `Remove-Item` 拒絕刪除的資料夾的問題
+- 改善 `/mcp` 工具列表：一次顯示更多工具、可用翻頁鍵和滑鼠捲動，並用警告圖示標記你的組織封鎖的工具
+- 改善 MCP tool 結果：MCP tool 回傳的圖片現在也會存成檔案，這樣 Bash、Read 和其他工具就能打開它們
+- 改善 `/tasks`：每列都顯示狀態圖示、名稱和完整內容，標題和關鍵提示在任務很多時也留在畫面上，列表還加了翻頁鍵、滑鼠滾輪和點擊功能
+- 改善 `/help`、`/hooks`、`/copy`、`/chrome`、`/memory`、`/ide`、`/release-notes`、`/rewind`、`/diff`、`/remote-env`、`/plugin` 和其他選擇器裡的列表，加入翻頁鍵、滑鼠滾輪和點擊功能
+- 改善搜尋框旁邊的列表（例如 `/skills` 和 `/artifacts`）：當搜尋框握有按鍵焦點時，把它們的指標畫成暗色，這樣一次只會有一個指標被高亮
+- 改善壓縮（compaction）轉圈動畫：計時器現在在壓縮開始時就起算，並在摘要 token 串流進來時計數，取代原本的百分比進度條
+- 改善登入 MCP server 後顯示的瀏覽器頁面：置中排版、深色模式和全新美術設計
+- 改善 Skill 工具的回覆：當某個 skill 隸屬於一個載入失敗的 plugin 時，Claude 會告訴你那個 plugin 無法載入，而不是說這個 skill 沒安裝
+- 改善對 Claude Code 設定做的 `prompt-audit`：過時路徑、過時指令和互相矛盾的指示檔現在會排在報告最前面，而 Claude Code 有記載的 thinking 關鍵字會被保留
+- 改善從一個完全讀不了的 `installed_plugins.json` 復原的流程：在重建之前，它的內容會被保存到旁邊一個檔案裡，而 `claude plugin list` 會指出那個檔案
+- 改善 artifact 資料庫讀取：一個回傳了整頁資料的排序查詢，現在會說明這是一頁、以及該如何讀取其餘的部分
+- 改善首次回覆延遲：原本在 session 首次回覆結尾才跑的 pattern-compile 步驟，現在會在回覆串流進來時同步進行
+- 改善首次請求延遲，做法是重用預先建立好的 API 連線
+- 改善啟動流程：`claude -p` 和 Claude Code Remote 不再載入互動式 UI，而 auto-mode 分類器的規則和 Artifact 工具改成第一次用到時才載入、而不是在啟動時載入
+- 改善那些 Artifact 工具功能尚未確定的 claude.ai 帳號（例如第一次執行時）的啟動流程：prompt 不再等最多 1.5 秒去檢查它們；如有需要，改由第一則訊息來等
+- 變更第三方供應商上的互動式 session 或關閉遙測的 session：當沒有設定權限模式時，改成以 auto 模式啟動；`permissions.defaultMode` 仍會覆蓋這項設定
+- 變更 `/ultrareview` 啟動對話框，說明審查本機分支可能會上傳已追蹤檔案的未提交變更
+- 變更 `/model` 選擇器的 Opus 那一列和 Default 模型的名稱，在 Opus 本來就有 1M context window 的地方拿掉「(1M context)」字樣；context window 本身不變
+- 變更終端機裡的 prompt 建議：連續 20 次都沒被使用後就減少出現的頻率；用了其中一個就會讓它們回來
+- 變更 `--system-prompt` 和 `--append-system-prompt`，讓它們可以同時接受直接輸入的文字和 `-file` 形式；檔案裡的文字會排在前面
+- 變更 `Skill(anthropic-skills:<name>)` 的 deny 規則，讓它在 Claude Desktop 以 plugin 形式提供該 skill 時也一併封鎖，而 `Skill(skill:<name>)` 的 deny 現在會比對該 skill 的別名和顯示名稱
+- 變更 `/rewind` 和 `/diff` 列表，讓它們跟其他每個列表一樣用相同的鍵位動作來移動（`select:*`）；`messageSelector:*`／`diff:*` 的重新綁定仍然有效
+- 變更 `/workflows` 執行列表的尺寸邏輯，跟其他列表一致：內嵌時佔終端機一半高度，而當 prompt 顯示在下方時它會把標題留在畫面上
+- 變更 `claude plugin eval`，在有安裝 git 時要求 git 2.31 以上版本；在更舊的 git 上執行會被拒絕，並回一個標明版本的訊息
+- 變更 artifact 監看（watching）：一個自動啟用（不是你主動要求）的監看，現在會在 3.5 小時沒有活動後結束；再次發布或監看該 artifact 就會重新啟用它
+- 自架 runner：變更生命週期 hook 的 git，讓它跳過儲存庫的 Git LFS `pre-push` hook、忽略可寫入的系統層級 `core.hooksPath`，並在沒有 `--configure-git` 時不簽署 commit
+- 自架 runner：變更 Anthropic 受管理 git 底下的 `GIT_SSL_CAINFO` 和 `GIT_SSL_NO_VERIFY`：runner 自己的 git 對 Anthropic 的 git 路由一律驗證，並用警告訊息說明各項設定分別套用在哪裡
+- 還原 2.1.282 對 `claude-ai` 這個名稱的保留：叫這個名字的 skill、指令、workflow 以及 MCP server 的 skill 和 prompt 現在又能載入了，而 `Skill(claude-ai:*)` 規則恢復成普通的前綴規則
+- [VSCode] 修正權限模式指示器的問題：在自動切出 auto 或 bypass 模式失敗後，session 明明還跑在該模式下、指示器卻顯示 Default；現在會重試切換直到成功為止
+- [VSCode] 修正從 web 傳送（teleport）過來的 session 會弄丟 Claude 工作期間送出的訊息的問題
+- [VSCode] 修正當舊版本存了一份空的本機副本時，Web session 會從 session 列表裡消失、還在它原本的位置開了一個空聊天的問題
+- [VSCode] 修正重新開啟的 session 會在 Claude turn 進行中收到的訊息（例如自動接續）處把一個 turn 拆開的問題
+- [VSCode] 修正重新載入的 session 會顯示一個已被 rewind 掉的 turn、或只顯示壓縮之前那幾列的問題
+- [VSCode] 修正 footer 的 agents 標籤（pill）在窄面板裡把圖示畫得沒對齊、狀態點緊貼邊緣的問題
+- [VSCode] 修正把以換行結尾的多行內容貼進一個長 prompt 之後，聊天輸入框會把文字顯示得比游標和選取範圍稍微低一點的問題
+- [Cloud sessions] 改善把儲存庫加進執行中雲端 session 的流程：一個你的 GitHub 帳號能讀但不能 push 的私有儲存庫，現在會以唯讀方式掛載進來
+- [Cloud sessions] 修正雲端 session 在從伺服器端重啟中復原後，偶爾會重做一個已經完成的步驟（例如重複張貼一則留言或 push）的問題
+- [Cloud sessions] 變更新的例行排程（routine schedule）預設值，改成整點過幾分鐘，並附註說設在整點正上的 routine 可能會晚幾分鐘才啟動
+- [Claude Tag] 新增「Claude 可搜尋的頻道」管理設定，把 Claude 的 Slack 搜尋限制在它已被加入的公開頻道，可依組織、workspace 或頻道分別設定
+- [Claude Tag] 在連結你的 Claude 帳號後顯示的頁面上新增一個 Back to Slack 按鈕，帶你回到你當初出發的那個討論串
+- [Claude Tag] 修正一個頻道的設定頁面，在該頻道是透過 attach 規則取得其存取套件（access bundle）時，列不出任何連接器或 plugin 的問題；透過規則掛上的套件現在會顯示出來
+- [Claude Tag] 修正存取套件的儲存庫搜尋，在 GitHub App 安裝被限制在一大串選定儲存庫時會漏掉部分儲存庫的問題
+- [Claude Tag] 修正 Claude 在被新訊息打斷回覆到一半時，偶爾會把同一則回覆張貼兩次的問題
+- [Claude Tag] 修正頻道 routine 的問題：在較舊的私有頻道（例如經過 Slack Connect 分享後）其 Slack 頻道 ID 改變時，routine 會停止執行
+- [Claude Tag] 修正設為「Channel only」的頻道裡的對話，會在一個非訪客成員加入、而 Slack 又慢慢才確認其成員身分時全部結束的問題
+- [Code Review] 修正「@claude review」請求在 GitHub 沒能回傳 pull request 時就沒聲沒息的問題：現在該請求會重試一次，如果還是失敗會用一則留言說明
+- [Code Review] 修正在時間上限處停下、什麼都還沒驗證的審查的計費問題：它現在會顯示為未完成、不計費，並重試一次
+
+- 變更 AGENTS.md 支援，讓它在 Amazon Bedrock、Google Vertex AI、Microsoft Foundry、LLM gateway 以及關閉遙測的 session 上也能運作
+- 新增 AGENTS.md 支援：在一個沒有 CLAUDE.md 的專案裡，Claude Code 會改讀 AGENTS.md；可在 `/config` 的「Project instructions」底下更改它
+
 ## 2.1.282
 - 新增 `maxProseWidth` 設定，可在寬螢幕終端機限制 Claude 敘述文字的寬度，而表格和程式碼區塊仍維持完整寬度
 - 新增啟動時的提示，以及 `/status` 和 `claude doctor` 的項目，列出專案設定檔中被忽略或用來關閉 telemetry 的 telemetry 變數
