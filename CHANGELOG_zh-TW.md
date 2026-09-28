@@ -2,6 +2,108 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.284
+- 新增 Claude Sonnet 5.5（`claude-sonnet-5-5`），現在是 Anthropic API 上的預設 Sonnet 模型 —— 1M context，每 Mtok $2/$10、cache 讀取每 Mtok $0.20
+- 在 auto 模式讀取工作目錄外的檔案前的提示，新增了「是，但下次再問我」的選項，這樣你可以放行這一次讀取，之後的讀取仍會問你
+- 當 Claude apps gateway 跑這個版本或更新版本時，`/usage` 與狀態列的 Claude apps gateway 支出上限會加上金額（例如「本月已花費 $271.40 / $500.00」）；狀態列的 `rate_limits.spend_limit` 也新增了 `used_usd`、`limit_usd` 和 `period`
+- 新增 `effortSlider:decreaseEffort`、`increaseEffort` 和 `toggleUltracode` 這幾個 keybinding 動作，這樣 `/effort` 滑桿的方向鍵和 Tab 鍵可以在 `keybindings.json` 裡重新綁定
+- 為 claude.ai 訂閱者在 `/help` 和指令選單裡加上 `/rate-limit-options`，這樣提到它的用量上限通知就能對應到一個你找得到的指令
+- 在互動式終端機新增 `/mcp reconnect all`，可以一次重試所有連線失敗或需要驗證的 MCP server
+- 當某個 managed policy 的 `availableModels` 為空，或漏掉了 Claude Code 啟動時所用的模型卻沒設定 `model` 或 `enforceAvailableModels` 時，新增 Claude apps gateway 的啟動警告
+- 為 Claude apps gateway 的 `telemetry.forward_to` 目的地新增 `auth: { google: {} }`，這樣 telemetry 就能用 gateway 的 Google Cloud 憑證，直接匯出到 Google Cloud 的 OTLP endpoint
+- 在 Claude apps gateway 與它的 identity provider 之間新增憑證式客戶端驗證（`private_key_jwt`），供那些發放憑證憑據而非 client secret 的 identity provider 使用
+- 修正損壞的 response stream 會顯示像「JSON Parse error」或「undefined is not an object」這種原始錯誤，或把「undefined」這個字寫進回覆裡，而不是重試或回報為中斷的回覆
+- 修正在一個 thinking block 之後緊接著出現 overloaded 或 server error 時，會以錯誤結束這一輪而不是重試
+- 修正壓縮（compact）後仍持續出現的「Prompt is too long」錯誤：當壓縮後的請求還是太長時，Claude Code 現在會再壓縮一次，少保留一些近期對話
+- 修正當某個 session 的模型無法使用、又沒有 fallback 模型可用時，會顯示一句乾巴巴的「is currently unavailable」訊息（在 cloud sessions 則是「Something went wrong」），而不是顯示模型無法使用的通知及其 Learn more 連結
+- 修正 Agent SDK sessions 在使用者訊息含有 `source` 格式錯誤的圖片時會崩潰，以及在遇到格式錯誤的 document block 後每一後續輪次都失敗的問題；格式錯誤的圖片現在會換成一段說明文字
+- 修正在恢復的 session 裡，MCP 工具呼叫會在其 server 仍在連線時以「No such tool available」失敗；現在這個呼叫最多會等 server 10 秒
+- 修正在 plan-usage endpoint 對你限流或拒絕登入後仍重複呼叫它的問題：`/usage`、`/extra-usage` 和 IDE 用量檢視現在會退避（back off）而不是一直重問
+- 修正當 managed settings 限制 MCP server 只能來自 plugin 時，`claude mcp add` 卻回報成功；現在它會拒絕並告訴你該怎麼做，而不是存下一個永遠不會載入的 server
+- 修正 `/plugin` 設定畫面：布林選項現在是 true/false 的選擇而非自由輸入，數字選項會拒絕無效輸入，且 ←/→ 會改變某個選項欄位而不是切換分頁
+- 修正 `ANTHROPIC_FOUNDRY_RESOURCE` 未經驗證就被插入 Foundry endpoint 的主機名稱；現在若其值不是單純的 resource 名稱就會被拒絕
+- 修正 Claude Desktop 在 Claude apps gateway 後面時不提供 1M context 選項：gateway 現在會自動為 Desktop 標記每個支援 1M 的模型
+- 修正在 shell 模式下按 ↓ 會選到隱藏的背景任務標籤（pill），導致 Backspace 和 Ctrl+U 無法編輯提示
+- 修正在啟用大量 plugin 時 Bash 工具在 Windows 上失敗的問題：不存在的 plugin `bin/` 目錄不再被加進 PATH，繼承來的項目也不會被加兩次
+- 修正 `sparsePaths` plugin marketplace 在較舊的 git（2.39 之前）上會 clone 成空的並取代掉一份可用的本地副本，導致每次 refresh 都以「marketplace.json file is no longer present」失敗
+- 修正全螢幕渲染在 transcript 模式下按 `[` 把對話寫進 scrollback 時，會抹掉 session 上方的終端機輸出（macOS 和 Linux）
+- 修正全螢幕捲動位置在你捲上去時、若一則回覆此時串流完成，會跳到前一則訊息或跳到最底部
+- 修正 `/config`、`/plugin` 等對話框裡的分頁列在狹窄終端機中把標題和分頁標籤從字中間斷開的問題；放不下的分頁現在會整個移到下一行
+- 修正 `/model` 選擇器在捲到最後一個模型後仍在清單下方顯示「+1 model」；這個數字現在只計算可見範圍下方的模型
+- 修正 `/keybindings` 會把一個什麼都不做的頁尾動作的 Backspace 和 Delete 綁定寫進產生出來的 `keybindings.json`
+- 修正重新綁定的 agent 面板關閉鍵（`footer:close`）在你正在檢視的那個 agent 的那一列上會打出「x」而不是它本身
+- 修正 vim 模式下 `.` 無法重複那些打得非常快（例如透過 ssh 或在 tmux 中）或未使用 bracketed paste 貼上的文字，以及在重複一個沒打任何字的變更（例如 `cw` 然後 Esc）後把提示停留在 INSERT 模式的問題
+- 修正 vim 模式在最後一行執行 `dd`、或在提示結尾執行 `yy` 後，把游標留在圖片佔位符的左括號上，此時按 `r` 或 `x` 會弄壞或刪掉圖片的問題
+- 修正在終端機剛重新取得焦點的那一瞬間按下的按鍵，會在 Remote Control 啟用提示的短暫安全延遲重新開始之前就先回答了它
+- 修正在家目錄啟動 Claude Code 時,切換 renderer 或更新後 workspace 信任對話框會第二次出現的問題
+- 修正從專案外部 symlink 進 `.claude/rules` 的規則會被略過、卻從沒顯示過外部匯入的核准提示；從專案外部 symlink 進來的 `.claude` 目錄現在會要求同樣的核准
+- 修正在 managed `allowManagedPermissionRulesOnly` 之下,來自 marketplace、claude.ai 和 npm 的 plugin 會透過 `allowed-tools` 預先核准自己的工具;現在只有來自官方 Anthropic 來源、或 managed settings 擔保的來源的 plugin 才保有這種預先核准
+- 修正第一次 `claude plugin install` 失敗時,在某個依賴的版本範圍無法滿足的情況下,仍把該 plugin 留在啟用並記錄下來的狀態
+- 修正 debug log 在某個失敗的 hook 同時也寫入 stdout 時會漏掉它的 stderr,以及對一個沒有任何輸出的失敗 hook 什麼都不記錄的問題;失敗的 hook 現在也會記錄它的狀態碼
+- 修正 Elicitation 和 ElicitationResult hook 回傳的 `{"decision":"block"}` 被忽略的問題;它現在會像 exit code 2 那樣拒絕該 MCP elicitation
+- 修正在沒有 `SendMessage` 工具的情況下啟動的 session（例如由 Claude Desktop 啟動的），仍被告知要用它去傳訊息給其他 session
+- 修正從 Claude app 透過 Remote Control 傳來的照片,在它排隊的訊息被拉回終端機提示編輯時會遺失,以及對一張沒有說明文字的照片游標會移動一個字元的問題
+- 修正在自動等待用量上限期間打字,會讓這次等待脫離「Continue automatically at usage limit」設定的控制（當那一輪又碰到上限時）
+- 修正用量上限警告對已在最高階 Max 方案的使用者建議 `/upgrade`;現在這些警告和 `/upgrade` 本身在 `/usage-credits` 可用時會改指向它
+- 修正 Explore subagent 在 session 執行 Claude Code 不認得的模型 ID（例如某個 proxy 後面的自訂模型）時,會在 Claude API 上切換到 Opus;Explore 現在會沿用那個模型
+- 修正 `/loop` 在 self-paced 模式下的狀態更新常常沒被顯示出來,因為 Claude 只把它們寫在 reasoning 裡;Claude 現在會把每則更新、以及 loop 停止時的結果,都寫成可見文字
+- 修正 `/ultrareview` 從 Claude 桌面 app 在 macOS 或 Linux 上建立的 git worktree 啟動時,無法上傳工作樹（working tree）的問題
+- 修正在 Linux 上當工作目錄被拒絕寫入且內含一個被拒絕讀取的目錄時,sandbox 化的 Bash 指令無法啟動的問題
+- 修正 artifact 資料庫寫入結果會告訴 Claude 說每個檢視者都看得到對某個檢視者私有 `data/users/` 子樹的寫入,並為 `as_level` 新增了一個「view」層級
+- 修正 Claude apps gateway 對來自某個 identity provider 列出很多群組的登入的每個請求都回應 `431 Request Header Fields Too Large`;現在它接受最大 256 KiB 的請求標頭
+- 改善用量上限等待:上限的狀態和帶有 usage-credits 選項的倒數計時現在會以一整塊顯示在提示下方,且上限訊息不再重複倒數計時
+- 改善 Claude in Chrome 工具在未加前綴就被呼叫時的「No such tool available」錯誤:它現在會指出該呼叫的工具名稱
+- 改善 Monitor 事件列,改為顯示每個事件印出了什麼而不是重複描述,並停止在每個事件後重複顯示沒有變化的「Waiting for N … to finish」那一行
+- 改善 Workflow 工具對非同步 script hook 所拋出錯誤的 sandbox 加固
+- 透過只建構你的設定檔實際用到的那部分 settings schema,改善了啟動時間和記憶體用量
+- 改善 `/claude-api`:`hillclimb` 不再把回合花在對 eval 而言小到量不出來的 prompt 改寫上,且你在 `report.html` 之外額外要求的頁面會被建成一個不從網路載入任何東西的本地檔案
+- 改善 `/tasks`、`/copy` 和 `/hooks` 等清單:每個名稱後面的細節在放得下時現在會對齊成一欄,否則就靠右邊緣排列
+- 改善 `claude plugin marketplace add`,會在它取代一個已用同名但來自不同來源加入的 marketplace 時說明,以及如何復原
+- 改善當 managed settings 同時要求登入（`forceLoginMethod` 或 `forceLoginOrgUUID`）和一個 API key、token 或 `apiKeyHelper` 已被設定時的啟動拒絕:它現在會指出正在使用的憑據、設在哪裡,以及如何移除它
+- 改善 auto-memory 載入:在 `MEMORY.md` 和被喚回的 memory 筆記到達 Claude 之前,會先中和掉隱形字元和模仿 Claude Code 自身標記的標籤
+- 改善 `claude remote-control`:在一個你還沒信任的資料夾裡,它現在會在終端機上要求 workspace 信任,而不是直接結束
+- 改善 artifact 頁面:Claude 會把它的設計計畫寫進頁面而不是回覆裡,並用你先前已為某物取好的名字當作頁面標題
+- 改善 Artifact 工具,這樣當給 Claude 一個 claude.ai 聊天或專案連結、一個來自聊天的 artifact,或單獨一個 artifact id 時,它會要求正確的連結或內容,而不是直接停下來
+- 將互動式終端機和 VS Code sessions 改為在沒有設定 permission 模式時,於每個方案和 provider 上都以 auto 模式啟動;`permissions.defaultMode` 仍會覆蓋它
+- 將 Ultracode 改成 `/effort` 裡它自己的開關（Tab,或 `/effort ultracode [on|off]`):它不再強制 xhigh effort,並在任何 effort 等級都保持開啟
+- 將回覆過程中連線中斷後的重試,改為與該請求其餘的重試共用同一份預算,這樣一個一直失敗的請求會更快放棄
+- 修改當某個 Sonnet 模型的安全防護標記了一則訊息時所顯示的通知,改為說明發生原因,並提供編輯和重試的選項
+- 修改在以 `ANTHROPIC_DEFAULT_OPUS_MODEL` 或 `modelOverrides` 釘選 Opus 模型的 session 裡的安全相關模型切換:在 Anthropic API 上,現在改由 API 針對每種標記類型挑選要切換到的模型,而不是那個被釘選的模型
+- 將非互動式的第一輪改為:即使 `CLAUDE_CODE_MCP_STARTUP_WAIT_MS` 為 `0`,仍會為 `--allowedTools` 或某個 `mcp_tool` hook 指名的、正在連線的 MCP server 最多等 2 秒
+- 將 `/recap` 改為:當它是從一個聊天討論串（包括你自己的）、或從某個 routine 或 webhook 轉傳過來時,會以簡短通知拒絕;若是在終端機、Claude apps、Remote Control、`-p` 或某個 SDK host 裡輸入的,則照舊執行
+- 將 `/artifacts` 改為在標題旁邊用單字標籤（All、Mine、Shared）顯示它的篩選分頁,使用與 `/config` 和 `/plugin` 相同的分頁列
+- 將 artifact 發布改為拒絕位於網路共享上的檔案（`\\host\share` 路徑或 `/net` automount）,除非它位於一個用 `--add-dir` 加入的已對應網路磁碟機上
+- [VSCode] 新增在每則提示和回覆上方可選顯示的時間,並在日期變更處加上一行日期（Claude Code: Show Message Timestamps 設定,預設關閉）
+- [VSCode] 在 Manage plugins 的列上新增 plugin 載入錯誤和備註,並附一個彈出視窗可停用、解除安裝或複製該錯誤
+- [VSCode] 在 Effort 滑桿下方新增 Ultracode 開/關切換,取代滑桿上的 Ultracode 停止點;model pill 在任何 effort 等級都會顯示「· Ultracode」
+- [VSCode] 修正從 Memory 對話框執行 Reload Claude 時,會在一個已編輯的檔案存檔前就重新啟動的問題
+- [VSCode] 修正還原的分頁會開啟一個另一個 Claude 行程仍開著的對話;它現在會先詢問
+- [VSCode] 修正你展開的 Focus 檢視區段會在 sub-agent 工作時、或當該區段的第一步被裁出視野時自行關閉的問題
+- [VSCode] 修正輸入 `/model` 並按 Enter 會把用法說明文字印進聊天,而不是開啟模型選擇器
+- [VSCode] 修正 `/feedback` 在 Vertex、Bedrock 和 Foundry 上按下 Send 後被拒絕;報告現在會像終端機那樣存在這台電腦上
+- [VSCode] 修正登入在視窗重新載入後會等 Python extension 最多一分鐘的問題
+- [VSCode] 修正在 Restart Extensions 後停止回應的 Claude Code 分頁:它們現在會重新開啟到自己的對話
+- [VSCode] 修正一則來自另一個 agent、沒有記錄寄件者的訊息會在聊天裡顯示成原始 XML 的問題
+- [VSCode] 修正來自其他 agent、session 或頻道的訊息在重新載入後消失的問題
+- [VSCode] 修正使用者自己的 `/mcp`、`/config` 或 `/settings` 指令被 extension 的對話框蓋掉的問題
+- [VSCode] 修正在沒有任何一輪正在執行時,按 Escape 會停止每一個背景 agent 的問題
+- [VSCode] 修正 plugin 安裝連結會取代掉一個你已擁有、且用相同名稱的 marketplace 的問題
+- [VSCode] 修正當一個大型文字檔附加到訊息時,壓縮後出現「Prompt is too long」錯誤的問題
+- [VSCode] 修正路徑中含有非 ASCII 字元、空格或括號的檔案的聊天連結無法開啟的問題
+- [VSCode] 將 `claudeCode.environmentVariables` 設定裡的 `CLAUDE_CONFIG_DIR` 改為只在它是絕對路徑時才套用,並把它傳給接續聊天的終端機
+- [Cloud sessions] 修正某個 routine 的 Edit 和 Duplicate 控制項在你離線時會說該 routine 還在載入的問題;它們現在會告訴你你已離線
+- [Claude Tag] 新增討論串、頻道預設值或你的 DM 的模型家族選項,例如「Opus (latest)」,這樣選擇會跟著該家族最新的模型走
+- [Claude Tag] 在 analytics 支出預測圖表上新增計入你整個組織上限的支出,並附上該上限已用掉多少
+- [Claude Tag] 修正舊版 Claude in Slack app 的進度卡片和連結預覽,在 GitHub Enterprise 主機名稱含有底線時,會漏掉 repository 和 Create PR 按鈕
+- [Claude Tag] 修正 Claude 在一個其環境拒絕啟動它的頻道裡保持沉默的問題;它現在會發一則通知請你聯絡管理員,並在被 @-mention 時重試
+- [Claude Tag] 將 Claude 改為在每次被尚未連結 Claude 帳號的人 @mention 時都張貼它的私人登入通知,而不是在第一次之後就安靜下來
+- [Claude Tag] 改善 admin 設定裡的「Notify members now」:按一次就能觸及你組織在 Enterprise Grid 中認領的每個 workspace,以及大型 workspace 裡更多的成員
+- [Claude Tag] 改善 Claude 在使用 on-demand runner 的自架環境上的等待通知:它現在會說明是 runner 正在啟動、將會重試啟動,還是不會啟動任何 runner
+- [Claude Tag] 改善當因為無法確認某頻道的 Slack workspace 已連結到你的組織而導致新增 channel manager 失敗時所顯示的錯誤
+- [Claude Tag] 改善 admin 設定裡某個頻道的存取清單,會顯示某個 auto-join 模式所附帶的 connector、repository 和 plugin,以及各自來自哪裡
+- [Claude Tag] 改善以 channel manager 身分新增 repository:當你的 GitHub 登入無法確認你是 repository admin 時,頁面會請你用 GitHub 登入
+- [Code Review] 修正 Code Review 在其 GitHub App 下有一個未提交的 review 於該 pull request 上開著時,會直接放棄而沒張貼完成的 review;它現在會先重試張貼
+
 ## 2.1.283
 - 新增 `x-claude-code-prompt-id` 到 gateway 提示標頭（hint headers），讓 LLM gateway 可以把服務同一個使用者 prompt 的請求分組在一起；用 `CLAUDE_CODE_GATEWAY_HINT_HEADERS=1` 來啟用
 - 新增 `availableModelsMatch` 管理設定：設成 `"exact"` 時，`availableModels` 項目只允許它明確指名的那個模型版本，所以新版本在被列入之前都會維持封鎖
