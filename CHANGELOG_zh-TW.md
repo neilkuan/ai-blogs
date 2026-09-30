@@ -2,6 +2,96 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.286
+- 當多個權限請求疊在一起時，權限提示（permission prompt）現在會顯示像「2 of 5」這樣的計數
+- 全螢幕模式下，清單的「N more」列現在支援滑鼠操作：點一下就能跳到清單的那一端，還有 hover 和按下的狀態
+- 修正當 gcpAuthRefresh 或 awsAuthRefresh 憑證過期時，多個 Claude Code 程序和 IDE 擴充套件各自開一個登入瀏覽器的問題
+- 修正 `claude --resume` 和 `--continue` 在先前 session 崩潰或被 kill 的情況下，有時會在一批並行工具呼叫後掉光每一個回合的問題
+- 修正當工具或 hook 回傳物件、數字或布林值而非文字時（包含在恢復的 session 中）出現 API 400 錯誤的問題
+- 修正歷史紀錄非常龐大的雲端 session 永遠醒不過來的問題，原因是逐字稿還在載入時容器就被停掉了
+- 修正 Claude apps gateway 的花費計量問題：把 1 小時的 prompt cache 寫入用較便宜的 5 分鐘費率計價，以及在執行伺服器端工具（例如 web search）的串流回合中只計算第一次 model 呼叫的輸入 token
+- 修正 macOS session 在另一個 Claude Code 視窗 `/login` 成功後，若殘留了 `~/.claude/.credentials.json`，仍顯示「Not logged in」或「Login expired」的問題
+- 修正當 Anthropic API 拒絕你的預設 model 或某個 model 別名解析出的 model 時，每個回合都失敗的問題：Claude Code 現在會在同一 tier 的前一個 model 上重試一次
+- 修正 Remote Control session（包含 `claude remote-control`）在你的組織政策關閉 Remote Control 後仍保持連線的問題；它們現在會斷線並附上通知
+- 修正當 fallback model 無法以 fast 速度執行時，拒絕重試和 `--fallback-model` 重試失敗的問題；它們現在會以 standard 速度執行，並在互動式 session 中顯示一次性通知
+- 修正當 MCP discovery 快取啟用時，headless session 在重新驗證成功後仍重複顯示「MCP servers require authentication」提醒的問題
+- 修正 `claude auth status` 把 Console 登入所儲存的 API key 回報成 `claude.ai` 的問題；現在會回報 `api_key`，而 VS Code 擴充套件會把該 session 當成 API key session
+- 修正 `/status` 把 Anthropic profile 和 API key 並列、彷彿兩者都生效的問題；現在 profile 會被標記為未使用
+- 修正 Claude 沒被告知透過 Remote Control 送出的訊息所附的檔案沒送達，以及檔案最後一次下載嘗試有時只有 10 秒的問題
+- 修正一則在 Claude Code 正在結束時抵達的 Remote Control 訊息被標記為已送達、之後卻永遠沒回應的問題；它現在會保留在佇列中，等 session 下次執行時處理
+- 修正當「Bearer」或「Basic」出現在憑證的 key 名稱之前時，MCP 錯誤訊息會顯示憑證值的問題
+- 修正經過 percent-encoding 的 Bearer token 在錯誤訊息中只被部分遮蔽的問題
+- 修正遮蔽後的 log 和逐字稿會顯示 key 名稱中含有隱形字元（例如零寬空格（zero-width space））的密鑰的問題
+- 修正 log 和逐字稿會顯示 URL 密碼一部分的問題，這些密碼含有像 `)`、引號、`]`、`&` 或第二個 `@` 的標點符號，或是延伸過 `/` 到像 ssh URL 中 `[::1]` 這種方括號主機的密碼
+- 修正 `/feedback` 存到磁碟的 zip 裡的 session 逐字稿在密鑰遮蔽後含有無效 JSON 行的問題
+- 修正 MCP connector 在其伺服器捨棄較舊的 MCP handshake 後，最多一整天都列不出任何工具的問題
+- 修正 Claude 重複發出的 MCP 登入請求會取代待處理登入連結的問題，這可能導致該連結失效
+- 修正 `/usage` 沒有把某個 MCP 伺服器還在連線中或剛連上時（例如重啟後不久）所做的工具呼叫記給該伺服器的問題
+- 修正在 claude.ai 啟用的 plugin 在發生短暫伺服器錯誤後，偶爾會從 Claude Code 消失一個 session 的問題
+- 修正打進執行中 subagent 的訊息在 subagent 讀取後，於其逐字稿中顯示兩次的問題
+- 修正 subagent 交還訊息在 subagent 沒有註冊名稱時，顯示原始 task id 而非 agent 名稱的問題
+- 修正前景 subagent 在已啟用 task-tracking 工具（TaskCreate/Get/Update/List、TodoWrite）的 session 中有時會缺少這些工具的問題
+- 修正以 worktree 隔離產生的 subagent 在第一次讀檔時，會從 worktree 副本再次載入專案的 CLAUDE.md 及其 imports 的問題
+- 修正 Workflow 工具的 subagent 在連線於回應中途停滯幾分鐘時，被從原始 prompt 重新啟動的問題
+- 修正在查看背景 agent 或隊友的逐字稿時打的 `/compact`、`/clear` 和 `/rewind` 會默默作用在主對話上的問題：現在會有一個對話框指名目標並先詢問
+- 修正背景工作在等你核准時卻顯示已完成的問題
+- 修正當 model fallback 只持續一個回合時，commit 歸屬提醒被重新塞進工具輸出裡的問題
+- 修正在全螢幕模式下，點擊摺疊列文字之間的空白（例如「Thought for 4s」）會反白該列卻不展開它的問題
+- 修正沒有細節的列（例如名稱很長的動作列）在清單畫面中把其他每一列的細節都往右推的問題
+- 修正名稱非常長的檔案附加到雲端 session 時送不到的問題
+- 修正 Claude Code 拒絕載入某個 marketplace 時的 plugin 錯誤：現在會說明原因和修正方式，而不是只顯示「not found」
+- 修正 `/plugin` 的 Discover 分頁在「Checking … for new plugins」那行未加引號顯示 marketplace 名稱的問題，而其列已經用引號顯示了該名稱
+- 改善 commit 指引：當你的專案或使用者 skill 中有一個名為 `verify` 的 skill 時，現在會告訴 Claude 在 commit 前立刻執行它，但純文件和純測試的 commit 除外
+- 改善 subagent 檢視中的 send now（ctrl+enter）：它現在會把 subagent 執行中的命令移到背景，讓你的訊息馬上被讀取
+- 改善背景 agent 對你訊息的回覆，讓它們不再一開頭就把你說的話重述一遍
+- 改善 claude.ai artifact 連結的讀取：WebFetch 現在會問和 Artifact 工具讀取時相同的問題（session 網路存取開啟時不問 artifact，關閉時每個 artifact 問一次），而 auto-mode 的 yes 不再算在只有你能回答的地方
+- 改善 fetch、skill、file read、sandbox network、Claude in Chrome、workflow script 和 notebook edit 的權限提示，讓外觀和 file edit 提示一致
+- 改善 Bash、PowerShell 和 Monitor 的權限提示，把命令顯示在虛線之間，和 file edit 提示一致
+- 改善全螢幕模式下的清單捲軸：在大多數清單中，捲軸不再隨著「N more」列的出現和消失而移位，而且現在有可點擊或按住捲動的 ↑/↓ 箭頭
+- 改善外部編輯器（Ctrl+G）：接受行號的編輯器現在會開在你游標在 prompt 中所處的那一行
+- 改善打字時的 slash command 建議反應速度，尤其在安裝了很多 skill 或 plugin 命令的情況下；命令描述現在會以字詞前綴比對
+- 改善 output style 選擇器：它現在會開在你目前的樣式而非 Default，每個樣式的描述會顯示在名稱下一行；數字鍵不再選取樣式
+- 改善 `/hooks`：hook 細節畫面的結尾那行現在寫「this hook」而不是「it」
+- 改善 model fallback 通知和 autocompact 抖動（thrashing）錯誤，讓它們在 fallback 把 context window 從 1M 降到 200K token 時會說明
+- 改善 SDK 和 `-p` session 的反應速度，當主機為已連線的伺服器重送 MCP 伺服器啟用時
+- 改善 Claude apps gateway 在 `/protocol` 提供的 protocol 頁面：它現在會說不要拒絕未知輸入，並符合 Claude Code 現今所送出的內容
+- 變更為：在沒有任何東西執行或排隊時送出的 prompt，現在會立刻以正常文字顏色顯示而非灰色
+- 變更失敗 API 請求的重試方式：現在一個上限涵蓋整個 model 呼叫，所以在預設重試設定下，一個失敗的呼叫最多送出 14 個請求
+- 變更 `--bare`：只連線命令列上指名的 MCP 伺服器、不送任何 system reminder 給 model、也不啟動背景任務；在 `--bare` 下，達到逾時的 shell 命令現在會停止而不是移到背景
+- 變更 send-now 鍵（ctrl+enter），讓它把 skill 自己的 shell 命令移到背景而不是結束它
+- 變更受速率限制網域的安全檢查所出現的 WebFetch 錯誤，告訴 Claude 不要在迴圈中重試它
+- 變更 plugin 安裝方式，拒絕屬於 git 儲存庫或資料夾的 npm 來源，並只從 registry 套件安裝 plugin 相依套件
+- 變更清單畫面（`/artifacts`、`/mcp`、`/skills`、`/hooks` 等）讓每一列的細節都在名稱後對齊成一欄
+- 變更清單的溢出列，讓它們讀作「↑ N more」/「↓ N more」而非「N more above」/「N more below」
+- 變更 `/hooks`，讓它開在一份依事件分組的已設定 hook 清單上，這樣查看一個 hook 只要按一次 Enter 而不是三次
+- 變更 theme 選擇器為適合你終端機的捲動清單，而不是把預覽推到螢幕外；數字鍵不再選取 theme
+- 變更 `/exit` 的 Remove worktree，讓它在 Claude Code 停掉它在那裡啟動的伺服器和 shell 之後才執行，這在 Windows 上原本可能導致資料夾刪不掉
+- 變更 `claude-api` skill 的 Managed Agents 範例，改為建立網路受限的環境
+- 從 `/ultrareview` 和 `claude ultrareview` 的輸出中移除瀏覽器連結
+- Windows：修正 `claude --bg` 和 agents 檢視拒絕一個 `claude` 已經信任的資料夾的問題，起因是其信任紀錄是以不同字母大小寫儲存的
+- [VSCode] 新增書籤：儲存 Claude 的回應，並把它們保留在 Bookmarks 側邊面板中查看
+- [VSCode] 把 Claude 問的問題和你的答案加進對話：你回答問題卡片後，會有一個 Questions 列顯示每個問題和你的選擇
+- [VSCode] 為聊天面板的問題卡片新增選項預覽：反白選擇的模擬圖或程式碼片段會顯示在選項旁邊或下方
+- [VSCode] 在訊息底下新增可展開的列，顯示連同它一起送出的終端機輸出、瀏覽器分頁、瀏覽器指示和選取的程式碼
+- [VSCode] 修正當對話已在側邊欄開啟時，還會在分頁再開一份副本的問題；側邊欄現在會切換過去
+- [VSCode] 修正當 Claude Code 印出超過 1 MB 的輸出時，設定對話框未重新檢查就回報儲存失敗的問題
+- [VSCode] 修正當擴充套件停止回應時出現無止盡「Teleporting session…」轉圈的問題
+- [VSCode] 改善 Manage plugins 對話框：它會說明一個關掉的 plugin 為何因其他設定仍是開啟的，並解釋 plugin 資料夾衝突
+- [VSCode] 變更 Stop 和 Escape，讓它們只結束當前回合；背景 agent 會繼續執行，可從 agent map 逐一停止
+- [VSCode] 變更「✻ Claude Code」狀態列項目，讓它顯示在每個視窗中，這樣沒開檔案時也能開啟 Claude
+- [Cloud sessions] 修正當 session 在 Claude 送出訊息後已閒置時，已回答的問題卡片或已核准的工具呼叫得不到回應的問題
+- [Cloud sessions] 修正在 admin 設定中清除組織環境的 setup script 後，新的雲端 session 仍執行舊 script 的問題
+- [Cloud sessions] 修正 self-hosted 環境 admin 頁面上的 Runner 動作選單在開啟幾秒後自己關閉的問題
+- [Cloud sessions] 修正雲端 session 從未啟動的例行（routine）執行在 Runs 窗格、routine 頁面和側邊欄顯示為 Succeeded 的問題；它們現在會顯示為 Failed
+- [Cloud sessions] 修正在雲端 session 的 Outputs 卡片中點擊音訊或視訊檔會開啟空白檔案搜尋而非播放檔案的問題
+- [Cloud sessions] 變更 routine 的頁面，當排程執行遲到且尚未開始時，讀作「Due」並附上排定時間，而不是顯示一個過去的下次執行時間
+- [Claude Tag] 在 admin 設定中 Claude Tag 的花費上限頁面新增 Add channel 按鈕，這樣就能透過 channel ID 或 Slack 連結，為任何頻道（包含私人頻道）設定上限
+- [Claude Tag] 修正在無法使用預設 Sonnet model 的組織中，記憶回想（memory recall）找不到任何東西的問題
+- [Claude Tag] 修正當 Enterprise Grid 管理員把 Slack 頻道移到另一個 workspace、而之後第一則貼文沒提到 Claude 時，該頻道遺失其 Claude 設定的問題
+- [Claude Tag] 修正 Claude 在 Slack 討論串中偶爾會在一台全新機器上重頭來過、遺失還沒推送的工作的問題，起因是你的回覆回答了它剛問的問題
+- [Claude Tag] 修正在較大的組織中，Claude Tag 花費上限頁面（admin 設定）上的公開頻道名稱顯示為原始 Slack ID 的問題
+- [Claude Tag] 改善從 Slack 啟動的 session 在 claude.ai 上顯示的標題：它們現在會讀作你打的字，不含 Slack 使用者 ID 或跳脫碼
+
 ## 2.1.285
 - 新增 `CLAUDE_CODE_DISABLE_WEB_FETCH` 環境變數，用來關閉 WebFetch 工具
 - 新增 `claude --desktop`，可在目前目錄開啟 Claude 桌面版 app，或搭配 `--continue` / `--resume <id>` 開啟某個 session
