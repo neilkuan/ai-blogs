@@ -2,6 +2,114 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.287
+- 新增 Claude Mods：plugin 現在可以修改更深層的行為
+- 新增 You should know，一個選擇性啟用的 plugin，由一個 side agent 幫你盯著，提醒你或 Claude 可能漏掉的東西。用 `/plugin enable cc-plugin-you-should-know@builtin` 開啟（適用於有開啟 telemetry 的第一方 session）
+- 在 agents 檢視畫面新增 `n:<text>` 篩選條件，可比對 session 名稱和 task；篩選後現在會在收合區塊中顯示符合的項目，按 Enter 開啟第一個符合項
+- 在 OpenTelemetry 的 `user_prompt` event 中新增 `prompt_text`，它是 `prompt` 的副本，供那些會把帶點號的 key 做巢狀處理的 backend 使用；你在哪裡捨棄或遮罩 `prompt`，就在哪裡一併捨棄或遮罩它（anthropics/claude-code#70763）
+- 新增來自 MCP server 的 URL 提示（走 2025-11-25 協定），例如用來登入。如果某個 server 在這次更新後無法連線，請在它的 MCP config 項目中加上 "bareElicitationCapability": true
+- Windows：新增一個啟動警告，當拒絕 Bash 工具同時也會關掉 PowerShell 工具時會跳出，避免 Claude 沒有任何 shell 工具可用
+- Self-hosted runner：為那些在 macOS 和 Linux 機器上使用 Anthropic 託管 git、但沒安裝 GitHub CLI 的 session，新增內建的 `gh api`（僅限 REST）
+- 修正 fast mode 在由沒有使用者帳號的 agent 擁有的 remote session 中一直關閉的問題，即使組織允許也一樣
+- 修正 Remote Control 在重連請求沒有收到回應時，會一連好幾分鐘收不到訊息的問題；現在會在 30 秒後放棄並重試
+- 修正設定了 `asyncRewake` 的 hook 在其 script 檔案不存在時，會不斷用「found issues」通知喚醒 Claude 的問題；壞掉的 hook 現在只回報一次
+- 修正當模型的回應串流卡住、沒有資料進來時，工具 heartbeat 無法傳到 SDK host 的問題
+- 修正 Bedrock 和 Vertex 啟動時的模型檢查會忽略強制指定的 `availableModels` 清單的問題，這可能會讓 `/model` 塌縮成只剩一列 Opus
+- 修正 Claude in Chrome 的瀏覽器選擇器在無法連到 Chrome 時顯示 JSON parse 錯誤的問題
+- 修正在 claude.ai 登入狀態下，於 `/model` 選取 Fable 時會存成當前版本 id 的問題，所以你存的預設值現在會跟著最新的 Fable 走，就像 Opus 和 Sonnet 那樣
+- 修正在 Opus 5.5 和 Sonnet 5.5 之間切換（`/model`、`opusplan`）時會改寫先前的 MCP 工具公告，這可能會導致先前的 extended thinking 被丟掉的問題
+- 修正 Amazon Bedrock Guardrails 在回應途中送達的封鎖，在回覆是以 thinking 開頭時會以 API 錯誤結束這一輪、而非顯示 guardrail 訊息的問題
+- 修正危險的 `rm`（例如對 `/` 或家目錄執行的）在同一指令還把輸出重導向到 `~` 或萬用字元路徑時，會失去「總是詢問」保護機制的問題
+- 修正在回覆進行中切換模型後，`claude -p` 和 SDK session 會在之後的每一則訊息都重複做一次模型 fallback 的問題
+- 修正某個資料夾的 CLAUDE.md 在恢復 session 或 compaction 之後被重複附加一次的問題
+- 修正背景 session 在 agent 結束並移除當初啟動該 session 的 worktree 後，無法從 `claude agents` 重新開啟的問題
+- 修正 `/advisor` 的配對檢查：Sonnet 5.5 現在可以為 Opus 4.7 和 4.8 提供建議，而 API 會拒絕的 advisor 現在會事先標示出來，而不是被默默丟掉
+- 修正 Bash 權限提示顯示內部 parser 名稱（例如「Contains simple_expansion」）而非平白解釋的問題
+- 修正在慢速或忙碌的機器上，長對話中按住捲動鍵時，全螢幕 session 會以「Claude Code exited after an unrecoverable interface error」退出的其中一個成因
+- 修正組織層級的每個工具權限上限，對於名為 `__proto__` 的 MCP 工具會被默默丟掉的問題
+- 修正 Claude 被要求用 Read 的 offset 和 limit 來分頁存成 JSON 的大型 MCP 結果的問題，因為那無法切割單一長行
+- 修正 commit 署名提醒在 compaction 後被夾帶在工具結果裡送出的問題
+- 修正螢幕報讀模式在搜尋框（例如 /resume 和 /permissions）和登入碼欄位中，讓游標離開已輸入文字的問題
+- 修正螢幕報讀模式在 /rewind 的摘要選項（其附加 context 為選填）上，沒有輸入任何東西就拒絕 Enter 的問題
+- 修正螢幕報讀模式在核准提示上顯示「Tab to amend」提示的問題，因為那裡按 Tab 根本沒作用
+- 修正螢幕報讀模式在 /permissions 和 /mcp 中列出按了沒作用的方向鍵，以及在空選單或搜尋框取得按鍵焦點時說「Select with numbers」的問題
+- 修正螢幕報讀模式在檔案編輯核准提示和其他 diff 中漏掉變動行的問題
+- 修正螢幕報讀模式在每一個 spinner frame 都把 `claude --teleport` 進度畫面、以及正在檢查中的 MCP 表單欄位，重複送給螢幕報讀器的問題
+- 修正 `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` 沒有從 session 標題和 prompt-hook 請求中移除 structured-output 格式的問題，而 Bedrock 後端的 gateway 會拒絕這種格式
+- 修正螢幕報讀模式在前一個畫面比終端機視窗還高時，漏掉第二個核准提示的頂部幾行、變動的 /config 列、或被拒絕的 plan 行的問題
+- 修正 `--include-partial-messages` 在被截斷的回覆上，過晚或根本不送出 `message_stop` 的問題，導致 app 可能把回覆顯示成還在進行中
+- 修正 `claude agents` 有時不顯示背景 session 正在等待的權限提示的問題
+- 修正 `/ultrareview` 在上傳因一個它讀不到的、已 commit 的 `.gitattributes`（例如存成 UTF-16 的）而停止時，卻給出關於 `.git/info/attributes` 的建議的問題
+- 修正 `claude remote-control` 在 HTTP proxy 後方註冊失敗時，顯示誤導性的「Check your organization permissions」錯誤的問題（anthropics/claude-code#97352）
+- 修正 Linux 上沙箱化的 Bash 指令繼承了一個對 Claude Code 執行檔的開啟 handle 的問題
+- 修正在開啟「Reduce motion」設定後，執行中工具的那顆點和三個 spinner 仍在動，以及 /rewind 的確認畫面會在你打字時更新它的「ago」時間的問題
+- 修正 `claude agents` 中的時間在螢幕報讀模式下每秒都在變的問題；現在最多每 10 秒才變一次
+- 修正已撤銷的 claude.ai 登入顯示通用的 `API Error: 401` 而非「OAuth token revoked」的問題；在 `-p` 模式下，錯誤現在會以「Failed to authenticate」開頭
+- 修正 `/ultrareview` 的上傳拒絕訊息，建議你把一個由某儲存庫設定檔命名的變數複製到你自己的使用者設定裡的問題
+- 修正 `--output-format stream-json` 和 SDK 在你用 `/<skill>` 當作 prompt 輸入來跑一個 `context: fork` 的 skill 時，不會串流各輪內容的問題，而它們在 Skill 工具的 fork 時是會串流的
+- 修正 /feedback 和 /bug：預先填好的 GitHub issue 不再包含你近期的錯誤訊息，而確認畫面現在會把這些錯誤訊息列為報告的一部分
+- 修正 `claude plugin marketplace add --sparse` 和 `git-subdir` 的 plugin 安裝，在儲存庫透過純 http 提供時失敗並顯示「transport 'http' not allowed」的問題
+- 修正雲端 session 在 compaction 進行中重啟時，有時會遺失先前對話的問題
+- 修正一個與啟動時 `--plugin-url` 下載重疊的 plugin reload，會損毀 session 快取的 plugin 封存副本的問題
+- 修正 `/desktop` 在開啟 Claude Desktop 逾時或輸出過多時，會引用部分輸出的問題；現在錯誤會指明成因
+- 修正當 MCP connector 的 server 改變它支援的 MCP 協定版本時，一個 connector 工具呼叫偶爾會跑兩次、或該 connector 的呼叫會一直失敗到重啟為止的問題
+- 修正來自同步 plugin 的 SessionStart hook 在新的雲端 session 中沒有執行的問題
+- 修正 transcript 的「N hooks ran」摘要和 verbose debug log 的符合 hook 計數，把 Claude Code 的內部 callback 也算進去的問題，所以一個設定好的 hook 不再顯示成兩個
+- 修正 Claude 從雲端和 Remote Control session 送出的檔案，在上傳剛好於 30 秒逾時之後才完成時失敗的問題；現在會等 35 秒
+- 修正在雲端和 SDK session 中於途中加入的儲存庫，不會載入它們的 skill 和 plugin、而且在 Claude 切換目錄後才過晚載入 CLAUDE.md 的問題
+- 修正單邊超過 8,000 像素的 PNG、JPEG 和 WebP 圖片無法從 remote session 送出的問題；Claude 現在會送出一份縮小的副本
+- 修正從 Claude app 送出、附帶 17 到 20 個檔案的訊息只送達前 16 個的問題
+- 修正無頭（headless）session 在一次呼叫被拒後，就回報某個 MCP server 需要驗證的問題，即使之後的呼叫會成功
+- macOS：修正用 `claude remote-control` 啟動的 Remote Control session 在 Mac 進入閒置睡眠時會在途中停住的問題
+- Windows：修正互動式 `claude` 在輸入被 pipe 或重導向時會卡住或以「Raw mode is not supported」崩潰的問題；現在它會說明原因並退出（pipe 輸入請改用 `-p`）
+- Bedrock、Vertex、Mantle：修正在 `CLAUDE_CODE_SKIP_*_AUTH` 下的模型可用性檢查，在 `ANTHROPIC_CUSTOM_HEADERS` 重複設定 `Authorization` header 時，送出的 header 與真實請求不同的問題
+- 改善 `/config`：會循環切換的設定現在會顯示 ‹ ›，並可用 ←/→ 雙向切換，窄的終端機會把每個值堆疊在其標籤下方，PgUp/PgDn 可翻動清單
+- 改善 plugin 市集的錯誤訊息，用平白的話說明一個市集為什麼被忽略或拒絕，以及該怎麼做
+- 改善 plugin 列表，會註明某個 plugin 的相依套件未安裝，而且更新 plugin 現在會重試一次沒完成的安裝
+- 改善 Claude app gateway 在 Amazon Bedrock 拒絕某個 model ID 時的錯誤訊息：開發者現在會看到是哪個模型無法使用，而 gateway log 會指明送出的 ID
+- 改善 SDK session，讓以優先權「now」送出的訊息不再取消正在進行的 web fetch 或 web search；它會繼續在背景載入
+- 改善 `/memory`：左右方向鍵現在可以切換它的開/關設定，例如 Auto-memory
+- 改善在訊息途中打出的 `/skill` 名稱：Claude 現在會被告知它們是 skill，包括 `disable-model-invocation` 的那些
+- 改善 prompt 輸入框邊框在淺色主題下的對比度，以及你先前訊息前方 ❯ 的對比度
+- 改善 Claude 從雲端 session 送出檔案的傳遞：因逾時、網路錯誤或 502、503、504 而失敗的上傳現在會重試一次
+- 改善當某個檔案因可能是暫時性的原因而無法送出時 Claude 的說明：現在會提到你可以過幾分鐘再要一次這個檔案
+- 改善來自另一個 session 的待處理訊息提示，把訊息顯示在虛線之間，與其他權限提示一致
+- 改善 MCP 和其他工具的權限提示，把工具呼叫顯示在虛線之間，與檔案編輯提示一致
+- 改善無頭模式下的 MCP 啟動：一個首次連線暫時失敗的 remote server 現在會被重試，而不必等最慢的 server 連完
+- 改善 Claude 從 remote session 送出的檔案：大型檔案現在會從磁碟串流，而不是整個讀進記憶體，而超過大小上限的檔案會被拒絕並指明 server 的上限
+- 改善當 server 拒絕 Claude 從 Remote Control 或雲端 session 送出的檔案（例如過大的圖片）時 Claude 給出的說明
+- 改善大型 MCP 工具結果的處理：更省記憶體、更小的 session 檔案，而且對於遠超過上限的結果，不再為了計算 token 而多做一次上傳
+- Windows：改善 Bash 工具的速度，移除了每個指令前都會跑的一個 subshell
+- 變更透過已 commit 到儲存庫的 symlink 寫入敏感檔案或寫到工作目錄外的 shell 寫入行為，改為指明它會寫到哪裡並等待人工確認，在目標為 `~` 的那些行上也一樣
+- 變更 Opus 4.7+ 和 Fable 在 Bedrock、Vertex、Foundry 和 Claude app gateway 上預設使用 1M context window，不帶 `[1m]` 後綴（`CLAUDE_CODE_DISABLE_1M_CONTEXT=1` 可維持 200K）
+- 變更來自 `claude agents` 的回覆改以排隊訊息的形式送達；在某一輪執行中送出的 `/stop` 以外的 slash 指令，現在會在該輪結束後才執行
+- 變更整個工具層級的 `Bash` allow 規則以及 allow hook 的行為，對於 Claude Code 的檔案工具直接拒絕的檔案（Anthropic profile store、host credentials 檔案）的 shell 寫入，改為提示詢問而非直接執行
+- 變更 Windows 和 Linux 上的右鍵貼上、以及 Linux 上的中鍵貼上，改在放開按鍵時才發生；放開前先把指標移開會取消貼上
+- 變更 MCP server 的 `alwaysLoad: false`，改為把該 server 的所有工具都延後到 tool search 之後
+- 變更螢幕報讀模式，寫入新的或變動的行時不再先把游標停在行首暫停；設定 `CLAUDE_AX_PREPARK_MS=50` 可還原暫停
+- 變更被標記的訊息之後的自動模型切換，改為保留你目前的 effort 等級，而非採用新模型的預設值
+- 變更等待中的權限提示改為最舊的優先顯示，所以新的提示不再蓋住你正在讀的那個（帶倒數的提示仍會疊在最上層）
+- [VSCode] 新增「Run in background」到執行中的指令或 sub-agent，可把它移到背景繼續工作
+- [VSCode] 在 agent map 的卡片上新增背景 shell 和 Monitor 的輸出
+- [VSCode] 修正設定對話框在 Claude Code 的回覆太大而無法確認儲存時，誤怪罪於逾時的問題
+- [VSCode] 修正重新開啟一個側邊欄已帶到本機的雲端 session 時，會在新分頁再開一次的問題；現在改為顯示側邊欄
+- [VSCode] 修正側邊欄的 Web 分頁沒有列出視窗載入後才啟動的雲端 session 的問題；載入失敗現在會顯示「Remote server is not connected」而非「No web sessions yet」
+- [VSCode] 修正重新載入後還原的分頁，會在側邊欄已開啟的對話上啟動第二個 Claude 行程的問題；現在會顯示「still open somewhere else」的提示
+- [VSCode] 修正工具列的檔案連結、session 清單連結和兩個提示以純文字顯示的問題
+- [VSCode] 修正背景 agent 仍在執行的指令，在主要那一輪結束後顯示為失敗的問題
+- [VSCode] 修正使用者自己的 `/usage` 或 `/context` 指令從指令選單選取時，會開啟擴充功能的對話框而非直接執行的問題
+- [VSCode] 修正 plan 預覽分頁中的檔案連結點了沒反應的問題；現在它們會像聊天回覆裡的連結一樣開啟檔案
+- [VSCode] 修正在遠端 host（例如 WSL）上，當分頁出現得較慢時，於編輯器分頁開啟工具的輸入或輸出會以「Timeout waiting after 1000ms」失敗的問題
+- [VSCode] 改善 Manage plugins 對話框：市集的新增、移除或重新整理失敗時，現在會說明哪裡出錯
+- [VSCode] 變更 Claude in Chrome 的「Enabled by default」開關，使其也連接編輯器自己的 session，這些 session 在執行瀏覽器動作前仍會先詢問
+- [Cloud sessions] 修正在 GitHub 短暫拒絕一個新發出的 access token 時，偶爾無法從 GitHub 擷取或推送的問題
+- [Claude Tag] 修正當像 GitHub 活動這類背景事件喚醒 Claude、而沒有人在等回覆時，Claude 卻在 Slack thread 裡貼出失敗警告（例如花費上限通知）的問題
+- [Claude Tag] 修正 Claude Tag 在 admin 設定裡的花費上限頁面，在頻道很多的組織中漏掉近期建立和私人頻道的問題
+- [Claude Tag] 改善 Claude 在長 Slack thread 中的 task list：背景工作不再把它當成一則新訊息自行重貼，所以追蹤該 thread 的人不會被通知
+- [Code Review] 修正發現的留言及其「Why this was flagged」文字停在句子中間的問題；它們現在會在完整的句子結尾
+- [Code Review] 修正 Code Review 在新推送後、若其審查在前一個 commit 上已失敗兩次就略過該 pull request 的問題；現在它會審查最新的 commit
+- [Code Review] 改善在對話已鎖定的 pull request 上的審查失敗卡片：它現在會說明是鎖定擋下了審查，而且沒有張貼或計費任何東西
+
 ## 2.1.286
 - 當多個權限請求疊在一起時，權限提示（permission prompt）現在會顯示像「2 of 5」這樣的計數
 - 全螢幕模式下，清單的「N more」列現在支援滑鼠操作：點一下就能跳到清單的那一端，還有 hover 和按下的狀態
