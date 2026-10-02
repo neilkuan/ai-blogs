@@ -2,6 +2,99 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.288
+- 新增 `$.ui.selection()` 給 mod 使用：回傳你在全螢幕模式下最後選取的文字，而且當選取範圍落在單一一列 transcript 內時，也會回傳那一列
+- 幫映像檔沒有安裝 GitHub CLI 的 cloud session 內建了 `gh api`，並修正內建功能會把檔名、jq 過濾條件或 GitHub 錯誤裡的控制字元送進終端機的問題
+- 新增用 Ctrl+C 清空提示後的復原機制：在空的提示上按 Up 可以把草稿叫回來，包含貼上的文字和圖片
+- 新增重新驗證（re-authenticate）的提示，當 MCP server 在工具呼叫過程中要求更多 OAuth scope 時會出現
+- 幫 /code-review 新增 `--max-findings <n>|all`，可以回報比平常上限更多或更少的發現項目；這個選擇會一直沿用，直到你傳入 `--max-findings default`
+- 新增 Ctrl+F 可依名稱尋找 session，以及 Alt+↑/↓ 在 agents 檢視裡的群組間跳轉；這兩個加上重新命名，都能在 keybindings.json 裡重新綁定
+- 新增螢幕閱讀器（screen reader）模式下的朗讀：當你核准一個計畫時（包含用 Shift+Tab）會朗讀新的權限模式
+- 修正回應進行到一半時 API 逾時導致整輪失敗的問題：非互動式 session 和 subagent 現在會從部分回應繼續，而只有 thinking 的回應會重試
+- 修正長對話在最後一則回覆回報 token 用量為零時，會以「Prompt is too long」失敗而不是自動壓縮（auto-compact）的問題
+- 修正 `--resume` 有時會把壓縮（compaction）剛還原的檔案和其他 context 給弄丟的問題
+- 修正恢復的 session 有時沒有存到該輪的最後一則回應，導致下次 `--resume` 時顯示提示沒有被回答的問題
+- 修正 resume 偶爾會載入到被截斷的 transcript 的問題，這發生在載入期間同一個 session 又重寫了該檔案時
+- 修正恢復在 2.1.286 或更早版本開始的對話時，會把模型先前的 thinking 弄丟的問題
+- 修正 session 標題、記憶回想（memory recall）和 prompt hook 在 Mantle 上，或在會拒絕結構化輸出（structured output）的 gateway 後面時失敗的問題；新增 `CLAUDE_CODE_DISABLE_STRUCTURED_OUTPUTS` 可以關掉結構化輸出
+- 修正 auto 模式的拒絕訊息，在被擋下的工具不是 Bash 時卻把 Claude 指向某條 Bash 權限規則的問題
+- 修正 auto 模式在 Bedrock 和 Mantle 上，在一次對較舊模型（例如 WebFetch 摘要或 `sonnet` subagent）的請求後，整個 session 剩下的時間都切換到本地分類器（local classifier）的問題
+- 修正 cloud session 以新選的模型重啟後，在 server 拒絕該模型後卻仍以那個模型回覆的問題
+- 修正 Cowork cloud session 在針對未核准 URL 的 WebFetch 權限提示連續五分鐘沒人回答後，仍被標記為等待輸入的問題
+- 修正手機加入另一台裝置上開啟的 Cowork cloud session 時，提示建議不會出現的問題
+- 修正 mod 的按鈕在 Claude Code 重啟前就畫好的檢視上按下時，有時會執行到另一個按鈕的動作的問題
+- 修正 plugin 的面板在某個 `Code` 元素裡放了一段無法解析的 diff 時什麼都不顯示的問題；現在會改以純程式碼呈現
+- 修正 plugin 的 LSP server 在 `initializationOptions` 和 `settings` 裡收到字面上的 `${user_config.*}` 和 `${CLAUDE_PLUGIN_ROOT}` 佔位符，而不是代入後的值或 manifest 預設值的問題
+- 修正 plugin 的 `tool.call` hook 在跑於 worktree 的 subagent 裡會讓 Bash 失敗、並讓檔案搜尋讀到錯誤資料夾的問題
+- 修正 `git-subdir` plugin 安裝在較舊 git（2.39 之前，例如 Ubuntu 22.04 的 2.34）上失敗、或快取到不完整 plugin 的問題
+- 修正用 `--plugin-dir` 載入的 plugin 在 `/plugin` 裡不顯示「Configure options」的問題
+- 修正背景 session 在某個 plugin 的計時器或讀取還在跑時，該 plugin 被重新載入或停用就導致 session 結束的問題
+- 修正沙箱（sandbox）內使用未加引號分隔符的 heredoc（`python3 <<EOF`）時，在 sandbox auto-allow 下每次執行都要求核准的問題，這發生在內容只含純文字和簡單 `$VAR` 參照時
+- 修正 Bash 工具的權限檢查，現在對 shell 會以算術方式求值其值的 `BASHPID` 賦值會先提示，而不是悄悄放行
+- 修正全螢幕 session 在 plugin 或 mod 於提示上方顯示了幾列內容時，開啟背景任務對話框會以「unrecoverable interface error」退出的問題
+- 修正 Claude 把一則給另一個 session 的訊息回報為已送達、但其實那個 session 把它卡住了的問題：現在通知會說它沒送達並點名是哪個 session，而在 SDK session 中 Claude 現在可以在一輪進行中得知此事
+- 修正 OpenTelemetry 的 `claude_code.tool.blocked_on_user` span 在 `-p` 和 SDK session，以及 PreToolUse hook 核准時回報 source 或 decision 為 `unknown` 的問題
+- 修正在 `-p` 或被中斷的一輪中沒被回答就結束的權限詢問，不會發出 `tool_decision` 事件的問題
+- 修正 Cowork cloud session 裡的 Edit and Retry 拒絕一則在 `/compact` 之前送出的訊息的問題，即使它的歷史其實還存著
+- 修正無人值守 session（`CLAUDE_CODE_RETRY_WATCHDOG`）在一段很長的回應串流失敗後重試好幾個小時的問題；Claude Code 現在會重新串流，並在三次逾時後放棄
+- 修正 `/login` 在憑證無法存進安全儲存區時卻回報「Login successful」的問題；現在會顯示失敗，並在新登入沒有生效時提供重試（anthropics/claude-code#73861）
+- 修正在 Bedrock 憑證查找期間按 Stop 有時會把 session 移到備援模型、而不是結束請求的問題
+- 修正筆電從睡眠喚醒、而另一個 Claude Code 程序正在登入時，會多開一個 `gcpAuthRefresh`/`awsAuthRefresh` 瀏覽器登入的問題
+- 修正 agent teams：以名稱生成的 plugin 定義 agent，現在會以它自己的 prompt、tools、disallowedTools 和 effort 執行，而不是用預設值
+- 修正 headless（`-p` / SDK）session 在像 `timeout` 或 systemd 這類監督程序連同 SIGCONT 一起送出 SIGTERM 時，偶爾會忽略 SIGTERM 的問題
+- 修正重啟的 cloud session 還原了組織強制模型清單所拒絕的模型的問題
+- 修正 MCP 工具呼叫在遠端 server 的結果超過 16 MB 或無法解析時，有時會跑兩次的問題
+- 修正 Claude Desktop 的 Code 分頁裡的 subagent 完全拿不到名為 `memory` 的使用者自訂 MCP server 的任何工具的問題
+- 修正 Claude in Chrome 在 auto 模式無法使用時（例如用 `disableAutoMode` 或較舊模型），對你已允許的網站每次截圖和讀頁都要先詢問的問題；打字、導覽和 JavaScript 仍會詢問
+- 修正 `claude plugin install` 在沒有 GitHub SSH key 的 macOS 和 Linux 機器上安裝 GitHub 來源的 plugin 失敗的問題：clone 現在會回退（fall back）到 HTTPS 並印出通知
+- 修正在 `permissions.blockReadsOutsideWorkingDirectories` 開啟時，針對 git config 檔案的 `sandbox.credentials.files` 項目不生效的問題
+- 修正 Claude 在 Team 和 Enterprise 方案或有受管設定的機器上，用 Artifact 工具開始做投影片或設計稿時漏掉你組織的設計系統（design system）的問題
+- 修正 Claude Code 自我重啟後（首次登入某個 Claude apps gateway、provider 設定、`/tui`）鍵盤在 Windows 上失效的問題
+- 修正啟動一個 `tools:` 列了非常多 `Agent(...)` 項目的 agent 時卡住的問題
+- 修正在整份 PDF 進入對話後，Claude 3 Opus 和 Claude 3 Sonnet 上的 session 每一輪都失敗的問題
+- 修正 npm 自動更新器在平台原生二進位檔下載失敗、只裝了佔位用的 `claude` stub 時卻回報成功的問題
+- 修正 Remote Control 清理時，去封存一個其實還連著、或剛被另一個 Claude Code 程序重新接上的 session 的問題
+- 修正 `owner/repo` 的 plugin marketplace 在 SSH 和 HTTPS 兩種抓取都失敗時只顯示第二次嘗試錯誤的問題；現在兩個錯誤都會顯示，並把先嘗試的傳輸方式放在最上面
+- 修正路徑範圍的 `.claude/rules` 和巢狀 CLAUDE.md 檔案，在 Write 或 Edit 於其範圍內建立或變更檔案時不會載入的問題（先前只有 Read 會載入）
+- 修正危險的 `rm`（例如對 `/` 或家目錄下手）寫在 `bash -c` 或 `sh -c` 腳本裡時，在 bypassPermissions 模式下或在某條 shell allow 規則下不經提示就執行的問題（anthropics/claude-code#96300）
+- 修正 LSP 工具呼叫在語言伺服器使用動態能力註冊（dynamic capability registration）或停止回應時無限掛住的問題；請求現在會在 60 秒後逾時（可用每個 server 的 `requestTimeout` 設定）
+- 修正 `idle_prompt` 通知 hook 在背景 agent 還在跑時就觸發的問題（anthropics/claude-code#93672）
+- 修正 PreToolUse 和 PermissionRequest hook 在比對失敗、或工具的輸入無法序列化成 JSON 時被跳過的問題；現在這類呼叫會被擋下
+- 修正全新環境裡的第一個請求、或切換模型後的第一個請求，用的是內建的輸出上限和 auto-compact 視窗，而不是 server 的；該請求現在可能會等上最多 1.5 秒
+- 修正用 ctrl+enter 送出排隊訊息後，「What should Claude do instead?」提示出現在 Interrupted 列上的問題
+- 修正 `/login` 在 `--bare` session 裡跑了一次該 session 根本不會讀取的登入、進而可能覆蓋你已存登入的問題；現在它會說明哪一組憑證有效
+- 修正 InstructionsLoaded hook 在 subagent 的檔案存取載入某條規則或巢狀 CLAUDE.md 時漏掉 agent_id 和 agent_type 的問題；因檔案存取而載入的規則和巢狀 CLAUDE.md 檔案現在也會回報 effort
+- 修正 `claude mcp serve` 裡的 Agent 工具總是回報沒有可用 agent 並拒絕每一個 subagent_type 的問題
+- 修正終端機游標在全螢幕 transcript 檢視器的搜尋以及 `/theme` 的自訂顏色搜尋裡不跟著輸入文字跑的問題
+- 修正螢幕閱讀器模式下的 `/permissions`：現在輸入某條規則的編號會選取它，而不是開啟搜尋框
+- 改善 auto 模式：當對話長到用戶端安全分類器（client-side safety classifier）無法審查時，現在會被壓縮，而不是對每個工具呼叫都提示或直接失敗
+- 改善螢幕閱讀器模式：短朗讀（例如刪掉一個字）現在會留在畫面上，直到你下一次按鍵、或畫面上它上方有東西改變為止
+- 改善螢幕閱讀器模式：問答對話框裡已回答的問題現在會在它的方框旁邊說「answered」
+- 改善顯示給組織已關閉用量額度（usage credit）申請的 Team 和 Enterprise 成員的 `/usage-credits` 訊息
+- 改善 cloud session：一個新對話的第一輪不再等待某個設定了 `alwaysLoad: false` 的 stdio MCP server
+- 改善「You should know」提示：現在會依據誰該為某個決定負責，分別說「我們」、「主要 agent（the main agent）」或「你」
+- 改善 artifact 資料庫寫入在撞到資料庫大小上限而被拒時的錯誤訊息：現在會說明上限是多少、以及什麼可以騰出空間
+- 改善 Bash 權限提示：當一個指令有部分在執行前無法檢查時，給出比較簡短的理由
+- Self-hosted runner：改善內建的 `gh api`：被拒的 gh 指令現在會印出它的 `gh api` 等效寫法，`--paginate` 會跟著一個 repository 清單的每一頁，而巢狀的 `claude` 不再把它移除
+- 改善 Remote Control 從過期的 server 憑證復原的方式：續約期間 session 保持連線，而若在 server 中斷後放棄續約也會保留 session
+- 變更背景指令時間限制，現在只套用在無人值守 session（`-p`、Agent SDK、CI、cloud）；終端機、桌面 app 和 VS Code session 沒有限制
+- 變更用戶端 auto 模式分類器，忽略名為 Claude Sonnet 5.5 或 Opus 5.5 的 `ANTHROPIC_DEFAULT_SONNET_MODEL` 綁定，改用 Claude Sonnet 5
+- 把 `claude project purge` 改成 `claude purge`；舊名稱仍可用，但會印出通知
+- 變更 agents 檢視的 `n:` 過濾器（以及 Ctrl+F 搜尋），現在 Enter 會開啟名稱最吻合的 session，而不是最上面那一列
+- 變更 `/autocompact`，現在會把 auto-compact 視窗按模型分別儲存，這樣你切換時每個模型都保有自己的設定
+- 變更那些無法回報你已完成的 server 所發出的 MCP URL 提示，現在會等到「I'm done, continue」才讓工具呼叫繼續，這樣你可以先在瀏覽器裡把事情做完
+- [VSCode] 修正 claude.ai 連接器在你授權後仍停在「Needs authentication」的問題：MCP servers 對話框現在會提供 Check connection
+- [VSCode] 修正可選用的 New Conversation 快捷鍵（Cmd/Ctrl+N）會在每個可見的 Claude 檢視裡都開一個新對話、而不是只在你所在的那一個的問題
+- [VSCode] 修正 chat 檢視在你封存它顯示的那個 session 後，會恢復下一個已存 session 的問題；現在它會改開一個新對話
+- [Cloud sessions] 修正 Claude Code 管理設定裡的 Cloud sessions 開關在一個不相關的安全設定還在載入、或載入失敗時被鎖在關閉狀態的問題
+- [Cloud sessions] 修正在 self-hosted runner 還在啟動時按 Stop 不會取消排隊訊息的問題，該訊息之後可能會在 runner 起來後跑一次
+- [Claude Tag] 修正 Claude Tag 管理設定在那些設定是自動建立的頻道上，提供了一個總是失敗的「Remove this scope」選項的問題
+- [Claude Tag] 改善 Claude，讓它也會追蹤另一個頻道裡它只讀過的相關 Slack 討論串，這樣那邊的更新就能傳到依賴它們的對話
+- [Claude Tag] 改善頻道 Configure 頁面上的儲存錯誤：太長的頻道指示現在會說要縮短它，而因失去存取權而被拒的儲存不再說要再試一次
+- 修正 `claude plugin test` 把 mod 回報為被遠端關閉的問題，其實它只是讀到了過時的已存設定
+
+- 新增「You should know」，一個內建 mod，由一個側邊 agent 幫你把關、標出你或 Claude 可能漏掉的事情。用 `/plugin enable cc-plugin-you-should-know@builtin` 開啟（適用於開了遙測的第一方 session）
+
 ## 2.1.287
 - 新增 Claude Mods：plugin 現在可以修改更深層的行為
 - 新增 You should know，一個選擇性啟用的 plugin，由一個 side agent 幫你盯著，提醒你或 Claude 可能漏掉的東西。用 `/plugin enable cc-plugin-you-should-know@builtin` 開啟（適用於有開啟 telemetry 的第一方 session）
