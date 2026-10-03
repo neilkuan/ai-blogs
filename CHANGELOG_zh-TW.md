@@ -2,6 +2,35 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.289
+- 修正在託管機器（managed machine）上，複合 shell 指令中某個巢狀部分的 deny 或 ask 規則無法凌駕於使用者自行安裝的 mod 核准設定之上的問題
+- 修正終端機在處理含有大量未閉合 `<script>` 標籤，或深層巢狀 `${` 替換（substitution）的短程式碼區塊時會凍結的問題
+- 修正 `Read` deny 規則對於透過 symlink 在 IDE 中 @ 提及、變更或選取的檔案不生效的問題
+- [VSCode] 還原（revert）2.1.288 對 `claude auth status` 的一項變更，該變更可能導致登出變得更頻繁
+- 改善大型檔案在 plugin 程式碼窗格中開啟的速度，做法是以最終寬度一次性完成高亮檢視的排版
+- 修正 `plugin list`、`plugin eval` 和 `plugin update` 顯示從本地資料夾 marketplace 安裝之 plugin 的舊版本（stale copy）的問題，以及 symlink 的 `--plugin-dir` 熱重載（hot reload）的問題
+- 修正已安裝的 mod 在升級後的第一個 session 無法載入的問題
+- 修正當 Background tasks 對話框以全螢幕開啟時，plugin 在提示列上方的行會顯示舊內容（stale row）的問題
+- 修正 plugin 窗格在連結使用 localhost 位址、路徑中含有 `@`、大寫主機名稱或 `file:` 路徑時完全不繪製的問題
+- 修正使用者自行安裝的 plugin 能夠改寫組織託管（organization-managed）MCP server 登入工具描述的問題
+- 修正啟動時若 plugin 繪製了帶有終端機無法辨識邊框樣式的 Box，會發生凍結或被迫退出的問題
+- 修正當 plugin 的螢幕處理常式（on-screen handler）以非同步方式拋出例外時，supervised 和 background session 會結束的問題
+- 修正當某個無高度的 plugin 區域持續增長時，session 會以介面錯誤（interface error）結束的問題
+- 修正當 sandbox 自動允許指令時，Bash deny 和 ask 規則漏掉位於環境變數前綴（含展開值）後面的指令（例如 `TZ="$HOME" rm -rf build`）的問題
+- 修正在 sandbox 自動允許模式下，當指令前出現單純的變數賦值時，Bash deny 或 ask 規則會被跳過的問題
+- 修正 `claude plugin validate` 在資料夾同時含有 marketplace manifest 時會跳過該 plugin 的問題
+- 新增給隊友使用的 `agent.spawn`、plugin hook 事件間共用的單一 agent id，以及 `$.agent.list()` 中的 idle 與 waiting 狀態
+- 修正當 mod 的 `ui.render` hook 寫入的值導致某一行在繪製時拋出例外時，session 會以「unrecoverable interface error」結束的問題；現在引擎會改為繪製自己的行
+- 修正含有 tab、脫序跳脫字元（stray escape）與 C1 控制字元的文字，或是含有 tab 和 CRLF 換行的短文字，會覆蓋到下方行的問題
+- 修正 mod 窗格或 band 中靠右對齊的內容會繪製在關閉標記或 `[-]` 下方的問題；兩者現在也會與終端機邊緣保持一欄的距離
+- 修正 mod 的 `Client` 在繪製時失敗會連帶拖垮該 mod 周圍所有繪製內容的問題；現在它會獨自失敗並拋出 `ui.fault`
+- 修正 `claude plugin validate` 讓 Anthropic marketplace 自家 plugin 驗證失敗，以及在 `--json` 中列出乾淨的 `plugin.json` 的問題
+- 修正 mod 的 band 短暫繪製失敗時，會要求其下方卡片讓位的問題
+- 修正失敗的 plugin 元件在失敗訊息為空時，將原因顯示為 `Error` 或空白的問題
+- 改善 mod 作者在其 band 或 pane 繪製失敗時看到的那一行訊息：現在會指明 mod 名稱並說明沒有繪製任何內容
+- 修正已發布的 artifact 頁面在處理含有大量未閉合 `<script>` 標籤的短程式碼區塊時，會凍結或導致讀者瀏覽器分頁崩潰的問題
+- 修正 mod 的 Client 區域在終端機繪製時拋出例外後，整個 session 都維持失敗狀態的問題
+
 ## 2.1.288
 - 新增 `$.ui.selection()` 給 mod 使用：回傳你在全螢幕模式下最後選取的文字，而且當選取範圍落在單一一列 transcript 內時，也會回傳那一列
 - 幫映像檔沒有安裝 GitHub CLI 的 cloud session 內建了 `gh api`，並修正內建功能會把檔名、jq 過濾條件或 GitHub 錯誤裡的控制字元送進終端機的問題

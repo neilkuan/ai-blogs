@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.289 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.289 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.289</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>修正在託管機器（managed machine）上，複合 shell 指令中某個巢狀部分的 deny 或 ask 規則無法凌駕於使用者自行安裝的 mod 核准設定之上的問題</li>
+<li>修正終端機在處理含有大量未閉合 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">&lt;script&gt;</code> 標籤，或深層巢狀 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">${</code> 替換（substitution）的短程式碼區塊時會凍結的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Read</code> deny 規則對於透過 symlink 在 IDE 中 @ 提及、變更或選取的檔案不生效的問題</li>
+<li>[VSCode] 還原（revert）2.1.288 對 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude auth status</code> 的一項變更，該變更可能導致登出變得更頻繁</li>
+<li>改善大型檔案在 plugin 程式碼窗格中開啟的速度，做法是以最終寬度一次性完成高亮檢視的排版</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin list</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin eval</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin update</code> 顯示從本地資料夾 marketplace 安裝之 plugin 的舊版本（stale copy）的問題，以及 symlink 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--plugin-dir</code> 熱重載（hot reload）的問題</li>
+<li>修正已安裝的 mod 在升級後的第一個 session 無法載入的問題</li>
+<li>修正當 Background tasks 對話框以全螢幕開啟時，plugin 在提示列上方的行會顯示舊內容（stale row）的問題</li>
+<li>修正 plugin 窗格在連結使用 localhost 位址、路徑中含有 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@</code>、大寫主機名稱或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">file:</code> 路徑時完全不繪製的問題</li>
+<li>修正使用者自行安裝的 plugin 能夠改寫組織託管（organization-managed）MCP server 登入工具描述的問題</li>
+<li>修正啟動時若 plugin 繪製了帶有終端機無法辨識邊框樣式的 Box，會發生凍結或被迫退出的問題</li>
+<li>修正當 plugin 的螢幕處理常式（on-screen handler）以非同步方式拋出例外時，supervised 和 background session 會結束的問題</li>
+<li>修正當某個無高度的 plugin 區域持續增長時，session 會以介面錯誤（interface error）結束的問題</li>
+<li>修正當 sandbox 自動允許指令時，Bash deny 和 ask 規則漏掉位於環境變數前綴（含展開值）後面的指令（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">TZ=&quot;$HOME&quot; rm -rf build</code>）的問題</li>
+<li>修正在 sandbox 自動允許模式下，當指令前出現單純的變數賦值時，Bash deny 或 ask 規則會被跳過的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin validate</code> 在資料夾同時含有 marketplace manifest 時會跳過該 plugin 的問題</li>
+<li>新增給隊友使用的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">agent.spawn</code>、plugin hook 事件間共用的單一 agent id，以及 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">$.agent.list()</code> 中的 idle 與 waiting 狀態</li>
+<li>修正當 mod 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ui.render</code> hook 寫入的值導致某一行在繪製時拋出例外時，session 會以「unrecoverable interface error」結束的問題；現在引擎會改為繪製自己的行</li>
+<li>修正含有 tab、脫序跳脫字元（stray escape）與 C1 控制字元的文字，或是含有 tab 和 CRLF 換行的短文字，會覆蓋到下方行的問題</li>
+<li>修正 mod 窗格或 band 中靠右對齊的內容會繪製在關閉標記或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">[-]</code> 下方的問題；兩者現在也會與終端機邊緣保持一欄的距離</li>
+<li>修正 mod 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Client</code> 在繪製時失敗會連帶拖垮該 mod 周圍所有繪製內容的問題；現在它會獨自失敗並拋出 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ui.fault</code></li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin validate</code> 讓 Anthropic marketplace 自家 plugin 驗證失敗，以及在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--json</code> 中列出乾淨的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">plugin.json</code> 的問題</li>
+<li>修正 mod 的 band 短暫繪製失敗時，會要求其下方卡片讓位的問題</li>
+<li>修正失敗的 plugin 元件在失敗訊息為空時，將原因顯示為 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Error</code> 或空白的問題</li>
+<li>改善 mod 作者在其 band 或 pane 繪製失敗時看到的那一行訊息：現在會指明 mod 名稱並說明沒有繪製任何內容</li>
+<li>修正已發布的 artifact 頁面在處理含有大量未閉合 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">&lt;script&gt;</code> 標籤的短程式碼區塊時，會凍結或導致讀者瀏覽器分頁崩潰的問題</li>
+<li>修正 mod 的 Client 區域在終端機繪製時拋出例外後，整個 session 都維持失敗狀態的問題</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
