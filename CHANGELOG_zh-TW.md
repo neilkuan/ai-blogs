@@ -2,6 +2,100 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.292
+- 在 `claude plugin install` 新增 `--marketplace <source>`：若有需要會先把該 marketplace 加進來（套用跟 `claude plugin marketplace add` 一樣的政策檢查），然後從裡面安裝 plugin
+- 在 Agent 工具新增 `effort` 參數，讓 Claude 用你指定的 effort 等級去跑 sub-agent
+- 新增 `CLAUDE_CODE_OVERLOADED_RETRY_BASE_DELAY_MS` 環境變數，可以把重試超載（529）請求時的退避（backoff）基礎延遲設長一點
+- 新增 `prompt.autocomplete` 事件，mod 可以掛上去，往提示框的自動完成清單加自己的項目
+- 為 mod 的 `$.model.complete` 加上提示快取（prompt caching）：`prompt` 跟 `system` 收的是文字區塊，區塊上標 `cache: true` 就會把到該區塊為止的請求快取起來
+- 在 `agent.spawn` mod hook 裡加進 workflow agent，連同它們的 run 和 index，這樣 mod 可以拒絕它們
+- 修正 `permissionMode: auto` 的 subagent 定義，在 auto 模式無法使用時（被設定停用、斷路器觸發，或模型本身不支援）仍然進入 auto 模式的問題
+- 修正沙箱（sandbox）內指令可以讀到 `/ultrareview` 上傳檔案在 `~/.claude/seed-admin` 底下暫存副本的問題
+- 修正受管沙箱的讀取拒絕路徑（還有旁邊使用者自訂的那些），在 session 進行到一半才出現或改指向時，沒有把它底下的專案授權撤掉、也沒有結束它所涵蓋檔案的憑證注入
+- 修正在 macOS 和 Windows 上讀取 notebook 或 PDF 時，可以透過在讀取途中被掉包的連結，回傳核准範圍外的檔案
+- 修正被竄改的伺服器受管設定磁碟快取，可以在設定抓取失敗時關掉或頂替內建的政策 plugin
+- 修正對家目錄或磁碟機的 8.3 短檔名、或其他 Windows 替代寫法執行 `rm -rf` 時，沒有被當成是在刪除它本身
+- 安全性：修正 PreToolUse hook 核准與 auto 模式，在讀取網路（UNC）路徑檔案時會略過權限提示的問題
+- 修正 skill 或斜線指令的 `allowed-tools` 規則，在你於一個 turn 中途離開 auto 模式或 plan 模式時，會在後面的 turn 又跑回來的問題
+- 修正設定了 `HTTPS_PROXY` 時，Claude Code 自己的 API 請求（登入、政策、feedback、artifacts）會忽略 `NO_PROXY` 的問題
+- 修正名稱超過 128 個字元的 MCP 工具會讓每個請求都失敗；現在會把那個工具排除掉，並用一則 MCP error 點名它
+- 修正 `claude plugin` 指令（例如 `marketplace add` 和 `install`）在首次執行時，會在組織的受管設定載入前就先跑起來的問題
+- 修正一次性的 `claude -p` 和 Agent SDK 執行，會在最終結果出來 5 秒後就停掉背景指令，而且一次性的 `claude -p` 會把排程的喚醒丟掉；現在這兩者都會等它們跑完
+- 修正從 `claude --resume` 的 session 選單、或用 `/resume` 恢復 session 時，plan 模式沒有被還原的問題
+- 修正在 `/resume`、`/branch` 或 `/clear` 之後建立的已存排程任務永遠不會觸發，以及任務檔在毫秒之內連寫兩次後，已存任務會忽略後續的新增與刪除的問題
+- 修正背景 session 的 `/loop` 在 session 的 process 重啟後（例如當掉之後）會悄悄停掉的問題，因為它待處理的喚醒掉了
+- 修正 Grep 和 Glob 在拿到的檔案或資料夾讀不到時，會回報「找不到符合項目」；現在 Claude 會重試一次或直接告訴你
+- 修正當 PDF 的 `pages` 是像 "6,9,15" 這樣的清單時，Read 工具只回傳第一筆、而且沒有任何錯誤的問題；現在會回傳一則錯誤，叫你分別去讀每一頁或每個範圍
+- 修正用 @ 提及、超過 256KB 的文字檔會被悄悄略過的問題：現在會告訴 Claude 這個檔案的大小、要牠分段去讀
+- 修正當 agent 因為一個已經讓主對話停下來的用量上限而失敗時，用量上限提醒會對每個背景 agent 各重複一次的問題
+- 修正 Remote Control 的檢視者，在由桌面 app 或 IDE 代管的 session 中，看到背景 subagent 的 subagent 面板是空的問題
+- 修正跨 session 的傳送通知，會把兩個名字相近的 session 顯示成同一個收件者，以及當終端 session 讓訊息逾期時，過期通知卻怪到桌面 app 頭上的問題
+- 修正桌面 app 的「立即傳送（Send now）」，在已經有另一則訊息排隊時，會把某個 turn 正在等的 subagent 結束掉的問題
+- 修正 `/bug`、`/share` 和 `/feedback <text>` 在報告正在送出時按了 Ctrl+O 或 Ctrl+Z 會從頭來過、而且在送出後卻以「已取消」關閉的問題
+- 修正 `/remote-env` 在你一開啟就馬上按 Enter 時，會把你存好的預設環境換掉的問題：現在清單會停在你的預設上，而且在沒有預設生效時，不會有任何一列打勾
+- 修正當一個提示裡有好幾次貼上重疊時，部分貼上的文字會變成像打字輸入一樣送到 Claude 的問題
+- 修正 vim 模式會把游標留在一行結尾之後、j/k 在較短的行會丟失原本所在的欄位，以及 `f`/`t`/`F`/`T`/`;`/`,` 會跳到、或刪到提示中另一行的符合位置的問題
+- 修正 `/add-dir` 路徑輸入框會讓 Shift+Enter 或貼上加進換行、而且會把快速打的「tab」、「up」或「down」當成那些按鍵的問題
+- 修正在提示底部的某一列被選取時，快速打字、輸入法（input method）文字和分解過的重音字元會被丟掉，以及 `!` 會讓該列仍然維持被選取的問題
+- 修正偵測到 iTerm2 時，全螢幕模式會在每次視窗調整大小和按 Ctrl+L 時送出一次全螢幕清除，這可能就是把 iTerm2 的 scrollback 塞滿舊畫面的元凶
+- 修正設了 Read 拒絕規則、而且工作目錄在一個 symlink 底下時，對不指向任何檔案的 @ 字詞出現假的「could not be examined」提示的問題
+- 修正 `/cd` 或權限變更之後，「instruction file not loaded」訊息變得過時或消失的問題，並在巢狀的那一個沒有被載入時加上一行 transcript 說明
+- 修正重複出現 `/name` 的壓縮（compaction）摘要，會讓 Claude 去呼叫一個保留給使用者專用的 skill 的問題
+- 修正 Write、Edit、NotebookEdit 和 LSP 這幾列，以及單一的 Read、Grep 和 Glob 列，會把 mod 拒絕該呼叫的原因藏起來的問題：現在那一列會顯示原因
+- 修正雲端 session 在它的 worker 剛好在 turn 結束那一刻被停掉時，會顯示一個永遠不會結束的 turn 的問題
+- 修正 transcript 很大的雲端 session，有時候在權限被核准後又再次要求核准的問題
+- 修正雲端 session 在 Claude 正在讀取訊息時，訊息被重試或編輯而導致排程任務和其他排隊通知遺失的問題
+- 修正雲端 session 在容器重啟後，會忘記 client 選的 thinking 設定的問題
+- 修正 Cowork 雲端 session 在 Anthropic 無法確認組織設定時，卻說是 proxy 擋掉 artifacts 的問題
+- 修正 hooks 模組透過單一個 const 做很多次 `$.state` 呼叫的 plugin，載入或驗證要花上好幾分鐘的問題
+- 修正 `claude plugin validate` 會列出一個引擎其實是從別處讀取的 hooks 模組 matcher 或 state 值的問題
+- 修正 `claude plugin validate` 會列出一個透過頂層 `var`（而該 `var` 又被重新宣告或重新賦值）讀取的 `$.state` 值；這種模組現在會被拒絕
+- 修正 plugin 提供的 `$` 方法會重啟 hook 來源，可能導致上面掛著 `.catch` 的 guard hook 無止盡地一直重跑的問題
+- 修正在 plugin hooks worker 重啟期間所做的 plugin 介面呼叫，會略過其他 plugin 掛在它們上面的 hook 的問題
+- 修正 mod 的 `config.set`、`state.set`、`env.set` 或 `agent.spawn` hook，在呼叫 `next(e)` 之後拒絕時，被當成一次「拒絕」回應的問題：現在這個 hook 會被回報為「失敗」，並點出名稱
+- 修正 `/theme`、`/config` 的 Theme 選單和首次執行的佈景主題步驟，會在 plugin 的 `config.set` hook 被詢問之前就先把佈景主題存起來的問題
+- 修正 plugin 的 `tool.check` hook 對一個需要你親自回答的工具（一個提問、一個 plan 核准）回答「允許」執行，卻沒有把它的對話框顯示出來的問題
+- 修正當 hooks worker 被替換時，mod 的啟動提示、指令或 subagent 會被排隊第二次的問題
+- 修正 mod 的 hook 在呼叫 `next(e)` 之後、又在 turn 被中斷時失敗，卻讓該呼叫放行的問題；現在這個呼叫會被拒絕
+- 修正當 plugin 的提示丟棄或設定拒絕的原因超過 4,096 個字元時，該丟棄或拒絕會被忽略的問題
+- 修正組織的 plugin 在自己重新載入時、或在另一個 plugin 當掉之後，若它回傳的 `$` 名稱剛好跟使用者安裝的 mod 加入的一樣，就會被卸載的問題；現在改成卸載那個 mod
+- 修正在 plugin hooks worker 重啟期間所做的工具呼叫，會略過各 plugin 的權限 hook 的問題
+- 修正 plugin 的 `tool.call` hook 會在參數名稱寫錯被修好之前就看到某些工具呼叫的問題；現在 hook 看到的是工具實際會拿去執行的引數
+- 修正 mod 的 guard hook（帶著 `.catch`），對於另一個 mod 的 hook 在這個 guard 自己的 `$` 呼叫底下所做的呼叫，會被悄悄略過的問題；現在它的 `.catch` 會被詢問
+- 改善 `claude -p` 和 SDK session 的啟動：第一個 turn 不再等 HTTP 和 SSE MCP 伺服器回應 `resources/list`
+- 改善長條列式或編號式回覆的算繪（rendering）速度：它們現在串流、調整大小和在 transcript（ctrl+o）裡重新開啟都快很多
+- 改善 Ctrl+C 的草稿復原：被清掉的提示在打完斜線指令或送出訊息後，仍然可以用 Up 鍵叫回來
+- 改善 hook 輸出處理：寫在 hook 輸出裡的 `<system-reminder>` 標籤，會在送到 Claude 之前先被跳脫（escape）
+- 改善工具輸入處理：Grep 的 `path` 現在接受 `file_path`，而 Write、WebFetch 和 Read 會忽略幾個多餘的參數，而不是直接讓呼叫失敗
+- 改善當設定檔裡宣告的 marketplace 名稱看起來很像官方 Anthropic marketplace 時所顯示的步驟
+- 改善沙箱自動允許：在使用者、受管或 --settings 設定裡設了嚴格沙箱模式時，像 `FOO=bar python3 app.py` 這種帶有環境變數前綴的直譯器指令會直接執行、不再詢問
+- 改善 Artifact 工具的清單：Claude 現在看得到你有幾個已發布的 artifact，而且一次最多可以列出 200 個，而不是 50 個
+- 改善雲端 session 在重啟後的狀況：現在會告訴 Claude 哪些被停掉的背景 agent 可以用 id 來恢復
+- 改善 claude.ai 雲端 session 在瀏覽器連不上時的 Claude in Chrome 訊息：現在會告訴 Claude，如果使用者比較想這樣，牠可以用其他替代方案繼續
+- 改善 /focus 的提示：現在會邀請你在 turn 進行到一半時試試 focus 檢視，並示範怎麼切回來
+- 改善使用本機（stdio）MCP 伺服器時的啟動：那些忽略較新協定檢查的伺服器，在一次較慢的連線之後,會被記住 7 天，之後都用舊方式連線、不用再等
+- 把本機（stdio）MCP 伺服器連線改成每次安裝時預設協商協定版本 2026-07-28，Bedrock、Vertex 和 Foundry 也一樣；可用 `MCP_PROTOCOL_NEGOTIATION=legacy` 退出
+- 變更 `claude plugin test`：測試所註冊的 hook 裡有 `expect` 失敗、或是引擎拒絕的 stub 回答，現在會讓測試失敗，而不是悄悄通過
+- 把用量上限訊息改成用 https:// 開頭來寫 claude.ai 的設定連結，這樣終端機和各家 app 才能把它變成可點擊的連結
+- 把排程和「立即執行（Run now）」的 routine 執行改成：發布一個只有你看得到的新 artifact 時不用再要求核准；至於會要求連接器（connector）或其他存取權的 artifact 仍然會詢問
+- 把 agent 名稱改成最多 256 個字元：超過的會被拒絕，而 skill 或 plugin 檔的 `name` 超過的話會被忽略
+- [雲端 session] 修正 routine 執行偶爾在跑完後,還被列為執行中長達好幾個小時的問題
+- [雲端 session] 修正在 routine 沒有存過通知設定時，編輯或複製該 routine 會把它的推播通知關掉的問題
+- [雲端 session] 修正 SVG、HEIC、TIFF 和其他較少見的圖片檔無法附加的問題；現在它們會以一般檔案的形式附加
+- [雲端 session] 修正核准提示對於組織設定需要核准的連接器工具，仍提供「永遠允許（Always allow）」選項的問題；這個選擇其實沒有任何作用
+- [Remote Control] 修正從 claude.ai/code 開始的新 Remote Control session，第一則訊息只收圖片的問題；現在它跟後面的訊息一樣，也收 PDF 和其他檔案
+- [Claude Tag] 在頻道 Configure 頁面的 Allowed domains 卡片新增一個 Edit 按鈕，讓 Enterprise 管理員可以打開設定該頻道網域的存取套件
+- [Claude Tag] 修正在 Claude 還在處理它在某個 Slack 討論串裡的第一個請求時所送出的回覆，會被壓著等到那個請求跑完、或在相隔幾秒送出時被漏掉的問題
+- [Claude Tag] 修正只被 GitHub pull request 活動或某個 routine 喚醒的 Slack 討論串，在管理員更改了頻道或 workspace 的預設模型之後，仍停留在原本模型的問題
+- [Claude Tag] 修正 Claude 有時會在 Slack 貼出一則花費上限通知，但真正原因其實是你的組織用量額度已經用完的問題
+- [Claude Tag] 修正當一個無法從 Slack 回答的權限提示被自動拒絕時，session 會卡住直到被中斷的問題
+- [Claude Tag] 改善頻道裡的 `@Claude !status`，讓它說明 Claude 什麼時候、為什麼停止讀取它那些未被標記的訊息，以及用 @ 提及可以讓它重新開始讀
+- [Claude Tag] 把用 `!fork` 延續的 Slack 討論串第一則訊息，改成一張卡片，顯示它從哪來、請求內容、是誰發問的，並附上原討論串的連結
+- [Claude Tag] 把 Claude Tag 花費上限頁面（管理設定裡）的「組織層級」和「預設」花費上限輸入框，改成只有在你按下 Save 或 Enter 時才儲存，而不是點到別處就存
+- [Code Review] 在 Code Review 分析的「已審查 PR」圖表裡，加上該期間的總數、與前一期的變化，以及依 repository 的分項明細
+- [Code Review] 修正當 pull request 移到一個新的 base branch、而舊的被刪掉時，排隊中的審查會失敗的問題；現在該 commit 會被重新排隊審查
+- [Code Review] 修正當 pull request 編輯了 CLAUDE.md 這個檔案時，審查會忽略它裡面規則的問題；現在審查會改用它在 base branch 上的版本
+
 ## 2.1.291
 - 修正 2.1.290 的回歸問題（regression），雲端 session 可能會漏掉對權限提示（permission prompt）的回答
 - 修正 2.1.288 的回歸問題，離開（quit）session 時最後幾則訊息可能遺失
