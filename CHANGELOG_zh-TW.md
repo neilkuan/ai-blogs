@@ -2,6 +2,64 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.293
+- 新增 Claude Haiku 5.5（`claude-haiku-5-5`），現在是 Anthropic API 上預設的 Haiku 模型 —— 1M context，每 Mtok 為 $0.10/$0.50（超過 100K 的 prompt 則為 $0.50/$2.50）
+- 在 `subagentStatusLine` payload 中新增 `agentType`，讓腳本能分辨不同的自訂 subagent 類型
+- 為 mod 的 `$.tool.register` 新增 `isDeferred`：設為 `false` 時會從一開始就把該工具的 schema 列在 prompt 裡，而不是藏在工具搜尋後面
+- 修正 Claude 有時會把 context 壓縮（compaction）前自己的最後動作當成壓縮後才完成，進而撤回或重做已完成的工作
+- 修正一個記憶體洩漏（memory leak）問題：HTTP MCP 連線會一直保留它送出的每個 request，直到連線關閉
+- 修正在 Claude 工作時送出的訊息，會在用 `←` 把 session 移到背景時遺失的問題；現在如果排隊中的訊息無法移動，`←` 會停在原地並告知你
+- 修正 `/model` effort 用 ←/→ 切換時會超過最高或最低等級並繞回，這可能不小心把 Low 存成某個模型的預設 effort
+- 修正 `/tui` 在以 `--chrome` 啟動的 session 中會讓 Chrome 裡的 Claude 斷線，並忽略 `--no-chrome` 的問題
+- 修正在某些 session（包含 resume 的 session）中，當 host、權限規則或 `--tools` 清單已移除 `SendMessage` 工具時，Claude 仍被要求用它繼續或傳訊息給 subagent 的問題
+- 修正當只有 subagent 和 `--agent` session 自己的工具清單排除了某個內建工具時，卻被告知該工具在整個 session 都被停用的問題
+- 修正從 claude.ai 同步的 skill 編輯過的描述，有時要等到新對話或 `/clear` 後才會傳到模型的問題
+- 修正 `claude logs`、`stop`、`kill`、`rm` 以及 `claude daemon status`、`stop`、`uninstall` 在你的登入已逾期或即將逾期時，有時會把你登出的問題
+- 修正頁尾的 agents 數量在短暫無法讀取 sessions 資料夾後（例如開啟的檔案過多）就消失的問題
+- 修正名為 `worker` 的自訂 agent 在啟動時被顯示為「Agent」，以及 agent 詳情對話框的標題在 agent 完成後失去 agent 類型的問題
+- 修正 Artifact 工具的 transcript 列在 publish 呼叫仍在串流（streaming）時，會短暫顯示 `Artifact("(unprintable path)")` 的問題
+- 修正 Linux 上 `/ultrareview` 上傳會錯誤地拒絕某些 repository（例如位於另一個 checkout 內的 repository）的問題，原因是在某個 sandboxed 指令執行時，有個「無法解析」的設定檔
+- 修正 `/ultrareview` 上傳因 split-index 檔案而拒絕時，建議了一個可能讓 git 無法讀取其 index 的 git 指令
+- 修正在非常長的 Remote Control 和 cloud session 中,回覆仍可能一次顯示一整塊而不是串流進來的問題
+- 修正 Remote Control 在每次憑證（credential）復原後，又重新上傳 session 起始歷史的問題
+- 修正 PushNotification 在用 `claude remote-control` 啟動的 session 中回報「Remote Control inactive」的問題
+- 修正在 plugin hooks worker 重啟期間，mod 綁在 `classic.*` 事件上的 hook 會被跳過的問題，這讓 settings hook 得在沒有它們的情況下回應
+- 修正 `claude plugin test` 對會呼叫 `$.session.append` 的 mod 執行失敗的問題；測試現在可以用新的 `mock.session` 把 append 進去的列讀回來
+- 修正 `claude plugin eval` 在裝有 Docker Desktop 的 Mac（`~/.docker/bin` 底下有連結）上拒絕每一個授予 Bash 的執行；現在拒絕訊息會指明是 credential store 的哪個部分持有該連結
+- 修正當 `desktop` policy 設定了 Claude Desktop 的內建瀏覽器 key（例如 `builtinBrowserEnabled`）時，Claude apps gateway 無法啟動的問題
+- 修正 `claude agents` 提供 bypass 權限，但背景 session 在同意僅存於 `.claude/settings.local.json` 或 `--settings` 檔案時卻忽略它的問題；現在它會先詢問同意，而忽略 bypass 的 session 會顯示一則會持續存在的簡短通知
+- 修正 `←` 在 prompt 裡還有未送出文字（現在會取消移動）或有問題正等你回答時，仍會在 10 秒後把 session 移到背景的問題
+- 修正在剛按下 `←` 把 session 移到背景時，對權限提示按 Esc 或不附回饋的 No 無法停止這一輪的問題
+- 修正當 sessions 資料夾無法讀取時（例如開啟的檔案過多），agents 檢視畫面會短暫地把 session 清單換成佔位列的問題
+- 修正在 Bash 工具中用單檔案的 cat、head、tail、sed -n 或 grep 指令（而非 Read 工具）檢視檔案時，path-scoped 規則和巢狀 CLAUDE.md 檔案不會載入的問題
+- 修正以相同字詞開頭和結尾的貼上文字，有時會被當成是手動打字的那樣送給 Claude 的問題
+- 修正當貼上後緊接著打出或貼上的重音符號併入最後一個字母時，貼上文字裡的 skill 名稱會被當成手動輸入的問題
+- 修正在報告傳送期間按 Ctrl+O 或 Ctrl+Z 時，`/feedback` 會返回草稿清單，導致傳送無法取消的問題
+- 修正 `claude purge` 在某個檔案或資料夾無法刪除時會靜默停止（exit 0，或在終端機裡卡住）的問題；現在它會刪掉其餘的、列出無法刪除的項目，並以 1 結束
+- 修正 keybindings.json 的檢查：單獨一個 " "（空白鍵）不再被回報為錯誤，而像 "ctrl+ k" 這類的 key 現在會收到警告
+- 修正 vim 模式下對只有空白的那一行用 `>>` 和 `<<` 會讓游標停在行尾之後的問題，這會導致後續的 `x` 什麼都沒刪到
+- 修正 vim 模式：在 Visual 模式下刪除整行（`V` 接著 `d`）後,游標會落在第一個非空白字元上,而其後的 `.` 會作用在游標所在的那一行
+- Windows：修正停止 status line、hook 或 shell 指令時，有時會終止另一個被賦予相同 process ID 的無關 process 的問題
+- 還原（Revert）2.1.281 的 auto mode 拒絕訊息變更，該變更告訴 Claude 拒絕涵蓋的是結果，而不只是那條確切的指令
+- 還原（Revert）2.1.290 針對 cloud session 在容器重啟遺失待處理的 `/loop` 喚醒或排程任務後仍維持睡眠狀態的修正；現在不再告知 Claude，session 會維持睡眠
+- 改善 Team 和 Enterprise 組織的啟動：policy 和託管設定會更早抓取，停滯的 request 會在 3 秒後重試
+- 改善 Chrome 裡的 Claude：當瀏覽器回報分頁較慢時，被拒絕的頁面動作變少了
+- 改善在 cloud session 中無法連到瀏覽器時 Chrome 裡的 Claude 訊息：如果你屬於多個組織，現在它會說明 extension 必須登入同一個組織，以及如何更改
+- 改善 Bash 編輯的 diff 備註，說明列出的檔案是在指令執行期間變更的，這可能包含其他 process 的寫入
+- 改善 artifacts：Claude 會把函式庫鎖定在兩週以前（含）的確切版本
+- 將 claude.ai 的 skill 同步改為在沒有 session 使用時約每 40 分鐘檢查一次變更，而非每 10 分鐘
+- 變更 agent 清單以及向模型公告的 MCP server 的排序：含非 ASCII 字元的名稱現在會排在 ASCII 名稱之後
+- 變更 OpenTelemetry `claude_code.at_mention` 的記錄方式，每次讀取 prompt 時最多發出 100 筆 agent 和 100 筆 MCP-resource 事件
+- Self-hosted runner：將 orchestrator 改為在每次輪詢之間睡 4 到 6 秒，而非固定的 5 秒，這樣同一環境的多個 replica 就不會在同一刻一起輪詢
+- [Claude Tag] 修正 Claude in Slack 在跨 workspace 共用的 Enterprise Grid 頻道中,當 Slack 把訊息標上一個未連接的 workspace 時,會說該 workspace 尚未設定的問題
+- [Claude Tag] 修正 Claude in Slack 在某頻道執行任務到一半時,因管理員變更了該頻道的 connector、plugin、skill 或規則而停止的問題;該變更現在會在 Claude 完成後才套用
+- [Claude Tag] 修正要求 Claude in Slack 帶著額外備註立即執行某個 thread 的例行任務時,會啟動一個無法回貼的獨立執行的問題;該執行現在會在原本的 thread 裡繼續
+- [Claude Tag] 修正 Claude Tag 管理設定中,access bundle 的「Add a connector」對話框在一次 Google 登入後,把每個 Google connector 都顯示為已連接的問題
+- [Claude Tag] 改善 Claude Tag 管理設定,會列出尚未連接的 Enterprise Grid,並附上 Connect 按鈕
+- [Claude Tag] 將 Claude in Slack 改為加入只有管理員能發文的公告頻道時,不發布它的自我介紹
+- [Claude Tag] 將 Claude Tag 管理設定中頻道規則的上限,從每個 workspace 和全組織 Slack 頁面各 20 條改為 50 條
+- [Code Review] 改善 Code Review 的「Add a repository」對話框,會列出每個無法新增的 repository 及其原因,例如缺少 GitHub 寫入權限
+
 ## 2.1.292
 - 在 `claude plugin install` 新增 `--marketplace <source>`：若有需要會先把該 marketplace 加進來（套用跟 `claude plugin marketplace add` 一樣的政策檢查），然後從裡面安裝 plugin
 - 在 Agent 工具新增 `effort` 參數，讓 Claude 用你指定的 effort 等級去跑 sub-agent
