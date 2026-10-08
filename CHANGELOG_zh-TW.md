@@ -2,6 +2,10 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.294
+- 修正了寫成指令形式的 `prompt` 和 `agent` hook（例如「Block commands that...」）反而放行了本該被攔截的內容
+- 改善了 Stop 和 SubagentStop 上寫成指令形式的 `prompt` hook（例如「Carry on if the build is broken」）的判斷方式，讓 Claude 比較不會提早停下來
+
 ## 2.1.293
 - 新增 Claude Haiku 5.5（`claude-haiku-5-5`），現在是 Anthropic API 上預設的 Haiku 模型 —— 1M context，每 Mtok 為 $0.10/$0.50（超過 100K 的 prompt 則為 $0.50/$2.50）
 - 在 `subagentStatusLine` payload 中新增 `agentType`，讓腳本能分辨不同的自訂 subagent 類型
