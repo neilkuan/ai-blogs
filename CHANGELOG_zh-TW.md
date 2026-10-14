@@ -2,6 +2,96 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.300
+- mod 的 prompt 裝飾新增了 `virtualText`：畫在 prompt 輸入框裡的文字，但永遠不會進到草稿或送出的 prompt 裡
+- OpenTelemetry 的 `api_request` 事件新增 `cache_creation_5m_tokens` 和 `cache_creation_1h_tokens`，依照存活時間拆開 cache 寫入
+- 為 mod 新增 `$.ui.view({ agentId })`：你要求時會在主視圖顯示某個 agent 的對話記錄（transcript），而 `$.ui.view({})` 則回到原本畫面
+- 為 mod 的 `Text` 新增 `dir` 屬性，用於由右到左的文字：在 Windows 和 VS Code 終端機裡，它的每一列會依該方向顯示並靠右對齊
+- 在 AWS 上的 Claude Platform 新增 `/advisor`；在你用 `/advisor`、`advisorModel` 或 `--advisor` 選定之前不會跑任何 advisor，而 `CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1` 可以把它關掉
+- 為 trace span 新增 OpenTelemetry GenAI 語意慣例（semantic-convention）屬性，例如 `gen_ai.provider.name`、`gen_ai.conversation.id`、`gen_ai.tool.name` 和 `error.type`
+- 新增在 `agent.spawn` mod hook 裡改寫 workflow agent 的 `prompt` 和 `model` 的支援，之前只能拒絕 workflow agent
+- 新增 `prompt.change` mod hook，當 prompt 輸入框的文字不是透過手動輸入而改變時觸發：例如叫回某筆歷史記錄、清空、復原（undo），或是 plugin 的填入
+- 修正 cloud session 明明是 session 自己的網路設定擋掉某個主機，卻跟 Claude 說是組織政策擋的
+- 修正當你選了比較小的 auto-compact 視窗時，`/autocompact` 仍警告 token 用量過高
+- 修正你在背景指令還在跑的時候離開，SessionEnd hook 有時不會執行
+- 修正 `claude --help` 在說明 `--restricted` 時提到一個已被移除的工具
+- 修正 `claude agents` 在其中一筆資料回傳不完整時，就不去更新任何 pull request 的狀態
+- 修正 cloud session 的容器被換掉後，Claude 被告知某個背景 agent 已遺失、無法恢復（resume），但其實那個 agent 之前已經恢復過一次
+- 修正你打過字給它的 subagent 在結束後不久就從 `/tasks` 消失，導致沒辦法回到對話
+- 修正你正在看子 agent 時，已完成的父 agent 從麵包屑（breadcrumb）上掉了（它的子 agent 被重新掛到最上層）
+- 修正輸入在短時間內一次湧入時，agents 視圖會把你打的 "up"、"down" 或 "escape" 這類字當成按鍵，可能在回覆到一半時移動預覽視窗（peek）或清掉草稿
+- 修正自動工具搜尋（`ENABLE_TOOL_SEARCH=auto`）在對話進行到一半時被關掉，例如在恢復（resume）後 MCP server 重新連線的時候
+- 修正被 `forceLoginOrgUUID` 拒絕的登入，卻把被拒組織的 token 留著，或在 `/login` 後仍然有效
+- 修正 Claude Desktop 和 Remote Control session 裡的 diff 視圖，在 reftable 儲存庫中沒注意到 cherry-pick 或 revert 發生衝突
+- 修正 Artifact 工具在呼叫的輸入還在傳入時，verbose 和 ctrl+o 顯示為 `Artifact("(unprintable path)")`；它的那一列現在會像 Bash 一樣顯示「Waiting…」和「Running…」
+- 修正恢復 session 後寫入的第一筆對話記錄遺失的問題，起因是先前的當機把 transcript 最後一行截斷了
+- 修正當內容包含 Unicode 行或段落分隔符（U+2028、U+2029）時，`/branch` 會掉訊息、`claude purge` 會跳過子資料夾專案
+- 修正 Claude Code 以 `--worktree` 啟動時，plugin 的 `WorktreeCreate` 和 `WorktreeRemove` hook 沒有執行（搭配 `--tmux` 時目前還不行）
+- 修正在使用 reftable ref 儲存的儲存庫中執行 `git commit -q` 之後，OpenTelemetry 的 `tool_result` 事件缺少 `git_commit_id`
+- 修正被 mod 的 `prompt.submit` hook 改寫或丟棄的 prompt，仍然在 OpenTelemetry 的 `user_prompt` 事件、互動 span 以及 session 標題請求中被記成是你打的
+- 修正一則本該是給 Claude 看、關於 mod 熱重載（hot-reloading）的提示，卻像是你打的一樣出現在 transcript 裡
+- 修正 agent hook 忽略它們的 `model`：像 `haiku` 這類別名現在能正確解析、subagent 的 model 不再覆蓋它，而且遇到不可用的 model 時會改用呼叫端的，而不是放行該動作
+- 修正當某個 tag 或 branch 的名字長得像 commit ID 時，`--worktree` session 有時會從錯誤的 commit 啟動，而且它們的起始 git 狀態會指到新 worktree 以外的 branch
+- 修正在使用 git reftable ref 儲存的儲存庫中，branch 顯示為 ".invalid"、`--worktree` 無法重新開啟 worktree 的問題
+- 修正 Claude 在 session 暫存區（scratchpad）裡用純檔名或相對路徑命名檔案，而不是用完整路徑
+- 修正 `claude remote-control` server 在短暫的登入錯誤（例如 keychain 被鎖）後就放棄更新連線；它們現在會重試，並在你需要執行 `claude /login` 時提出警告
+- 修正當 origin 的預設 branch 無法擷取時，`--worktree` 在裸儲存庫（bare repository）的 worktree 中會失敗；備援的 base 現在改用當前 checkout 的 HEAD，而不是主儲存庫的
+- 修正在 VS Code、Cursor 或 Devin Desktop 整合終端機裡啟動 Claude Code 時，會啟動編輯器的命令列工具兩次來檢查擴充套件；現在只啟動一次
+- 修正 mod 的 `prompt.edit` hook 在用 `chat:newline` 鍵位（Ctrl+J，或重新綁定的 Enter）輸入換行時沒有被觸發
+- 修正當 API 拒絕某個 MCP 工具的輸入 schema 時，對話在每一輪都因 400 錯誤而失敗；Claude Code 現在會在接下來的對話中改送不帶參數的那個工具
+- 修正恢復 headless 或 Agent SDK session 時，會遺失 compaction 保留下來的近期訊息，起因是該次 compaction 發生在一則因達到輸出 token 上限而被截斷的回覆之後（本版之後產生的 compaction）
+- 修正當某個 MCP server 在 compaction 之後才完成連線時，Claude 要等到下一次工具呼叫才會被告知該 server 的工具和指示
+- 修正在同時服務多個 session 的電腦上，Remote Control session 明明還在跑卻被標記為已停止
+- 修正恢復 headless 或 Agent SDK session 時，會遺失它的 compaction 摘要或把 compaction 前的歷史帶回來，起因是該次 compaction 發生在同一輪中一則重試過或未完成的回覆之後
+- 修正 Claude 在背景指令執行期間輪詢（poll）它的輸出檔或進入 sleep
+- 修正在憑證只透過作業系統憑證儲存信任的「TLS 檢查型 proxy」後面，feature flag 和分階段推出（staged rollout）一直是過時的狀態
+- 修正 `claude daemon stop --any` 在某個卡住的背景服務還在跑時就印出「stopped」：它現在會等待、強制終止該服務，若它仍然存在則說明並以 exit 1 結束
+- 修正關閉遙測（telemetry）時，`claude daemon stop` 沒有任何輸出就結束，且把 session 留在列表上顯示為執行中
+- 修正 Cowork cloud session 裡的 Write、Edit 和 NotebookEdit 對你自己電腦上的某個路徑回報成功，但檔案其實從未送達
+- 修正 session 恢復一段從未列出某些延後載入（deferred）工具的歷史時，Claude 卻去搜尋這些稍早已載入的工具
+- 修正在深色 ANSI 主題下以及 16 色終端機上，次要（dim）文字看起來跟一般文字一樣
+- 修正當組織政策無法讀取時，cloud session 每一輪會卡 5 分鐘；該輪現在會立即結束並說明原因
+- 修正 cloud session 在長回覆期間重啟後，有時會把一則已經回應過的訊息再跑一次
+- Self-hosted runner：修正當沒有人讀取輸出時，runner 和 orchestrator 會凍結（不輪詢、無 `/healthz`、也無法用 `SIGTERM` 關閉）；log 現在保留最新的 256 KiB，並顯示丟棄的筆數（Windows 上不適用）
+- 改善 Cowork cloud session 裡的 WebFetch：某個頁面剛才擷取失敗時會告訴 Claude，而不是又去擷取一次
+- 改善內建 `plugin-authoring` skill 裡的 mod 分享：Claude 在打開 mod 的檔案前會先掃描裡面是否有金鑰（key），而且要掃描專案以外的資料夾前會先詢問
+- 改善給 Claude 3 模型關於以 @ 提及（@-mention）的 PDF 的提示，讓它比較不會在沒讀的情況下就作答
+- 改善 artifact 更新：Claude 現在會在一次呼叫裡套用小改動並重新發佈 artifact，並在單一回覆內完成較大的編輯與重新發佈
+- 變更 `CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST` session，使其忽略設定中的 CA bundle、tool proxy、git TLS 以及像 `SSL_CERT_FILE` 這類 git 設定變數；在 Claude Desktop 下則只忽略專案設定裡的
+- 變更離開（exit）時的行為：對仍在執行的背景指令，在要求停止 1.5 秒後仍未停就強制終止；在全螢幕模式下，這些指令先前可能被留著繼續跑
+- 變更 Claude Desktop 的 Code 分頁：當 `forceLoginGatewayUrl` 指向一個由 Anthropic 營運、且服務該 session 主機名稱的 gateway 時，會套用受管設定；該 gateway 必須在啟動時可連線
+- 變更 `claude gateway`：遇到一個 Claude Desktop 無法從 gateway 使用的 `desktop:` 政策金鑰時，會在啟動時直接停止並指出該金鑰，而先前是帶著警告照常啟動
+- 變更對 api.anthropic.com 的大型請求：即使關閉遙測也會使用 gzip 壓縮；設定 `CLAUDE_CODE_GZIP_REQUEST_BODIES=0` 可關掉
+- 變更 `claude-api` skill：除非你要求封存或刪除，否則會把 Managed Agents session 原封不動留著
+- 變更背景 session：改成透過 Workflow 工具的核准來接續（resume）一個被帶過來的 workflow，而不是從 handoff 檔去執行它
+- 變更本機 session transcript：現在也會記錄每個 API 請求的 system prompt、工具和參數，這樣你選擇分享的 transcript 就能完整重現一個請求
+- 變更 `/sandbox` 模式選項的文字，從「Sandbox BashTool」改成「Sandbox commands」
+- 變更 Cowork cloud session 裡的 `PermissionRequest` hook：hook 的 allow 裡若含 `setMode` 更新現在會被忽略，核准的其餘部分照常生效
+- 變更 hook：PreToolUse 和 PermissionRequest hook 的 `updatedInput` 現在會像 Claude 自己的輸入一樣被驗證：未知的 key 會被丟棄，而工具拒絕的輸入會讓該次呼叫被拒
+- 移除 `claude remote-control` 中原本就沒作用的 `--sandbox` 和 `--no-sandbox` flag，現在傳入任一個都會以錯誤結束。請在設定裡設定 `sandbox.enabled` 來沙箱化（sandbox）session
+- [VSCode] 新增 `claudeCode.attachSelection` 設定，可阻止你在編輯器裡選取的文字被加進訊息
+- [VSCode] 修正快速模式（fast mode）在用量額度（credits）用完後仍開著，導致每個請求被拒絕又重送；它現在會關閉直到你再次開啟，並附上錯誤提示
+- [VSCode] 修正 Thinking 開關在總是會思考的 model 上切換成 Off；這些 model 現在不再顯示該開關
+- [VSCode] 修正對已標記訊息按「Edit prompt」時，檔案或指令選單會蓋在復原的 prompt 上；現在按 Enter 會原樣送出
+- [VSCode] 修正在 Windows 上 Shift+拖曳檔案到 prompt 時，插入了無法辨識的 `/c:/…` 路徑，而不是相對於工作目錄的提及（mention）
+- [VSCode] 修正 VS Code 聊天字型大小設定的改動需要重新載入視窗、或被主題變更蓋掉；diff 和計畫預覽現在也會跟著它們
+- [VSCode] 修正「Resume session」以及重新載入後還原的分頁，會開到一個空白的新對話，而不是已經移進 git worktree 的那個對話
+- [VSCode] 修正在叫回的斜線指令上按 ↑ 再按 Enter 時，會不帶參數就執行它；在你編輯之前，指令和檔案選單不再蓋在叫回的 prompt 上
+- [VSCode] 修正在 WSL、SSH 和 Dev Container 視窗中，從檔案總管（Explorer）或編輯器分頁 Shift+拖曳檔案到 prompt 時什麼都沒插入
+- [VSCode] 修正在 Windows 和 Linux 上 Ctrl+Alt+F 在檔案總管、其他樹狀視圖或 Debug Console 裡切換 Focus 視圖，而不是打開 Find
+- [VSCode] 修正在 macOS 上檢查「session 是否在其他視窗或終端機開著」時會產生額外的 process：它現在直接啟動 `/bin/ps`，而不是每次檢查都去 PATH 裡找 `ps`
+- [VSCode] Windows：修正當機或斷電後，若 Windows 之後重新啟動並把舊的 process ID 給了另一個程式時，對話會顯示「still open somewhere else」
+- [Cloud sessions] 修正當組織關掉「Always allow」時，Cowork 針對連接器（connector）工具的核准提示少了「Allow for this task」（2.1.292 的回歸問題）
+- [Cloud sessions] 修正在 cloud session 裡送出第二則訊息後，/ 選單中大部分指令的描述會不見
+- [Remote Control] 修正 claude.ai 和桌面 app 上 Remote Control session 的 diff 視圖，把刪除和重新命名的檔案顯示成已修改；需要你機器上的 Claude Code v2.1.296 或更新版本
+- [Claude Tag] 新增對 Slack Connect 頻道的支援：Owner 或 Claude Tag 管理員可以讓 Slack 裡的 Claude 在與另一個組織共享的頻道裡回覆；預設關閉
+- [Claude Tag] 在 Slack 討論串裡為需要你核准的連接器動作新增一張私人的 Allow once / Deny 卡片，讓 Claude 改成詢問而不是拒絕；其他人只會看到它正在等你
+- [Claude Tag] 新增對 Slack 語音片段（voice clip）的支援：當 Slack 有逐字稿時，Slack 裡的 Claude 會讀取 Slack 對該片段的逐字稿
+- [Claude Tag] 修正當另一個 app 在 Claude 自己貼到頻道的訊息底下的討論串裡標記（tag）Claude 時，Slack 裡的 Claude 不回覆
+- [Claude Tag] 變更管理員附加到 Slack 頻道的存取套件（access bundle）：當該頻道變成 Slack Connect 頻道後仍會持續生效，不必再移除後重新附加
+- [Code Review] 修正 Code Review 忽略那些有寫入權限、但 GitHub 組織成員身分設為私人的人所留的 `@claude review` 留言；他們的留言現在會啟動一次 review
+- [Code Review] 修正 Code Review 的「paused for this repository」留言把管理員導向 Code Review 設定；它現在會說明誰可以修正，並連結到 Git providers 頁面
+
 ## 2.1.299
 - 新增 `CLAUDE_CODE_DISABLE_FILE_MENTIONS` 環境變數：Claude 會拿到 `@` 檔案提及的路徑，自己用檔案工具去讀，而不是直接塞檔案內容給它
 - 終端機新增閒置壓縮（idle compaction）：超過 200K token 的對話閒置約 54 分鐘後，會在它一小時的 prompt cache 過期前先壓縮，這樣你下一則訊息就不用整個重跑一遍
