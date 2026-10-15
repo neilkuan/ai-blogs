@@ -2,6 +2,59 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.301
+- 新增 `CLAUDE_CODE_RETRY_WATCHDOG_MAX_USAGE_LIMIT_WAIT_MS`，讓無人值守重試模式（`CLAUDE_CODE_RETRY_WATCHDOG`）在使用量上限（usage limit）重置時間太久遠時直接結束請求，而不是傻等
+- 在 `claude-api` skill 加入 OpenTelemetry tracing 指引，包含用 `ant` CLI 設定 trace 目的地
+- vim mode 新增 `%` 移動指令：跳到對應的括號，可單獨使用，也可搭配 d/c/y
+- 在 mod 的 `Input` 新增 `rows`：終端機裡的多行文字欄位，Enter 送出，Shift+Enter 或在 Enter 前加反斜線則換行
+- 在 OpenTelemetry 的 `tool_decision` 事件新增 `classifier_verdict` 和 `permission_mode`，這樣就能分辨 auto mode 分類器的判斷和權限規則
+- 在 OpenTelemetry 的 `tool_decision` 事件新增 `classifier_category`，用來標示分類器攔截時命中的內建規則名稱（需設定 `OTEL_LOG_TOOL_DETAILS=1`）
+- 修正：離開時會把 `WorktreeCreate` hook 建立的 worktree 直接移除而不先詢問，即使裡面可能還有未推送（unpushed）的 commit
+- 修正：當組織無法使用最新的 Fable 模型時，`fable`（還有 `best`）模型別名會在 Anthropic API 上出錯；Claude Code 現在會用前一版 Fable 模型重試一次
+- 修正：當磁碟滿了導致無法重新整理登入時，會跳出誤導人的「Please run /login」錯誤；現在錯誤訊息會指出是哪顆磁碟，並建議刪除檔案
+- 修正：Grep 和 Glob 在搜尋程式還沒回傳任何結果就意外失敗時，會回報「找不到符合項目」；現在它們會回傳一個說明搜尋失敗的錯誤
+- 修正：workflow agent 讀到 harness 說明（提到它們的任務文字不帶使用者授權）後，有時會跳過自己的步驟，但執行結果卻還是回報成功
+- 修正：當 PreToolUse hook 涵蓋 Edit 或 Write 時，artifact 更新會被拒絕；現在 Claude 會先編輯檔案再重新發佈（republish），而不是在發佈呼叫裡修改
+- 修正：skill 和指令若有超多或超長的參數名稱，被叫用時會卡好幾秒；現在只填入前 64 個名稱，每個最多 64 個字元
+- 修正：skill、指令和 hook 的參數填滿大量佔位符（placeholder）時會吃掉非常多記憶體
+- 修正：在基於較舊版 VTE（0.53 以前）的終端機上（例如 RHEL 8 的 MATE Terminal），`>0q` 之類的雜訊字元會蓋住資料夾信任提示，離開時 shell 提示字元前也會出現 `>4m`
+- 修正：某些版本的 iTerm2 在啟動時提示字元會出現雜訊 `GOK` 文字
+- 修正：切換到名稱含有 `application-inference-profile` 的模型時，即使供應商不是 Bedrock，也會執行你的 `awsAuthRefresh` 指令並延遲模型切換的 hook
+- 修正：在 token 重新整理過程中，執行像 `claude auth status` 或 `claude plugin list` 這種短指令並中途結束後，會發生登入重新整理逾時和非預期的登出
+- 修正：工具呼叫在權限檢查途中被中途送出的訊息打斷時，會被回報給模型說是「被使用者拒絕」
+- 修正：切換到 context window 較小的模型時，有可能在沒先詢問的情況下，就花費使用額度（usage credit）讓前一個模型做摘要
+- 修正：在某個 LLM gateway 後面，當 gateway 回應指名的模型跟請求的不一樣時，對話會被你沒選的模型反覆壓縮（compact）
+- 修正：在速度慢或忙碌的機器上，vim mode 按 Escape 後有時會停留在 INSERT 模式
+- 修正：vim mode 下按 Esc 會丟掉已輸入的 AskUserQuestion 答案；現在自由輸入欄位支援 vim NORMAL mode，而且只有在 NORMAL mode 下按 Esc 才會取消
+- 修正：Read 工具把 .xlsm、.parquet、.epub 和 .heic 之類的二進位檔當成文字讀取
+- 修正：只有標題列的 Markdown 表格在寬度超過終端機時會整個畫不出來，包含計畫核准卡片（plan approval card）上的計畫
+- 修正：/claude-api skill 誤稱 CMEK 外部金鑰端點在 AWS 上的 Claude Platform 無法使用
+- 修正：使用 `/rewind` 之後 skill 不再被列給模型看
+- 修正：恢復（resume）的工作階段中，壓縮列（compaction row）會提供 ctrl+o 去看根本沒載入的歷史紀錄；現在它會說明較早的訊息存在哪裡，而且也會在全螢幕顯示
+- 修正：你中斷回應後，「new task? /clear to save tokens」提示會馬上又跑出來
+- 修正：plugin 或 skill hook 的 `ask` 判斷所跳出的權限提示，沒顯示 hook 來自哪個 plugin 或 skill
+- 修正：`/diff` 在 reftable 倉庫（repository）中，當其中一項 git 檢查逾時或失敗時，沒注意到有衝突的 cherry-pick 或 revert
+- 修正：在同一個工作階段中執行過 Bash `cd` 後，workflow 腳本被讀取、編輯或重新執行時會要求權限或被拒絕
+- 修正：dark ANSI 主題和 16 色終端機上的暗色文字問題：填色方框內的文字會變淡、在選取和搜尋反白下不會變淡，而且清單描述會像其他次要文字一樣變淡
+- 修正：mod 的 `$.model.fork` 在新的 Claude Code 行程第一次回應完成前被呼叫時會回傳 `nothing-to-fork`，例如 `claude -p` 執行和雲端工作階段的情況
+- 全螢幕模式：修正 `/compact` 和自動壓縮在重建可見逐字稿時會讓 UI 短暫凍結
+- 自架 runner（Self-hosted runner）：修正當 managed settings 限制 MCP 伺服器時，從 Slack 啟動的工作階段找不到或無法掛載倉庫；請用 `deniedMcpServers` 把那些工具關掉
+- 自架 runner：修正當不相關的設定或工作階段失敗引用了 git 的「missing-ref」措辭時，工作階段會被回報成來源分支已被刪除，而且不會重試
+- 自架 runner：修正 log 承諾會重試一個正在結束的工作階段其失敗或被拒絕的 session release；現在反覆失敗會顯示次數
+- Windows：修正被停止的背景 PowerShell 指令，其輸出檔少了結尾的 `[killed]` 那一行
+- 改善切換到 context window 較小的模型：對新模型來說太長的對話，現在會先由前一個模型做摘要
+- 改善長時間執行的 subagent 工作時的渲染效能：它的進度軌跡（progress trail）現在會逐步更新，而不是每次渲染都整個重新處理
+- 改善 artifact：Claude 寫的頁面現在會把黏性標頭（sticky header）上方的區塊畫出來，這樣在行動 App 裡捲動時那裡就不會露出文字
+- 改善 mod：在 VS Code 以及桌面和行動 App 中，問題對話框上方畫的樹狀圖現在可以放 Markdown 和最多 48 列；終端機維持 12 列純文字
+- 變更 mod hook 的 `.catch` 處理器：現在只有在 hook 丟出錯誤或逾時才會執行；在 hook 自己呼叫底下所引發的事件，現在會跳過該 hook 而不去問它的 `.catch`
+- 變更 mod 的 `$.env.set`：變數設定或取消設定完成後會以 `{}` resolve，或在寫入未完成時以 `{ deny }` resolve 並說明原因
+- [VSCode] 新增 Claude 回應中的 LaTeX 數學渲染，包含 `$$` 和多行 `\[ … \]` 區塊，以及行內 `$…$` 和 `\(…\)` 數學式
+- [VSCode] 在 VS Code 和 JetBrains 面板的使用量上限橫幅，為 Pro 和 Max 方案新增「Get more usage」連結
+- [VSCode] 修正會讓面板當掉或凍結的對話，在每次重新載入時都被重新開啟
+- [VSCode] 修正聊天面板在長時間 thinking 時變慢：現在不會在每次更新時都重新解析整段 thinking 文字
+- [VSCode] 修正某些 language server 的診斷顯示「[object Object]」而不是規則代碼（例如 MD013）
+- [VSCode] 修正在不提供聽寫功能的情況下（非 claude.ai 登入、遠端視窗）仍載入原生聽寫音訊模組去檢查麥克風權限
+
 ## 2.1.300
 - mod 的 prompt 裝飾新增了 `virtualText`：畫在 prompt 輸入框裡的文字，但永遠不會進到草稿或送出的 prompt 裡
 - OpenTelemetry 的 `api_request` 事件新增 `cache_creation_5m_tokens` 和 `cache_creation_1h_tokens`，依照存活時間拆開 cache 寫入
