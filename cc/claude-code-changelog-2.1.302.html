@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.302 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.302 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.302</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_AUTO_MODE_MODEL</code>，可指定客戶端 auto mode 分類器（classifier）使用的模型；這不會改變伺服器端 auto mode 的模型</li>
+<li>在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/config</code> 新增一列 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Idle compaction</code>，可以關閉或重新開啟閒置壓縮；閒置壓縮後顯示的通知現在會告訴你怎麼關掉它</li>
+<li>在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/design-sync</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/design-login</code> 加上通知，告知獨立版 Claude Design（claude.ai/design）將於 2026 年 12 月 14 日停用</li>
+<li>修正在對話正在壓縮時停止某一輪（turn）會跳出「Prompt is too long」錯誤的問題</li>
+<li>修正在工作階段中途切換到 Vertex 或 Bedrock 後，請求會以「diagnostics: Extra inputs are not permitted」失敗的問題</li>
+<li>修正 Read 工具會把任意大小的圖片檔，或命名成圖片的 pipe 或裝置，整個載入記憶體的問題；現在超過 128 MB 的圖片來源會被拒絕</li>
+<li>修正當 gateway 用前綴命名 Opus 4 或 4.1（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">anthropic/claude-opus-4-1</code>）時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/autocompact</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/effort</code> 會存到錯誤模型的問題</li>
+<li>修正工作階段中途新增的工具透過 ToolSearch 或在壓縮後再次載入時，發生 prompt cache 未命中（cache miss）的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin</code> 和其他子指令有時會在佇列中的設定或 config 寫入完成前就先結束，可能導致變更遺失或留下 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.tmp</code> 檔的問題</li>
+<li>修正當 git 預設使用 reftable ref 格式時，plugin marketplace 每次重新整理都會重新 clone，以及新安裝的 git plugin 版本顯示為「unknown」的問題</li>
+<li>修正 PowerShell 工具找不到 plugin <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">bin/</code> 資料夾內指令，以及當一個找不到結果的搜尋（rg、grep、findstr、git grep）被 pipe 到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Select-Object</code> 或其他格式化 cmdlet 時會報錯的問題</li>
+<li>修正桌面版 app 中的 Claude 會叫你去 claude.ai 設定或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/mcp</code> 來授權或重新連線某個 MCP server，但那個選項其實不存在的問題</li>
+<li>修正當 Claude 送出空的編輯清單時 artifact 發佈有時會失敗，以及在較新版本的 artifact 擋下更新後 Claude 用錯誤方式重試 artifact 更新的問題</li>
+<li>修正大多數 auto mode 分類器攔截的情況下 OpenTelemetry <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tool_decision</code> 事件缺少 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">classifier_category</code>，以及當 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">OTEL_LOGRECORD_ATTRIBUTE_COUNT_LIMIT</code> 偏低時新的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tool_decision</code> 屬性會把 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tool_use_id</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tool_source</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">tool_parameters</code> 擠掉的問題</li>
+<li>修正在長清單中往下移動或摺疊某個區塊後，agents 檢視畫面中的列會保持空白的問題</li>
+<li>修正未登入時 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude remote-control --help</code> 不會印出使用說明就直接結束的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/design consent</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/design revoke</code> 在雲端工作階段中失敗時會建議使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/design-login</code>，但那裡並沒有這個功能；訊息現在改為指向 claude.ai/design/settings</li>
+<li>修正當 MCP server 協商出協定版本 2026-07-28 但省略 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">resultType</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ttlMs</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">cacheScope</code> 時，會導致 server 顯示沒有工具、或每次工具呼叫都失敗的問題</li>
+<li>修正提示建議（prompt suggestions）會消耗你方案只能用 credit 付費的模型的用量：現在在一則回覆以 credit 計費後就會略過</li>
+<li>修正用反引號包起來的 URL 換行時只有第一行可以點擊的問題；在支援超連結的終端機中，現在整段 URL 會是一條連結</li>
+<li>修正當找不到 plugin 時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin details &lt;name&gt;@builtin</code> 會建議 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin list</code>（但它從來不會顯示內建 plugin）的問題；現在改為指向 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code></li>
+<li>修正連結開頭的 emoji 換行時會多寬一欄的問題，這會讓它在問題預覽中被隱藏，並把表格變成清單</li>
+<li>修正在 git 2.56 以上版本中，當有一個殘留的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.git</code> 檔指向不存在的目錄時，worktree 隔離會拒絕建立或恢復 worktree 的問題</li>
+<li>修正雲端工作階段在新 process 中恢復後，成本和用量會從零重新開始計算的問題</li>
+<li>Self-hosted runner：修正在重複使用以 git reftable 格式儲存的 checkout 的工作階段中，git fetch 會以「bad object refs/heads」失敗的問題</li>
+<li>Windows：修正在 exFAT 或 FAT32 磁碟機上的專案，每次檔案寫入都會被拒絕或跳出詢問的問題，包含用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--plugin-dir</code> 啟動的工作階段</li>
+<li>改善啟用大量 plugin 時的啟動時間：plugin 的指令和 agent 檔案現在載入所需的檔案系統呼叫大幅減少，在 Windows 上尤其明顯</li>
+<li>改善使用伺服器端分類器的 auto mode：太長而無法通過安全檢查的對話現在會被壓縮，而不是每個被檢查的工具呼叫都被拒絕</li>
+<li>改善背景工作階段從其他資料夾重新開啟但沒有 LLM gateway 時顯示的訊息：現在會說明原因，而不是顯示「Not logged in」</li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude -p</code> 和沒有權限模式的 Agent SDK 工作階段，在第三方供應商上、關閉遙測或全新安裝時，改為以 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">default</code> 模式啟動；<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--permission-mode auto</code> 仍維持 auto</li>
+<li>變更 fork subagent（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">subagent_type: &quot;fork&quot;</code>）在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude -p</code>、Agent SDK、桌面版 app 和 VS Code 中預設開啟，就像在終端機中那樣；<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_FORK_SUBAGENT=0</code> 可以關掉它，而 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude mcp serve</code> 一律不提供</li>
+<li>變更桌面版 app 和 VS Code，讓主對話的 subagent 一律在背景執行（就像終端機那樣），而不是讓 Claude 自行決定；在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude -p</code>、Agent SDK、桌面版 app 和 VS Code 中，subagent 自己的 Agent 呼叫現在預設在前景執行</li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">← for agents</code> 頁尾提示，在工作階段開啟 10 秒後隱藏；等待你處理的 agent 數量仍會顯示</li>
+<li>變更 Claude in Chrome 說明在系統提示（system prompt）中的位置，讓新對話可以從共用的 prompt cache 讀取它們</li>
+<li>變更 prompt 和 agent hook，讓同一事件最多同時執行 12 個；其餘的要排隊等候</li>
+<li>變更當你組織的政策關閉 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/feedback</code> 時顯示的訊息：現在會指向 GitHub issues，而不是組織管理員</li>
+<li>[VSCode] 修正清單中未關閉的程式碼區塊後面的文字，在回覆串流時會顯示為純文字、接著才變成程式碼的問題</li>
+<li>[VSCode] 修正從面板登入 MCP server 時，若 server URL 含有查詢字串（query string）會開啟一個壞掉的授權頁面的問題</li>
+<li>[VSCode] 修正在沒有任何裝有 Claude 擴充功能的瀏覽器可連線時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">@browser</code> 橫幅仍顯示「Browser connected」的問題</li>
+<li>[Cloud sessions] 在例行任務（routine）頁面新增橫幅，說明它上次執行為何沒有啟動，例如你的組織已達到並行雲端工作階段的上限</li>
+<li>[Cloud sessions] 修正雲端工作階段中「Rewind to here」在除了最新訊息外的每一則訊息上都失敗的問題；self-hosted runner 需要 Claude Code v2.1.246 或更新版本</li>
+<li>[Cloud sessions] 修正雲端工作階段中的 pull request 狀態列，在 GitHub 重新檢查時會把有合併衝突的 pull request 翻回 ready 狀態的問題</li>
+<li>[Cloud sessions] 修正例行任務執行在其雲端工作階段意外停止後顯示為 Completed、以及在開始前被封存時顯示為 Cancelled 的問題，應該顯示為失敗</li>
+<li>[Cloud sessions] 修正雲端工作階段中的差異（diff）檢視，在工作階段的 GitHub 儲存庫被重新命名或搬移後會遺漏變更或載入失敗的問題</li>
+<li>[Cloud sessions] 修正排程的例行任務執行到一半失敗後，會在一小時以上之後從頭再跑一次的問題，這可能重複做某些工作，例如重複張貼同一份報告兩次</li>
+<li>[Cloud sessions] 修正開啟中的雲端工作階段有時直到你重新載入頁面、或點開又點回來前，都不會顯示從另一台裝置送出的訊息的問題</li>
+<li>[Cloud sessions] 改善雲端工作階段啟動失敗時顯示的錯誤：現在會顯示「Connection lost」或「Server error」，而不是「Something went wrong」</li>
+<li>[Remote Control] 修正在你的電腦離線後，Remote Control 工作階段中 subagent 的面板會一直轉圈圈的問題；現在會顯示 Remote Control 已斷線</li>
+<li>[Claude Tag] 修正當 Claude 透過編輯它先前的某則訊息來回答 Slack 頻道或私訊中的提及時，「is thinking…」會一直掛在那則提及下方的問題</li>
+<li>[Claude Tag] 修正 Claude 的 Slack 回覆中，編號或項目符號步驟下程式碼區塊內的 URL 會被包在角括號（&lt; &gt;）裡的問題，這會讓複製的指令失效</li>
+<li>[Claude Tag] 修正在 Slack 中附加的 HEIC、SVG、TIFF 和 BMP 圖片從未送達 Claude 的問題；它們現在會像其他檔案類型一樣，以檔案形式出現在工作檔案中</li>
+<li>[Claude Tag] 修正在依角色限制 Claude Tag 的組織中，新的頻道管理者會失去 Slack 中 Claude 存取權的問題；管理者角色現在也會一併授予 Slack 中的 Claude Tag</li>
+<li>[Claude Tag] 修正多個 MCP server 共用同一個 host 的自訂連接器（custom connector），在 Claude Tag 管理設定中會顯示為單一連接器的問題；現在每個 server 都是獨立的連接器</li>
+<li>[Claude Tag] 修正當單一 Slack 查詢卡住時，Slack 中的 Claude 有時會以「DMs are temporarily unavailable」回覆私訊並把它丟掉的問題；現在會先重試</li>
+<li>[Claude Tag] 修正在 Slack Enterprise Grid 上與 Claude 的私訊會忽略 Slack 工作區下拉選單的問題；現在它們會在你上次開啟 Claude 所連接的工作區下執行</li>
+<li>[Claude Tag] 修正 Slack 中 Claude 關於頻道每月花費上限的通知，寫說頻道管理者可以調高上限的問題；現在會改為指名組織擁有者並附上用量頁面連結</li>
+<li>[Claude Tag] 修正 Claude 的 Slack 回覆中，連結會吸收緊接在後的粗體或斜體結尾標記、或全形標點的問題，這會破壞連結和格式</li>
+<li>[Claude Tag] 改善 Claude Tag 管理設定中的儲存庫搜尋，現在可涵蓋多達 100 個已連接的 GitHub 帳號，並能找到某個 GitHub App 安裝前 5,000 個以外的私有儲存庫</li>
+<li>[Claude Tag] 改善 Claude Tag 管理設定中的 Add place，現在會立即列出你輸入或貼上的頻道，而不是要等組織的完整頻道清單載入後才顯示</li>
+<li>[Claude Tag] 改善 Claude Tag 管理設定中，工作區或頻道頁面上的 Add &gt; Domain，現在在該頁面載入後就能使用，而不是要等每個頻道都載入完</li>
+<li>[Claude Tag] 變更 Claude Tag 管理設定，把 Claude 的存取權整理成四個分頁：Bundles、Connectors、Skills and plugins，以及 Channels</li>
+<li>[Claude Tag] 變更組織設定中的 Roles 頁面，把為 Claude Tag 頻道管理者建立的角色，集中放在你組織自有角色下方一個摺疊的區塊中</li>
+<li>[Code Review] 修正在你離開去連接 GitHub 後 Code Review 設定不會接續的問題；回到管理設定後，現在會重新開啟在儲存庫選擇器那一步</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
