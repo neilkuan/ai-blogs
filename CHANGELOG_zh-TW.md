@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.303
+- 修正錯誤並提升穩定性
+
 ## 2.1.302
 - 新增 `CLAUDE_CODE_AUTO_MODE_MODEL`，可指定客戶端 auto mode 分類器（classifier）使用的模型；這不會改變伺服器端 auto mode 的模型
 - 在 `/config` 新增一列 `Idle compaction`，可以關閉或重新開啟閒置壓縮；閒置壓縮後顯示的通知現在會告訴你怎麼關掉它
