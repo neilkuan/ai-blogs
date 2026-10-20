@@ -2,6 +2,46 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.305
+- 新增 `sandbox.allowNestedUserNamespaces`，讓 Linux 上的沙箱指令可以建立 user namespace（Chromium、rootless podman）；這會讓它們繞過沙箱的檔案保護機制
+- 新增 `CLAUDE_CODE_RETRY_WATCHDOG_USAGE_LIMIT_RECHECK_MS`，讓無人值守的重試模式（`CLAUDE_CODE_RETRY_WATCHDOG`）能察覺到在重置前就已經解除的用量限制（usage limit）
+- 修正在 Vertex、Bedrock 及其他 provider 上，當端點或 gateway 拒絕 tool search 時每個請求都失敗的問題，以及在 ToolSearch 被禁用或沒放進 `--tools` 的 gateway 後面也會失敗（2.1.304 的回歸問題（regression））：Claude Code 現在會在不帶它的情況下重試
+- 修正當 model 名稱跟 `modelOverrides` 的值只差在大小寫或多了 `[1m]` 標籤時，`/effort` 和 `/autocompact` 設定沒有生效的問題
+- 修正 bare repository 裡的新 worktree 有時會從本地 HEAD 而不是預設分支（default branch）開始的問題，以及沒變動的 subagent worktree 有時沒被清掉的問題
+- 修正磁碟滿了的時候 Bash 指令會以原始 `ENOSPC` 檔案路徑的形式失敗：現在錯誤訊息會說磁碟已滿，而且什麼都沒執行
+- 修正由 cloud session 或 SDK 的 `setMcpServers` 傳入的 MCP server，在 session 後段被你自己設定裡同名的 server 取代的問題
+- 修正當 subagent 切換到 fallback model 後，Claude 會講錯該 subagent 工作所用 model 名稱的問題
+- 修正 cloud session 和隊友在壓縮（compaction）必須捨棄最舊訊息才能塞進摘要時，沒有告知 Claude 的問題
+- 修正更多排程 Cowork cloud session 的情況：每個 subagent 的 WebFetch 需要 URL 核准、卻沒人在場批准時，會白等五分鐘
+- 修正 Workflow 續跑（resume）時會重跑已經完成的 `pipeline()` 和 `parallel()` agent，而不是從該次執行的日誌（journal）直接取用的問題
+- 修正 Remote Control 在用 `/resume` 切換對話後，會在 `/resume` 裡留下空的「(session)」項目的問題
+- 修正 `/usage` 的列（rows）在窄終端機裡被切掉的問題
+- 修正啟動警告以原始文字印在 logo 上方的問題：現在改寫進 debug log，而什麼都沒限制到的權限規則會以警告列的形式顯示在橫幅下方
+- 修正螢幕報讀器（screen reader）模式：搜尋框現在會唸「Search:」，而不是一個會被 VoiceOver 唸成「telephone recorder」的符號；被高亮的提示文字，例如 Ctrl+R 搜尋符合項和「ultrathink」，字裡面不再夾雜空格
+- 自架 runner（self-hosted runner）：修正一個只把自己 stdout 分享給 runner 或 orchestrator 的啟動腳本，在設定了 `TERM` 時會以 `Resource temporarily unavailable` 失敗的問題（2.1.300 的回歸問題（regression））
+- 自架 runner：修正自 2.1.296 起，當 git credential helper 或 askpass 程式透過 `GIT_CONFIG` 讀取設定時，repository 存取會失敗的問題
+- 自架 runner：修正當 orchestrator 在背景啟動的 runner 一直開著輸出時，會把 spawn-runner hook 誤報為逾時的問題
+- 改善 `/usage`：每個警告現在都是一行、會指明來源的修法，按 `f` 就能套用；同樣的修法也會出現在 VS Code 和 `/doctor` 裡
+- 改善 MCP 同意（consent）對話框，讓原本要給提示用的 Enter 比較不會被當成 Accept
+- 改善某個 mod 的 `Image`，讓它在 iTerm2 3.5 以上版本以全螢幕渲染畫出圖片，原本那裡只會顯示 `alt` 文字
+- Remote Control：改善 spawn 模式的訊息：現在按 `w` 會說新模式已為該資料夾儲存，而之後用已存模式啟動的 `claude remote-control` 會說明這設定是從哪來的
+- 變更 `allowedMcpServers`，讓它不再過濾 `managed-mcp.json` 中只在 `env` 裡用到 `${VAR}` 的 stdio server：原本被你的允許清單漏掉的那個，升級後現在會載入；要讓它保持關閉請用 `deniedMcpServers`
+- 變更由 Claude Desktop 以路徑掛載的 plugin，當你組織的受管設定開了 `allowManagedPermissionRulesOnly` 時，不再保留它們的 `allowed-tools`
+- 變更 `/artifacts` 的刪除確認：按 1 或 Enter 保留、按 2 刪除、按 Esc 取消；`y` 和 `n` 不再是回應選項
+- 變更某個 mod 的停靠窗格（docked pane），讓它維持在終端機寬度的 45% 以內，包括從較寬終端機沿用下來的寬度
+- [VSCode] 新增「Running start-up hooks」的轉圈狀態，在 SessionStart 或 Setup hook 執行時顯示，並附帶螢幕報讀器播報
+- [VSCode] 修正當你的 `spinnerVerbs` 設定把內建動詞換成短的時候，轉圈動畫會把「Compacting...」切掉的問題
+- [VSCode] 變更 session 沒及時啟動且沒有 hook 在跑時顯示的訊息：現在會先帶出輸出的 log 並列出可能原因，而不是一開始就叫你去看登入和網路
+- [Cloud sessions] 修正 Cloud environments 管理頁面會以「installs packages」錯誤誤拒儲存既有環境的問題
+- [Cloud sessions] 改善刪除自架環境的流程，讓對話框和錯誤訊息說明是什麼擋住了刪除、以及刪除會影響什麼
+- [Claude Tag] 在 Claude Tag 管理後台的新增地點搜尋裡，加入 Claude 還沒加入的公開 Slack 頻道，讓管理員可以直接從那裡設定
+- [Claude Tag] 修正 Claude Tag 存取套件（access bundles）的問題，讓已搬到另一個 GitHub 帳號的 repository 可以再次被加入
+- [Claude Tag] 修正在 Slack DM 討論串裡設定的例程（routine），在同一討論串裡另一個例程重啟對話後就不再發文的問題；現在兩者都會繼續在那裡發文
+- [Claude Tag] 修正在 Slack 討論串裡設定的例程，在對話結束後回報成功卻沒發文的問題；那些執行現在會被略過，並通知建立者
+- [Claude Tag] 改善大型組織的 Claude Tag 管理頁面，讓 plugin、skill 和 bundle 的編輯在頻道清單還在載入時就能運作
+- [Code Review] 修正當一次審查期間有多次 push 進到某個 pull request 時，Code Review 有時沒審查到最新 commit 的問題
+- [Code Review] 變更 Code Review 的重新審查（re-review），讓它在先前的阻擋性發現（blocking findings）還沒解決時，不再一開頭就給 LGTM
+
 ## 2.1.304
 - 新增一行 transcript 訊息：當某個優先執行的 plugin 跳過了你的 mod 的某個 hook 時，會標示出事件名稱與該 plugin
 - 在 mod 的 `tool.check` 回覆中新增 `decider: "person"`：只有權限對話框或 host 的 callback 能批准這個請求，當現場沒有人可以詢問時，就以 mod 提供的理由拒絕

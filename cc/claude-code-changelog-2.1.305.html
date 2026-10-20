@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.305 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.305 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.305</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">sandbox.allowNestedUserNamespaces</code>，讓 Linux 上的沙箱指令可以建立 user namespace（Chromium、rootless podman）；這會讓它們繞過沙箱的檔案保護機制</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_RETRY_WATCHDOG_USAGE_LIMIT_RECHECK_MS</code>，讓無人值守的重試模式（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_RETRY_WATCHDOG</code>）能察覺到在重置前就已經解除的用量限制（usage limit）</li>
+<li>修正在 Vertex、Bedrock 及其他 provider 上，當端點或 gateway 拒絕 tool search 時每個請求都失敗的問題，以及在 ToolSearch 被禁用或沒放進 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--tools</code> 的 gateway 後面也會失敗（2.1.304 的回歸問題（regression））：Claude Code 現在會在不帶它的情況下重試</li>
+<li>修正當 model 名稱跟 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">modelOverrides</code> 的值只差在大小寫或多了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">[1m]</code> 標籤時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/effort</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/autocompact</code> 設定沒有生效的問題</li>
+<li>修正 bare repository 裡的新 worktree 有時會從本地 HEAD 而不是預設分支（default branch）開始的問題，以及沒變動的 subagent worktree 有時沒被清掉的問題</li>
+<li>修正磁碟滿了的時候 Bash 指令會以原始 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ENOSPC</code> 檔案路徑的形式失敗：現在錯誤訊息會說磁碟已滿，而且什麼都沒執行</li>
+<li>修正由 cloud session 或 SDK 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">setMcpServers</code> 傳入的 MCP server，在 session 後段被你自己設定裡同名的 server 取代的問題</li>
+<li>修正當 subagent 切換到 fallback model 後，Claude 會講錯該 subagent 工作所用 model 名稱的問題</li>
+<li>修正 cloud session 和隊友在壓縮（compaction）必須捨棄最舊訊息才能塞進摘要時，沒有告知 Claude 的問題</li>
+<li>修正更多排程 Cowork cloud session 的情況：每個 subagent 的 WebFetch 需要 URL 核准、卻沒人在場批准時，會白等五分鐘</li>
+<li>修正 Workflow 續跑（resume）時會重跑已經完成的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">pipeline()</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">parallel()</code> agent，而不是從該次執行的日誌（journal）直接取用的問題</li>
+<li>修正 Remote Control 在用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 切換對話後，會在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/resume</code> 裡留下空的「(session)」項目的問題</li>
+<li>修正 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code> 的列（rows）在窄終端機裡被切掉的問題</li>
+<li>修正啟動警告以原始文字印在 logo 上方的問題：現在改寫進 debug log，而什麼都沒限制到的權限規則會以警告列的形式顯示在橫幅下方</li>
+<li>修正螢幕報讀器（screen reader）模式：搜尋框現在會唸「Search:」，而不是一個會被 VoiceOver 唸成「telephone recorder」的符號；被高亮的提示文字，例如 Ctrl+R 搜尋符合項和「ultrathink」，字裡面不再夾雜空格</li>
+<li>自架 runner（self-hosted runner）：修正一個只把自己 stdout 分享給 runner 或 orchestrator 的啟動腳本，在設定了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">TERM</code> 時會以 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Resource temporarily unavailable</code> 失敗的問題（2.1.300 的回歸問題（regression））</li>
+<li>自架 runner：修正自 2.1.296 起，當 git credential helper 或 askpass 程式透過 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">GIT_CONFIG</code> 讀取設定時，repository 存取會失敗的問題</li>
+<li>自架 runner：修正當 orchestrator 在背景啟動的 runner 一直開著輸出時，會把 spawn-runner hook 誤報為逾時的問題</li>
+<li>改善 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code>：每個警告現在都是一行、會指明來源的修法，按 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">f</code> 就能套用；同樣的修法也會出現在 VS Code 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/doctor</code> 裡</li>
+<li>改善 MCP 同意（consent）對話框，讓原本要給提示用的 Enter 比較不會被當成 Accept</li>
+<li>改善某個 mod 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">Image</code>，讓它在 iTerm2 3.5 以上版本以全螢幕渲染畫出圖片，原本那裡只會顯示 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">alt</code> 文字</li>
+<li>Remote Control：改善 spawn 模式的訊息：現在按 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">w</code> 會說新模式已為該資料夾儲存，而之後用已存模式啟動的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude remote-control</code> 會說明這設定是從哪來的</li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">allowedMcpServers</code>，讓它不再過濾 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">managed-mcp.json</code> 中只在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">env</code> 裡用到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">${VAR}</code> 的 stdio server：原本被你的允許清單漏掉的那個，升級後現在會載入；要讓它保持關閉請用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">deniedMcpServers</code></li>
+<li>變更由 Claude Desktop 以路徑掛載的 plugin，當你組織的受管設定開了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">allowManagedPermissionRulesOnly</code> 時，不再保留它們的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">allowed-tools</code></li>
+<li>變更 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/artifacts</code> 的刪除確認：按 1 或 Enter 保留、按 2 刪除、按 Esc 取消；<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">y</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">n</code> 不再是回應選項</li>
+<li>變更某個 mod 的停靠窗格（docked pane），讓它維持在終端機寬度的 45% 以內，包括從較寬終端機沿用下來的寬度</li>
+<li>[VSCode] 新增「Running start-up hooks」的轉圈狀態，在 SessionStart 或 Setup hook 執行時顯示，並附帶螢幕報讀器播報</li>
+<li>[VSCode] 修正當你的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">spinnerVerbs</code> 設定把內建動詞換成短的時候，轉圈動畫會把「Compacting...」切掉的問題</li>
+<li>[VSCode] 變更 session 沒及時啟動且沒有 hook 在跑時顯示的訊息：現在會先帶出輸出的 log 並列出可能原因，而不是一開始就叫你去看登入和網路</li>
+<li>[Cloud sessions] 修正 Cloud environments 管理頁面會以「installs packages」錯誤誤拒儲存既有環境的問題</li>
+<li>[Cloud sessions] 改善刪除自架環境的流程，讓對話框和錯誤訊息說明是什麼擋住了刪除、以及刪除會影響什麼</li>
+<li>[Claude Tag] 在 Claude Tag 管理後台的新增地點搜尋裡，加入 Claude 還沒加入的公開 Slack 頻道，讓管理員可以直接從那裡設定</li>
+<li>[Claude Tag] 修正 Claude Tag 存取套件（access bundles）的問題，讓已搬到另一個 GitHub 帳號的 repository 可以再次被加入</li>
+<li>[Claude Tag] 修正在 Slack DM 討論串裡設定的例程（routine），在同一討論串裡另一個例程重啟對話後就不再發文的問題；現在兩者都會繼續在那裡發文</li>
+<li>[Claude Tag] 修正在 Slack 討論串裡設定的例程，在對話結束後回報成功卻沒發文的問題；那些執行現在會被略過，並通知建立者</li>
+<li>[Claude Tag] 改善大型組織的 Claude Tag 管理頁面，讓 plugin、skill 和 bundle 的編輯在頻道清單還在載入時就能運作</li>
+<li>[Code Review] 修正當一次審查期間有多次 push 進到某個 pull request 時，Code Review 有時沒審查到最新 commit 的問題</li>
+<li>[Code Review] 變更 Code Review 的重新審查（re-review），讓它在先前的阻擋性發現（blocking findings）還沒解決時，不再一開頭就給 LGTM</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
