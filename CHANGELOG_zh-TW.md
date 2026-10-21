@@ -2,6 +2,10 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.306
+- 修正在 cloud session 中，若啟動時沒帶上 session 的環境變數，`claude -p` 會誤報「Not logged in」的問題
+- 修正在有大量 MCP 工具的 session 中，API 錯誤被替換成「prompt is too long」、以及多做了一次不必要的 compaction 的問題
+
 ## 2.1.305
 - 新增 `sandbox.allowNestedUserNamespaces`，讓 Linux 上的沙箱指令可以建立 user namespace（Chromium、rootless podman）；這會讓它們繞過沙箱的檔案保護機制
 - 新增 `CLAUDE_CODE_RETRY_WATCHDOG_USAGE_LIMIT_RECHECK_MS`，讓無人值守的重試模式（`CLAUDE_CODE_RETRY_WATCHDOG`）能察覺到在重置前就已經解除的用量限制（usage limit）
