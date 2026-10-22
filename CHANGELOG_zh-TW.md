@@ -2,6 +2,54 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.308
+- 修正錯誤並改善穩定性
+
+## 2.1.307
+- 新增 `/claude-api api-version`，可將 Claude API 程式碼切換到 API 版本 `2026-10-21`
+- 新增 `claude_code.safety_event` OpenTelemetry 事件，每當某個工具呼叫被權限規則、auto 模式、安全檢查、hook 或 sandbox 擋下、提示或退回時都會記錄
+- 修正當設定了 `CLAUDE_CODE_DISABLE_1M_CONTEXT`，且模型是帶有 `[1m]` 後綴的別名（例如 `opus[1m]`）時，請求會出現 model-not-found 錯誤的問題
+- 修正 `prompt-caching-scope` beta header 在自訂 `ANTHROPIC_BASE_URL` gateway 後方以及在 Foundry 上仍被送出的問題，這些情況下它根本沒有作用
+- 修正在 macOS 上登入 keychain 被鎖定時，MCP server 在 `claude -p` 中顯示「needs authentication」的問題；現在會說明原因，解鎖後下一次執行就能直接連上，不需要重新登入
+- 修正 macOS 或 Linux 電腦在 MCP server 連線過程中進入睡眠時，MCP server 被回報為逾時、並在 headless 執行中一直維持失敗狀態的問題
+- 修正連線在呼叫途中關閉時，HTTP MCP 工具呼叫被送出兩次的問題；現在只有唯讀或 idempotent 的工具才會重試
+- 修正背景任務執行時，一個回合有時會在沒有拿到 SDK MCP server 最新工具的情況下就開始的問題
+- 修正在讀取大量 PDF 頁面、圖片或其他大型工具結果的回合中，偶爾出現「Autocompact is thrashing」錯誤的問題
+- 修正 cloud session 中的 `/autocompact` 在 session 重啟後退回預設視窗的問題
+- 修正用 `/clear` 清掉的對話，在 cloud 或自架（self-hosted）runner session 重啟後有時又跑回來的問題
+- 修正 `CLAUDE_STREAM_FIRST_BYTE_TIMEOUT_MS` 在 Claude apps gateway session 中被忽略的問題
+- 修正當設定了 `OTEL_EXPORTER_OTLP_HEADERS` 時，來自 Claude Desktop session、經過 Claude apps gateway 的 telemetry 被拒收的問題
+- 修正 `/permissions` > Recently denied 不顯示被拒絕的 shell 指令，以及 auto 模式的本地分類器在檢查重試指令時會忽略那裡的核准；現在核准某一列會顯示指令本身，而不是它的描述
+- 修正 `/help` 和 `/` 指令選單對 `/claude-api` 這類內建 skill 顯示冗長的、給模型看的描述，而不是它們的簡短描述的問題
+- 修正 subagent 的對話紀錄（transcript）在串流回應中記錄了佔位的 token 用量和空白的 stop reason 的問題
+- 修正透過 Agent SDK 的 `setModel()`（以及以它為基礎打造的 app）切換模型時，若 API 花超過 5 秒才確認模型就會被拒絕的問題；Claude Code 現在最多會等 15 秒
+- 修正透過連線的 app 停止的背景指令（例如桌面 app 封存閒置 session）被回報給 Claude 說是被使用者停止的問題；現在的通知會寫出它的輸出檔名
+- 修正在 Cowork cloud session 中，WebFetch 在網站回應 4xx 狀態或 robots.txt 拒絕時回報工具錯誤的問題；現在會像本地 session 一樣當成正常結果處理
+- 修正直接設定的 GitHub MCP server 上的寫入工具，在桌面 app 的 Code 分頁顯示一個關閉後什麼都沒建立的表單的問題
+- 修正當 server 關閉了被重複使用的連線時，Artifact 工具的讀取會因為連線重置（connection reset）而失敗的問題
+- 自架 runner：修正使用 `--use-anthropic-git-proxy` 的 session 會把前一個 session 留在 clone 裡的 `.claude/settings.local.json` 一起 commit 進去的問題
+- 自架 runner：修正在 session 的 checkout hook 執行期間封存、重新排入佇列、或停止 runner 時，會讓 hook 的程序繼續跑、並一直占住 runner 名額的問題
+- 改善無法解析的工具呼叫的復原機制：Claude Code 現在會重試該呼叫最多兩次，才會以錯誤結束這個回合
+- 改善一起啟動的 fork subagent：現在每個 fork 都會被告知哪一個啟動是它自己的，所以 fork 比較不會去搶著做別人的工作
+- 改善瀏覽器登入：登入完成後成功頁面會立刻出現，不用等你的帳號 profile 載入
+- 改善 cloud 和自架 runner session 中的網路搜尋錯誤：若一次搜尋被 403 拒絕且附帶原因，現在會顯示那個原因，而不是籠統的「Authentication error」
+- 改善在桌面 app 其中一個 MCP server 無法連線時，cloud session 收到第一則回覆的時間
+- 改善對話紀錄中含有大量貼上的圖片或 PDF 讀取內容的 session，其 Remote Control 的連線時間
+- 變更 WebSearch 額度用完時 Claude 收到的通知，現在也會告訴它不要透過瀏覽器或 computer use 去查搜尋引擎
+- 變更 `axScreenReader` 設定和 settings `env` 區塊中的 `CLAUDE_AX_SCREEN_READER`，現在只會從 user、managed 或 `--settings` 的設定套用（自 2.1.305 起）
+- 自架 runner：變更 checkout hook 預設在 30 分鐘後停止，並讓該 session 的設定失敗；如果你的 hook 需要更久，請調高 `--checkout-hook-timeout-min` 或把它設成 `0`
+- 自架 runner：變更為 Anthropic-managed git 建立的憑證檔，現在會像 CLI 一樣過濾它信任的憑證；會有一行 `[runner:warn]` 告訴你被篩掉幾張
+- [VSCode] 新增麥克風按鈕上的通知，當語音聽寫自己停下來時（15 秒沒有辨識到語音，或達到 2 分鐘上限）會說明原因，並表示目前為止的文字都有保留
+- [VSCode] 修正用 Show more 展開的長 prompt 蓋住整個聊天面板的問題：釘選的 prompt 現在最多占面板的 40%，超過會捲動
+- [VSCode] 修正在 rich text 編輯器中，貼上含有 LaTeX 數學的部分 list item 或表格儲存格時會變成一個新 list 或表格的問題
+- [VSCode] 修正當 `NODE_EXTRA_CA_CERTS` 只設在 `~/.claude/settings.json` 裡時，聽寫在 TLS 檢查（TLS-inspecting）proxy 後方會失敗的問題；現在它也會參照 `CLAUDE_CODE_CERT_STORE`
+- [VSCode] 變更「still open somewhere else」通知，現在也涵蓋擴充套件重啟後殘留的 Claude 程序，這種程序通常會在大約 10 分鐘內自行結束
+- [VSCode] 變更語音聽寫，現在會像 CLI 一樣過濾它信任的憑證
+- [VSCode] 變更擴充套件本身的請求，讓它們像 CLI 一樣過濾信任的憑證，並信任環境變數或 user 設定中指定的 `NODE_EXTRA_CA_CERTS` 檔
+- [Cloud sessions] 修正 repository 選擇器在搜尋還在進行時就顯示「No repositories match」的問題；現在會先顯示「Searching…」直到結果出來
+- [Cloud sessions] 修正自架環境上「Waiting for a runner」狀態被截斷的問題；使用 on-demand runner 時，它現在會從你最後一則訊息開始計時，並顯示失敗的嘗試次數
+- [Code Review] 在 Code Review 新增 `@claude review stop`（也可用 `off` 和 `pause`），可在不啟動新一輪 review 的情況下，結束某個 pull request 上的 `@claude review always` 訂閱
+
 ## 2.1.306
 - 修正在 cloud session 中，若啟動時沒帶上 session 的環境變數，`claude -p` 會誤報「Not logged in」的問題
 - 修正在有大量 MCP 工具的 session 中，API 錯誤被替換成「prompt is too long」、以及多做了一次不必要的 compaction 的問題
