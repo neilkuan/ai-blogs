@@ -2,6 +2,87 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.309
+- 修正 macOS 和 Linux 上的沙箱化（sandbox）Bash 指令，先前會在每個指令執行前於沙箱外執行 shell 的啟動檔案
+- 修正 macOS 沙箱 `denyWrite` glob 模式，當模式所在的資料夾是透過 symlink 抵達時，未能套用到路徑的真實位置
+- 修正沙箱化指令與自動接受的編輯能夠修改透過 `--mcp-config` 傳入的 MCP 設定檔
+- 修正已停用的 MCP server 在 print 和 SDK session 中被後續的權限提示重新連線
+- 修正 Bash 權限檢查會信任由某個指令設定的變數，而該指令的 redirect 可能開啟失敗
+- 修正 Bash 權限檢查對某些在執行 git 前會切換目錄的複合指令未提示，當 `cd` 被包裝或加上前綴時（對單純的 `cd` 則會提示）
+- 修正 `Edit(path)` 拒絕規則在某些同時包含 subshell 的指令中，未能阻擋對該路徑的 Bash redirect
+- 修正 worktree 隔離的 session 接受某些帶 locale 前綴的指令，而隔離防護應該拒絕這些指令
+- 修正 zsh 上的 worktree 隔離 session 接受某些算術指令，而隔離防護應該拒絕這些指令
+- 修正 Claude Code 建立的 worktree 與分支 checkout，讓它們忽略 git replace refs，就像其他 git 操作已經在做的那樣
+- 修正 profile store 寫入保護，當設定目錄是透過 symlink 抵達時未能套用
+- 修正 session 在讀取超大型巢狀 CLAUDE.md 下的檔案後反覆壓縮（compact）的問題；超過大小限制的巢狀 CLAUDE.md 現在只載入開頭部分
+- 修正 ctrl+enter（立即送出）只在回應開始前按下時才會將訊息排入佇列，以及在那些 hook 執行期間按下時會重啟某個 prompt 的 hook，同時把訊息留在佇列中
+- 修正綁定按鍵的 slash 指令從 `!` 模式在 shell 中執行
+- 修正 ctrl+o 未顯示來自其他 agent 和 session、仍在等待送達的訊息；它們現在會完整出現在 transcript 下方，並標記為等待中
+- 修正過長的工具輸出預覽被從一個 emoji 中間截斷，導致 `jq` 無法解析的 session transcript
+- 修正 Read 在共用父層 `/proc` 的 Linux 沙箱中，對 PDF 頁面範圍回報「File does not exist」
+- 修正由 Claude Desktop 託管的 session 訊息在連線更新時有時會遺失
+- 修正當同一台電腦上的終端機登入了不同帳號或組織時，Claude 桌面 app 中的 Claude Code session 缺少功能
+- 修正 `claude remote-control` 狀態列對於不在 git repository 中的資料夾，將分支顯示為 `HEAD`
+- 修正分割窗格（split-pane）的 agent 隊友未繼承 leader 指令列上給定的工具拒絕規則與 `--tools` 規則
+- 修正用 `/rename` 重新命名的 session，在 VS Code 視窗重新載入或非互動式 `--resume` 後，對其他 session 顯示成自動產生的名稱
+- 修正 `/rewind` 清單對於透過 `/code-review --fix`、subagent 或 shell 指令變更了 checkpoint 檔案的回合，顯示「No code changes」
+- 修正 `/privacy-settings` 顯示過時的「Help improve our AI models」值；現在也會在無法取得設定時提示
+- 修正當你的組織不接受意見回饋時，回饋訊息顯示「try again later」；現在會顯示 server 給的原因以及該去哪裡回報 bug
+- 修正過大的 /feedback 回報失敗，而非在移除 transcript 後重新送出
+- 修正 `--add-dir` 資料夾中的 skill 在另一個 skill 已佔用其名稱時變得無法存取；現在會以 `<folder>:<name>` 形式提供
+- 修正 `/verify` 和 `/code-review` 在巢狀套件的檔案從 shell 變更後，找不到該套件自己的 skill
+- 修正 /claude-api skill 聲稱 `ant beta:worker poll --on-work` 會把 trace context 傳給指令
+- 修正 /claude-api skill 的 C# tracing 設定缺少來自 cloud platform clients 的 spans
+- 修正 /claude-api skill 聲稱對 AWS 上 Claude Platform 請求的 API spans 無法加入呼叫端的 trace
+- 修正在 PowerShell 中執行的 hook 在 hook 的程式以 code 2 結束時未能阻擋，以及在 Windows 上當未安裝 Git for Windows 時，帶 `"shell": "powershell"` 的 `PreToolUse` 和 `PermissionRequest` hook 會 fail open
+- 修正某個 mod 的 `turn.step` hook 以別名（例如 `haiku`）指定模型時，每個請求都會因模型錯誤而失敗：別名現在會解析到其對應的模型
+- 修正從 claude.ai 同步的 plugin 和 skill 在磁碟讀取錯誤後被移除（有時發生在 session 進行中）
+- 修正某些一般頁面的 artifact 發布與更新被拒絕，例如含有特定 minified script 的頁面，或 Claude 無法先讀取的 artifact
+- 修正在某個回合中壓縮對話後，Claude 在該回合剩餘時間內對每次 artifact 更新都要求權限
+- 修正當 `ANTHROPIC_BEDROCK_BASE_URL` 設定為預設的 `bedrock-runtime.<region>.amazonaws.com` 端點時，Amazon Bedrock 上的 fine-grained 工具 streaming 仍保持關閉
+- 修正「Waiting for API response」提示在只送出 keepalive ping 的 gateway 後方閃爍：非 Anthropic 後端的路由現在會等待 45 秒
+- 修正 Claude 在 PR、issue 和留言中把角色名稱與佔位符寫成 mention，而通知到不相關的 GitHub 使用者
+- Linux：修正當背景指令存活時間超過 session 時，沙箱寫入拒絕被解除
+- Windows：修正 PowerShell 權限檢查自動核准某些以當前目錄為目標且帶有額外參數的 `Set-Location` 或 `cd` 指令；這些現在會提示核准
+- macOS：修正在沒有 Xcode 或 Command Line Tools 的 Mac 上，每次 Claude Code 啟動時都會打開「Install Command Line Developer Tools」對話框
+- Self-hosted runner：修正 `--startup-timeout-min` 停掉某個第一個 prompt（例如 `/code-review`）仍在 subagent 中運作的 session；凍結的程序仍會被停掉
+- 改善 Claude Code 為自己執行的許多 git 指令在 Windows 上的速度；在所有平台上，這些指令的錯誤即使 git 設定為其他語言，現在也會以英文顯示
+- 改善 hook 模組巢狀過深無法載入時的錯誤：現在會指出檔案名稱，而非顯示一個光禿禿的 stack-overflow 訊息
+- 改善磁碟已滿的處理：被滿磁碟中斷的 Bash 指令現在會說明這點並指出要清出空間的資料夾，而在滿的暫存磁碟上啟動時會印出清楚的訊息，而非原始的 ENOSPC 錯誤
+- 改善 /claude-api skill，在被要求加入 OpenTelemetry 時，一併提供 API tracing 與 SDK tracing
+- 改善 /claude-api skill，在聲稱某功能不受支援前會先查看最新文件
+- Self-hosted runner：改善移轉到新 runner 的 session：Claude 現在會看到被中斷的工具呼叫，並標記為結果未知
+- 更新內建的 dataviz skill，接受 APCA 作為文字對比度的衡量標準（在要求符合 AA 的地方仍保留 WCAG 2 比值），在其調色盤驗證腳本中加入 `apca(text, background)` 函式，並說明在彩色圖表填色內的標籤應該用白色還是接近黑色
+- 更新 /claude-api skill：service account keys 和 Workload Identity Federation tokens 現在可以管理 OpenTelemetry destinations
+- 變更 `sed -i`，讓它取得標準 Bash 提示並照原樣執行，而非模擬的檔案編輯預覽；跟其他 Bash 編輯一樣，它不再被 `/rewind` 還原
+- 變更 `claude ultrareview`，要求 workspace trust：在終端機上會詢問，否則拒絕；腳本可傳入 `--trust-workspace`（此 flag 不接受值，請把 PR 編號或 base branch 放在它前面），或設定 `CLAUDE_CODE_DISABLE_ULTRAREVIEW_TRUST_CHECK=1`
+- 變更 Desktop app 和 VS Code 中 bypass permissions 模式下危險的 `rm` 和 `rmdir` 提示，改為立即拒絕該指令並附上改寫提示，好讓無人看管的 session 能繼續跑
+- 變更被設定排除於沙箱外的指令，在沙箱已啟用但無法執行時，會在寫入其寫入清單（write-list）路徑前先詢問；在那裡不允許無沙箱的 fallback
+- 變更 worktree 的建立與重用，讓 git 不再按需（on demand）抓取物件，無論是一般 clone 還是設定了 Bash 沙箱的 partial clone；這類 partial clone 會先抓取它們
+- 變更 `/claude-api` skill，在 `multiagent_20261001` 上建立 Managed Agents subagent 團隊，並預設開啟動態 workflow，而非 `coordinator`
+- [VSCode] 新增一則 log 警告，說明當聽寫（dictation）或擴充套件自身的請求未通過憑證驗證時（例如在 TLS 檢查代理後方）該怎麼做
+- [VSCode] 修正編輯器快取了不完整的檔案副本後 Claude 面板一直空白的問題；現在它會自行復原，或說明出了什麼問題以及如何修正
+- [VSCode] 修正 Session 歷史在每次你開始新 session 卻未送出訊息時，被空白的「Untitled」session 塞滿
+- [VSCode] 修正過長的 slash 指令訊息（例如 `/goal`）塞滿聊天面板；它們現在會像其他 prompt 一樣折疊在 Show more 後方（anthropics/claude-code#97469）
+- [VSCode] 修正聊天面板變窄後過長的訊息未折疊在 Show more 後方
+- [VSCode] 修正聊天輸入框中的 Ctrl+J 總是插入換行：當 ~/.claude/keybindings.json 的 Chat context 中「ctrl+j」設為 null 時，現在會交給 VS Code 與 OS 處理
+- [VSCode] 修正某個 mod 在 prompt 上方的「From the … plugin」標籤蓋在 slash 指令與 @-mention 選單上（anthropics/claude-code#102981）
+- [VSCode] 修正貼上複製的 LaTeX 數學式時出現空的清單項目、段落或程式碼區塊，以及清單項目從 1 重新編號
+- [VSCode] 修正當你的組織不接受意見回饋時，回饋錯誤只顯示 HTTP 狀態
+- [VSCode] 改善聊天面板中 Edit 與 Write 的速度：現在每次編輯後等待新問題的時間在多數情況下為 0.75 秒，從原本的 1 到 1.5 秒降低
+- [Cloud sessions] 修正 routine 表單中的 Add connector 清單在 connector 仍在載入時卻顯示沒有可用的 connector
+- [Cloud sessions] 修正 cloud 環境編輯器打亂環境變數的順序，並對同時含有兩種引號的值加上反斜線
+- [Cloud sessions] 修正管理設定中的 self-hosted 環境詳情對話框，讓其標題、分頁和按鈕保持在畫面內，只有內容會捲動
+- [Cloud sessions] 修正 cloud session 中的「read documentation」工具列，先前顯示跳脫過的 JSON 而非可讀的頁面
+- [Cloud sessions] 改善 cloud session 的 Changes 窗格，現在會說明它列出的只有已 push 的 commit，或只有 Claude 的編輯
+- [Claude Tag] 修正 Slack 中的 Claude 把你核准要發到某頻道的草稿誤發到你的 DM；沒有頻道的貼文現在會被拒絕，好讓它能發到核准的頻道
+- [Claude Tag] 修正 Slack 中 Claude 核准卡片上的 Allow 和 Deny 在 session 已停止時毫無作用；你的回答現在會重啟 session
+- [Claude Tag] 修正當 Claude 的 workspace 移到不同的 Claude 組織後，它會忽略 Slack 頻道中未標記（untagged）的訊息，包括 Enterprise Grid 上未共享的頻道
+- [Claude Tag] 修正 Slack 頻道中的 Claude 在讀取某人剛加進該討論串的較新訊息前，就先張貼了討論串回覆
+- [Claude Tag] 修正 Claude Tag 管理設定中的 Slack 頁面在清單載入失敗時顯示沒有連接任何 workspace；現在會顯示錯誤並附上 Retry 按鈕
+- [Code Review] 修正已完成的 review 在先前建立 check 的嘗試失敗後，於 pull request 上未顯示任何 check；現在最後一次嘗試會加上一個已完成的 check
+- [Code Review] 修正在 `@claude review stop` 後，排在執行中 review 後方的 push 仍會啟動一次 review；它的 check 現在會關閉並說明原因
+
 ## 2.1.308
 - 修正錯誤並改善穩定性
 
