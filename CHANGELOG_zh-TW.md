@@ -2,6 +2,34 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.310
+- 新增 Monitor 工具，以及在 Bedrock、Vertex、Foundry 上，還有在 telemetry 或非必要流量被停用時的 plugin 監控器；現在在這些情況下長時間的前景 sleep 也會被阻擋
+- 修正在某些 gateway 和相容伺服器後方請求失敗的問題，這些伺服器會拒絕 `effort-2025-11-24` beta 值或對話中途的 system 訊息；Claude Code 現在會在不帶這些東西的情況下重試
+- 修正當 `cleanupPeriodDays` 設成非常大的值時，背景清理會誤刪一些最近的檔案（例如貼上的圖片）的問題
+- 修正在「Prompt is too long」錯誤後進行壓縮（compaction）時，會保留太多含有密集文字（例如 base64 或 SVG）的對話內容，導致下一個請求又失敗的問題
+- 修正檔案讀取權限提示沒有顯示符號連結（symbolic link）指向哪裡的問題
+- 修正在長時間編輯後關閉外部編輯器的瞬間，問題的自動繼續逾時就立刻觸發的問題
+- Windows：修正當缺少 Git Bash、而 hook 的指令只是被引號包住的字串（例如一個加了引號的路徑）時，PreToolUse 和 PermissionRequest hook 會放行工具呼叫的問題
+- 改善 auto 模式在第一次讀取工作目錄外檔案前的提示：現在會說明阻擋這些讀取時，會導致 shell 指令需要詢問權限
+- 改善非互動式工作階段（`-p`、Agent SDK）在 transcript 檔案非常大時進行壓縮（compaction）的記憶體使用
+- 改善某個 mod 的 `Image`，讓它能在開啟 `allow-passthrough` 和 `focus-events` 的 tmux 裡，於 kitty、Ghostty 和 iTerm2 3.5+ 中以全螢幕渲染繪製，先前這些情況下只會顯示它的 `alt` 文字
+- Linux：改善 `/sandbox` 以及 sandbox 啟動警告，當 Ubuntu 對 user namespace 的 AppArmor 限制導致 bubblewrap 無法啟動 sandbox 時，現在會點名這項限制以及如何解除它
+- 變更 MCP 工具呼叫在非互動式工作階段中逾時、而伺服器的 elicitation 尚未被回答時的錯誤訊息：現在會告訴 Claude 沒有收到任何回答，且不要重複這個呼叫
+- [VSCode] 修正在 plan 審查卡片的「Send feedback and keep planning」按鈕上按 Enter 時，會核准 plan 而不是把你的意見送回去的問題
+- [VSCode] 修正從 Session history 的 Web 分頁開啟的雲端工作階段上，執行「Switch branch & continue」後面板顯示「Something went wrong」的問題
+- [Cloud sessions] 把 Claude Code 雲端工作階段和 Remote Control 權限加進 Enterprise 自訂角色，讓 Owner 可以依角色控制各自的存取權
+- [Cloud sessions] 新增「Choose file」按鈕，可從檔案載入雲端環境的 setup script
+- [Cloud sessions] 修正雲端環境編輯對話框裡儲存和封存失敗時，對話框內沒有顯示錯誤的問題
+- [Cloud sessions] 修正 routine API token 操作失敗時只顯示一個 toast 的問題；現在錯誤會出現在 routine 編輯對話框裡
+- [Cloud sessions] 改善工作階段啟動檢查清單，讓它在可捲動的框裡顯示雲端環境的 setup script 輸出
+- [Cloud sessions] 變更在管理設定中開啟 Cloud sessions 或 Remote Control 的流程，現在會要求確認並列出擁有該權限的自訂角色
+- [Cloud sessions] 變更雲端環境對話框，改以各列（row）分別開啟網路存取、setup script 和環境變數，而不是一次列出所有編輯器
+- [Claude Tag] 修正 Claude Tag 在以粗體、斜體或刪除線傳送 `!` 指令（例如 `!restart` 和 `!help`）時，把它們當成一般訊息處理的問題
+- [Claude Tag] 修正當背景重新整理 bundle 清單失敗時，Claude Tag 的管理頻道與 workspace 頁面被載入錯誤取代的問題
+- [Claude Tag] 修正 Claude Tag 在管理設定中的 spend limits 頁面，在頻道名稱還在載入時就回報沒有頻道符合篩選條件的問題
+- [Code Review] 修正 Code Review 管理區在重新整理儲存庫清單失敗後，隱藏其儲存庫和開關的問題
+- [Code Review] 改善 Code Review 管理區，讓它會重試第一次載入，並在仍然失敗時顯示單一的「Try again」橫幅
+
 ## 2.1.309
 - 修正 macOS 和 Linux 上的沙箱化（sandbox）Bash 指令，先前會在每個指令執行前於沙箱外執行 shell 的啟動檔案
 - 修正 macOS 沙箱 `denyWrite` glob 模式，當模式所在的資料夾是透過 symlink 抵達時，未能套用到路徑的真實位置
