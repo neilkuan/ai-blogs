@@ -2,6 +2,100 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.311
+- 為 `self-hosted-runner` 新增 `--hold-idle-file` 和 `--max-hold-min`，讓閒置 session 能繼續保留，直到你的主機回報它遺留的執行中程序
+- 新增 Explanatory 輸出樣式的小提示，當你請 Claude 解釋時會顯示
+- 修正當 CLAUDE.md 檔案裡有超長的清單項目時，啟動時以及讀取或編輯檔案後會長時間凍結的問題
+- 修正當 MCP server 還沒回應資源讀取、或 skill 還在下載時，中斷 Claude 要等到逾時才會生效的問題
+- 修正 standard-context session 在單次請求超過 200K tokens 時，會以「Usage credits required for 1M context」停下來的問題；Claude Code 現在會壓縮（compact）對話後繼續執行
+- 修正一次變更檔案中數千行時，Write 和 Edit 執行完後會卡住長達 5 秒、且回報變更 0 行的問題
+- 修正 subagent 無法使用那些在它啟動之後才完成連線的 server 所提供的 MCP 工具的問題
+- 修正自動壓縮（compaction）後，若 MEMORY.md 和 CLAUDE.md 在 session 稍早被編輯過，Claude 會看到舊內容的問題
+- 修正 `claude -p` 和 SDK session 儲存對話紀錄（transcript）訊息時順序錯亂，或保留了已被收回訊息的問題
+- 修正 `SubagentStop` hook 對每個執行中的 subagent 大約每分鐘跑兩次、而不是在它結束時才跑一次的問題
+- 修正 @ 檔案選擇器忽略 `.ignore`/`.rgignore` 中那些會把 git-ignore 檔案重新納入的否定規則（negation rule）的問題
+- 修正 subagent 的獨立 worktree 在它所啟動的背景 subagent 還在裡面工作時就被移除的問題
+- 修正 auto 模式下、會等待自己 shell 的背景 agent，每次喚醒時都開啟新的主對話回合（turn）的問題
+- 修正 Bash 工具說明宣稱工作目錄在每次呼叫間一定會保留的問題
+- 修正環境資訊區塊（environment block）列出一個 shell 指令實際不會在其中執行的 shell，例如 Bash 工具用的是 zsh 時卻寫成 fish 的問題
+- 修正 `claude mcp add`、`claude mcp remove` 和 `/mcp` 在 repository 根目錄以下執行時，會指向當前資料夾、而非 `~/.claude.json` 裡持有 local-scope server 的專案項目的問題
+- 修正 `claude mcp list` 和 `claude mcp get` 在連線失敗的行上把錯誤碼顯示兩次的問題（例如 `ENOENT: ENOENT: …`）
+- 修正當網路 proxy 擋下啟動請求時，Remote Control session 會停在「Connecting」約兩分鐘的問題
+- 修正 Claude 送到雲端或 Remote Control session 的訊息，在 Claude 手機 App 裡顯示成你自己發的訊息的問題
+- 修正以下情況沒告知 Claude 原因的問題：透過 Remote Control 或送到雲端 session 的訊息所附的檔案因磁碟空間已滿而無法儲存，或一則訊息第 20 個之後的附件被略過
+- 修正 WebFetch 和 WebSearch 在 Cowork 雲端 session 中遇到卡住的回應時會一直掛著的問題；未完成的請求現在會在 300 秒後失敗
+- 修正在兩回合之間當掉的背景 session，若它正被附著（attached）、釘選（pinned）、或設有排程任務或喚醒時卻沒被重啟的問題
+- 修正「background service did not respond」錯誤建議使用已停用的 `claude daemon restart` 的問題；現在改建議 `claude daemon stop --any` 並說明它會結束背景 session
+- 修正 `claude respawn <id>` 在回報找不到符合該 id 的背景 session 之前，就先啟動背景服務的問題
+- 修正當 plan 模型與 session 模型不同時，`/effort` 在 plan 模式下沒警告會發生 prompt cache 未命中（cache miss）的問題
+- 修正 `/ide` 在安裝完成前、或安裝失敗時就說 VS Code 擴充套件已安裝的問題
+- 修正當某一行比終端機還寬時，Write 工具的檔案預覽會跳過某些列、並算錯隱藏行數的問題
+- 修正在 agent 聊天分頁按 ↑ 會叫回一則還在等待送出的訊息，導致重送時送出第二份複本的問題
+- 修正當 plugin 或你的設定裡命名了 `agent` 時，Cowork 雲端 session 重啟後會遺失其 connector 和大部分工具的問題；Cowork 雲端 session 現在會忽略該設定
+- 修正 agent teams session 以 `--resume`、`--continue`、`/resume` 或 `--session-id` 回來時（包含在 `/clear` 或當機之後）顯示空白任務清單的問題，以及 `/branch` 會寫入原始 session 清單的問題
+- 修正貼上提到圖片檔的文字（例如 `! open /tmp/shot.png` 或 `/review look at /tmp/shot.png`）時會附上圖片卻把路徑從 prompt 中拿掉的問題
+- 修正當 prompt 已有文字時，意見回饋草稿卡片仍顯示它的 1/2/0 和 Esc 快捷鍵的問題，因為此時那些按鍵其實作用在 prompt 上而非卡片
+- 修正引號或括號裡的單一反斜線（例如 `"\"` 或 `(\)`）在 Claude 回覆中消失的問題
+- 修正設定了 `DISABLE_COMPACT` 時 agent 隊友仍會壓縮自己對話紀錄的問題
+- 修正設定了 `DISABLE_COMPACT` 時，rewind 選單仍提供「Summarize from here」和「Summarize up to here」的問題
+- 修正已完成的 `/code-review`（或其他在 sub-agent 中執行的 skill），在雲端或背景 session 重啟時會再跑一次的問題
+- 修正在 Google Vertex AI、Microsoft Foundry 和 AWS 上的 Claude Platform（這些端點會送出 thinking 進度更新）上，長時間的隱藏 thinking 被當成閒置而被截斷的問題
+- 修正 `/ide` 在其實什麼都沒裝的情況下卻說已安裝 JetBrains plugin 的問題
+- 修正 Claude Pro 和 Max 訂閱者在訂閱無法使用時被叫去找管理員的問題；現在訊息會改指向帳單設定
+- 修正在寬螢幕全螢幕終端機中，diff 窗格明明沒東西可顯示，卻在編輯後自己跳出來的問題
+- 修正 `/mcp` 在「Clear authentication」後，把一個其實不用登入就能運作的遠端 server 顯示為失敗的問題
+- 修正 `/mcp` 為一個 Claude Code 根本沒送任何憑證過去的遠端 server 顯示「authenticated」的問題
+- 修正當 `--plugin-dir` 資料夾最上層放了一個空的 `.mcp.json` 時，整個 plugin 資料夾被當成單一 plugin 載入的問題
+- 修正 `/usage` 從不在「What's contributing to your limits usage?」底下顯示大量 prompt-cache 未命中的問題
+- 修正從支援連結的終端機開啟背景 session 後，status line 連結仍維持純文字的問題
+- 修正 /rewind 確認訊息在稍後的訊息其實是從對話中移除時，卻說對話「will be forked」的問題
+- 修正 /rewind 警告錯誤地宣稱手動編輯和 Bash 編輯絕不會受程式碼還原影響的問題
+- 修正螢幕報讀模式（screen reader mode）下，plan 核准會送出你已用 Escape 關掉的意見回饋的問題
+- 修正 Claude Code 會重試 API 標記為不可重試的請求的問題，這可能讓一個回合卡住數分鐘，或在無人值守重試模式（`CLAUDE_CODE_RETRY_WATCHDOG`）下無限期卡住
+- Linux：修正當 `--plugin-dir` 資料夾同時也是一個已加入的目錄、且 `permissions.blockReadsOutsideWorkingDirectories` 開啟時，沙箱化的 Bash 指令以 `bwrap: Can't create file` 失敗的問題
+- Self-hosted runner：修正當速率限制（HTTP 429，或一個以 exit 75 結束的 git wrapper）擋住一個已加入的唯讀 repository 時，session 無法啟動的問題；現在會在沒有該 repository 的情況下啟動
+- 改善 Pro 和 Max 帳戶的啟動時間：在距上次檢查一小時內的啟動會略過兩個網路請求
+- 改善 `/teleport` 和 `claude --teleport`：當一個已壓縮的雲端 session 從它最後一次壓縮載入時會提出警告，因為它所摘要掉的訊息並不在本機副本裡
+- 改善背景 session 程序結束時顯示的訊息：它們不再承諾一個不會發生的重啟，並會說明如何恢復該 session
+- 改善具有多個檢視（view）的 artifact：Claude 現在會依連結的 `#name` 來路由每個檢視，也不再說切換檢視時網址列會保持不變
+- 改善到達逾時的 shell 指令：結果現在會顯示目前為止的輸出，並說明該指令仍在背景執行
+- 改善壓縮（compaction）：當模型的回覆裡沒有摘要時，Claude Code 現在通常會在替換對話前再要求一次摘要
+- 改善 Artifact 工具在頁面與文件之間的選擇：說明性、視覺化或互動式的作品會變成 artifact 頁面；文件則留給人們會持續編輯或互相傳閱的寫作內容
+- 改善那些引數只有選項及其值的啟動（例如 `claude --model opus`）的啟動時間
+- 改善「Connection dropped」API 錯誤：它現在會說明該先從哪裡查起（正在使用的 proxy 或 gateway，否則是 VPN 或防火牆；僅限 Anthropic API，Bedrock、Vertex 和 Foundry 不變）
+- 改善螢幕報讀模式：在 /permissions 刪除一條規則時會立即說「Deleted allow rule …」
+- 改善貼上的登入碼被拒絕時顯示的訊息：現在會說該代碼可能已過期或已被使用，請重新登入
+- 改善 Slack connector 的發送：Claude 現在在對一個你沒指名的頻道發訊息前，會先檢查該頻道主題（topic）中的張貼規則
+- 改善螢幕報讀模式：Claude 的提問會列成「Questions: Color (answered), Pages」，不帶箭頭或符號
+- 變更互動式終端機中的 `ultrathink`：在 Opus 5.5、Sonnet 5.5、Haiku 5.5 和 Fable 5.1 上透過 Anthropic API 以 xhigh effort 執行該回合；在 Claude 工作時打出來，則會提升該回合剩餘部分的 effort
+- 變更 `ultrathink` 彩虹效果：只在該關鍵字能提升 effort 的地方才出現，而當這個字被引號包住或是檔案路徑的一部分時則不出現
+- 變更 agent 檢視中的 Ctrl+D 以和 prompt 一致：在空白輸入上按兩次即離開
+- 變更 `--output-format json` 和 `stream-json` 輸出：字串內的 DEL、C1 控制字元和 Unicode 格式字元會寫成 `\uXXXX` 跳脫序列；解析後的值不變
+- 變更模型名稱和 ID：在那些加了也沒作用的模型上拿掉 `[1m]` 後綴及其標籤；該後綴仍可被接受
+- 變更設定檔中關於權限規則的啟動警告：每位使用者只顯示一次，直到規則變更為止
+- 變更 `/code-review`：告訴 Claude 把 effort 等級放在最前面，並且只在被要求時才用 max
+- 變更設定檔中以及 mod 的 `$.env.set` 裡的 `DISABLE_COMPACT`：它們只能把壓縮關掉，不能再打開
+- 變更 Bedrock、Mantle、Vertex 和 Foundry 上的 Claude Code：從 downloads.claude.ai 上一個簽署過的檔案載入模型設定；設定 CLAUDE_CODE_MODEL_CATALOG=off 可關閉此功能
+- 變更那些設定了 `CLAUDE_CODE_SYNC_SKILLS` 但 feature-flag 擷取為關閉的 session：改用機器上另一個 session 擷取、最舊不超過 10 分鐘的 claude.ai skills 清單
+- 變更全螢幕清單中對 scrollbar 箭頭和捲軸的點擊：改在放開滑鼠按鍵時才作用，所以放開前把游標移開 scrollbar 就會取消該次點擊
+- 變更 `claude purge`：說明它只刪除這台電腦上的資料，而非 Anthropic 儲存的任何東西
+- [VSCode] 為 Claude 回覆中的程式碼區塊新增語法上色，支援淺色、深色和高對比深色主題
+- [VSCode] 為緩慢的 UserPromptSubmit hook 新增「Running UserPromptSubmit hooks」轉圈狀態和螢幕報讀播報
+- [VSCode] 修正從 VS Code 或 JetBrains 面板送出的自訂 skill 和自訂 slash 指令，遺漏了一般訊息會包含的開啟中檔案或選取行的問題（anthropics/claude-code#102799）
+- [VSCode] 修正在 macOS 和 Linux 上，登入 shell 執行其啟動檔以讀取 PATH 時擴充主機（extension host）凍結的問題
+- [VSCode] 修正在工具結果中點擊圖片、或關閉其預覽時，也會一併在編輯器分頁開啟該結果文字的問題
+- [VSCode] 修正以 Send 按鈕送出訊息後語音聽寫（voice dictation）仍繼續錄音的問題；現在送出會先停止聽寫，就像按 Enter 本來就會做的那樣
+- [VSCode] 變更擴充套件：在 VS Code 的遙測設定關閉時，以設定了 `DISABLE_TELEMETRY` 的方式啟動 Claude Code session，使其不送出任何使用指標或錯誤報告，也不擷取 feature flag
+- [VSCode] 變更 session 清單側邊欄：改在 Web 分頁首次開啟時才載入 Web session，而非啟動時
+- [Cloud sessions] 修正 Anthropic 託管環境中的 routine，在其擁有者離開組織後再重新加入時仍維持鎖定的問題；擁有者現在可以把它們重新打開
+- [Cloud sessions] 修正當編輯對話框已關閉時，routine API token 的刪除或重新產生失敗卻什麼都不顯示的問題；現在會顯示錯誤 toast
+- [Cloud sessions] 修正雲端環境對話框（包含管理員對話框）接受重複名稱的問題；現在會拒絕其他已列出環境已使用的名稱
+- [Claude Tag] 新增 Claude Tag analytics 的 Skills 檢視，顯示 Claude 在 Slack 頻道中執行各個附加 skill 的頻率、以及哪些沒被用到，並在管理員設定中附上 Usage 連結
+- [Claude Tag] 改善在新 session 中執行的 Claude Tag routine：一次沒有東西可回報的執行現在可以直接結束，而不用往頻道張貼一則用過即丟的訊息
+- [Claude Tag] 變更 Claude Tag 管理員設定：對你自己的 Slack 帳號能看到的私密 Slack 頻道，改顯示一個鎖頭而非 #
+- [Code Review] 改善 Code Review 的 check run：當模型在自動重試時仍無法分析某項變更，現在會說明不會再啟動進一步的自動審查
+- [Code Review] 改善 Code Review 的可靠性：一個因暫時性伺服器故障而無法啟動 session 的審查，現在會自動重試一次，並在其 check run 中說明這點
+
 ## 2.1.310
 - 新增 Monitor 工具，以及在 Bedrock、Vertex、Foundry 上，還有在 telemetry 或非必要流量被停用時的 plugin 監控器；現在在這些情況下長時間的前景 sleep 也會被阻擋
 - 修正在某些 gateway 和相容伺服器後方請求失敗的問題，這些伺服器會拒絕 `effort-2025-11-24` beta 值或對話中途的 system 訊息；Claude Code 現在會在不帶這些東西的情況下重試
