@@ -2,6 +2,47 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.312
+- 在 Claude apps gateway 新增 `oidc.user_id_claim`，可用 `sub` 以外的 id_token claim 來識別使用者，例如 Microsoft Entra ID 的 `oid`
+- 新增點擊即送：在全螢幕模式下，點擊排隊訊息下方的「to send now」提示就能立刻送出，跟按下它的快捷鍵效果一樣
+- 修正從 VS Code extension 登入後，managed settings 與組織政策（organization policy）在後續的 session 中都不會被抓取的問題
+- 修正 Claude 只看到開頭就覆寫掉子目錄中超大的 CLAUDE.md、規則檔或 @-included 檔案的問題；現在 Write 會要求 Claude 先讀完整份內容，或改成就地編輯（edit in place）
+- 修正在 Bash 執行 `cd` 進入 git repository 更深層目錄後，找不到 per-directory 與 `paths:` skills 的問題
+- 修正一個罕見狀況：在終端機恢復（resume）session 後的第一則回覆，可能會在下次恢復該 session 時遺失
+- 修正名稱無效的指令會導致所有指令都無法載入，進而可能讓 `claude -p` 完全沒有輸出的問題
+- 修正 Read 工具在清理舊 session 檔案的動作同時執行時，處理 PDF 頁面偶爾會失敗並出現「pdftoppm failed: Could not write image」的問題
+- 修正 spinner、OpenTelemetry 的 `effort` 值與 transcripts，在任務中模型尚未套用新選的 effort 等級前就先顯示該等級的問題；現在都會顯示實際生效的等級
+- 修正 `/model` 與 `/effort` 的快取警告說重新讀取要等你下一則訊息的問題；在 Claude 工作時做的變更其實可以更早觸發重新讀取
+- 修正某些 session 在最後一則訊息只是句子中途提到「等你處理的項目」時，就被顯示成在等你回覆的問題
+- 修正 agent view 在退出前用 Ctrl+C 清掉輸入文字後，下次啟動卻又把那些文字還原回來的問題
+- 修正 agent view 在空的 `!` 輸入中用 Ctrl+D 退出後，重新開啟時卻停在 shell 模式的問題
+- 修正 vim 模式下 `d`、`c`、`y` 搭配 `gj` 或 `gk`，且 count 大於剩餘行數時，會刪除或複製到文字的問題；現在跟 Vim 一樣，只會移動游標
+- 修正 `/verify` 在 `/help` 和 `/` 指令選單中顯示給 Claude 看的長描述、而非簡短描述的問題
+- 改善提示列（prompt）的 effort 指示器：任務進行中做的變更現在會註明可能要等你下一則訊息，且在不再適用時自動清除該提示
+- 改善 cloud session 中的 WebFetch 錯誤：無法解析（resolve）的主機現在會被說明可能不在允許的網路網域內，讓 Claude 能指出要允許哪個主機
+- 將 Bedrock、Vertex、Foundry 與 Mantle 改為對 Claude Code 無法辨識的模型名稱（例如自訂部署名稱與 inference profile ARN）使用較短的 system prompt，即使它們背後是 Sonnet 或 Haiku 也一樣；設定 `CLAUDE_CODE_SIMPLE_SYSTEM_PROMPT=0` 可保留完整 prompt
+- 將被標記（flagged）訊息後的自動模型切換，改為也涵蓋 Claude Code 無法辨識的模型名稱（例如自訂部署名稱）；設定 `CLAUDE_CODE_DISABLE_REFUSAL_FALLBACK=1` 可關閉此功能
+- 將用量限制（usage limit）訊息中的 5 小時區間，從「session limit」改稱為「5-hour limit」
+- 將從 CLI 啟動的 cloud session，改為從伺服器取得其名稱與分支名稱
+- 將 prompt 與 agent hook 改為每個 session 最多同時執行 24 個（含 sub-agents），再加上最多 12 個等待時間已超過其事件 timeout 的 hook；`timeout` 低於 1 秒現在一律以 1 秒計算
+- 將 subagent 的 `autoCompactWindow` 改為可調降由 `CLAUDE_CODE_AUTO_COMPACT_WINDOW` 設定的視窗（以前完全沒作用）；但它仍然永遠不會調高該視窗
+- 將 OpenTelemetry 的 `mcp_server.name` 改為回報官方 Anthropic marketplace plugin 所宣告的固定 URL 遠端 MCP server 的真實名稱，而非 `custom`
+- 將 Claude Code 改為不再傳送 `claude_code.safety_event` OpenTelemetry 事件
+- [VSCode] 修正當你的組織設定無法載入或在啟動時被拒絕時，session 只以一個空的 exit code 結束的問題；現在分頁會說明原因，並提供 Retry 或重新登入（Sign in again）
+- [VSCode] 將用量限制重置改為顯示時鐘時間（「Resets at 3:10 PM」）並改稱「5-hour limit」
+- [Cloud sessions] 在建立或編輯於雲端執行的 routine 時，於模型選擇器中新增 effort 等級
+- [Cloud sessions] 在 cloud 環境設定的 setup script 輸入框中，新增一個帶有顏色、行號與 Copy 按鈕的 Bash 編輯器
+- [Cloud sessions] 改善 Claude 將 repository 加入 cloud session 時所顯示的步驟：現在打開它會看到一份簡短的變更摘要表格，而非原始 JSON
+- [Cloud sessions] 修正在 cloud session 中送出失敗後，重送一則未變更的訊息有時會執行兩次的問題
+- [Cloud sessions] 修正 cloud 環境建立失敗時，錯誤只以 toast 顯示在開啟的對話框之外的問題；現在會顯示在對話框內
+- [Cloud sessions] 修正在 Routines 頁面上點選 routine 選單中的 Edit，卻直接跳到該 routine 的頁面而沒有開啟編輯對話框的問題
+- [Remote Control] 修正已取消封存（unarchived）的 Remote Control session 在電腦重新連線前都顯示為工作中的問題；現在會顯示為閒置（idle）
+- [Claude Tag] 改善 Claude Tag 在 Slack 的重試通知，改為指出正在使用的模型，或說明是碰到 rate limit，而非顯示一個籠統的 API 錯誤
+- [Claude Tag] 修正當較舊的私人 Slack 頻道轉為公開並取得新 ID 時，Claude Tag 頻道的開關與 agent 設定會退回使用 workspace 預設值的問題
+- [Claude Tag] 修正 Claude 在 Slack 中，無法於網路存取設為 None 的環境所屬頻道回覆的問題
+- [Claude Tag] 修正 Claude 在 Slack 中回覆同一頻道的另一個討論串時，有時會把檔案貼到錯誤討論串的問題
+- [Code Review] 修正當 GitHub 延遲送出 push event 時，Code Review 會審查過時的 commit 或完全沒審查的問題；現在會審查 pull request 目前的 commit
+
 ## 2.1.311
 - 為 `self-hosted-runner` 新增 `--hold-idle-file` 和 `--max-hold-min`，讓閒置 session 能繼續保留，直到你的主機回報它遺留的執行中程序
 - 新增 Explanatory 輸出樣式的小提示，當你請 Claude 解釋時會顯示
