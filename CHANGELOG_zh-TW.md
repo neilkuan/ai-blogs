@@ -2,6 +2,63 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.316
+- 新增 `CLAUDE_CODE_DISABLE_ULTRATHINK`，可以關掉 `ultrathink` 這個關鍵字
+- 在 Claude apps gateway 加入共用群組預算（pooled group budgets）：一筆每月預算讓群組成員共用，疊加在每位成員自己的額度之上，透過 spend limits 管理 API 的 `pooled_budget` 設定
+- 新增 `CLAUDE_CODE_DISABLE_LOOPED_CROSS_CERT_DROP`，可以保留互相循環認證的系統交叉憑證（cross-certificate），給那些私有 CA 需要這種設定的伺服器用
+- 新增 `CLAUDE_CODE_SUBAGENT_EFFORT`，當沒有其他地方指定時，用來設定 subagent 執行的 effort 等級，取代原本繼承 session 的做法
+- 在 Claude apps gateway 加入 `managed.policy_mode: layered`：每一條符合某個開發者的 policy 都會生效，並依序疊加在下方列出的 policy 之上，而不是只套用第一條
+- 在 Claude apps gateway 的 Bedrock upstream 上新增 `guardrail.input_tagging`，會把 prompt 包進 Amazon Bedrock guardrail 的 prompt attacks 過濾器所需的 input tag 裡；設成 `all_messages_and_system` 時連 system prompt 也會加 tag
+- Opus 4.8 的 fast mode 自 2026 年 10 月 30 日起進入棄用（deprecated），將於 2026 年 11 月 30 日移除。移除後，Opus 4.8 的 fast mode 請求會回傳錯誤，而且不會退回（fall back）到標準版 Opus 4.8。請遷移到 Opus 5.5 以繼續享有加速
+- 修正在 macOS 和 Linux 上，當 Claude Code 自己結束時（例如憑證被拒或雲端 session 被封存），shell 指令還留著繼續執行的問題
+- 修正 Bash 工具的 shell 裡，值含有換行的 bash alias（Git Bash 除外），以及名稱以破折號開頭的 function，會被弄亂或遺失的問題
+- 修正從 Bash 工具啟動的 bash 腳本，在 `SHELLOPTS` 被 export 時，執行完第一個指令就停住的問題
+- 修正當指令開頭是型別轉換（type cast）、`param`、`using` 或一個 attribute 時，PowerShell hook 無法在 exit code 2 時擋下的問題
+- 修正壓縮回應被截斷或損毀時，某些網路請求會卡住（hang）的問題
+- 修正 Vertex AI 和 Amazon Bedrock 上的 `sonnet`、`opus` 和 `haiku`，在最新模型尚未對該帳號或區域開放時，session 中途跳出錯誤，而不是切換到較舊模型的問題
+- 修正 Claude apps gateway 沒有把請求指名的每個模型都拿去比對 `availableModels`、`deniedModels` 和 `models` 的問題；現在指名被封鎖模型的請求會收到一個 400、並指出是哪個欄位
+- 修正在 managed settings 要求使用 Claude apps gateway 的環境下，`claude auth login` 拒絕執行的問題；現在在終端機裡會顯示 gateway 登入畫面
+- 修正 `--restricted` session 在 Read allow 規則涵蓋到工作目錄以外的檔案時，會上傳那些檔案的問題
+- 修正含有隱形字元的 prompt 需要按第二次 Enter 才送得出去的問題；現在單純的 prompt 第一次按 Enter 就會清理後送出，而指令仍會等待審核
+- 修正繼承了上層 sub-agent 模型的 sub-agent，在被背景工作或訊息喚醒時，會跳回主模型的問題
+- 修正沒有 `"$defaults"` 的 managed `autoMode.allow` 清單，會因為 host app 的 `--settings`、`/permissions` 裡新增的第一條規則、或 `/auto-mode-setup` 而把內建例外又加回來的問題
+- 修正當伺服器沒有回傳安全裁決（safety verdict）而 auto mode 中止一回合時，雲端 session 和雲端排程任務沒有被標記為失敗的問題
+- 修正當背景 agent 還在執行時，`claude -p` 的文字輸出有時不會說明 auto mode 為什麼中止一回合的問題
+- 修正在關閉實驗性 beta 的 proxy 或 LLM gateway 後方、由 host 應用程式（例如 Claude Desktop）啟動的 session 裡，`CLAUDE_CODE_AUTO_MODE_SERVER=1` 被忽略的問題
+- 修正當某個以憑證命名的環境變數被設成像 `1` 這種開關值時，plugin MCP 的 `headersHelper` 腳本會收到損毀的 `CLAUDE_PLUGIN_ROOT` 和 server URL 的問題
+- 修正 SDK 的 `register_repo_root` control 請求，在搭配 `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` 時，沒有載入工作目錄以外某個目錄的 CLAUDE.md 的問題
+- 修正 Artifact 工具在 `self` 層級把 artifact 資料庫存取規則顯示成 `?`，以及當它拒絕一個會丟掉那些規則的重新發佈（republish）時沒有把規則引述回來的問題
+- 修正 `/model <id>` 在這個版本不認得該模型、而 auto-compact 會假設 200K context window 時，沒有發出警告的問題
+- 修正「按住空白鍵說話」提示在一個 session 裡就用掉它三次顯示額度的問題，以及當 push-to-talk 沒有綁定按鍵時顯示空白按鍵的問題
+- 修正 Grep 和 Glob 在搜尋程序於逾時被 kill 卻沒真的結束時永遠不回傳的問題，這在 Windows 上看得到
+- 修正一個罕見狀況：當對話還有部分正在存檔時執行了 `/clear` 或 `/resume`，恢復對話時沒有把它的 plan 還原回來
+- 修正首次執行設定時，在狹窄的終端機裡會漏掉安全注意事項和 terminal-setup 說明中的字詞的問題
+- 修正 Enterprise 問卷卡片在短暫停頓後會吃掉輸入的 1 或 0 的問題；現在輸入的答案需要按 Enter
+- Self-hosted runner：修正當 session 的程序被換掉後，在 Claude 工作期間送出的訊息會在 Stop 之後才被回應的問題
+- Self-hosted runner：修正當 session 移到新機器時，MCP 伺服器的開關有時會遺失的問題
+- Windows：修正在 Git Bash 裡，當 rc 檔設了 errexit 和 pipefail 且只定義了 winpty alias（或完全沒定義）時，Bash 工具會弄丟你的 alias 和 function 的問題
+- 改善從 Claude Desktop 或網頁版 Code 分頁啟動的 `/code-review`：雲端和 `claude remote-control` session 現在會顯示發現項目卡片（findings card），而不是純文字清單
+- 改善大型 repository 上的 `/diff`：每次重新整理通常會少跑一個整個 repository 的 git 指令，而且在 git 很慢時會把重新整理拉開間隔
+- 改善 `/ultrareview`、雲端 session 或雲端 agent 找不到 GitHub remote 時顯示的訊息：現在會提示去 https://github.com/new 建立 repository，而且 `/ultrareview` 不再建議一個會被 `gh` 拒絕的 `gh` 指令
+- 改善 SSL 憑證錯誤的說明，點出可能的原因（其中包括伺服器漏掉中繼憑證（intermediate certificate）），以及各自的修正方法
+- 變更 auto mode，讓沒有 `"$defaults"` 的 `autoMode.allow` 清單不再移除排程任務 prompt 上的內建規則
+- 變更 Team 和 Enterprise 登入的伺服器端 managed settings：從 Anthropic API 取得的設定現在不需審核提示就會套用，而無法驗證的已存副本則會被拒絕
+- [VSCode] 新增從聊天面板登入 Claude apps gateway 的功能，不需要終端機
+- [VSCode] 變更 `ultrathink`，讓它以 `xhigh` effort 執行該回合，並像終端機一樣在聊天框裡顯示彩虹色
+- [VSCode] 修正當 model 設定帶有 `[1m]` 標籤（例如 `opus[1m]`）時，Effort 滑桿、Ultracode 開關和模型名稱不見的問題
+- [VSCode] 修正當設定檔有錯誤時，已儲存的 `/btw` 側邊提問紀錄太早被刪掉的問題
+- [VSCode] 修正當對話的 plan 是以「Yes, and manually approve edits」核准時，重新載入或重啟後對話又回到 Auto mode 的問題
+- [Cloud sessions] 在雲端 session 新增表單卡片，讓你可以填寫或拒絕 MCP 伺服器要求的表單，而不是請求在你還沒看到時就被取消
+- [Cloud sessions] 新增一行「Catching up…」提示，在你切回一個還在把訊息更新到最新狀態的雲端或 Remote Control session 時顯示
+- [Cloud sessions] 變更網路密鑰（network secrets），讓 Enterprise 成員可以自己在他們的雲端環境上新增和刪除，而不是只能檢視
+- [Cloud sessions] 改善雲端 session 的 Changes 面板：關於清單略過了哪些內容的註記，現在變成分支名稱旁邊的一個 badge，而不是 diff 上方的一列
+- [Cloud sessions] 修正雲端 session 的 Files 面板裡，當 Claude 切換目錄後檔案搜尋把資料夾顯示成 ../.. 路徑的問題；結果現在會顯示從專案根目錄算起的路徑
+- [Claude Tag] 修正當 Claude 在某個 Slack 頻道做的 canvas 也被分享到另一個頻道或 DM 後，Claude 從該頻道拒絕編輯或附加（append）到這個 canvas 的問題
+- [Claude Tag] 修正在 Slack Connect 討論串裡，當兩個組織都安裝了 Claude、而 Slack 把回覆投遞給另一個組織的 app 時，未被 tag 的回覆沒有被回應的問題
+- [Claude Tag] 修正雲端排程任務在 Slack 裡的即時狀態檢查清單一直停在半完成的問題；現在一次執行可以編輯它在該次執行期間張貼的最上層訊息
+- [Claude Tag] 變更 Slack 頻道的「Respond automatically」開關，改成頻道 Configure 頁面以及 Claude Tag 管理設定裡的「How Claude participates」選項
+- [Code Review] 在 Code Review 分析頁面新增一個依嚴重程度分類的發現項目卡片，顯示該期間的發現項目總數、依嚴重程度堆疊的每日圖表，以及各嚴重程度的數量
+
 ## 2.1.314
 - 新增 `permissions.blockWritesOutsideWorkingDirectories`：Write、Edit 和 NotebookEdit 在所有權限模式下都會拒絕工作目錄以外的路徑
 - Claude apps gateway 的 upstream 新增選用的 `groups` 清單：只有名列指定 IdP 群組的開發者會被導向該 upstream，failover 時也一樣
