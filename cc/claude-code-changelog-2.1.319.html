@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 2.1.319 更新日誌</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        darkbg: '#0f172a',
+        cardbg: '#1e293b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { font-family: 'Noto Sans TC', sans-serif; }
+</style>
+
+</head>
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-gray-100 min-h-screen transition-colors">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <nav class="mb-8 flex justify-between items-center">
+      <a href="index.html" class="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">&larr; 所有版本</a>
+      <button id="themeToggle" onclick="toggleTheme()" class="px-3 py-1 text-sm border rounded-full border-gray-300 dark:border-gray-600 hover:border-indigo-500 transition-colors">🌙 深色</button>
+    </nav>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Claude Code 2.1.319 更新日誌</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm">翻譯自 <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="text-indigo-600 dark:text-indigo-400 hover:underline">官方 CHANGELOG</a></p>
+    </header>
+    <article class="bg-white dark:bg-cardbg rounded-2xl p-6 sm:p-8 shadow-lg space-y-3">
+<h2 class="text-xl font-bold mt-8 mb-3 text-indigo-800 dark:text-indigo-200 border-b border-gray-200 dark:border-gray-700 pb-2">2.1.319</h2>
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+<li>變更了關閉 telemetry 或 feature flag 時的 auto mode 行為（包含在 LLM gateway 後方的情況）：伺服器無法檢查的呼叫會被詢問或拒絕，而且不會退回內建的分類器；設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_AUTO_MODE_SERVER=0</code> 可以繼續沿用（Bedrock、Vertex 和 Foundry 不受影響）</li>
+<li>變更了 LLM gateway 後方的 auto mode：即使有設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS</code>，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_AUTO_MODE_SERVER=1</code> 仍會開啟伺服器端檢查；如果 managed settings 設了後者，就也必須把前者設成 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">1</code></li>
+<li>新增終端機中 MCP 任務的支援：當 MCP server 把一個工具呼叫當成任務來執行時，Claude Code 會立刻把它移到背景，等它完成後再把結果告訴 Claude</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_DISABLE_MCP_TASK_BACKGROUND</code> 環境變數，讓 Claude Code 在工具呼叫裡等 MCP 任務跑完，而不是立刻把它丟到背景</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">permissions.denyInsteadOfPrompting</code> 設定：原本會卡在權限提示的工具呼叫會直接被拒絕、然後繼續往下跑，這在終端機 session、subagent 和隊友（teammate）中都適用</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/claude-api latency-optimize</code>，用來找出你的 Claude API 程式碼在哪裡讓使用者等太久，並拿你的 eval 試跑更快的設定</li>
+<li>新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_DISABLE_FEATURE_FLAGS</code> 環境變數，可以停掉 feature flag 的抓取但不關閉 telemetry；這樣每個 flag 都會用它內建的預設值</li>
+<li>在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code> 中新增今日、本週和本月的花費，給那些在 Claude apps gateway 後方、沒有花費上限的開發者看（前提是 gateway 跑的是這個版本以上）</li>
+<li>在 Claude apps gateway 新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">admin.pooled_conflict_rule</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">admin.pooled_priority_order</code>，用來設定當某個開發者同時屬於多個群組時，要先由哪個共用群組預算付費</li>
+<li>在 Claude apps gateway 新增一個可選的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">login_notice</code> 設定，會在 gateway 的瀏覽器驗證頁面和 Claude Code 的登入畫面上顯示營運方自訂的訊息</li>
+<li>在 Claude apps gateway 新增 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_GATEWAY_LOG_FORMAT=json</code>：營運日誌會變成 JSON，含有 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">severity</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">time</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">message</code> 欄位，方便那些從欄位讀取等級的日誌收集器使用</li>
+<li>在 Claude apps gateway 新增一個開機警告，用於另一個 policy 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">availableModels</code> 也允許某個 policy 以名稱列出的自訂 model id 的情況</li>
+<li>在 Claude apps gateway 新增啟動警告，針對那些沒有 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">desktopHome</code>、卻依賴 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">coworkTabEnabled: false</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">chatSessionRetentionDays</code> 的 policy，以因應 Claude Desktop 11 月 10 日的變更</li>
+<li>新增一個警告：當你的 claude.ai 登入過期、而 Claude Code 繼續沿用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ant auth login</code> 的登入時會提醒你，因為這會把用量計費到你的 Claude Console 組織</li>
+<li>在啟動時新增一行訊息，標明當 Claude Code 使用 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ant auth login</code> 的登入時，被計費的是哪個 Claude Console 組織</li>
+<li>在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/tasks</code> 新增一列「Earlier in this session」，列出已完成的 subagent，這樣即使它已離開清單、或你重啟過，你也能重新打開並傳訊息給它</li>
+<li>在雲端 session 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/loop</code> 確認訊息中新增一則說明：計時器會隨容器一起停止，並提供一個能存活下來的 loop 選項</li>
+<li>修正了使用舊版 handshake 的 MCP server 連不上、或回傳空結果的問題，原因是 Claude Code 宣告了一個只會對較新 server 使用的擴充功能</li>
+<li>修正了 claude.ai connector 上長時間執行的 MCP 工具呼叫，在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--resume</code> 後有時永遠不回報結果的問題</li>
+<li>修正了當 Claude Code 執行所在的資料夾裡有名為 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">HEAD</code> 的檔案或資料夾時，session 的 diff 在 claude.ai 和行動 App 上載入失敗的問題</li>
+<li>修正了當 git repository 的最上層有名為 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">HEAD</code> 的檔案或資料夾時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/diff</code> 顯示「Diff unavailable」的問題</li>
+<li>修正了在有 64 個或更多輪次編輯過檔案的 session 中，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/diff</code> 面板打開時一片空白的問題</li>
+<li>修正了在開頭有空格、tab 或換行後才輸入的 slash command 被當成純文字送給 Claude、而不是真的執行的問題</li>
+<li>修正了某個請求在每次重試時都刷新你的登入、持續以 401 失敗，並導致你其他 session 也出現 401 的問題</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/context</code> 在之後每一輪都把完整的視覺表格送給 Claude 的問題；現在 Claude 只讀那張表格</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude -p</code> 在 auto mode 下、當它的動作因為沒有可用的安全檢查而被拒絕時卻以 0 結束的問題：現在文字和 JSON 輸出都會以 1 結束</li>
+<li>修正了在 Linux 上、針對位於網路檔案系統（NFS、SMB、Lustre 等）的專案，Claude Code 在啟動時列出專案中每個檔案的問題</li>
+<li>修正了當 client 連續送出 model 變更和 auto mode 請求時，auto mode 被錯誤拒絕的問題</li>
+<li>修正了當伺服器端的審查沒有傳到 session（例如在會把它丟掉的 LLM gateway 後方）時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/status</code> 卻顯示「Auto mode server: Enabled」的問題</li>
+<li>修正了當伺服器已為你的組織拒絕回饋後，Claude 草擬的回饋、問卷和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/feedback</code> 仍繼續出現的問題</li>
+<li>修正了 Claude 在第三方 gateway 上草擬回饋的問題，那種情況下回饋根本送不出去</li>
+<li>修正了當權限規則或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">autoMode</code> 設定非常龐大時，auto mode 拒絕動作卻不說明原因的問題：現在它會解釋原因，而且除非有設 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">autoMode</code> 的 deny 規則，否則會在終端機裡問你</li>
+<li>修正了 Bash 的 deny 和 ask 規則漏掉以帶引號字詞寫成的指令的問題</li>
+<li>修正了 subagent 的交接報告在非 verbose 模式下展開時，顯示出內部標記和來源註記的問題</li>
+<li>修正了帶 prompt 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude -p --resume</code> 在其 MCP server 缺失時遺失一個延後的工具呼叫的問題：現在這種執行會以 1 結束、保留該呼叫，並拒絕之後的輸入</li>
+<li>修正了送給 SDK client 的資訊性訊息中文字被漏掉的問題</li>
+<li>修正了當磁碟滿了時，Agent SDK 主機收到一個通用的 exit-code 錯誤、而不是失敗執行本身錯誤訊息的問題</li>
+<li>修正了當 session 以另一種權限模式 resume 時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_RESUME_INTERRUPTED_TURN</code> 會重跑一個在 plan mode 中被中斷的輪次的問題</li>
+<li>修正了在 Claude Code 寫入設定檔後幾秒內對該檔所做的編輯被忽略的問題</li>
+<li>修正了一個留在舊檔名的設定檔會在沒有警告的情況下蓋掉你設定的問題：現在當一個 home 目錄裡有兩個設定檔時，Claude Code 會在 stderr 上說明，並指出目前用的是哪一個</li>
+<li>修正了當磁碟在存檔過程中被填滿（在唯讀資料夾中、或存到 bind-mount 的檔案時），<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude.json</code>、設定和被編輯的檔案最後變成空的或被截斷的問題（同一時間只有一個 session 存檔）</li>
+<li>修正了 Write 在無法讀取要覆寫的檔案時、以拒絕結束該輪次的問題</li>
+<li>修正了幾乎瞬間完成的背景 Bash 指令遺失其輸出、卻被回報為已完成的問題</li>
+<li>修正了 Bash 工具對變更檔案的 diff 漏掉一個指令在結束前才剛寫入的檔案的問題</li>
+<li>修正了打錯的 model 名稱（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">opus-5-5</code>）叫你去更新 Claude Code、而不是建議你本來想打的那個 model 的問題</li>
+<li>修正了當 notebook 在權限提示開啟期間發生變動時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">NotebookEdit</code> 改到錯誤 cell 的問題</li>
+<li>修正了在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/login</code> 成功畫面上按 Enter 後出現約 0.5 秒卡頓的問題：現在對話框會立刻關閉，登入後的刷新改在背景執行</li>
+<li>修正了在螢幕報讀（screen reader）模式下、輸入問題的「Other」答案時 Ctrl+G 無法打開外部編輯器的問題</li>
+<li>修正了當有設 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_PROXY_RESOLVES_HOSTS</code>、而機器本身沒有 DNS 時，Monitor 的 WebSocket 監看在 proxy 後方以「could not resolve」失敗的問題</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin eval</code> 警告對一個絕對不該被呼叫的工具建議 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">max: 0</code> 的問題，那種設定根本永遠無法通過</li>
+<li>修正了背景 plugin 自動更新沒有安裝更新版本新增的相依套件的問題</li>
+<li>修正了從 agents view 開啟的 session 中，Cmd+click 在 tmux 上的 Ghostty 裡無法打開連結的問題</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.claude/skills</code> 中某個 mod 的熱重載漏掉一個剛出現後又立刻被刪除的檔案、並漏掉它的回傳值的問題</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/rewind</code> 在把程式碼還原到 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/branch</code> 之前的 checkpoint 時以「No files were restored」失敗的問題</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/claude-api</code> skill 說 Console 網頁設定不適用於 Managed Agents session 的問題，並收緊了它的憑證和權限範例</li>
+<li>修正了對那些包在單純 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">timeout DURATION</code> 裡的唯讀指令（例如 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">timeout 30 rg foo</code>）跳出多餘權限提示的問題</li>
+<li>修正了 WebFetch 把 claude.ai 的分享對話連結描述成空白頁面的問題；現在它會說分享對話無法被讀取，請改貼對話內容</li>
+<li>修正了 Artifact 的資料庫呼叫被重送到沒有資料庫的 artifact 的問題；現在錯誤訊息會說明重新發布是否有幫助</li>
+<li>修正了會存到某個資料夾（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">out_dir</code>）的 artifact 資料庫讀取被拒絕的問題</li>
+<li>修正了詳細 beta tracing 沒有向要求 client 憑證的收集器出示 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_CLIENT_CERT</code> 的問題</li>
+<li>修正了 OpenTelemetry 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude_code.session.count</code> metric 把那些從未被認領的 Agent SDK <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">prewarm()</code> 行程也算進去的問題;現在一個預先啟動的行程只在被認領時算一次</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/clear</code> 殺掉背景 agent、隊友和會持續運作的 workflow 的執行中指令、以及背景 agent 和隊友的前景 subagent 的問題</li>
+<li>修正了當某個終端機的 Claude apps gateway 登入已過期時，仍送出 telemetry 和 managed-settings 請求、而 gateway 會拒絕並記成 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">invalid_token</code> 的問題</li>
+<li>修正了 agents view 看起來像是把回覆送給一個正在等權限提示的背景 session 的問題;現在回覆會留在輸入框裡，並提示你打開該 session 來回答</li>
+<li>修正了 agent view 在退出時移除同一目錄下另一個 agent view 所存草稿的問題</li>
+<li>修正了 agent view 為了更新而重啟自己後、回來時帶著另一個 agent view 輸入文字的問題</li>
+<li>修正了 agents view 的預覽把過長的指令、結果和狀態行截斷卻沒有省略號，並把等待核准的指令中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">**</code>、反引號和標籤丟掉的問題</li>
+<li>修正了 Claude in Chrome 在連線於動作中途斷掉時回報擴充功能未連線的問題;現在 Claude 會在重複一個可能已執行的動作前先檢查頁面</li>
+<li>修正了 Remote Control session 在用量上限於 session 外被解除後，其他裝置上仍顯示「Limit reached」的問題</li>
+<li>修正了當 Claude 傳送單一檔案時，Claude iOS App 中有時缺少檔案卡片的問題</li>
+<li>修正了當伺服器一直拒絕續訂 model 存取權時，self-hosted runner session 毫無說明就失敗的問題:現在 runner 會更快重試，並在 session 中貼出警告</li>
+<li>修正了雲端 session 中 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/permissions</code> 只回答它無法使用的問題;現在它會說明該 session 的規則存在哪裡、以及如何變更</li>
+<li>修正了雲端 session 在移到新 worker 時遺失 session 範圍內的 deny 和 ask 權限規則（例如 PermissionRequest hook 加入的那些）的問題</li>
+<li>修正了在雲端 session 中，當你連打三則訊息、而不是回答它的問題時，該 session 的 mod 熱重載會被關掉的問題</li>
+<li>修正了在 Web 版 Claude Code 上，那些在 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/clear</code> 後仍持續運作的背景任務會從任務清單消失、直到另一個任務開始或結束才出現的問題</li>
+<li>修正了隱藏指令出現在行動版和 Web 版雲端 session 的 slash command 選單中的問題</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/rewind</code> 可能透過目錄 symlink 還原或刪除檔案的問題</li>
+<li>修正了在 accept-edits 和 auto mode 中，某個 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">sed</code> 指令可能跳過權限檢查的問題</li>
+<li>修正了當 gateway 的 URL 只設在 managed settings 裡、而伺服器管理的設定又抓不到時，LLM gateway 後方的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_AUTO_MODE_SERVER=1</code> 被忽略的問題</li>
+<li>修正了一個 Bash 權限繞過漏洞，攻擊者可以用精心構造的環境變數前綴，把指令的一部分藏起來不讓權限檢查看到</li>
+<li>修正了在 Claude Desktop 中，以 claude.ai connector 的終端機名稱（<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">mcp__claude_ai_Slack</code>）寫成的 deny 和 ask 規則、hook matcher 以及 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">disallowedTools</code> 項目被忽略的問題（會在 Claude Desktop 納入這個版本後生效）</li>
+<li>修正了建立 worktree 時的一個沙箱逃逸（sandbox escape）漏洞</li>
+<li>修正了 self-hosted runner 的問題：<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--trust-workspace false</code> 現在也會一併阻止 repository 設定檔裡的 hook 和 skill 執行</li>
+<li>修正了透過 shell 匯出的 LLM gateway 啟動的閒置背景 session，在更新後離開 gateway 的問題</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/status</code> 和 auto mode 計費通知中的說明連結在換行時只能打開部分網址的問題</li>
+<li>修正了在會做 TLS 檢查的 proxy 後方、設有 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC</code> 時憑證錯誤仍持續的問題。設了這個變數後，Claude Code 現在會在憑證失敗後，對設定的 API host 做一次 TLS handshake（若有設 http:// proxy 就透過它），但不會送出任何 API 請求</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude remote-control</code> 在首次執行的問題沒人回答時（腳本、服務、批次工作、Ctrl+C）悄悄以狀態 0 結束的問題;現在它會說明原因並以 1 結束</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude remote-control</code> 在首次執行問題時忽略一個後面沒有換行的管線 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">y</code> 的問題;現在它會被當成「是」</li>
+<li>修正了當新名稱無法存進 session 轉錄檔時，<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/rename</code> 卻回報單純成功的問題;現在它會警告新名稱可能無法保留</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">${CLAUDE_PLUGIN_ROOT}</code> 在 plugin 提供的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">subagentStatusLine</code> 指令中沒有被替換的問題,現在它可以引用該 plugin 自己的腳本</li>
+<li>修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude plugin update</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/plugin</code> 的「Update now」沒有安裝新 plugin 版本新增的相依套件的問題</li>
+<li>修正了 subagent 在 compaction 之後被告知要等待一個背景 agent 的完成通知、而那個背景 agent 其實既不是它啟動、也不是它接手的問題</li>
+<li>修正了背景 agent 之後的報告被悄悄遺失的問題:現在通知會說明它被拒絕了、以及該如何索取</li>
+<li>改善了 Windows 上的設定存檔:Claude Code 會等另一個程式開著的檔案更久一點，這樣在存檔期間被 kill 時比較不會把 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">~/.claude.json</code> 弄成空的</li>
+<li>改善了 Claude in Chrome 在短暫斷線後的行為:它會等最多 6 秒讓 session 自己的瀏覽器回來，再去挑另一個</li>
+<li>改善了 Claude in Chrome:最多 60,000 字元的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">javascript_tool</code> 結果現在會留在對話裡，而不是被存成檔案</li>
+<li>改善了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude purge</code> 和舊 session 的清理：會重試一個沒能完全刪除的資料夾，若還在就回報為錯誤</li>
+<li>改善了 macOS 和 Windows 上對工作目錄外路徑的拒絕訊息：當它只是大小寫跟目錄內的某個路徑不同時，訊息會指出那個拼法</li>
+<li>改善了那些淡灰色次要文字的對比度，例如提示、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/stats</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/model</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/sandbox</code> 裡的細節，以及被拒絕的動作訊息</li>
+<li>改善了 artifact 資料庫在更新指向不存在文件、以及服務暫停重複被拒絕的寫入時的錯誤訊息</li>
+<li>改善了 Claude apps gateway 對上游呼叫失敗的警告：現在每一則都會指明是哪個上游，而不只是它的供應商</li>
+<li>改善了 Claude apps gateway 的花費上限錯誤:它現在會顯示「spend limit reached · resets Dec 1」，若有設 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">admin.blocked_message</code> 就接在後面</li>
+<li>改善了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/model</code> 選擇器:較舊的 model 現在會被歸到「More models」一列底下，而不是列在目前的 model 後面</li>
+<li>改善了終端機中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/context</code>，讓 Claude 讀的表格維持精簡:每個清單只保留它最大的 10 列，而按需載入的 MCP 工具在被呼叫前，每個 server 共用一列</li>
+<li>改善了雲端 session 中的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/usage</code>:當無法顯示方案上限時，它現在會連到 claude.ai 上的 Settings → Usage</li>
+<li>[VSCode] 改善了移除 plugin marketplace 的確認:現在它會檢查當下有哪些它的 plugin 已安裝</li>
+<li>變更了 MCP 任務，使其在終端機中不需抓取 feature flag 也能運作（Bedrock、Vertex、Foundry、LLM gateway、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">DISABLE_TELEMETRY</code>）;設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_DISABLE_MCP_TASKS=1</code> 可以關掉它們</li>
+<li>變更了 auto mode，讓專案的設定檔或 plugin 在你於專案外把伺服器端檢查關掉後，再也無法把它切回開啟</li>
+<li>變更了 Monitor 的 WebSocket 監看，讓它在每個 Bash 指令上都遵循規則:deny 會拒絕它，而在 ask 規則下，Monitor、bypass 模式或 auto mode 的 allow 不再跳過提示</li>
+<li>變更了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_PROXY_RESOLVES_HOSTS</code>，讓設定檔在由主機管理網路的情況下再也不能設定它;請改在行程環境中設定</li>
+<li>變更了 session 中精確的 Bash 或 PowerShell ask 規則:當有一個更廣的 deny 規則涵蓋該指令時，它會被拒絕、而不是被詢問</li>
+<li>變更了 Bash 工具，讓它在執行帶有 lookup/display 集合以外 flag 的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">which</code> 前先詢問權限</li>
+<li>變更了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--add-dir</code> 目錄，讓它只在該目錄自己的信任對話框被接受後，才註冊 plugin marketplace</li>
+<li>變更了巢狀 skill 的載入：開啟 Bash 沙箱時，位於起始資料夾底下 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">.claude/skills</code> 資料夾裡的 skill，只有在你從那裡啟動 Claude Code 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/cd</code> 過去時才會載入</li>
+<li>變更了自訂步調（self-paced）的 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/loop</code>，讓它在某一輪結束而沒有重新排程時就結束，而不是排一個後備的喚醒;設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_CODE_LOOP_KEEPALIVE=1</code> 可以保留舊行為</li>
+<li>變更了 PostToolUse hook，讓它在那些因新訊息打斷輪次後才完成的工具呼叫上也會執行，最多有 10 秒可以跑完</li>
+<li>變更了安全防護機制擋下 subagent 後告訴 Claude 的內容：改成用更窄的 prompt 重試、或告訴你，而不是自己把那件事做掉</li>
+<li>變更了雲端 session，讓它在移到新 worker 時、若無法完整保留所有 deny 和 ask 規則，就捨棄 session 範圍內的 allow 規則，所以你可能會被再問一次</li>
+<li>變更了 TLS 檢查 proxy 後方的自動憑證修復:當 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">ALL_PROXY</code> 是唯一設定的 proxy 變數時，它就不再執行。請改把 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">HTTPS_PROXY</code> 設成該 proxy 的 http:// URL</li>
+<li>變更了對別人可能寫過的 artifact 資料庫列的儲存：每個檔案都會有一個隱藏的標記檔，而既有的、沒有標記檔的檔案（包含舊版本匯出的那些）會被保留不動並回報</li>
+<li>更新了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/claude-api managed-agents-onboard</code> 的範本以符合 Claude Console：移除了 Performance tuner、重新命名了兩個，並在五個 prompt 沒用到 web search 和 fetch 的範本中把這兩項關掉</li>
+<li>從 Claude Code 內建的 Claude in Chrome 工具中移除了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">shortcuts_list</code> 和 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">shortcuts_execute</code>，這兩個工具原本用來列出和啟動存在擴充功能裡的快捷方式</li>
+<li>Gateway：新增了針對把 AWS GovCloud 和其他上游混在一起的上游、以及 gateway 環境中 base URL 變數的啟動警告</li>
+<li>Gateway：新增了一則啟動日誌警告，用於 managed settings 在 header 裡指名了某個 Amazon Bedrock guardrail（而 gateway 並不會轉發它）、且沒有任何 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">bedrock</code> 上游設定 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">guardrail</code> 的情況</li>
+<li>Gateway：修正了當所有上游都是 Amazon Bedrock 時，Claude Desktop 提供一個永遠會失敗的 web search 工具的問題</li>
+<li>Self-hosted runner：修正了一個以 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--use-anthropic-git-proxy</code> 或 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--configure-git</code> 啟動的 runner，在失敗的啟動檢查讓它退出之前就先註冊的問題;現在它會先退出</li>
+<li>Self-hosted runner：變更了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">CLAUDE_RUNNER_CHECKOUT_PATH</code>，讓一個 session 中的每個 repository 都有自己的資料夾:若某個資料夾名稱在該 session 中已被用掉，就在結尾加上 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">-2</code>、<code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">-3</code>……</li>
+<li>Self-hosted runner：移除了 session 結束時上傳 session 除錯日誌的動作;除非有設 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">--remove-session-state</code>，否則失敗 session 的日誌會留在 runner 主機上</li>
+<li>[VSCode] 修正了超過 50,000 字元的 prompt 被悄悄截斷的問題:現在 prompt 會留在聊天框裡並附上通知，而超過上限的貼上會被拒絕並附上通知</li>
+<li>[VSCode] 修正了點擊問卷或「Report a problem」按鈕會把尚未完成的 prompt 送出去的問題</li>
+<li>[VSCode] 修正了從擴充功能的 Web 分頁開啟的雲端 session，會把那些被 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">/clear</code>、或對已輸入 prompt 做 Retry 或 Edit 時移除掉的輪次又帶回來的問題</li>
+<li>[VSCode] 修正了一個已刪除 session 的檔案在該 session 於擴充功能中被重新命名時又跑回來的問題</li>
+<li>[VSCode] 修正了 Claude 在視窗重新載入後執行一個未經核准計畫的問題:現在一個在 plan mode 中被中斷的步驟，會在 session 以另一種權限模式回來時以通知停下</li>
+<li>[VSCode] 改善了 Claude apps gateway 後方的「未登入」訊息:現在它看起來像個錯誤，並附有 Sign in 連結</li>
+<li>[VSCode] 變更了 Claude 回覆中指向 Claude 登入、connector 或 API 網址的連結，改成以文字加網址的形式顯示，而不是在瀏覽器中開啟</li>
+<li>[VSCode] 修正了當拖放項目的路徑含有很長一串「/」字元時，聊天面板可能卡住的問題</li>
+<li>[VSCode] 修正了 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">claude-vscode.toggleDictation</code> 指令會在每個打開的 Claude view 中同時開始聽寫的問題;現在它只作用於你正在使用的 view，而再按一次會停止</li>
+<li>[VSCode] 修正了當一則含有許多未閉合 <code class="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-indigo-600 dark:text-indigo-300 text-sm">$$</code> 數學圍欄（每個都比前一個短）的回覆串流進來時，聊天面板變慢的問題</li>
+<li>[VSCode] 改善了聊天面板針對大型工作區的診斷工具：它會略過沒有問題的檔案、回傳精簡的 JSON，並接受一個可選的最低嚴重度</li>
+<li>[雲端 session] 修正了排程任務悄悄丟掉一個名為 memory 的 connector 的問題:現在執行時會保留它，掛在那個名稱加上一個短後綴之下</li>
+<li>[雲端 session] 修正了對一則等待中訊息按 Send now 時會結束執行中背景 agent 的問題;現在它們會繼續運作</li>
+<li>[雲端 session] 改善了 self-hosted 環境上的卡住設定警告：它的連結現在會優先選你組織的預設、或一個有存活 runner 的環境，並把它指名出來</li>
+<li>[Code Review] 變更了取消連結某個 GitHub 組織時，也會一併關掉它在 Code Review 中的 All repositories 設定;重新連結後它會維持關閉，直到你再把它打開</li>
+<li>[Claude Tag] 修正了當頻道清單無法完整載入時 Claude Tag 設定卡住、無法啟動的問題;現在管理員不用選頻道也能啟動</li>
+<li>[Claude Tag] 在 Models 管理頁面為已連接 Claude Tag 的 Enterprise 組織新增了一列 Claude Tag，連到管理其 model 預設值的地方</li>
+<li>[Claude Tag] 修正了在 Claude Tag 管理設定中儲存 auto mode allow 規則會覆蓋另一位管理員變更的問題;現在這個儲存會被拒絕並附上訊息</li>
+</ul>
+    </article>
+    <footer class="mt-12 text-center text-gray-400 dark:text-gray-500 text-xs">
+      此頁面由自動化流程產生，僅供參考。
+    </footer>
+  </div>
+  <script>
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+    function applyTheme(t) {
+      document.documentElement.classList.toggle('dark', t === 'dark');
+      btn.textContent = t === 'dark' ? '\u2600\uFE0F 淺色' : '\uD83C\uDF19 深色';
+      localStorage.setItem('theme', t);
+    }
+    function toggleTheme() {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    }
+  </script>
+
+</body>
+</html>
