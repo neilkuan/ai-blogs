@@ -2,6 +2,9 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.322
+- 新增 Vertex 上的快速模式（fast mode），支援 global、us 和 eu 區域；如果 Vertex 拒絕該請求，會自動退回標準速度
+
 ## 2.1.321
 - 新增 Claude Fable 5.2（`claude-fable-5-2`），現在是預設的 Fable 模型 — 1M context，每 Mtok $8/$40，cache 讀取每 Mtok $0.20
 - 在 `claude remote-control` 新增 `--settings <file>`，會把一個設定檔套用到它啟動的每個 session；如果該檔案有變動，在你重新啟動 `claude remote-control` 之前不會啟動新的 session
