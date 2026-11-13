@@ -2,6 +2,147 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.325
+- 修正 zstd 壓縮回應解碼方式中的一個安全性問題
+- 在 VS Code 與類似的整合式終端機中新增 spinner 提示,告訴你可以重新執行 notebook cell;Claude 讀取或編輯過 Jupyter notebook 後會顯示一次
+- 當你所屬組織的政策擋下某個請求時,錯誤訊息下方新增一行說明如何繼續:執行 `/rewind` 並修改訊息,或執行 `/clear`
+- 當沙箱(sandbox)中的 `git checkout`、`git stash` 或 autostash pull 無法更新受保護的檔案(例如 `.claude` 底下的檔案)時,新增給 Claude 的提示
+- 修正 `/security-review` 與 skills 的 inline git 指令,在 bare repository 的 worktree、`--separate-git-dir` checkout 以及 Android `repo` checkout 中會因錯誤而中止的問題
+- 修正當模型設定為 `opusplan` 或 `haiku` 時,擁有自己模型的 subagent 被切換到 plan 模式模型的問題
+- 修正使用不同模型的 subagent 在判斷檔案讀取與 MCP 結果大小時,誤用主 session 模型的問題
+- 修正在許多第三方 gateway 與 Foundry 上,session 每一輪都因 context length 錯誤而中止、不會進行壓縮(compact)的問題
+- 修正 Claude Code 未正常結束後,恢復的 session 有時會遺失最近幾輪對話的問題
+- 修正工作目錄被刪除後,shell 指令仍在啟動目錄中執行的問題;現在指令會失敗並顯示訊息,可以重新下達
+- 修正當 `plansDirectory` 資料夾無法存放已核准的 plan 編輯時,該編輯會遺失的問題:現在 plan 會存到預設的 plans 資料夾,並顯示警告說明存放位置與原因
+- 修正已儲存的 `sonnet[1m]` 模型設定在全新安裝時,被改寫成 API 不接受的 model id 的問題
+- 修正排程任務在你送出提示之後才回覆時,focus view 會隱藏對你提示的回覆的問題
+- 修正關閉全螢幕時,背景 subagent 的檢視畫面有時缺少提示內容的問題
+- 修正清單與權限提示中的長選項換行時被部分覆蓋,以及首次執行畫面在窄終端機中遺失行數的問題
+- 修正權限規則的啟動警告與「N MCP servers need authentication」通知,在被捲出畫面時就被記錄為已讀的問題
+- 修正當 agent 名稱或工作資料夾含有控制字元或換行時,歡迎標題顯示控制字元或跨行斷開的問題
+- 修正當 Claude 嘗試執行只有你能執行的指令時顯示紅色錯誤的問題:現在改為顯示一行淡色文字,說明該指令只有在你於提示列自行輸入時才會執行
+- 修正 `/stats` 顯示的 Active days 總數多算一天的問題
+- 修正 `/insights` 在沒有任何 session 符合分析條件時仍表示報告已就緒,以及在 HTML 報告中寫入兩個未跳脫(escape)的值的問題
+- 修正當 managed settings、`--settings`,或專案的 `.claude/settings.json`、`.claude/settings.local.json` 讓 voice mode 維持原狀時,`/voice` 仍表示 voice mode 已變更的問題;現在會說明是由誰決定的
+- 修正 IDE 歡迎對話框在 Windows 與 Linux 上將 Quick Launch 顯示為 Cmd+Esc 的問題
+- 修正組織政策禁止雲端 session 時,仍顯示 Slack app 提示的問題
+- 修正 `claude purge` 在沒有可讀取按鍵的終端機時會無聲卡住,以及 stdin 為 pipe 時,其專案選擇器與 `-i` 提示不理會鍵盤輸入的問題
+- 修正 `claude plugin eval --output-dir ''` 會把報告寫進目前資料夾的問題;現在會以錯誤結束
+- 修正 `claude -p` 在終端機上輸出文字時,會傳出文字樣式以外的控制序列(control sequence)的問題;pipe 與檔案不受影響
+- 修正設定目錄中殘留大量 `.oauth_refresh.lock.owner.tmp.*` 檔案的問題
+- 修正在無金鑰(keyless)的 Console 登入下,`/fast` 顯示「Fast mode has been disabled by your organization」的問題,實際上 Claude Code 根本沒有詢問伺服器
+- 修正 `/model` 在 Claude Code 無法檢查時(例如沒有網路),仍表示你的組織限制某個模型的問題
+- 修正在 `/login` 中選擇「Sign in with your Console account」後,若在瀏覽器步驟之後立刻按 Esc,會取代你既有登入的問題
+- 修正在某些登入失敗或被取消的情況下,瀏覽器仍顯示登入成功頁面的問題
+- 修正 `claude auth status` 與其他簡短指令在 Console profile 上留下鎖(lock),導致下一個 session 卡住約一分鐘的問題
+- 修正以 claude.ai 登入啟動的背景 session,會使用(並計費到)啟動背景服務的 shell 中的 API key 或 token 的問題
+- 修正更多 session 在背景切換到另一個登入帳號的情況;現在這些切換會被拒絕,並顯示可行做法的訊息
+- 修正在切到背景的動作被拒絕後,於退出對話框中再按一次 Enter 會停止背景工作的問題
+- 修正當 `allowedProviders` managed setting 不允許時,Amazon Bedrock 上的 token 計數仍會把對話傳送給 Bedrock 的問題
+- 修正在沒有 `HOME` 環境變數的情況下啟動 Claude Code 時,AWS `credential_process` helper 與 Google Cloud 預設憑證會失敗的問題
+- 修正 subagent 的 plan 被核准後,session 有時會退回較早的權限模式的問題
+- 修正 Agent SDK 的 `applyFlagSettings()` 呼叫中只要有一個無效值,就會無聲丟棄先前所有呼叫設定的問題;現在會造成此情況的呼叫會被拒絕並回報錯誤
+- 修正當已完成的 pull request 只需要你自己審查或合併時,session 卻顯示為等待輸入的問題
+- 修正無法辨識的 `teammateMode` 設定值被忽略卻沒有警告的問題:`claude -p`、啟動警告與 `claude doctor` 現在會將其列為被略過的項目(仍不會套用)
+- 修正在新的 home 目錄首次執行時,`--worktree` 會略過 `CLAUDE_CODE_PLUGIN_SEED_DIR` 中 plugin 的 `WorktreeCreate` hook 的問題
+- 修正 brief-mode session(例如 Dispatch)在該輪已回覆之後又再回覆一次的問題
+- 修正當 plugin 以不同 URL 列出 Atlassian、Asana 或 Sentry connector 時,Claude 在雲端 session 中誤稱運作正常的 connector 已失敗的問題
+- 修正 Claude Desktop 與 SDK session 在資料夾移動或預先暖機(pre-warmed)啟動後,把資料夾自己的 MCP server(`.mcp.json`、local)列為 host 新增或根本不列出,且未連線 WebSocket 類型 server 的問題
+- 修正 plugin 重新載入時,若 plugin 的 MCP server 在連線中被移除,`/mcp` 仍列出該 server 的問題
+- 修正 token 重新整理只被短暫拒絕後,MCP server 仍停在「needs authentication」,且其 `mcp_tool` hook 被略過的問題
+- 修正在工具呼叫期間 server 連線被替換後,headless 模式下的 MCP elicitation 請求未經詢問就被取消的問題
+- 修正 SDK host 在某次工具呼叫已重新連線 MCP server 之後,MCP 工具呼叫仍回應「Not connected」的問題
+- 修正 MCP task 在其問題被 Esc 關閉或被再次詢問後卡住的問題:現在頁尾會顯示需要你的輸入,並可在 `/tasks` 中按 Enter 再次顯示該問題
+- 修正同一個 server 的另一次呼叫斷線後,背景 MCP task 停止更新的問題,現在後續呼叫重新連線時會恢復
+- 修正背景 MCP task 的問題在你還在輸入訊息時就跳出來蓋住草稿的問題;現在會等到你送出或清除草稿後才顯示,且 spinner 與回合計時器會持續運作
+- 修正在較舊的 git 版本(例如 2.34)上,`worktree.sparsePaths` 與 sparse 的 plugin 及 marketplace clone 會漏掉儲存庫根目錄檔案的問題
+- 修正有多個儲存庫的 self-hosted runner session,無法使用 session 中途新增的儲存庫的問題
+- 修正 Claude 在讀取你自己的 artifact 或其資料前會先要求權限的問題
+- 修正在某些雲端 session 中,Artifact 工具的 deny 與 ask 權限規則及 hook 沒有生效的問題
+- 修正 Code Mode 腳本忽略以 `EnterWorktree` 進入的 worktree、把 `~` 路徑寫進專案,以及在 MCP server 登入過期後 `/mcp` 仍顯示其為已連線的問題
+- 修正在 Code Mode 中,於權限對話框或 plan 核准時隨 Yes 一起輸入的文字沒有傳給 Claude 的問題
+- 修正恢復一個在 Code Mode 腳本執行期間結束的 session 時,Claude 會自行開始工作的問題;現在會等你的下一個提示
+- 修正在工具呼叫執行期間送出的訊息,缺少 OpenTelemetry `user_prompt` 事件的問題。該事件帶有 `delivery.mode: "mid_turn"` 以及執行中該輪的 `prompt.id`
+- 修正在 VS Code 中,排隊的訊息合併成同一輪,或某則訊息含有圖片時,OpenTelemetry `user_prompt` 事件漏掉較早訊息文字的問題
+- 修正 slash command 的 `allowed-tools` 授權,被套用到在其該輪期間或之後被喚醒的背景 agent 的問題
+- 修正 `/feedback` 與 `/bug`:現在只有在其他 session 是由目前登入的帳號或組織記錄時,才會上傳它們
+- 修正相對路徑的 deny 與 ask 權限規則(例如 `Read(./.env)`)在 `cd` 之後不再涵蓋專案的問題;現在它們也會套用在新增的目錄中
+- 修正以 `mcp__plugin_*_` 開頭的 deny 與 ask 權限規則,會漏掉大小寫拼法不同的 plugin MCP server 或工具的問題
+- 修正在 self-hosted runner 與 `claude remote-control` session 中,Claude Code 重新啟動後才送達的權限核准,未套用 deny 規則的問題
+- 修正在儲存庫的某些子資料夾中啟動 Claude Code 時,已提交(committed)的 `.claude/settings.local.json` 可能被當成使用者自己的設定的問題
+- 修正某些 deny 與 ask 規則未套用到特定 Bash 指令的問題
+- 修正 Bash 權限檢查中的一個漏洞:某些複合指令(compound command)可能未經詢問就執行;現在這些指令會要求權限
+- 修正 Bash allow 規則可能執行與其名稱不同的程式的問題
+- 修正在 plugin 仍在載入時,雲端 session 中 connector 工具的核准提示被自動回答的問題
+- 修正某些 subagent 在已設定 allow 規則或先前已核准上傳的情況下,未經詢問就修改組織外人士可見的 artifact 或對其上傳檔案的問題
+- 修正在 Artifact 已選擇「don't ask again」的情況下,某些 artifact 發佈跳過了對組織外人士可見頁面的確認的問題
+- 修正 auto mode 只審查組織外人士可見 artifact 的第一次變更的問題;現在其同意只涵蓋該次變更
+- 修正 managed 的 `strictPluginOnlyCustomization` 對 agent 與 skill 的鎖定,在已經執行中的 session 裡沒有生效的問題
+- 修正沙箱指令在某些情況下可以寫入原生更新程式(native updater)下載資料夾的問題
+- 修正 Bash 沙箱在某些情況下沒有完整保護 worktree 的設定與 hook 的問題
+- 修正 Bash 沙箱在某些情況下沒有完整保護 linked worktree 共用 git 資料夾的問題
+- 修正 `/teleport` 在某些罕見 git 狀態下的 stash 選項問題:現在會停止並說明該怎麼做
+- Windows:修正當 PATH 中有項目位於你的帳號無法開啟的資料夾底下時,啟動可能卡住約一秒的問題
+- 修正 Windows 上的 `/resume` 會拒絕或隱藏資料夾以不同磁碟機代號大小寫或斜線記錄的 session 的問題
+- 修正 Windows 上於 session 內執行 `/resume` 時,若 session 以不同磁碟機代號大小寫記錄,會丟失專案已儲存的信任設定的問題
+- Linux:修正當工作目錄位於 `denyRead` 內的 `allowRead` 資料夾之下(例如在符號連結的 home 目錄底下)時,沙箱 Bash 指令會因 `bwrap: Can't create file` 而失敗的問題
+- 修正 Claude Desktop 的第三方部署會一直停在「Stopping」,直到 token 更新完成的問題(待其包含此版本後生效)
+- 改進 subagent 在輸出達到 token 上限而被截斷時的行為:現在會再次要求它以更精簡的方式給出完整答案,而不是只回傳結尾的部分
+- 改進使用無金鑰 Console 登入或其他 Anthropic profile 登入時的啟動:仍有效的 token 現在不必等待憑證鎖就能讀取
+- 改進帳號 email 檢查:現在也會拒絕把你的 email 當作用戶端身分,用於指令執行的腳本、檔案寫入、網頁擷取(web fetch)與 MCP 呼叫
+- 改進私有 plugin marketplace 的 `HTTPS authentication failed` 訊息:現在會說明 git 的終端機提示與 askpass 程式已被停用,且在較新的 git 版本中也會出現
+- 改進新增 marketplace 的確認、plugin 推薦提示與 plugin 安裝警告,明確說明 plugin 可以在你的電腦上執行程式碼,並能存取你的檔案與 shell
+- 改進 `claude --desktop` 的登入錯誤訊息:現在會指出是哪個 API key、provider 或設定導致 Claude 帳號無法登入
+- 改進 macOS 與 Windows 上 `/voice` 的「No audio detected」訊息:現在會說明在哪裡選擇麥克風
+- 改進 MCP task:現在 Claude 會被告知某個 task 正在等你回答,並可以引導你前往 `/tasks`
+- 改進 `claude remote-control`:自行停止時現在會以狀態碼 4 結束(單一 session 執行仍為 0),無法註冊時則為 69,讓服務管理程式(service manager)可以重新啟動它
+- 改進背景 session 無法使用其 session 的 API key 或 token 時顯示的訊息:不再建議把金鑰加入設定
+- 改進內建 dataviz skill 針對靜態圖片與具有自然順序的部分(例如年齡區間)的 part-to-whole 建議
+- 變更沙箱 Bash 指令預設改為遵循一般權限流程;若要維持免提示執行,請設定 `sandbox.autoAllowBashIfSandboxed: true`
+- 變更開啟沙箱的 managed settings:若要讓指令維持免提示執行,請在你最高優先順序的 managed 來源中設定 `sandbox.autoAllowBashIfSandboxed: true`
+- 變更唯讀 git 指令的行為:在不屬於該專案、也不是你信任的儲存庫中,現在會先詢問;若要免提示執行,請用 `--add-dir` 指定它,而不是用 `additionalDirectories` 設定
+- 變更排程任務與 `/loop`:在執行宣告了 `allowed-tools` 或 hook 的 skill 前會先詢問;若要無人值守執行,請將 `Skill(name)` 加入 `permissions.allow`
+- 變更 Desktop、IDE 與 SDK host 中的「Always allow」:只有在儲存規則後確實能再次允許該指令時,才會單獨提供規則,因此原本依賴這類規則的排程任務現在可能會等你處理
+- 變更沙箱行為:與啟動資料夾一樣,現在會拒絕沙箱對新增目錄中 `.claude` 設定、skills、agents、commands 與 hook 的寫入
+- 變更 worktree 隔離:隔離的 worktree session 或 agent 現在會被拒絕執行 `git bisect run`、`git maintenance register|start` 與 `scalar` 的設定指令,並告知哪些仍然可用
+- 變更 plugin MCP bundle(`.mcpb`、`.dxt`)改為解壓到 plugins 目錄底下,而不是 plugin 資料夾中的 `.mcpb-cache`,讓唯讀的 plugin 資料夾也能載入;以 URL 取得的 bundle 會再下載一次
+- 變更由 managed settings 宣告的遠端 marketplace 中,在 `prependPlugins` 或 `appendPlugins` 內啟用並列出的 plugin,會被視為組織的 plugin;`pluginDigests` 已棄用(deprecated)且會被忽略
+- 變更 plugin 載入:會略過 plugin 資料夾中某些不安全的路徑與連結,`claude plugin validate` 也會回報這些項目
+- 變更巢狀 skill 載入:`--plugin-dir` plugin 中的 `.claude/skills` 資料夾不再從其上層啟動的 session 載入;請改為在 plugin 資料夾中啟動 Claude Code
+- 變更 EnterWorktree:會拒絕經過專案內符號連結的 `WorktreeCreate` hook 路徑;請讓 hook 輸出真實路徑
+- 變更 tmux 與 iTerm2 的 teammate,以及從 agents view 以 ← 開啟的新 session:改為在 session 的資料夾中啟動,而不是 shell 上次 `cd` 到的位置
+- 變更終端機中的提示建議(prompt suggestion):在連續 8 輪都由背景或排程任務觸發後,更新頻率會降低,在你按下按鍵或回到終端機之前節省用量
+- 變更背景 MCP task 問題上的 Esc 行為為「稍後回答」:不會送出任何內容給 server,問題會保留在 `/tasks` 中
+- 變更 `CLAUDE_CODE_MAX_CONTEXT_TOKENS`:現在也會設定以 `claude-` 開頭但無法辨識的 model ID(例如 gateway 的 `claude-sonnet-latest`)的 context window
+- 變更 `/login`:會詢問是否允許變更你的隱私設定
+- 變更 `/cost`、`$.session.usage()`、`--max-budget-usd` 以及費用與 token 指標(metrics):現在會計入 mod 的 `$.model.complete` 與 `$.model.classify` 呼叫
+- 變更 Claude Code 沙箱為自身用途啟動的程式(例如其網路橋接),改為在環境中不含 Claude Code 登入 token 與 API key 的情況下執行
+- 變更 ripgrep、本機 git 指令與沙箱 runtime 自己的 helper 程式,改為在環境中不含 mTLS 用戶端金鑰密碼(passphrase)的情況下執行
+- Remote Control:變更 `/resume` 與 `/teleport`,當已連線的 session 有分享連結,或無法檢查時,會先中斷連線;請執行 `/remote-control` 重新連線
+- 變更 Claude Code on the web、雲端排程任務與 Cowork 雲端 session,即使設定了 `sandbox.failIfUnavailable` 也會啟動:因為託管容器沒有指令沙箱
+- 變更透過雲端或 self-hosted session 連線請求設定、權限規則、hook 或狀態時,會回傳較少內容或被拒絕;session 中實際生效的內容不變
+- 變更沒有快取帳號資料的 `claude -p`:第一次請求前會先等待這些資料,因此在乾淨環境中首次執行可能會晚幾秒啟動
+- 變更 Claude 的指示:要求把你之後會用到的檔案放在它的暫存 scratchpad 資料夾之外,因為該資料夾可能被清除
+- 變更 marketplace 的 `ref`:可接受分支或 tag 上任何 commit 的完整 ID;此版本之前的用戶端無法 clone 這樣的 pin,因此以此方式固定的 marketplace 在那些用戶端上會停止載入
+- 變更 plugin marketplace 與 plugin 下載:當 `ALL_PROXY` 是唯一設定的 proxy 時改用 CONNECT 通道;拒絕 CONNECT 的 proxy 現在會導致下載失敗
+- 變更掛載到容器中的 worktree 或 submodule 裡的 `-p` 與 SDK 執行:只有在資料夾被信任之後,才會套用 `.claude/settings.local.json` 的 allow 規則
+- 變更 self-hosted runner:會拒絕 session 資料夾或儲存庫路徑為符號連結的 session,`checkout` hook 的 checkout 除外
+- 移除雲端 session 與 Remote Control 下,花費上限與共用預算錯誤訊息中的「ask your admin to raise it」
+- [VSCode] 新增提示建議:凡是終端機會顯示的地方都會出現,按 Tab 即可接受建議的下一個提示;在 Claude Code 的 settings.json 中設定 `promptSuggestionEnabled: false` 即可關閉
+- [VSCode] 新增不會建立 API key 的 Console 登入
+- [VSCode] 新增欄位:在 SSH、WSL 與容器視窗中,從面板登入 MCP server 時可貼上 redirect URL
+- [VSCode] 修正在 Claude Code 以另一個模型重新啟動,或透過 Remote Control 切換模型後,模型選擇器的勾選記號仍停在舊模型上的問題
+- [VSCode] 修正 effort 選擇器提供超出組織或 `maxEffortLevel` 設定所限制的 effort 上限的等級的問題
+- [VSCode] 修正登入畫面提供被 managed `allowedProviders` 設定拒絕的登入方式的問題
+- [VSCode] 修正 MCP 工具的權限提示在安全檢查引發詢問時,沒有說明 Claude Code 為何詢問的問題
+- [VSCode] 修正無法載入組織設定時的訊息要求再次執行指令的問題;現在改為請你再試一次,與分頁上的 Retry 連結一致
+- [VSCode] 改進未信任資料夾的提示:現在會說明擴充功能為何關閉,以及如何開啟
+- [VSCode] 改進系統拒絕執行 Claude Code 時的錯誤訊息:現在會說明你的 IT 團隊可以允許被封鎖的程式
+- [VSCode] 改進登入卡片:當瀏覽器對 localhost 顯示連線錯誤時,會說明該怎麼做
+- [VSCode] 變更安裝連結的 marketplace 確認按鈕為「Trust marketplace and continue」
+- [Claude Code on the web] 修正新的雲端 session 會把透過 tool search 載入的 MCP 工具描述截斷在 4,096 個字元的問題;現在上限為 16,384,與其他 Claude Code session 一致
+- [Claude Tag] 修正當貼文者的 Claude 登入已過期、且位於其組織未管理的 workspace 時,貼在 Slack 的 artifact 連結不會產生卡片的問題;現在會顯示一張純文字卡片
+
 ## 2.1.323
 - 新增 Code Mode,這是一個實驗性、需手動開啟的功能,讓 Claude 寫 JavaScript 來呼叫它的工具;開啟方式(或為整個組織關閉)請見 https://code.claude.com/docs/en/code-mode
 - 在 `plugin.json` 新增 `engines["claude-code"]`:Claude Code 版本不在 plugin 所聲明範圍內時,該 plugin 不會被安裝、更新或載入,且安裝與更新會挑選符合範圍的最新版本
