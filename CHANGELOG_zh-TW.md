@@ -2,6 +2,180 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.327
+- 新增：`/install-github-app` 在變更儲存庫（repository）之前會先跳出確認
+- 新增：`claude mcp add-json <name> -` 可從 stdin 讀取 server 的 JSON，token 就不用出現在命令列上；在 Claude Code session 內無法使用
+- 新增：當恢復（resume）的 session 之前的訊息無法載入時，會顯示一行提示
+- 新增：`/status` 現在會列出損壞的 agent、skill、command 和 output style 檔案、快捷鍵（keybinding）錯誤、無法使用的 sandbox、被忽略的權限設定，以及永遠不會匹配的 hook matcher
+- 新增：當其他設定覆蓋了 `/config` 中的某一列時，會顯示提示
+- 新增：gateway hint headers 加入 `x-claude-code-managed-settings-checksum`；只要 managed settings 設定了 `CLAUDE_CODE_GATEWAY_HINT_HEADERS=1` 就會送出，已經設定的情況也包含在內
+- 新增：支援用 `attributionProject` 設定來指定 session 的計費群組（billing group），適用於設定了 `admin.billing_group_tag` 的 Claude apps gateway
+- 新增：`/tui classic` 作為非全螢幕 renderer 的名稱；`/tui default` 仍可使用
+- Remote Control：修正在 worktree 模式下停止 server 時，會刪除執行中 session 被 git 忽略的檔案（例如 `.env`）的問題
+- 修正：使用 `--use-anthropic-git-proxy` 的 self-hosted runner 在啟動時，會刪除 `GIT_CONFIG_GLOBAL` 所指向的非空目錄；現在 runner 會保留該目錄、忽略這個變數並顯示警告
+- 修正：專案範圍（project scope）的 `claude mcp add` 和 `claude mcp remove` 會刪除 `.mcp.json` 中其他頂層 key 的問題，例如 `$schema` 或其他工具的 `servers`
+- 修正：`/export` 會在沒詢問的情況下覆寫既有檔案：現在對話框會先詢問，而 `/export <name>` 會保留該檔案並提示你執行 `/export`
+- 修正：在雲端與 self-hosted runner session 中，沒有載入任何 feature flag 時，如果核准在重啟後才送達，你已允許的命令在你按下 Stop 之後仍會繼續執行
+- 修正：按 Enter 會關閉 `/teleport` 的載入錯誤畫面
+- 修正：在 `/plugin` 中先點擊再按 Enter，會安裝或停用 plugin
+- 修正：在使用量上限選單之後多按一次 Enter，會執行打到一半的 `!` 命令
+- 修正：部分內容含有括號的 `--disallowedTools` 規則
+- 修正：auto mode 忽略部分以 `.\` 指定腳本的萬用字元（wildcard）PowerShell allow 規則，例如 `PowerShell(.\scripts\build.ps1 *)`
+- 修正：在 auto mode 下，當 Claude 啟動了第二個同樣被 auto mode 允許的腳本後，執行中的 Code Mode 腳本會遇到權限提示與拒絕
+- 變更：帳號切換後，部分預先啟動的背景 session 會被捨棄
+- 變更：在終端機中因使用量上限而暫停的 workflow，登入後會維持暫停，直到先前的登入恢復或你輸入新的 prompt
+- 修正：帶有自己 token 的巢狀 `claude` 被 `forceLoginOrgUUID` 拒絕的問題：拿不到該 session token 的命令不會再取得它的 `CLAUDE_CODE_OAUTH_SCOPES`；需要的話請自行設定
+- 修正：headless session 在程序被終止後，若同一個 UUID 的訊息被重新送出，恢復時會遺失已儲存的訊息
+- 修正：session 在空回覆或命令被終止後恢復時，若又發生當機或被移到背景，可能遺失答案或帶回已被回溯（rewind）的 prompt
+- 修正：遠端 session 在重啟期間按下 Stop 之後送出的訊息，若 Claude Code 隨後當機就會被遺忘
+- 修正：在沒有載入任何 feature flag 的雲端或 self-hosted runner session 之後再恢復時，`/clear` 後建立的 task 會遺失、已清除的 task 會復活
+- 修正：在回覆因達到輸出 token 上限而被截斷後立刻進行壓縮（compaction），會遺失該回覆的工具呼叫及其結果
+- 修正：從 `/config` 及類似命令變更設定時，儲存失敗卻沒有任何警告；現在提示列下方會顯示一行說明
+- 修正：部分檔案無法還原時，`/rewind` 會不發一語就關閉
+- 修正：當 prompt 以 `/tmp/a.txt` 這類檔案路徑開頭時，貼上的圖片會被丟棄
+- 修正：用 `--agents` 傳入的 agent 在 plugin 載入或重新載入後會消失
+- 修正：從 `--resume` 選單恢復 session 時，plugin 的 agent 會被丟棄
+- 修正：當 `https_proxy` 或 `HTTPS_PROXY` 是單純的 `host:port`，且輸入和輸出都不是終端機（桌面 app、SDK、cron）時，Claude Code 會拒絕啟動
+- 修正：Linux 上的 Claude Code 在啟動時重新啟動自己（例如第一次登入 Claude apps gateway 或開啟 Code Mode 之後），有時會回到 shell
+- 修正：當取得模型設定的請求卡住（例如在 proxy 後面）時，`claude -p` 會在第一次請求前卡住；現在 10 秒後會不帶這些設定繼續執行
+- 修正：短暫的記憶體不足（out-of-memory）錯誤後，畫面持續空白或凍結
+- 修正：一個罕見的顯示故障，可能導致畫面凍結或 session 結束
+- 修正：當程式對 session 的網路 proxy 開著數千個連線時，雲端 session 會壞掉
+- 修正：mod 的 `$.model.complete` 或 `$.model.classify` 呼叫遇到使用量上限時，turn 會卡住：現在這個呼叫會立刻拿到 API 的錯誤；mod 應該要處理這個錯誤
+- 修正：壓縮回覆含有數千個未閉合標籤時，以及部分超長 WebFetch URL 造成的卡頓；WebFetch 現在會在任何權限提示之前，先拒絕超過 2,000 字元的 URL
+- 修正：訊息含有數千個 `@` 提及（mention）時，Claude 回覆前會卡住；現在只會把前 100 個提及當作檔案去查找
+- 修正：拒絕寫入超大檔案後 prompt 會凍結；被拒絕的寫入現在會顯示簡短預覽
+- 修正：大量按鍵一次湧入 `/plugin` 的搜尋框時會當機
+- 修正：在 Linux 安全策略阻止行程對自己發送訊號的環境中，suspended session 恢復時或結束時，會出現誤報的當機回報與錯誤的結束碼（exit code）
+- 修正：遠端 MCP server 在較長時間中斷（例如 VPN 斷線）後一直保持斷線：現在大多數透過 https 以主機名稱連線的其他機器上的 server，會在背景重試大約一天
+- 修正：在壓縮之後，對於專案外、Claude 已完整讀過且未變動的檔案，Edit 會以「File has not been read yet」拒絕
+- 修正：使用 `head_limit` 和 `offset` 分頁時，Grep 會重複或跳過結果；內容與計數結果現在會依檔案路徑排序
+- 修正：Read 讀取含有未知類型輸出的 Jupyter notebook 時會失敗
+- 修正：NotebookEdit 會移除 notebook 檔案最後的換行
+- 修正：當 10 MB 以上的檔案太大無法一次讀取時，Read 工具回報的是 512KB 而不是實際大小
+- 修正：Bash 工具的變更檔案 diff 沒有列出二進位、過大或數量過多而無法顯示的檔案名稱
+- 修正：當同步資料夾或遠端備援資料夾只改變了檔案的時間戳記時，artifact 發佈會失敗並顯示「the source file changed between approval and publish」
+- 修正：在要求每個新 artifact 都需核准的組織中，你已核准的新 artifact 在雲端排程任務的 session 裡仍被拒絕
+- 修正：在要求每個新 artifact 都需核准的組織中，由 Agent SDK 建構的 app 核准後，新 artifact 仍被拒絕
+- 修正：當載入清單後續內容的請求失敗時，`/artifacts` 只顯示部分清單或「No artifacts yet」：現在會重試，若仍無法載入完整清單則顯示警告
+- 修正：與 lead 使用不同模型的 in-process agent 隊友，會在 lead 的 context 上限、並以錯誤的模型進行壓縮；現在會使用自己的上限與模型，並以該模型的費率計算
+- 修正：已完成的 subagent 被同層 subagent 傳訊喚醒時，會沿用該同層 subagent 的模型與 effort
+- 修正：在非 auto mode 下，啟動背景 agent 的 subagent 自行結束而沒讀取結果時，主對話不會被告知該背景 agent 已完成
+- 修正：在桌面 app、網頁版和 SDK 中，背景 agent 在權限提示上等待 30 秒以上時，Claude 仍回報它在執行中
+- 修正：在 auto mode 下，背景 agent 對後續訊息的回覆被丟棄時，Claude 不會被告知；同時減少了等待背景命令的 agent 在該模式下重複喚醒的情況
+- 修正：背景 task 喚醒 subagent 後，桌面 app、網頁版 Claude Code 和 VS Code 會把原始的 task 通知顯示成 subagent 的 prompt
+- 修正：在 Remote Control 與 Claude Desktop session 中，從其他 session 以「later」優先順序送出的訊息會加入執行中的 turn，而不是等它結束
+- 修正：逾時或觸發速率限制（rate limit）後，傳給雲端與 Remote Control session 的訊息會以過期的位址被回報為失敗；現在 Claude 會說明訊息可能已經送達
+- 修正：在 Claude 工作期間送出的訊息被 `UserPromptSubmit` hook 擋下時，雲端 session 沒有給出任何錯誤
+- 修正：失敗的 hook 沒有任何顯示：背景 agent 中的 SubagentStop、`/clear` 和 `/resume` 時的 SessionEnd，以及全螢幕下的 CwdChanged 和 FileChanged
+- 修正：執行失敗的 Stop hook 被顯示成「已回報問題」
+- 修正：Stop hook 執行期間，focus view 會一直隱藏已完成的回覆
+- 修正：當 mod 為工具呼叫加入 context 時，Claude 會收到兩次很長的 managed PostToolUse hook 輸出
+- 修正：當專案的 `.claude/settings.json` 把 `ANTHROPIC_BASE_URL` 設為 LLM gateway 時，部分終端機 session 中的 `/model` 會列出錯誤的模型
+- 修正：當 `CLAUDE_CONFIG_DIR` 指向其他資料夾時，`/statusline` 仍寫入 `~/.claude/settings.json`
+- 修正：Windows 上的 `claudeMdExcludes` 模式無法匹配磁碟機代號大小寫不同的路徑
+- 修正：當 worktree 頂層有名為 `HEAD` 的檔案或資料夾時，`claude agents` 和 `claude rm` 會拒絕移除已完整推送的 session（「The worktree has unpushed commits」）
+- 修正：在有大量雲端或 Remote Control session 的帳號上，過長的 ListAgents 結果會隱藏大部分 session：現在長清單會分頁
+- 修正：對擁有數萬個 connector 工具權限的組織，恢復的 session 中 turn 變慢
+- Self-hosted runner：修正由 session 的腳本或 hook 啟動的 `claude -p`，因繼承了 session 本身的重試設定而去等待速率限制的問題
+- 修正：伺服器拒絕變更時，花費上限（spend limit）選單仍回報上限已變更
+- 修正：在 `/tasks` 的 task 詳細頁再按一次 `x`，會連下一個 task 也一起停止
+- 修正：剛出現的權限提示會忽略 Esc
+- 修正：延後載入資料列的清單有時會忽略 Enter 和方向鍵
+- 修正：在按 ← 開啟 agents 視圖之後馬上用 ctrl+c 離開，會出現空白畫面，且 shell 裡留下多餘的滑鼠控制碼
+- 修正：在信任（trust）提問之後立刻按 Ctrl+C，終端機會停留在全螢幕狀態
+- 修正：在全螢幕模式下按 ← 開啟 agents 視圖時，shell 會在畫面上閃現
+- 修正：終端機顯示問題：Ghostty 調整大小時大多數捲動緩衝區（scrollback）錯亂、舊版 tmux 下的 Windows Terminal 與 VTE 0.50.0 中連結位址被隱藏，以及 16 色下沒有選取反白
+- 修正：在 kitty、Ghostty 或 iTerm2 內的 tmux 開啟 `allow-passthrough` 時，部分列會亂碼
+- 修正：在 session 中新增或拒絕（declined）了一個 server 後，`/mcp` 卻顯示沒有設定任何 server；現在會提示該怎麼做
+- 修正：`/hooks` 漏掉由 `--settings` 提供的 hook
+- 修正：`/` 選單會為同名的每個 skill 各列一行，但每一行實際上都執行第一個
+- 修正：選定的 session 恢復失敗時，`/teleport` 沒有顯示任何訊息
+- 修正：transcript 搜尋中的 n 和 N 會跳過匹配項目
+- 修正：在長 session 中取消 transcript 搜尋（ctrl+o，然後 /）後，位置會落在離搜尋起點很遠的地方
+- 修正：游標經過短行或空白行時，上下移動會遺失游標所在的欄位
+- 修正：shell 模式下，Tab 會在 `&&`、`;` 或 `|` 之後（應該放命令的位置）補全檔名
+- 修正：當分支名稱或資料夾路徑很長時，`claude --resume` 和 `/resume` 中選取的 session 會跑出畫面
+- 修正：在 `/mcp` 和 `/plugin` 中從某個工具返回時，MCP 工具清單會遺失你原本的位置
+- 修正：`/resume` 少列一個視窗其實容得下的 session；以及在大多數花費上限（spend cap）之後顯示的「Resend your message」提示，而重送其實沒有用
+- 修正：MCP server 的長問題在一列後被截斷、文字欄位貼上長內容時沒有任何提示就被隱藏，以及 `/plugin` 選項和 `/login` 的 Bedrock 與 Vertex 步驟中出現重複的分隔線
+- 修正：含有連結或顏色的命令輸出，其「+N lines」計數偏高；以及視窗很短時，transcript 的 `?` 說明會把離開方式藏起來
+- 修正：在 `/chrome` 的瀏覽器清單中按兩次 Ctrl+C 無法關閉
+- 修正：在螢幕閱讀器模式下，太早在 agent 的計畫核准畫面輸入數字並按 Enter，會讓下一個數字也被丟掉
+- 修正：開始製作簡報（deck）或設計時，Claude 會嘗試讀取不存在的 design system token 檔案
+- 修正：結束時沒有說明 worktree 被保留下來
+- 修正：`/hooks` 的說明提到了不存在的輸入欄位
+- 修正：重新綁定外部編輯器按鍵後，問題對話框仍然寫著 ctrl+g
+- 修正：在 `forceLoginMethod` 設為 `console` 的電腦上，有兩則登入錯誤訊息仍指向 Claude 訂閱選項
+- 修正：變更主題後，`/config` 顯示的是對話框已關閉，而不是「Set theme to …」
+- 錯誤修正與穩定性改善
+- 改善：加快 session 第一個 Bash 命令的速度：shell 啟動檔現在可能在命令核准之前就先執行，即使最後被拒絕也一樣；設定 `CLAUDE_CODE_DISABLE_SHELL_HEAD_START=1` 可以關閉
+- 改善：較新的模型以及 PowerShell 下的 commit：現在會告知 Claude 不要 commit 可能含有機密的檔案
+- 改善：沙箱（sandbox）中的 shell 命令：當某個免除 sandbox 的命令因為權限檢查依賴 sandbox 而仍留在其中時，Claude 現在能看到這件事
+- 改善：對於不含 `rm`、但危險 `rm` 檢查無法解析的 shell 命令的拒絕訊息，讓 Claude 可以改用簡單語法重送無害的命令，而不是直接放棄
+- 改善：恢復非常長的 session：提早結束的 transcript 讀取現在會重試一次，減少訊息遺失的情況
+- 改善：兩度達到輸出 token 上限的 subagent 回答：現在更常能完整回傳，或一開始就說明內容是不完整的
+- 改善：長回覆在未識別模型上的表現：在 32,000 個輸出 token 被截斷的回覆，現在會以 128,000 的上限繼續
+- 改善：壓縮之後關於已完成 subagent 的提醒：如果 Claude 讀不到該 agent 的輸出檔，現在會被告知用 `SendMessage` 去問該 agent
+- 改善：同時設定 API key 和 Anthropic profile 時的警告：現在會說明正在使用哪一個，以及如何切換到 profile
+- 改善：`/plugin`：移除 marketplace 前的詢問現在會說明其 plugin 的設定與已儲存資料會被刪除，且 marketplace 頁面不再顯示另一個 marketplace 的錯誤
+- Windows：改善在沒有 Git Bash 也沒有 `pwsh` 在 PATH 上時的啟動時間，現在會立即檢查 PowerShell 的標準安裝位置；System32 的 `powershell.exe` 現在優先於 PATH 上較前面的那一個
+- 改善：當 PATH 指向 Git for Windows 的 bin 資料夾時，Windows 的啟動時間：直接啟動 git.exe，而不經過它的 launcher
+- Windows：改善 PowerShell 工具的速度，每個命令最多快約半秒
+- 改善：在 auto 與 bypass permissions 模式下，Bash 工具變更檔案 diff 的就緒速度
+- 改善：在 macOS 和 Linux 上，對非常深層且不存在路徑的 Bash 權限檢查速度，以及對含有 URL 的超長文字進行機密遮蔽（secret masking）的速度
+- 改善：transcript 搜尋現在能找到編輯內容與寫入檔案中的文字
+- 改善：讀取大型 PNG 圖片的速度，以及用來取代它們送出的 JPEG 品質
+- 改善：Artifact 工具現在可以用 artifact 頁面顯示的位址來讀取已上傳的檔案；其他形式仍會失敗，多數會附上訊息，說明上傳檔案要依 id 逐一讀取、每次呼叫一個
+- 改善：Artifact 工具在某些不使用 `prompt`、`limit` 和 `label` 的呼叫中會忽略它們，而不是讓呼叫失敗
+- 改善：`/mcp` 中的 MCP server 頁面：本地、遠端和 agent server 共用同一種版面，選單以 Back 結尾，且在螢幕閱讀器模式以外不再為動作編號；請使用方向鍵和 Enter
+- 改善：窄螢幕終端機：`/status`、表單和詳細頁面的排版更好，`/model` 和 `/effort` 可在約 40 欄寬下使用，且 `←/→ to adjust` 之類的按鍵提示會保留
+- 改善：`/install-github-app`：儲存庫、secret 和 API key 步驟改用標準清單與按鍵，訊息更簡短，並加入 spinner 與更清楚的錯誤訊息
+- 改善：`/desktop`：下載詢問改用標準清單，而不是 y/n
+- 變更：`ExitWorktree` 在移除可能含有未儲存工作的 worktree 前會先詢問；在 don't-ask 模式或沒有人可回答時會被拒絕，除非有 allow 規則、auto 或 bypass permissions 模式允許
+- 變更：當 `.mcp.json` 把 server 列在頂層、沒有 `mcpServers` key 時，`claude mcp add --scope project` 會停止而不是覆寫該檔案
+- 變更：大多數權限提示上的方向鍵會停在 No，而不是循環繞回；超過最後一個選項的數字會移到 No
+- 變更：路徑檢查會拒絕部分符號連結（symbolic link）
+- 變更：調整了「位於工作目錄內」的判定方式，因此部分路徑現在會要求權限
+- 變更：`permissions.blockReadsOutsideWorkingDirectories` 在 bypass 與 auto 模式下會對更多 Bash 命令詢問，並在 auto 模式下拒絕部分命令
+- 變更：`permissions.blockReadsOutsideWorkingDirectories` 會拒絕更多指向 Read 或 Edit deny 規則下路徑的 Bash 命令，這些過去是用詢問的
+- 變更：auto mode 在退回使用計費的分類器（classifier）請求時所顯示的通知，現在會說明即將發布的版本將移除這個退回機制；原本會被檢查的每個動作都會改為詢問或拒絕
+- 變更：auto mode 會忽略更多會執行任意套件的 allow 規則，例如 `Bash(pnpm dlx *)`，以及已被忽略規則的路徑或版本形式（`/usr/bin/npm run:*`）；這些由安全檢查來決定
+- 變更：`/sandbox` 和大多數 `/config` 的值清單在螢幕閱讀器模式以外不再編號；請使用方向鍵和 Enter
+- 變更：變數展開後變成超長文字的 Bash 命令會被拒絕，並附上訊息說明請改用較短的值或檔案
+- 變更：PowerShell 工具會在多一種命令之前先詢問，即使有規則指名該命令也一樣；沒有人可回答時會被拒絕，除非有整個工具層級的規則、auto mode 或 bypass permissions 模式允許
+- 變更：被同層 subagent 的訊息恢復的 subagent，現在會遵循 session 的權限設定；它可能會詢問，或在沒有人能回答時被拒絕
+- 變更：`--worktree` 搭配位於啟動資料夾旁邊的相對路徑 `--add-dir` 時，Bash sandbox 會取得該資料夾，而不是 worktree 旁邊的那個
+- 變更：部分 `--worktree` 搭配位於啟動資料夾上層（例如 `..`）的相對路徑 `--add-dir` 的啟動方式，現在只會給 Bash sandbox 和 `--bg` session 該 worktree
+- 變更：Claude in Chrome 會拒絕上傳部分憑證檔案；請自己把這些檔案附加到網頁上
+- 變更：在要求每個新 artifact 都需核准的組織中，只由 plugin 建立或允許的 artifact 可能會被拒絕
+- 變更：在要求每個新 artifact 都需核准的組織中，沒有人可詢問的 session 會立刻拒絕新的 artifact，不會出現權限提示
+- 變更：設定關閉 Artifacts 之後，Artifact 工具會拒絕呼叫，已在執行中的 session 也一樣
+- 變更：Artifact 發佈提示在 subagent 中，以及在背景 task 結果、他人訊息或壓縮之後，不再提供「don't ask again」
+- 變更：`claude plugin eval` 會保留其 deny 規則，優先於 plugin 的權限 hook，並標示出被 hook 放行的呼叫
+- 變更：MCP server 日誌現在記錄 elicitation 請求與 hook 回應的模式、動作和欄位名稱，而不是完整內容
+- 變更：大多數提示在用 `fg` 恢復後的短時間內，會忽略 Esc 以外的答案
+- 變更：Code Mode 在已安裝的 mod 掛接工具呼叫（hook tool calls）時不再拒絕啟動；管理員仍可在 managed settings 中將 Code Mode 保持關閉
+- 變更：未指定模型而啟動的 subagent，恢復時會維持在它原本啟動的模型，包括 `/model` 之後
+- 變更：某個模型上的第一個 subagent 現在會等待最多 1.5 秒（`claude -p` 為 10 秒），從 Anthropic 取得該模型的設定，而不是在沒有設定的情況下就啟動
+- 變更：重新啟動的背景 subagent，以及自行開始的 turn，現在會等待 plugin 載入完成
+- 變更：prompt 歷史紀錄會省略大多數由另一個 Claude Code session 啟動之 session 的啟動 prompt，例如由 Claude 執行的 `claude --bg`
+- 變更：Amazon Bedrock、Google Vertex AI 和 Microsoft Foundry 的終端機 session 中，subagent 的進度摘要改為依據簡短筆記而非整段對話撰寫，大幅減少 token 用量
+- 變更：非互動（`-p`）模式在第一次請求前會執行更少的 git 命令
+- 變更：首次執行設定在遠端 VS Code、Cursor 和 Devin Desktop session 中會略過終端機設定，因為那裡無法變更設定
+- 變更：全螢幕文字選取會排除系統、思考（thinking）和傳入訊息列的圖示字元（glyph）
+- 變更：Anthropic 代管的雲端 session 會忽略更多儲存庫的 flag 與 plugin 派送設定；其 `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` 現在最多只等同於 `DISABLE_TELEMETRY`
+- [VSCode] 新增：Explorer 右鍵選單中的「Claude Code: Add to Chat」，可在聊天中 @ 提及所選的檔案與資料夾
+- [VSCode] 修正：當 PreToolUse hook 要求確認時，權限提示沒有顯示它給的原因 (anthropics/claude-code#85950)
+- [VSCode] 修正：權限提示標題中，過長的工具與檔案名稱被截斷
+- [VSCode] 修正：你在終端機 session 的 diff 中輸入內容、而 Claude 又再次編輯同一個檔案後，diff 顯示的仍是前一次提議的編輯
+- [VSCode] 修正：當 Escape 用來關閉回饋或「Build a custom style」對話框、@ 提及選單、模型、模式或「+」選單，或其他彈出視窗時，同時也會停止 Claude 的回應
+- [VSCode] 改善：Claude 連續進行多次編輯時的速度：排隊中的編輯共用同一次等待新問題的時間；某個問題可能會隨後續的編輯一起回報
+- [VSCode] 改善：當 `PATH` 上有 `rg` 時，大型工作區中 @ 提及檔案搜尋的速度；結果排序現在與終端機大致相同，對錯字的容忍度較低
+- [VSCode] 改善：啟動速度：第一次開啟的資料夾、空白視窗和 worktree 中，模型選擇器會立即就緒，第三方 provider 除外
+- [VSCode] 變更：當同一視窗中的終端機 session 送出 prompt 時，聊天編輯的 diff 會保持開啟並持續要求核准
+- [VSCode] 移除：IDE 連線中未使用的工具（openFile、saveDocument、getOpenEditors 及相關工具）
+
 ## 2.1.326
 - 新增支援在啟用 agent teams 時開啟 Code Mode；如果你已經開啟過，之後啟用 teams 的 session 會直接以 Code Mode 啟動
 - 新增啟動警告：當 `--allowedTools`、`--disallowedTools` 或 `--tools` 的值裡有看起來不像完整規則（rule）的項目時會提醒
