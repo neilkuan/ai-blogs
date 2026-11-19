@@ -2,6 +2,152 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.328
+- 新增 auto mode，支援 Amazon Bedrock、Google Cloud 的 Agent Platform、Microsoft Foundry 以及 Claude apps gateway 上的 Claude Opus 4.6 和 Sonnet 4.6；沒有設定權限模式（permission mode）的互動式 session 會預設啟用
+- 新增 `mcp_tool` hook 的 `"onFailure": "block"`，行為與 command 和 HTTP hook 一致：hook 呼叫失敗時會封鎖該動作
+- 新增警告：當略過權限提示的 session 所發出的訊息可能被雲端 session 擱置並丟棄時，會顯示提醒
+- 當 OpenTelemetry exporter 沒有設定 endpoint、資料很可能會遺失時，`/status` 和 `claude doctor` 現在會顯示提示
+- 新增 `CLAUDE_CODE_DISABLE_DEFERRED_TOOL_RESUME`，讓 host 可以阻止 `claude -p --resume` 和 `--continue` 去執行被 hook 延後（deferred）的工具呼叫
+- 新增支援：嵌入 Claude Code 的應用程式可以開啟 policy plugin 的 `allowManagedModsOnly` 選項；管理員的 managed settings 仍然優先
+- 當 policy 的 `maxEffortLevel` 不是有效的 effort level 時，Claude apps gateway 現在會在啟動時顯示警告
+- Self-hosted runner：新增 `--repository-folder`，在 `--capacity 1` 時用來指定 session 存放 repository 的資料夾名稱，取代原本位於 base folder 底下的路徑；該資料夾不能是符號連結（symbolic link）
+- Self-hosted runner：新增啟動警告，當 host 的 settings.json 設定了預設權限模式、但 session 會忽略它時會提醒
+- Self-hosted runner：`claude self-hosted-runner orchestrator` 新增 `--hook-label`，可將指定的 session label 傳給 `spawn-runner` hook
+- Self-hosted runner：`claude --environment` 新增 `--metadata key=value`，用來為 `spawn-runner` hook 標記 session
+- Self-hosted runner：orchestrator 的 `/metrics` 新增 `claude_code_self_hosted_orchestrator_session_queue_wait_by_reason_seconds`，可以區分重新開啟的 session 與新 session 的等待時間
+- Self-hosted runner：新增 orchestrator 指標 `claude_code_self_hosted_orchestrator_sessions_given_up_total`，依原因統計 Anthropic 放棄為某個 session 啟動 runner 的次數
+- 修正 zsh 中的 Bash 指令會在以 `=` 開頭的字詞（例如 `echo ====` 或 `[ a == b ]`）處因「not found」錯誤而中止的問題；`=cmd` 不再展開成指令的路徑
+- 修正自動壓縮（compaction）會沿用 session 先前的 system prompt，而不是像 `/compact` 一樣重新建構的問題
+- 修正 markdown 渲染在某些非常長或格式錯誤的輸入下會凍結的問題
+- 修正罕見的畫面凍結
+- 修正在權限提示或提問畫面中，緊接著輸入內容時 Esc 常常被吃掉的問題；在會把 Alt 當成 Esc 加按鍵送出的終端機中，按下未使用的 Alt 或 Option 鍵現在會在該處選擇拒絕
+- 修正慢速連線把貼上的內容或終端機的回應切成兩半時，這些內容被當成輸入打進 prompt 的問題
+- 修正在無法讀取 scheduled tasks 檔案時（於第三方 provider，或關閉 telemetry 或 feature flag 的情況下），儲存排程任務會把專案中其他已儲存任務清除的問題
+- 修正專案的 scheduled tasks 檔案中某個排程任務有打字錯誤時，下次儲存該檔案就會把它刪掉的問題
+- 修正在訊息延遲儲存時，已恢復的雲端 session 可能遺失壓縮摘要或近期訊息的問題
+- 修正 spinner 與 subagent 上的 token 計數把重試的回覆重複計算、漏掉非串流回覆，以及在 Claude 思考期間停滯不動的問題
+- 修正用量額度（usage credits）在回應途中用完時，錯誤訊息卻寫成速率限制（rate limit）的問題
+- 修正在 Claude Desktop 以外，設定 `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS` 且位於會拒絕 beta 的 gateway 後方時（Bedrock、Agent Platform、Foundry 或 Claude apps gateway），auto mode 每個 turn 都失敗的問題
+- 修正 `CLAUDE_STREAM_IDLE_TIMEOUT_MS` 無法延長 gateway、自訂 base URL 和雲端 provider 上 5 分鐘連線上限的問題
+- 修正部分第三方 provider 上的 Claude Desktop session（排程任務除外）在大型工具結果之後，因「Prompt is too long」而永久結束的問題；現在會排除最大的那些結果
+- 修正輸入 schema 以 `anyOf`、`oneOf` 或 `allOf` 開頭的 MCP 工具，在第三方 provider 上或關閉 telemetry 或 feature flag 時消失的問題
+- 修正輸入 schema 無效的 MCP 工具會在第三方 provider 上或關閉 telemetry 或 feature flag 時導致請求失敗的問題；現在會排除該工具，並告知 Claude 原因
+- 修正當 Bedrock、Google Cloud 的 Agent Platform 或 Foundry 拒絕 subagent 進度摘要的 effort 設定時，該 subagent 模型的 effort 會在整個 session 中被關閉的問題（2.1.327 的迴歸（regression））
+- 修正在 auto 或 bypass 模式以外的權限提示、計畫核准或提問開啟超過十分鐘時，Code Mode 會中止腳本的問題
+- 修正在 auto 和 bypass-permissions 模式下，Code Mode 腳本無法呼叫在前一個腳本執行期間才連上的 MCP server 的問題
+- 修正在 `claude --resume` 選擇器中選取的 session 裡，Code Mode 腳本在 auto 或 bypass permissions 模式下無法在背景執行的問題
+- 修正在同一次回覆執行了多個腳本的 session 被恢復時，Code Mode 遺失已載入的 skill、hook context 或隨權限核准輸入的備註的問題
+- 修正當 session 從選擇器恢復，或在會詢問權限的模式下恢復時，Claude 沒有被告知 Code Mode 腳本已被中斷的問題
+- 修正 Code Mode 對先前失敗腳本從未設定的頂層變數，默默使用 `undefined` 的問題
+- 修正 Code Mode 腳本在失敗指令的長輸出被截斷時沒有收到通知的問題
+- 修正 Code Mode 拒絕以 `{` 區塊開頭的有效腳本的問題
+- 修正 Code Mode 拒絕同時使用頂層 `await` 和頂層 `return` 的腳本的問題
+- 修正在 Code Mode 中，腳本讀取或寫入過的、被 @ 提及的小檔案沒有被附加的問題
+- 修正 Code Mode 把 `write()` 和 `edit()` 提供給無法呼叫它們的唯讀 subagent 的問題
+- 修正在 Code Mode 中，按下 Esc 後接著輸入 `/model` 這類指令時，Claude 會自己開始一個 turn 的問題
+- 修正 Code Mode 中的 Claude 沒有被告知「只有在你要求時才執行 workflow」，以及沒有被告知你在 `/config` 中設定的 workflow 大小的問題
+- 修正 Remote Control 重複顯示相同的中斷連線訊息，並叫你重試一個無法重新連線的 session 的問題
+- 修正遠端 session 在服務變慢時重新啟動，導致等待中的權限提示遺失、且其回答被忽略的問題
+- 修正在回溯（rewind）後接著執行 `/clear`，雲端 session 卻恢復已清除的對話的問題
+- 修正在模型串流中斷並重試後，若 runner 或 worker 遺失，遠端 session 會遺失該 turn 的工具呼叫與結果的問題
+- 修正剛啟動、或標題含有 @ 的雲端與 Remote Control session，在已開啟 Remote Control 的 session 中無法透過跨 session 訊息傳遞（cross-session messaging）連到的問題
+- 修正 Claude 被告知雲端 session 永遠無法回覆的問題；現在它會知道何時可以收到回覆，以及還能用什麼方式取得結果
+- 修正在指令移動到另一個 repository 之後，`/diff`、Remote Control session 的 Changes 面板，以及編輯旁邊的 diff 會漏掉已 commit 的內容的問題
+- 修正當 IDE extension 或其他 SDK 應用程式執行的 session，在 workflow 最後一次有進展的一小時之後才被開啟時，Remote Control 不顯示執行中 workflow 的 agent 的問題
+- Remote Control：修正開啟 Remote Control 後，閒置的 Desktop 或 VS Code session 顯示為執行中的問題
+- 修正 SDK 中斷（interrupt）已經停止背景 agent 之後，模型仍說背景 agent 還在執行的問題
+- 修正桌面應用程式與 SDK host 中的 Send now 會告訴 Claude「已停止的 web search 沒有找到結果」的問題
+- 修正在會回報 Cmd 的終端機中，Cmd+字母被打進 prompt 的問題
+- 修正全螢幕模式下，GNOME Terminal 中 Ctrl+click 會開啟兩次連結、滑鼠側鍵被當成點擊，以及暫停後反方向的第一個滾輪刻度被忽略的問題
+- 修正在 tmux 與 ssh 以外的 Konsole 中的 Shift+Enter，以及支援 kitty keyboard protocol 的終端機中，非拉丁字母鍵盤配置下的 Alt 快捷鍵
+- Linux：修正已安裝 `xclip` 或 `wl-copy` 時，用 Ctrl+Z 暫停 Claude Code 會導致在其他應用程式中貼上卡住的問題
+- Linux：修正 Ctrl+V 抓不到剪貼簿圖片、貼出舊圖片或卡住的問題
+- 修正全螢幕模式下複製的文字包含引用列（quote bar）、拖曳向上捲動時換行處的空格遺失，或在「Jump to bottom」膠囊下方漏字的問題
+- 修正貼到 `!` 指令中的圖片路徑會變成附件的問題
+- 修正在 `?` 快捷鍵列表開啟時，Ctrl+C 不顯示離開警告的問題
+- 修正全螢幕模式的 Ctrl+R 搜尋與 `/theme` 色彩編輯器在按鍵同時湧入時選錯列，以及這兩處與 `/config`、`/plugin` 的搜尋中按鍵被丟失的問題
+- 修正 GNU screen 內顏色錯誤或缺失的問題
+- 修正全螢幕模式下，大量背景通知切到開啟中對話框上緣邊框的問題
+- 修正傳給背景 agent 的訊息中，貼上的圖片被顯示成一長串檔案路徑的問題
+- 修正當 skill 的 Stop hook 與另一個 hook 的文字相同時，`/goal` 會移除該 skill 的 Stop hook，或因另一個 hook 的結果而提早結束的問題
+- 修正 `/bug` 在回報送出後卻顯示已取消的問題
+- 修正 Pro 與 Max 使用者按 Esc 無法關閉 transcript 分享詢問的問題
+- 修正 `/hooks` 在返回上一層時會丟失你原本位置的問題
+- 修正 `/export` 在名稱留空時會寫出名為 `.txt` 的檔案的問題
+- 修正 Zed 中的 `/terminal-setup` 會把符號連結的 `keymap.json` 換成一般檔案的問題
+- 修正在要求更新既有 workflow 檔案時，`/install-github-app` 卻新增 code review workflow 的問題
+- 修正在你返回之後，當緩慢的儲存或移除操作才完成時，`/plugin` 會重新開啟某個 skill 或關閉目前頁面的問題
+- 修正在變更仍在執行時離開某個 plugin 後，`/plugin` 會詢問要解除安裝錯誤的 plugin，或忽略 Esc 的問題
+- 修正在搜尋無結果或點擊分頁列之後，`/plugin` 的 Installed 分頁無法輸入文字與使用方向鍵的問題
+- 修正在 `/plugin` 中按住 Enter 會關閉多個已安裝 plugin 的問題
+- 修正 1M context 模型上，`/usage` 的 plugin 總計停在 2,000 tokens，以及未選擇模型時 `/usage` 與 `/plugin` 的 token 估算偏低的問題
+- 修正在 Bedrock access keys 步驟按 Esc 會關閉 `/login`、而不是返回上一步的問題
+- 修正 `/exit` 與 Ctrl+D 對執行中工作的描述不一致，以及 `/exit` 針對已停止的 workflow 仍顯示警告的問題
+- 修正 Claude 在讀取共享資料夾中的 artifact、或發布到其他組織後，把 artifact 稱為私有的問題；以及當資料夾內的成員也能開啟時，卻說只有指名的人能開啟的問題
+- 修正 plugin 的 toast 有時顯示另一個 plugin 文字的問題
+- 修正在 turn 剛開始時儲存的 mod，有時會在 turn 進行中重新載入、而不是等到 turn 結束的問題
+- 修正單一格式錯誤的 `OTEL_RESOURCE_ATTRIBUTES` 項目會讓該變數的其他 label 從 metric point、event 和 span 中消失的問題。現在只會略過那一個項目
+- 修正在請求因過大而被拒絕後進行壓縮時，agent hook 執行超過逾時（timeout）時間的問題
+- 修正 `FORCE_COLOR` 設為負數時啟動崩潰的問題
+- 修正機器記憶體幾乎用盡時，secret masking 發生崩潰的問題
+- 修正 Linux 上的 Bash sandbox 在分支名稱不是有效 UTF-8 時，會在每次指令後重新命名 `.git/HEAD` 的問題
+- Self-hosted runner：修正當 proxy 或 web filter 以 HTTP 200 和 `{}` 之類的內容回應 poll 時，所有執行中的 session 都被停止的問題；runner 現在會重試這類 poll
+- Self-hosted runner：修正暫時性磁碟錯誤後，被保留的 clone 的物件或 ref，以及只存在於其中的 commit 被刪除的問題；現在該次啟動會直接失敗
+- 修正 self-hosted runner 在時鐘偏慢或被往回調的 host 上，因 token 到期而停止的問題
+- Self-hosted runner：修正使用 Anthropic-managed git 的 session，在 session 內的腳本或 hook 再次執行 `claude` 後，失去 GitHub git 存取權的問題
+- 修正使用 Anthropic-managed git 的 self-hosted runner，在機器的 git config 設定了 `http.proactiveAuth` 時無法 fetch 或 push 的問題
+- Self-hosted runner：修正 runner 在註冊後、設定失敗時沒有通知 server 就直接結束的問題；現在會附上原因取消註冊（deregister），隨需（on-demand）runner 也會回報啟動失敗
+- Self-hosted runner：修正當 session 正在等待另一個 session 準備同一個 repository 時（`--capacity` 大於 1），封存或重新排入佇列不會生效的問題
+- Self-hosted runner：修正在 `--trust-workspace false` 下，`.claude.json` 損毀的 session 之後每次啟動都失敗的問題；現在會以預設值啟動，並重新開啟該處被關閉的 MCP server
+- Self-hosted runner：修正當 checkout hook 或 git 輸出大量內容時，啟動失敗訊息會遺失說明失敗內容的關鍵文字的問題
+- 修正磁碟停滯數秒時，self-hosted runner 會跳過 session 結束後（post-session）hook 的問題；磁碟完全故障時，session 的結束預設可能多花 25 秒
+- 修正 self-hosted runner：在新的 Claude config 目錄中恢復的 session，不再遺失其任務清單
+- 修正 self-hosted session 在缺少其中一個 repository 的情況下啟動時，Claude 沒有被告知此事與原因的問題
+- Self-hosted runner：修正 `claude --environment` 的 `--correlation-id` 沒有傳到 `spawn-runner` hook 的問題
+- 修正 self-hosted runner 設定精靈的金鑰輪替（key rotation）建議，現在會警告撤銷金鑰會讓使用該金鑰執行中的 session 停止
+- 改善 `claude -p` 與 SDK session，現在會在背景擷取擁有自己 git repository 的 managed-settings plugin，供之後的 session 使用
+- 改善在全新機器上的 `claude -p`、SDK 和 Claude Desktop session 中，來自 git marketplace 的 managed-settings plugin 的載入速度；短時間的執行可能會晚最多 30 秒才結束
+- 改善大型 session 的恢復時間
+- 改善恢復含有大量圖片的 session 時的記憶體用量
+- 改善執行緩慢指令或工具的長時間 SDK 與桌面 session 的記憶體用量與回應時間
+- 改善 auto 與 bypass-permissions 模式下 Code Mode 的速度，移除了大多數腳本之後 0.75 秒的停頓
+- 改善有 MCP server 的新 Code Mode session 的 prompt caching，並且 Claude 現在會被告知某個 server 仍在連線中，以及 server 清單何時變動
+- 改善 Code Mode 的 token 用量，工具描述變得更短
+- 改善 Code Mode，腳本執行時會顯示它正在執行的指令及其輸出
+- 改善 Code Mode 的編輯：沒有任何變更的編輯不再中止腳本，且 Claude 會被告知失敗的編輯在哪裡有匹配、或最接近哪裡
+- 改善 Code Mode：腳本失敗時，Claude 現在會被告知哪些工具呼叫仍在執行
+- 改善 Claude 在 Code Mode 的 auto 與 bypass 模式下啟動 dev server 的方式：Claude 會被告知要把它們當作背景任務執行，並顯示在 `/tasks` 中
+- Windows：改善 Code Mode，告知 Claude 腳本中的 shell 指令是在 Git Bash 中執行，且會執行 PowerShell 別名（alias），而不是同名的函式
+- 改善同時啟動多個 in-process teammate 的情況：出現「Lock file is already being held」的次數大幅減少
+- 改善 computer use 核准對話框：現在會顯示每個 app 的存取等級，以及更白話的警告
+- 改善跨 session 訊息傳遞：當雲端 session 或另一台電腦沒有列出時，Claude 現在會說明這是因為 Remote Control 處於關閉狀態
+- 改善 `claude -p` 的文字輸出，當來自另一個 session 的訊息被擱置或丟棄時會在 stderr 說明，並告知如何允許
+- 改善 Claude 對「誰能開啟它所發布的 artifact」的回答：現在 Claude 會被告知要重新檢查該 artifact，而不是重複上一次發布時的答案
+- 改善已恢復的 self-hosted runner session：Claude 現在會檢查先前的工作是否還在，並說明缺少了什麼
+- 變更第三方 provider 上 Opus 4.6 和 Sonnet 4.6 的 plan mode 與 Bash 提示，改為使用並提供 auto mode，與較新的模型一致；`disableAutoMode` 會同時關閉這兩者
+- 變更 Code Mode，不再對腳本的輸出執行 UserPromptSubmit hook（包含 managed hook）；若要遮蔽（redact）該輸出，請使用搭配 `updatedToolOutput` 的 PostToolUse hook
+- 變更大多數模型上的 `/code-review`，只回報 bug 與違反 CLAUDE.md 的地方；若要做重用、簡化與效率方面的清理，請執行 `/simplify`
+- 變更大多數模型上的 `/code-review`，會將每個發現標記為 Important、Pre-existing 或 Nit，並在每份摘要結尾附上建議的修正；沒有問題的 review 清單現在會顯示「Code review found no issues.」
+- 變更 `claude.ai <name>` 格式的 `deniedMcpServers` 項目，現在也會套用到雲端與 self-hosted runner session 中的該 connector
+- 變更 managed `PostToolUse` hook，不再對執行前就被拒絕的呼叫觸發：不會有 log 記錄、改寫、封鎖或停止；`PostToolBatch` 仍會收到大部分這類呼叫，且不會標記為被拒絕
+- 變更 `/bug`，送出前會先詢問 Yes 或 No，因此連按 Enter 不會再送出回報或開啟 GitHub
+- 變更在 `claude -p`、Agent SDK、desktop 和 VS Code 中的 subagent，在設定 `CLAUDE_CODE_FORK_SUBAGENT=0` 時預設會等待自己的 subagent
+- 變更設定 `CLAUDE_CODE_FORK_SUBAGENT=0` 的 `claude -p`，會把一個背景 subagent 與它所等待的 subagent 一起計入同一個 10 分鐘等待時間；較長的鏈請調高 `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS`
+- 變更被 PermissionRequest hook 改寫成「排除在 sandbox 之外」指令的 shell 指令，現在會在 sandbox 外執行
+- 變更 Claude in Chrome 歡迎畫面與 `/chrome`，說明 Claude Code 會在 Claude 對網站採取動作前先詢問，除非你的權限模式或 `/permissions` 中的規則已經給出答案
+- 變更第三方 provider 上，或關閉 telemetry 或 feature flag 時的 Claude Desktop 與 Agent SDK session：在有提問開啟時被關閉，會直接結束該 turn，而不是在沒有答案的情況下繼續
+- 變更在第三方 provider 上，或關閉 telemetry 或 feature flag 時，貼上的文字會被標記為「貼上的內容」告知 Claude
+- 變更 Anthropic API 上終端機 session 的 subagent 進度摘要，改由預設的小型快速模型根據簡短筆記撰寫（關閉 telemetry 時亦同），使用的 token 少很多
+- 變更無法啟動的 sandbox 的回報方式（除非設定了 `sandbox.failIfUnavailable`）：下一個要在 sandbox 中執行的 Bash 指令會被拒絕，並說明此 session 的 sandbox 已關閉
+- 變更 `/list-agents`，只顯示清單給你自己看；需要時 Claude 會自行列出 session
+- Self-hosted runner：變更內建的 `gh api`，在 settings 依名稱保護 Claude 的 GitHub 工具時預設關閉；`--use-anthropic-gh true` 可以開啟
+- Self-hosted runner：變更在 session 自己的 `claude` 啟動之前、或結束之後，由包裝腳本（wrapper script）執行的 `claude`，不再擁有 Anthropic-managed git
+- Self-hosted runner：變更 `CLAUDE_RUNNER_SESSION_UUID` 和 `CLAUDE_CODE_REMOTE_SESSION_UUID`，現在兩者都會為 session 及其 `checkout`、`post-session` 和 `spawn-runner` hook 設定
+- 變更 `--capacity 1` 的 self-hosted runner，當 session 要 push 的 repository 路徑是符號連結時，會更早拒絕該 session
+- [VSCode] 新增提示：當來自另一個 session 的訊息被擱置時會顯示通知，並附上可允許它的設定檔連結
+- [VSCode] 修正權限提示在面板高度不足，或指令、URL 或描述很長時，會截掉 No 按鈕、回覆欄位或標題的問題
+- [VSCode] 修正失敗或被封鎖的工具呼叫沒有顯示原因或原因被截斷，以及 Glob 和 Grep 把錯誤算成結果的問題
+
 ## 2.1.327
 - 新增：`/install-github-app` 在變更儲存庫（repository）之前會先跳出確認
 - 新增：`claude mcp add-json <name> -` 可從 stdin 讀取 server 的 JSON，token 就不用出現在命令列上；在 Claude Code session 內無法使用
