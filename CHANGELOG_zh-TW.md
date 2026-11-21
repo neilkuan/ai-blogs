@@ -2,6 +2,150 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.330
+- 新增支援登入由 Anthropic Enterprise Admin Console 管理的組織：執行 `claude auth login` 之後，Claude Code 會套用該組織的設定，並使用其雲端供應商或 gateway
+- 新增 easel，一個內建的 mod，會在你要求時畫出圖表，也會在 MCP 指標結果下方顯示圖表；適用於 Pro、Max，以及（在可用的情況下）macOS 與 Linux 上的 Team 和 Enterprise；可在 `/config` 中關閉自動產生圖表
+- 新增 `CLAUDE_CODE_FULL_SIGN_IN_LINK=1`，可印出完整的登入連結，適用於短連結出現錯誤，或有腳本需要從連結中讀取值的情況
+- Self-hosted runner：新增 `--start-dir` / `SELF_HOSTED_RUNNER_START_DIR`，讓 Claude 從儲存庫（repository）中的某個資料夾開始工作，而設定與 hook 的載入方式與不使用此選項時相同
+- 在雲端與 self-hosted runner 的 session 中，當 plugin marketplace 因其儲存庫不屬於該 session 而無法擷取時，新增提示訊息
+- Self-hosted runner：新增提示訊息，當 Anthropic 託管的 git 拒絕某個 plugin 自己的儲存庫時，會指出是哪個 plugin 以及該怎麼處理
+- `claude plugin install --json` 的結果新增 `commandPrinted`（plugin 的安裝指令有寫入 stderr 時為 true）與 `commandFailed`（指令以錯誤結束、被終止或逾時時為 true）
+- self-hosted runner 的 `/metrics` 新增 `claude_code_self_hosted_runner_order_to_registered_seconds`：從工作指派（work order）發出到註冊被接受的秒數，適用於由 orchestrator 產生的 runner
+- self-hosted runner 的 `/metrics` 新增 `claude_code_self_hosted_runner_order_to_first_session_seconds`：從工作指派到第一個 session 被交付的秒數，適用於為某個 session 而啟動的 runner
+- 修正 Claude Code 在壓縮（compact）超長對話後，會凍結長達數分鐘的問題
+- 修正 WebFetch 在某些頁面上讓 session 凍結數分鐘，以及在另一些頁面上回傳空結果的問題
+- 修正 `ExitWorktree` 與離開 worktree 的對話框，會刪除另一個執行中的 Claude Code session 正在使用的 worktree 的問題
+- 修正多個 Claude Code 行程同時儲存使用者設定時，變更內容遺失的問題
+- 修正最後一則儲存的訊息時間戳記（timestamp）缺漏或無效時，`--continue` 與 `--resume` 會開啟空白 session 或失敗的問題
+- 修正在 Linux 與 WSL 上，睡眠兩分鐘以上之後的第一個 prompt，會在已斷線的連線上白等三分鐘的問題
+- 修正當許多 MCP 工具的輸入 schema 被 API 拒絕時，回合（turn）會失敗並出現 "JSON schema is invalid"，且 session 檔案暴增數 MB 的問題
+- Linux：修正在含有大型被忽略資料夾（例如 `node_modules`）的緩慢儲存庫中，Bash 指令會等上數秒，且在 session 剩餘時間都不顯示檔案 diff 的問題
+- Windows：修正在沒有自訂啟動檔案的機器上，Git Bash 啟動花了 10 到 60 秒之後，Bash 指令在 session 剩餘時間都跑得比較慢的問題
+- 修正在變更某個檔案的回合結束後，兩個排隊中的 prompt 或疊在一起的 skill 同時執行時，`/rewind` 有時會還原成檔案較舊版本的問題
+- 修正核准權限提示時附加的文字與圖片，在被核准的指令或工具之後失敗時會被丟棄的問題
+- 修正在終端機的 prompt 輸入框中 @ 提及（@-mention）來自 claude.ai connector 與 plugin server 的 MCP 資源時，資源沒有被附加的問題
+- 修正 subagent 所宣告的 MCP server，會在其中一個 subagent 結束時被關閉，而其他 subagent 或 session 仍在使用它的問題
+- 修正 Claude in Chrome 在短暫連線問題後一直顯示「未連線」，即使 Chrome 已開啟且已登入的問題
+- 修正在 Amazon Bedrock（Mantle）上、未選擇模型就啟動的終端機 session，會忽略已釘選的 Opus 模型，並且在宣告後備（fallback）後仍然呼叫無法使用的預設模型的問題
+- 修正在全螢幕模式下收到 plan 時，你正在輸入的其餘內容會遺失的問題
+- 修正名稱不同的 claude.ai connector 因共用同一個 server URL 而被丟棄的問題（anthropics/claude-code#101856）
+- 修正多個 `claude plugin` 指令同時執行時，plugin 從已安裝清單中消失的問題
+- 修正多個 task 更新同時執行時，task 的相依關係與 metadata 遺失的問題
+- 修正磁碟已滿時，不完整的 `~/.claude.json` 備份會被保留並擠掉完好備份的問題
+- 修正在有路徑範圍規則（path-scoped rules）或 Read deny 規則的專案中，Code Mode 的程式碼讀取數百個檔案後會長時間停頓的問題
+- 修正 Claude 在 Code Mode 中呼叫內建圖表工具時會失敗的問題
+- 修正在 auto 與 bypass permissions 模式下，Code Mode 會忽略 MCP 工具從腳本中要求結束回合的請求的問題
+- 修正在 auto 模式的 Code Mode 中，當腳本載入 skill 後 mod 又新增了一則備註，會丟失先前的 thinking 並重寫 prompt cache 的問題
+- 修正 Code Mode 在按 Esc 與執行 `/compact` 之後，沒有還原腳本曾讀取過的檔案的問題
+- 修正在 Claude 第一次回覆前，`/context` 在 Code Mode 中少算系統工具的問題
+- 修正已停止的背景 subagent 有時不會維持停止狀態的問題
+- 修正在由 app 或 SDK 執行的 session 中，Claude 仍在等待一個剛好在完成時被停止的背景 agent 的問題
+- 修正背景 session 在核准 plan 後，有時會以先前的權限模式醒來的問題
+- Remote Control：修正從手機或網頁按下 Stop 結束背景 agent 後，相關提示在終端機中顯示得像是你自己輸入的問題
+- Remote Control：修正在對話進行中途開啟後，行動 app 會隱藏 Diff 與 pull request 按鈕，或把已停止的 session 顯示為執行中的問題
+- 修正使用 `claude -p --continue` 時，SessionStart hook 寫入的環境變數會遺失的問題
+- 修正當 `claude -p` 的輸出寫到已滿的磁碟上的檔案時，會以 0 結束且沒有任何訊息的問題：現在會印出錯誤並以 1 結束，不過已滿的 NFS export 可能不會被察覺
+- 修正在 `/context` 之後、第一則訊息之前切換模型時，system prompt 仍保留先前模型指示的問題
+- 修正模型在回合中途被更換後，Claude 有時會回覆其 commit 署名提醒並提早結束回合的問題；若 managed settings 設定了 PR 署名行，仍可能發生
+- 修正 Esc 無法結束正在等待緩慢或卡住的 language server 的 LSP 工具呼叫的問題
+- 修正在 language server 仍在啟動時，若同時收到多個呼叫或編輯，LSP 工具呼叫與診斷會失敗的問題
+- 修正 `/mcp` 把 plugin server 列為內建的問題：現在 plugin server 會列在「Plugin MCPs」下，`--mcp-config` 與內建 server 列在「Other MCPs」下，且 server 的頁面會標明所屬的 plugin
+- 修正當 MCP 允許清單（allowlist）或拒絕清單（denylist）排除了內建圖表工具時，每次啟動都會出現「MCP server blocked by enterprise policy: easel」警告的問題，該工具仍維持被封鎖
+- 修正 `/stats` 以 UTC 日而非你的本地時區來計算新活動的問題
+- 修正 shell 移到另一個儲存庫後，`/ultrareview` 會失敗或審查到錯誤程式碼的問題：現在會停止並列出兩個資料夾
+- 修正在未啟用 multiline 模式時，Grep 的 pattern 含有換行會回報沒有符合結果的問題；現在會回報該 pattern 被拒絕
+- 修正以位元組順序標記（byte order mark）儲存的 Jupyter notebook，被 Read 與 NotebookEdit 工具回報為無效 JSON 的問題
+- 修正含有 HTML 註解的 CLAUDE.md 與記憶檔案中，連結參照定義（link reference definitions）被丟棄的問題
+- 修正執行中的 Monitor 在結束前一直把先前的對話留在記憶體中的問題
+- 修正在第三方供應商上的某些 Claude Desktop session（排程任務除外），當超過 context window 的 PDF 接在長對話之後時，會以 "Prompt is too long" 結束回合的問題
+- 修正當兩個使用者或專案 agent 檔案宣告相同名稱時，選用哪一個取決於檔案搜尋列出順序的問題
+- 修正在沒有日誌檔的 git 儲存庫內，`claude daemon logs` 永遠不會結束的問題
+- 修正段落後方出現表情符號（emoji）前面有反斜線時，markdown 會在粗體或斜體文字之後吃掉一兩個字元的問題
+- 修正 Edit 會拒絕 Claude 設定檔中某些有效 hook 指令的問題
+- 修正 `Read` 搭配頁面範圍時，掃描的雙頁跨頁會在每一頁都顯示兩半的問題
+- 修正 HTML artifact 中的 Mermaid 圖表缺少換行與 class stereotype 的問題
+- 修正在 24 行的全螢幕視窗中，`/config` 的 Project instructions 選擇器只顯示四個選項中的一個的問題
+- 修正在 `opusplan` 或 `haiku` 下的 plan 模式中，subagent 自己的 subagent 與 fork 會在 plan 模式的模型上執行的問題
+- 修正當 gateway 拒絕小型快速模型時，WebFetch 頁面摘要會忽略 `/effort` 等級的問題
+- 修正在 Google Cloud 的 Agent Platform 上，當模型來自 `ANTHROPIC_MODEL` 或設定檔時，`claude -p` 會忽略 `--settings '{"fastMode":true}'` 的問題；這類執行現在會以 fast mode 價格計費
+- 修正在 `forceLoginOrgUUID` 之下，啟動會因一次暫時性的伺服器錯誤或連線中斷而被拒絕的問題
+- 修正 `claude mcp remove` 對 claude.ai connector 沒有給出後續做法的問題：現在會提示在 /mcp 中關閉它，或到 claude.ai 上移除
+- 修正當 claude.ai 上有一個 connector 的 URL 與 server 相同但不含 query 時，/mcp 的「Connect on claude.ai」檢查仍顯示「not connected」的問題
+- 修正 `/install-github-app` 與 `/design-login` 對被停權（on hold）的帳號顯示通用失敗訊息，而不是停權通知與申訴連結的問題
+- 修正在把 session 移到背景時，執行中的 MCP task 被回報為已停止的問題；背景 session 現在可以接續追蹤該 task，但若其 server 使用 stdio 或設定了 headers 則不行
+- 修正 self-hosted runner 在失敗回報遺失，或 session 被交還給同一個 runner 之後，會在結束之前一直忽略該 session 的問題
+- 修正在重啟時無法準備的儲存庫清單改變後，self-hosted session 會丟失 prompt cache 與先前 thinking 的問題
+- Self-hosted runner：修正在關閉 telemetry 的 session 中，當新的 runner 接手權限提示時，該提示後的工具呼叫會消失且沒有結果的問題
+- 修正在大型儲存庫中，設定了 `--push-outcome-on-release` 時，恢復的 self-hosted runner session 啟動時沒有帶上已推送的工作的問題
+- 修正當 Claude Code 每次啟動都卡住，且 `--startup-timeout-min` 介於 2 到約 6 之間時，self-hosted runner session 被顯示為執行中的問題
+- 修正在 Linux 上的 self-hosted runner session 中，`pkill -f` 會以結束碼 144 結束自己的 shell 或 runner 的問題（需要支援 `--ignore-ancestors` 的 `pkill`）
+- 修正在 telemetry 關閉或使用第三方供應商時，self-hosted runner 上的排程任務沒有工具可通知其擁有者的問題
+- Self-hosted runner：修正一個緩慢的 `spawn-runner` hook 會讓 orchestrator 無法為其空閒的 slot 領取 session 的問題；現在在有 slot 空閒時，每 4 到 6 秒輪詢（poll）一次
+- Self-hosted runner：修正 403（例如 IP allowlist 造成的）被記錄成錯誤的 secret 或 token 的問題：大多數這類記錄現在會以伺服器給的原因開頭，因此請更新比對舊字詞的 log 警報
+- 修正 self-hosted runner 針對儲存庫設定的 warn 模式，會在大多數類型的第一個發現就停下的問題：現在會繼續，每個 session 最多 50 筆，並在提早停止時告知
+- Self-hosted runner：修正在磁碟已滿的情況下啟動的 runner 仍會接 session 並使其失敗的問題；現在它們會等待空間，並在一分鐘內沒有 session 時以 1 結束，從 work order 啟動的除外
+- Self-hosted runner：修正 runner 機器沒有 git 憑證時，啟動失敗卻建議重試的問題；現在錯誤訊息會說明該問誰、以及儲存庫有誤時該怎麼做
+- 修正 self-hosted runner 的 `last_poll_age_seconds` 在 runner 從未成功輪詢時顯示為 0 的問題
+- 修正略過未指定組織的排程任務的提示訊息：現在會說明要用 `--resume` 啟動 Claude Code，因為在執行中的 session 內使用 `/resume` 不會執行該任務
+- 修正 `claude plugin validate` 錯誤地警告 mod 的 `AbovePrompt` 或 `AbovePromptList` hook 在 VS Code 中永遠不會執行的問題
+- 修正當 Claude Design 以變更後的名稱儲存檔案時，`/design-sync` 會刪除自己剛上傳的檔案的問題
+- 還原 2.1.329 對「當 `max_tokens` 超過模型或 gateway 的上限時自動重試」的移除
+- 改善 /login、`claude auth login` 與 `claude setup-token` 顯示的 claude.ai 登入連結：現在短得多
+- Windows：改善 Grep 與 Glob 的速度，不再為本機路徑上每次內建的 ripgrep 搜尋啟動 console host
+- 改善檔案 diff 的速度
+- 改善 `/config` 搜尋：名稱以你輸入內容開頭的設定現在大多排在最前面，輸入 "effort" 會找到 Model，輸入 "dark" 或 "light" 會找到 Theme
+- 改善 `/resume`：只是打開 `/model` 之類的畫面就離開的 session，現在不會再被列出
+- 改善 `/mcp` 與 `/plugin` 中的 Reconnect：當 server 仍然失敗或需要登入時，server 的頁面現在會保持開啟，並顯示原因
+- 改善 macOS 上沙箱（sandbox）拒絕清單過長時的錯誤訊息：現在會指出哪些清單太長，以及如何縮短
+- 改善全螢幕模式下的 `/plugin`：有錯誤的 plugin 頁面現在會以那些錯誤開頭
+- 改善 Team 與 Enterprise 方案上 `/ultrareview` 的費用確認：當你每月支出上限的剩餘額度低於一次審查通常的花費時，現在會告訴你還剩多少
+- 改善在 Amazon Bedrock 或 Google Cloud 的 Agent Platform 上的 self-hosted runner session：當因帳號拒絕第一個模型而改用另一個預設模型啟動時，會明確告知
+- Windows：改善 session 的資料夾位於 Claude Code 無法驗證的磁碟機上時的錯誤訊息：會說明原因，以及重試是否有幫助
+- 改善 Code Mode：現在會告訴 Claude 如何查看圖片與 PDF
+- 改善 Code Mode：按 Esc 後，已停止的指令下方現在會顯示 "Interrupted"，而不是紅色錯誤
+- 改善 Code Mode：subagent 的腳本發出數千次工具呼叫後，終端機凍結的時間大幅縮短
+- 變更週期性排程任務與 `/loop`，在其 session 持續執行期間最多可執行 30 天（原為 7 天），並會告知何時結束；在此版本之前建立的任務仍然在 7 天後結束
+- 變更更多針對根目錄、家目錄、頂層資料夾或工作資料夾的 `rm` 指令，改為需要核准；在沒有人能回應的情況下則會被拒絕
+- 變更 `deniedMcpServers` 的名稱項目，現在只會隱藏指名的那個 claude.ai connector，而不是同一 URL 上的其他 connector；若要全部封鎖，請拒絕其確切的 URL
+- 變更在某些環境中，`claude --teleport` 會印出切換分支的 git 指令而不是直接執行；搭配 `-p` 時會以 1 結束，直到你切換分支為止
+- 變更名稱含有 "sonnet" 或 "haiku" 的無法辨識模型名稱，改用較短的 system prompt，與其他無法辨識的名稱一致；設定 `CLAUDE_CODE_SIMPLE_SYSTEM_PROMPT=0` 可讓所有模型使用完整版本
+- 變更 Claude 以 `model` 設定執行的 skill（`context: fork` 的 skill 除外），讓 subagent、fork、壓縮（compaction）與 `/recap` 維持使用 session 的模型
+- 變更 subagent 的模型後備（fallback）會延續下去：沒有指定模型的 agent 與它之後啟動的 fork 會在該後備模型上執行，而它們啟動的 agent 會使用其 Bedrock region
+- Self-hosted runner：變更 `spawn-runner` hook 在前面的 hook 仍在執行時就會啟動，每個 orchestrator 最多同時 `--hook-concurrency` 個（預設為 4）；若你的 hook 無法與其他 hook 並行，請設為 1
+- Self-hosted runner：變更 Bash 指令在不需要時會略過檔案 diff，因此 transcript 可能缺少 diff；在 managed settings 中將 `bashEditDiffEnabled` 設為 true 即可取得每一份 diff
+- 變更 self-hosted runner，當 checkout hook 以狀態碼 108 結束時，會立即中止該 session 的啟動，不再嘗試其他 runner
+- 變更 prompt hook 的 `model` 欄位，現在可接受 `haiku` 或 `sonnet` 這類模型別名
+- 變更 `/design-sync` 在建置參考用 Storybook 的後備流程中，只使用專案內已安裝的 Storybook
+- 變更登入 Claude apps gateway 的終端機 session 中，subagent 的進度摘要改由簡短筆記撰寫而非整段對話，大幅減少 token 用量
+- [VSCode] 新增 `/fork`，可在最後一則回覆之後分岔（fork）對話（anthropics/claude-code#69272）
+- [VSCode] 新增 `/workflows`，會開啟顯示執行中 workflow 的 agent 地圖
+- [VSCode] 新增 `claudeCode.escapeStopsClaude` 設定；關閉後按 Escape 不會停止 Claude（anthropics/claude-code#91536）
+- [VSCode] 新增 `claudeCode.pinPrompt` 設定，讓你的訊息可以捲走而不是一直釘在畫面上
+- [VSCode] 新增 `claudeCode.contextUsageThreshold` 設定，用來決定何時顯示 context 指示器（anthropics/claude-code#93036）
+- [VSCode] 為「Open in Side Bar」指令新增 `prompt` 參數，可用於快捷鍵與擴充功能
+- [VSCode] 在 session 群組的選單中新增 Move up 與 Move down（anthropics/claude-code#98654）
+- [VSCode] 修正 VS Code 在已連線的終端機 session 每次送出 prompt 時都會開啟並聚焦其終端機的問題
+- [VSCode] 修正複製程式碼區塊時會多加一個結尾換行，導致貼上時直接執行指令的問題（anthropics/claude-code#96976）
+- [VSCode] 修正在 `/rewind` 上按住 Enter 會未經確認就還原檔案，以及雙擊 Remove 或 Delete 會未經確認就移除記憶、MCP server 或 plugin marketplace 的問題
+- [VSCode] 修正在問題卡片上按 Enter 會送出你先前的答案而不是選取目前聚焦的選項，以及選了「Other」答案後方向鍵失效的問題；已回答的問題重新開啟時會停在你選的答案
+- [VSCode] 修正按住 Enter 鍵會送出寫到一半的訊息，或執行打到一半的 slash 指令的問題
+- [VSCode] 修正在 macOS 上，Cmd+A、C、V、X 與 Z 在重新命名輸入框與對話框中無法使用的問題
+- [VSCode] 修正在 macOS 上，Ctrl+F 與 Ctrl+P 無法在訊息輸入框中移動游標（caret）的問題
+- [VSCode] 修正移到新視窗的提議 diff 上，Accept 與 Reject 按鈕沒有作用的問題
+- [VSCode] 修正 Accept 與 Reject Proposed Changes 會顯示在聊天、終端機分頁與其他檔案上方的問題；現在只會顯示在提議的 diff 上
+- [VSCode] 修正啟動緩慢的 Claude 分頁，會把鍵盤從你已繼續輸入的檔案上搶走的問題
+- [VSCode] 修正在 macOS 與 Linux 上，路徑含有 `#`、`?` 或 `%20`（例如 `C#` 資料夾）的檔案，會漏掉未儲存的變更與新問題的問題
+- [VSCode] 修正整行選取在選取晶片（selection chip）、@ 提及以及告知 Claude 的內容中多算一行，且檔案連結漏掉範圍最後一行的問題
+- [VSCode] 修正在面板中分岔的對話，會在視窗重新載入後自行重新執行舊的、尚未回答的 prompt 的問題
+- [VSCode] 修正分岔的對話會第二次執行原始對話的 `/loop` 排程的問題
+- [VSCode] 修正 /clear 沒有任何跡象顯示 session 仍在沒有新信任資料夾的 CLAUDE.md 與設定的情況下執行的問題
+- [VSCode] 修正拖曳文字選取超出對話框邊緣時，對話框會關閉並遺失已輸入文字的問題
+- [VSCode] 修正 advisor 呼叫顯示為 "Unsupported content type" 的問題（anthropics/claude-code#73499、anthropics/claude-code#64158、anthropics/claude-code#90471、anthropics/claude-code#73637）
+- [VSCode] 修正 session 清單沒有顯示側邊欄聊天 session 狀態的問題（anthropics/claude-code#93898）
+- [VSCode] 修正在單字上快速雙擊後，plan 預覽的 Add Comment 按鈕消失的問題
+- [VSCode] 修正 Edit Notebook Cell 列中長行被截斷、窄面板中權限規則被擠壓、問題卡片的標記難以看清，以及在拒絕信任提示後選單會移動聊天的問題
+- [VSCode] 修正登入被停權的帳號時，顯示通用失敗訊息而不是停權通知與申訴連結的問題
+
 ## 2.1.329
 - 新增信任對話框警告，會標示資料夾的 hook 是在哪裡宣告的
 - 在 Claude Desktop 和其他非互動式（non-interactive）host 中，當受管設定（managed settings）裡的 hook 載入失敗時，對話中會顯示警告
