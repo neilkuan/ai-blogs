@@ -2,6 +2,143 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.331
+- 新增在 Amazon Bedrock、Google Cloud 的 Agent Platform、Microsoft Foundry 和 Claude Platform on AWS 的終端機 session 中支援 Code Mode
+- 在 Claude apps gateway 新增 `oidc.groups_jsonpath`,可用 JSONPath(RFC 9535)的一小部分語法,從物件陣列中符合的項目讀取群組
+- 在 `claude doctor` 新增 API 連線區段,會回報 API 是否連得上(附上 HTTP 狀態碼或錯誤訊息),或說明為什麼沒有測試
+- 新增通知:輕觸模式(tap-mode)語音聽寫自行停止時(15 秒內沒有辨識到語音,或達到 2 分鐘上限)會顯示提示
+- 新增 `CLAUDE_CODE_DISABLE_RESPONSE_COMPRESSION`,可在會截斷壓縮回應的 proxy 後面,要求模型回傳未壓縮的回應;目前不建議用於自行代管的 runner 或 Remote Control
+- 為 Claude apps gateway 新增 `CLAUDE_GATEWAY_IDP_CONNECT_BY_HOSTNAME=1`:搭配 `oidc.use_proxy: true` 時,即使設定了 `NO_PROXY`,登入請求仍會把 `https` IdP 的主機名稱交給 proxy
+- 在 `claude_code.llm_request` trace span 新增 `gen_ai.usage.*`、`gen_ai.response.model` 和 `gen_ai.operation.name`;`gen_ai.usage.input_tokens` 包含 prompt cache token
+- 在 plugin manifest 新增 `optionalDependencies`:這類 plugin 會隨列出它們的 plugin 一起安裝,也可以單獨停用或解除安裝
+- 修正 MCP 工具呼叫在收到本機或 WebSocket 伺服器的某些格式錯誤回應時,最長會卡住 30 分鐘的問題
+- 修正 PushNotification 在無介面(headless)執行(例如排程執行)的第一分鐘內,會告訴它終端機是活躍的,而不是說明是否請求了手機推播
+- 修正 `/install-github-app` 在設定警告後找不到儲存庫時會跳過儲存庫步驟,以及 Esc 無法從工作流程清單和登入步驟返回的問題
+- 修正窄視窗中單行工具結果被截斷卻沒有省略號、/permissions 的 Auto mode 分頁出現 Markdown 星號,以及 hook 要求停止分叉(forked)skill 的原因顯示兩次的問題
+- 修正在 24 到 26 列高的視窗中,`/diff` 隱藏按鍵提示且無法選取檔案,以及在沒有任何 commit 的儲存庫中漏掉用 `git add -N` 加入的檔案的問題
+- 修正首次執行時的佈景主題清單在矮視窗中顯示的主題太少,以及 /usage 和其他較高的畫面在矮視窗中顯示亂碼的問題
+- 修正全螢幕的 `/bug` 在報告很長時會把 Yes 和 No 選項藏起來,以及在非常矮的視窗中看不到 Yes 的問題
+- 修正 /compact 和 auto-compact 在摘要引用某些 XML 標籤時,有時會遺失部分對話摘要的問題
+- 修正 Agent 工具的權限規則丟掉了送給已結束 subagent 的排隊訊息時,Claude 沒有收到通知的問題
+- 修正 Remote Control 訊息有時會顯示在正要完成的回覆上方的問題
+- 修正讀取逐字稿(transcript)的 Stop hook 在 Claude Desktop 中漏掉最後一則回覆的問題;SubagentStop hook 現在也會等待該回覆
+- 修正當 Claude 仍在思考、回覆卻陷入沉默時,雲端 session 中的 turn 和 subagent 會失敗,或在其他環境中長回覆會逾時的問題;Claude Code 現在會再重試一次請求
+- 修正當 Claude 正在讀取的雲端或網路檔案內容卡住時,Esc 和 Stop 要等約一分鐘或更久才有反應的問題
+- 修正用 `--resume` 或 `--continue` 在不同權限模式下恢復 Code Mode session 時,會遺失 thinking 和 prompt cache 的問題;在「會詢問」的模式下開始的 session,會保留該模式對腳本的限制
+- 修正在腳本執行期間輸入 `!` 或 slash 指令時,Code Mode 大約每秒送出一次請求的問題
+- 修正 plugin 更新被中斷或失敗後,會留下不完整的 plugin 資料夾,導致之後載入時缺少 skill 或其他元件的問題(anthropics/claude-code#102186)
+- Windows:修正在某些 plugin session 中,寫入 FAT32 和 exFAT 磁碟機上的檔案每次都要求權限的問題
+- 修正 Claude 無法讀取含有 null 輸出,或沒有 traceback 的錯誤輸出之 notebook 的問題
+- 修正還原失敗後,rewind 仍會刪除檔案的問題
+- 修正 auto mode 有時會拒絕 Claude 停止 /loop 的呼叫,導致下一次喚醒仍會觸發的問題
+- 修正 Workflow agent 交回報告後,它的背景 shell 和 MCP 伺服器有時仍持續執行的問題
+- Windows:修正 `/desktop` 下載舊版 Claude Desktop 安裝程式,以及舊安裝的資料夾殘留時會要求更新的問題
+- 修正當 managed settings 需要無法詢問的核准時,`claude plugin install`、`marketplace add` 等指令會卡住且沒有輸出的問題
+- 修正 subagent 模型的權限規則(例如 `Agent(model:*)`)會擋下 Claude 對「在此版本中啟動、未指定模型」的 subagent 所發的後續訊息的問題
+- 修正 PermissionRequest hook 無法把 `Skill(name:*)` 允許規則儲存到本機設定以外位置的問題
+- 修正「Ask your admin」在你被團隊的共用群組預算擋住時,會要求提高你個人的額度,以及在管理員幾分鐘前已核准你的請求時仍顯示「Request sent」的問題
+- 修正 Code Mode 會遺失長腳本輸出中段內容的問題;Claude 現在會拿到完整未截斷文字的路徑(anthropics/claude-code#111373)
+- 修正按住說話(hold-to-talk)的語音聽寫在 Claude Code 忙碌時提早停止並遺失字詞的問題
+- 修正搭配 `--bare` 的 Code Mode 沒有告訴 Claude 腳本可以呼叫什麼的問題
+- 修正自訂 API 端點回傳沒有工具名稱的工具呼叫時會當機的問題;現在該呼叫會以錯誤失敗,session 則繼續進行
+- Windows:修正機器記憶體幾乎用盡時可能發生的當機問題
+- 修正 CLI 在某些回覆時凍結,以及引用文字有時消失或顯示兩次的問題
+- Windows:修正登錄檔(registry)中的 managed settings 含有日文等非 ASCII 字元時,Claude Code 拒絕啟動的問題(anthropics/claude-code#93280)
+- Windows:修正 Remote Control 用戶端對新的 subagent 不顯示任何步驟的問題
+- 修正寫成 `@file#10-12` 的 @-mention 會附上整個檔案,而不是只附上那幾行的問題
+- 修正 Claude 誤解貼上的 artifact 邀請連結的問題;現在它會請你先接受邀請,再貼上 artifact 本身的連結
+- 修正在暫存碟已滿時,沙箱中的 Bash 指令有時無法啟動的問題(適用於檔案規則不讓指令使用暫存目錄的沙箱)
+- 改善螢幕閱讀器模式下的輸入速度,在長 session 中改善最明顯
+- 改善啟動時間:在另一個 session 剛啟動不久後再啟動的 session,不再等待模型清單;不在 git 儲存庫內、也沒有 `.claude/settings.local.json` 的 session,不再等待 git
+- Windows:改善在沒有自訂 shell 啟動檔案的機器上,session 中第一個 Bash 指令的速度
+- 改善 plugin 自動更新通知:現在會把新安裝的相依 plugin 與已更新的 plugin 分開列出
+- 改善 Code Mode 的工具搜尋,會顯示更多 MCP 工具的說明,包含其限制、格式和預設值
+- 改善 /login 和 `claude auth login --console` 顯示的 Console 登入連結:現在短很多
+- 改善 Claude 的 artifact 清單:現在會標示網頁,讓 Claude 比較不會嘗試用 Claude Docs connector 去開啟網頁
+- 改善矮終端機中的資料夾信任提示:全螢幕的 `/cd` 和 `/add-dir` 以更少列數顯示選項;啟動時的提示在警告很多時,仍會讓資料夾路徑保持在可見範圍內
+- 變更 `/ide` 中停止自動連線的提問,以及在 subagent 檢視中執行 `/clear`、`/compact` 或 `/rewind` 的提問,改為 Yes 排在第一個;預設仍停在 No,所以現在按 Down 再按 Enter 會回答 No
+- 變更 `PermissionDenied` hook 的 `retry: true` 對 Claude 的提示內容:只有在你要求過該呼叫時,才重新發出被拒絕的呼叫
+- 未來版本(2026 年 11 月 30 日當天或之後)的變更:managed `extraKnownMarketplaces` 中的 plugin marketplace 將預設自動更新。若要排除某個 marketplace,請在其項目上設定 `"autoUpdate": false`
+- Windows:變更使用登錄檔中 managed settings 的啟動行為:升級前請先檢查,因為 `HKLM` 政策的優先順序高於 `managed-settings.json`,而錯誤的值可能導致無法啟動
+- [VSCode] 新增警告與撤銷頁面的連結,用於登出時撤銷 claude.ai 登入的請求未獲確認的情況
+- [VSCode] 新增在送出非常大的選取內容或附加文字檔前的提示,並在「Prompt is too long」下方加上建議,指出過大的部分與下一步該怎麼做
+- [VSCode] 在 notebook 儲存格選單新增「Add Cell to Chat」,可連同輸出或錯誤一起附上儲存格
+- [VSCode] 新增「Fix with Claude Code」,作為錯誤與警告的快速修正(quick fix),也可用於測試預覽(test peek)和 Test Results 檢視中失敗的測試,會把問題放進聊天輸入框
+- [VSCode] 在 Source Control 檢視中,已變更檔案的右鍵選單新增「Add to Chat」
+- [VSCode] 在有合併衝突的檔案之編輯器標題,以及 Source Control 的 Merge Changes 群組中,新增「Resolve Merge Conflicts」
+- [VSCode] 修正改寫後的提示下選取程式碼會顯示原始標籤、模式按鈕閃爍 Manual、斜線選單隱藏反白列、登入圖片損毀,以及 Accept/Reject 列閃爍的問題
+- [VSCode] 修正分叉(fork)的對話會覆寫原始對話的計畫檔案的問題;無法複製計畫的 fork 或 rewind 現在會顯示警告
+- [VSCode] 修正語音聽寫在連線關閉或從未開啟時,顯示沒有辨識到語音的問題;現在會顯示連線中斷或無法連線
+- [VSCode] 修正未送出的側邊提問(side question)在面板關閉時遺失的問題
+- [VSCode] 修正重新命名 session 後 Escape 會停止 Claude,以及用 Escape 關閉 session 歷史後打字沒有任何反應的問題
+- [VSCode] 修正在從歷史恢復 session 的分頁上,Rename、Mark as Unread 和 Add to Group 顯示「still connecting」的問題
+- [VSCode] 修正寬表格和長路徑被截斷、長錯誤訊息遮住關閉按鈕、Add MCP server 表單和 Chrome 對話框中的錯誤不在可視範圍內,以及 plugin 圖片忽略編輯器佈景主題的問題
+- [VSCode] 修正之後的提示和訊息框蓋住 Rewind code 對話框,以及檢查完檔案時焦點從「Never mind」跳到「Rewind」的問題
+- [VSCode] 修正在篩選框中繼續輸入時,命令選單仍反白先前的符合項目,導致按 Enter 可能執行錯誤那一列的問題
+- [VSCode] 修正 @ 選單在第一批搜尋結果送達前,或無法搜尋超大工作區的所有檔案時,顯示「No files found」的問題;後者現在會明確說明
+- [VSCode] 修正在 MCP、Hooks 和 Memory 對話框的 Remove 或 Delete 確認、側邊提問面板的按鈕或連結,以及面板開啟時的 Bookmarks 按鈕上,Escape 會停止 Claude 的問題
+- [VSCode] 修正 diff 中 + 和 − 符號顯示成空白方框的問題(anthropics/claude-code#73069)
+- [VSCode] 修正面板被調整大小,或被隱藏後再顯示,聊天不再跟隨 Claude 回覆的問題
+- [VSCode] 修正聊天停在 bypass permissions 模式時,若設定停用 bypass,重新開啟後會變成 Auto mode,而不是你的初始權限模式的問題
+- [VSCode] 修正聊天面板在某些 CSS 程式碼區塊和 diff 上凍結的問題
+- [VSCode] 修正 context 用量指示器在 API 錯誤、「Prompt is too long」或 slash 指令後消失的問題
+- [VSCode] 修正排在已排隊的 /clear 之後的訊息遺失的問題
+- [VSCode] 修正 Manage Plugins 遺失搜尋框、搜尋沒有符合項目時沒有顯示訊息,以及沒有說明可用 plugin 清單載入失敗的問題
+- [VSCode] 修正對 notebook 和使用自訂編輯器的檔案提出的變更,會開在沒有 Accept 或 Reject 的分頁,且回答後分頁仍保持開啟的問題
+- [VSCode] 修正額度上限訊息叫 Team 和 Enterprise 成員執行 `/usage-credits` 的問題,因為成員無法從面板向管理員送出請求
+- [VSCode] 修正已輸入的訊息被「/」按鈕選單中某個指令上的 Tab,或點擊新手引導建議而清空的問題
+- [VSCode] 修正在 Claude 工作時 rewind 程式碼後,Claude 仍繼續編輯檔案的問題
+- [VSCode] 修正在 /tasks、/copy、/export、略過的 /feedback,或已在 plan mode 時執行 /plan 之後,輸入的文字遺失的問題
+- [VSCode] 修正問題卡片在按 Ctrl/Cmd+Enter 時丟掉輸入的「Other」答案,以及沒輸入任何內容時卻送出「Other」這個字的問題
+- [VSCode] 修正在 gateway 送出沒有名稱的工具呼叫的對話中,面板顯示「Something went wrong」的問題
+- [VSCode] 修正在透過 symlink 開啟的資料夾中,漏掉未儲存變更,以及 Claude 的編輯被下一次儲存覆寫的問題
+- [VSCode] 修正在 Claude 用 `cd` 切換資料夾後,@-mention 沒有附上任何東西,或附上另一個同名檔案的問題
+- [VSCode] 修正方向鍵在選取時用舊的提示取代已輸入文字,以及丟掉對已叫回提示的編輯的問題
+- [VSCode] 修正權限提示開啟期間新增的 @-mention 遺失的問題
+- [VSCode] 修正 Ctrl+1、Alt+1 或 Ctrl+Space 等快捷鍵會回應開啟中的對話框,可能導致在 rewind 確認中還原檔案或切換 git 分支的問題
+- [VSCode] 修正以檔案路徑或程式碼註解開頭的提示被送出時沒有附上選取的程式碼,且沒有 fork 或 rewind 選單的問題
+- [VSCode] 修正聊天中的檔案連結對工作區內的檔案(notebook 除外)忽略你的編輯器關聯設定的問題(anthropics/claude-code#81482)
+- [VSCode] 修正檔案分頁關閉後,選取的行仍附加在你下一則訊息上的問題
+- [VSCode] 修正按 Shift+Tab 經過 Edit 以切換到 Plan mode 後,新 session 會自動以 Edit 開始的問題
+- [VSCode] 修正在權限提示上編輯過的指令,執行時缺少你輸入或貼上的換行的問題
+- [VSCode] 修正新開啟的 Claude 分頁沒有把焦點放在訊息框,或較晚才從終端機或命令面板取得鍵盤,並把輸入的文字當成提示送出的問題
+- [VSCode] 修正 Alt+K 產生的行範圍(例如 `@app.ts#5-10`)會送出整個檔案或其前 2,000 行,而不是選取行的問題
+- [VSCode] 修正多個 subagent 等待核准時 diff 分頁開啟順序錯亂,以及對同一檔案的後續編輯會取消先前編輯的問題
+- [VSCode] 修正當 `/api` 這類 `/word`(例如路徑)與其他文字並排時,Enter 會改寫訊息或執行選單動作,以及執行輸入的 slash 指令時沒有帶上其參數的問題
+- [VSCode] 修正從 Claude、hook 或 MCP 伺服器啟動 Electron 應用程式和擴充功能測試會失敗的問題;把 VS Code 當 Node 執行的 wrapper、hook 或伺服器,現在必須設定 `ELECTRON_RUN_AS_NODE=1`
+- [VSCode] 修正當你拒絕提議編輯的一部分,或在接受前於 diff 檢視中修改時,Claude 沒有收到通知的問題
+- [VSCode] 修正權限提示上按 Escape 會把打到一半的指示送給 Claude,而不是取消的問題
+- [VSCode] 修正在 Windows 和 Linux 上,聊天中的 Ctrl+J 和 Ctrl+O 也會開啟 VS Code 終端機或 Open File 對話框的問題
+- [VSCode] 修正 @ 選單在快速按 Tab 或 Enter 時插入錯誤檔案,以及 Enter 無法送出以沒有符合檔案的 @word 結尾的提示的問題
+- [VSCode] 修正在 Claude 仍在啟動時關閉分頁,導致新的 Claude 分頁一直空白、側邊欄載入失敗的問題
+- [VSCode] 修正在面板中快速連按兩下,會按到第一次點擊後才出現的按鈕或列,或從 context 用量圓圈啟動第二次壓縮(compaction)的問題
+- [VSCode] 修正 settings.json 為空或以位元組順序標記(BOM)開頭時,切換模型會失敗並顯示「Settings file is not valid JSON」的問題
+- [VSCode] 修正長對話每次 fork 或 rewind 後記憶體持續增長,直到重新載入視窗才恢復的問題
+- [VSCode] 修正計畫留言沒有顯示在 Focus view 的計畫核准卡片上的問題
+- [VSCode] 修正沒有行號的檔案連結會把已開啟檔案的游標移到第 1 行的問題
+- [VSCode] 修正同一面板中,在另一個對話後方執行的對話需要權限或回答時,沒有通知的問題
+- [VSCode] 修正 Claude Code 啟動緩慢或啟動失敗時 Manage Plugins 無法載入的問題,讓阻擋啟動的 plugin 可以被關閉
+- [VSCode] 修正 `files.encoding` 不是 UTF-8 時,提議的 diff 顯示並儲存亂碼的非 ASCII 文字的問題
+- [VSCode] 修正已核准的編輯和寫入,在含有希伯來文、阿拉伯文或波斯文的行中,把從右到左標記(right-to-left mark)存成字面上的 `\u200F` 跳脫序列的問題
+- [VSCode] 修正在 Claude 的 process 已結束或仍在啟動時,選擇的模型在下一則訊息被忽略的問題
+- [VSCode] 修正 Claude 的 process 結束後,Rewind 顯示「No active session」的問題
+- [VSCode] 修正在沒有連接瀏覽器時,輸入 @ 會讓每個分頁都留下一個輔助 process 持續執行的問題(Claude in Chrome 的服務無法連線時除外)
+- [VSCode] 修正 session 清單一次開啟所有逐字稿,導致編輯器的擴充功能卡住,且在 session 很多的專案中可能漏掉部分 session 的問題
+- [VSCode] 改善安裝了 Python 擴充功能、但資料夾內沒有 Python 時,在新資料夾中收到第一則回覆的時間
+- [VSCode] 改善登入畫面:當因請求被拒絕而開啟時,會明確說明
+- [VSCode] 改善開啟、還原和切回長對話的速度,在有大量檔案編輯或 git 很慢的情況下改善最明顯
+- [VSCode] 改善長聊天的回應速度:回覆串流時打字與大型檔案寫入更順暢、權限提示更快出現,且在啟用無障礙支援時,送出訊息的凍結大幅減少
+- [VSCode] 改善啟動速度和記憶體使用:面板與新聊天分頁開啟更快、新分頁的第一則訊息更快得到回應,在 Pro 和 Max 方案上資料夾信任對話框也更快出現
+- [VSCode] 改善遠端視窗(SSH、WSL、container)中的速度:面板啟動、回覆顯示和 session 重新開啟都更快
+- [VSCode] 改善在記憶體不足的機器上,聊天閒置幾分鐘後第一則訊息的回應時間
+- [VSCode] 改善在緩慢或有防毒軟體掃描的磁碟上,聊天啟動、從歷史開啟和重啟後恢復的速度
+- [VSCode] 改善重新開啟的對話中 diff 的顯示速度,並移除無法運作的 diff 選單項目
+- [VSCode] 改善 @ 檔案選單,現在會先列出已開啟編輯器分頁的檔案,最近使用的排在最上面
+- [VSCode] 變更儲存提議的 diff 的行為:只有在你點擊或在其提議(右)側輸入後才會接受;當儲存被拒絕,或以 Save 關閉但沒有套用任何內容時,會顯示通知
+- [VSCode] 變更終端機 session 的 diff 行為:開啟時不移動鍵盤焦點,並開在有未儲存變更的檔案旁邊;要回答請點擊 Accept 或使用終端機
+- [VSCode] 變更權限卡片:設定 `allowManagedPermissionRulesOnly` 且卡片原本會提供允許規則時,只顯示 Yes 和 No;這類卡片上的按鍵 2 現在會回答 No
+- [VSCode] 變更 Claude 分頁在其 Find 框失去鍵盤焦點時,會忽略 Enter 並顯示提示
+
 ## 2.1.330
 - 新增支援登入由 Anthropic Enterprise Admin Console 管理的組織：執行 `claude auth login` 之後，Claude Code 會套用該組織的設定，並使用其雲端供應商或 gateway
 - 新增 easel，一個內建的 mod，會在你要求時畫出圖表，也會在 MCP 指標結果下方顯示圖表；適用於 Pro、Max，以及（在可用的情況下）macOS 與 Linux 上的 Team 和 Enterprise；可在 `/config` 中關閉自動產生圖表
