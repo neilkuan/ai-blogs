@@ -2,6 +2,158 @@
 
 > 此文件由 AI 自動翻譯，僅供參考。原文請見 [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
+## 2.1.332
+- 新增來自 MCP server 的 skills（beta）。它們在 `/` 選單中會顯示為 `server:skill`，其他 skills 維持原名
+- 新增 `PreSkillShellCommand` hook 事件，可在 skill 或指令載入時拒絕其內嵌的 shell 指令；在 2.1.331 及更舊版本中，若設定檔裡寫了這個事件，啟動時會跳出對話框
+- 在「其他 session 被保留的訊息」提示中新增「Always deliver」選項
+- 新增一行頁尾提示：當被標記的訊息讓你的 session 切到不同模型時，這行會一直顯示，直到你用 `/model` 選定模型為止
+- 新增 OpenTelemetry `assistant_response` 事件，用於記錄 Claude 透過 SendUserMessage 或 Cowork 的訊息工具送出的文字（需開啟回應記錄）
+- 在 VS Code 與 Desktop 的 Code 分頁中，當 session 有部分內容無法儲存時會顯示警告，並說明如何用 `/compact` 儲存
+- 在 VS Code 與 Desktop 的 Code 分頁中，當還原的 session 較早的訊息未被載入時會顯示通知，與終端機原本的行為一致
+- 在啟動標題列中新增你的 Cyber Verification Program 存取等級，當該等級適用於目前模型，且你以 claude.ai 帳號登入時，會顯示在模型名稱旁
+- 修正 `claude auth login` 在 claude.ai 登入無法儲存時仍回報 `Login successful.` 的問題：現在會以 exit code 1 結束，並說明該檢查什麼，例如殘留的鎖定檔（lock file）或磁碟已滿
+- 修正 Read、@-mention 與壓縮（compaction）在讀取沒有任何程式寫入的具名管道（named pipe）時卡住的問題，例如由已鎖定的密鑰管理工具掛載的 `.env`；現在讀取會在 20 秒後失敗
+- 修正在自動壓縮連續失敗後，回合以「Prompt is too long」結束的問題，而實際上在達到 context 上限時再壓縮一次就能繼續
+- 修正摘要輸出超過輸出上限導致壓縮失敗的問題：在三次回覆被截斷後，最後一次嘗試會要求產生更短的摘要
+- 修正當含有多個萬用字元的權限規則或 hook 條件，對很長的指令進行比對時會凍結的問題
+- 修正 hook 無止盡輸出時，大多數情況下會凍結並導致記憶體用量暴增的問題
+- 修正 hook 在回合中或 `/compact` 之後被阻擋或失敗，且記錄檔非常大時，造成凍結與 context 溢位的問題；超過約 50,000 字元的文字現在會被截短
+- 修正本機 MCP server 大量灌入標準輸出時，終端機凍結且無視 Ctrl+C 的問題
+- 修正當 prompt 或管道輸入含有 `@` 後接極長的連續字串（例如內嵌字型的壓縮版 CSS）時會凍結的問題
+- 修正在大型被追蹤檔案被改寫後，開啟 rewind 點時長時間凍結的問題
+- 修正 SSE MCP server 的事件串流中斷後，改用新的 endpoint 或完全沒恢復，導致卡住或拒絕所有工具呼叫，必須手動重新連線的問題
+- 修正 Remote Control 把桌面 app、VS Code 或 Agent SDK 中的 session 顯示為執行中，但實際上它正在該處等待對話框或 MCP server 提問的問題
+- 修正用量上限已重置後，仍向 Remote Control、IDE 與 SDK 用戶端回報已達上限的問題
+- 修正 session 以 EnterWorktree 移入 `.claude/worktrees` 下的 worktree，或在那裡被還原後，CLAUDE.md 與 rules 檔案在多數情況下會被第二次送給模型的問題
+- 修正在重新啟動過的 session 中拒絕權限提示後，從未執行的工具呼叫在 claude.ai 聊天的摘要行中被算成已完成的問題
+- Linux：修正 Claude 透過符號連結（symlink）讀取檔案後，Bash 編輯 diff 把未變更的 symlink 顯示為已編輯的問題
+- 修正在 transcript 含有大量損毀行時，還原 session 與 `/stats` 會凍結數秒的問題
+- 修正當 `availableModels` 只允許某個家族的較舊版本時，`--fallback-model` 中的家族名稱（例如 `sonnet`）會被丟棄的問題
+- 修正 `/stats` 讀取大型 session transcript 時按鍵延遲數秒的問題（對話框關閉後也一樣），以及開啟 debug 記錄且語言伺服器（language server）大量輸出 stderr 時的相同問題
+- 修正雲端拒絕預設模型，且未強制執行的 `availableModels` 清單既沒列出該模型、也沒列出同家族較舊模型時，session 失敗的問題
+- 修正在 Google Cloud 的 Agent Platform 與 Foundry 上，強制執行的舊模型清單在第一個模型被拒絕時失敗的問題：現在會依序降級到同家族的下一個模型（前提是清單由新到舊排列）
+- 修正在 Bedrock、Google Cloud 的 Agent Platform 與 Foundry 上，若 gateway 以自己的措辭拒絕某個模型，`opus` 會失敗的問題：現在會降級到能回應的較舊模型
+- 修正 Bedrock 與 Google Cloud 的 Agent Platform 上的啟動時模型升級提示，會列出你的 `availableModels` 清單未包含的模型的問題
+- 修正當你的帳號在父層所在區域沒有其模型的 profile 時，Bedrock sub-agent 會失敗的問題：現在會使用該模型自己的 profile，可能位於該區域之外
+- 修正在管理員的清單封鎖 `sonnet`、`opus` 或 `haiku` 所指向的版本時，Foundry session 會離開該模型家族的問題：現在會使用內建或對應名稱下最新的允許版本
+- 修正 Bedrock Mantle 上的 `sonnet` 別名會解析成 Haiku 4.5 的問題：現在代表 Sonnet 5，而非 Sonnet 5.5；沒有 Sonnet 5 的帳號會收到錯誤，所以請先啟用它
+- 修正當被停止的背景 agent 有未讀的 subagent 報告時，在提示字元按 Ctrl+C 會開始新回合，且連按兩次 Ctrl+C 無法退出的問題
+- 修正用 Esc 返回後，`/install-github-app` 又重新勾選 workflow 的問題
+- 修正語音輸入的文字超過 10,000 字元後會遺失的問題
+- 修正非串流重試收到損壞的回應或被中斷時，出現原始的「JSON Parse error」與「The operation was aborted.」API 錯誤的問題
+- 修正在 macOS 上，當 Claude Code 視窗或你允許的 app 位於最前方時，Esc 無法在動作之間停止 computer use 的問題；原本要給該 app 彈出視窗的 Esc 現在會改為停止 computer use
+- 修正輔助指令（例如 API key helper）超過時間限制時偶發的卡死問題
+- 修正在全螢幕中選取文字時，頁尾右側標籤被擠到第二列，導致滑鼠下方的文字移位、可能複製到錯誤行的問題
+- 修正 PreToolUse hook 要求確認的原因，沒有顯示在終端機的 Read、Grep、Glob、Edit 與 Write 提示上的問題（anthropics/claude-code#102892、anthropics/claude-code#105343）
+- 修正下載的 plugin 無法複製到定位時，`~/.claude/plugins/cache` 中堆積 `temp_*` 資料夾的問題
+- 修正在 `CLAUDE_CODE_EFFORT_LEVEL` 設為同一等級時，以 `--environment` 啟動互動式 session，`--effort` 被忽略的問題
+- 修正 headless 與雲端 session 在前景 fork 剛開始時，就把它的 Agent 呼叫回報為已完成的問題
+- 修正 Remote Control session 的程序重新啟動後，本機 MCP server 看到新 session ID 的問題
+- 修正每週用量上限仍遠未用完的訂閱者，閒置壓縮（idle compaction）被略過的問題
+- 修正帶有副檔名的 @-mention 文字檔，在連前 2,000 行都超過讀取上限時被默默丟棄的問題；現在會告知 Claude 該檔案大小與讀取方式
+- 修正 plugin「not cached」錯誤指向 `/plugin`，而非負責重新載入 plugin 的 `/reload-plugins` 的問題
+- 修正自架 runner（self-hosted runner）的 session 在機器的 git 設定含有 `includeIf "gitdir:"` 或（git 2.44 到 2.46）`"onbranch:"` 區段時，於 Anthropic 管理的 git 下首次 clone 失敗的問題
+- 修正以「You've used」或「You've hit your」等詞句開頭的回覆，被顯示成紅色用量上限錯誤的問題
+- 修正在 Bedrock、Google Cloud 的 Agent Platform、Foundry 與其他第三方供應商上，當機或被強制終止後，還原的對話有時缺少最後幾則訊息的問題
+- 修正 NotebookEdit 在編輯變更 cell 類型時會儲存無效 notebook 的問題；現在會拒絕把帶有附件的 cell 轉成程式碼
+- 修正從獨立的 Claude Design 移入設計系統的長 README，在 Claude 開始製作簡報或設計時，遺失其待載入檔案清單的問題
+- 修正當 server 的任務 ID 長於 128 字元時，MCP 工具呼叫會以「malformed task handle」失敗的問題；現在支援最長 1,024 字元的 ID
+- 自架 runner：修正 `--configure-git` 有時會把卡住的 `git --version` 誤報為 git 不在 PATH 中的問題
+- 修正同時刪除或更新多個任務時，任務 id 被重複使用、已刪除的任務又回來的問題，以及 TaskGet 把已完成的任務列為阻擋項的問題
+- 修正全螢幕 Ctrl+R 歷史選擇器在多個 prompt 時間戳記相同時，出現過時與重複列的問題
+- 修正 Code Mode 在工具輸入含有超過 4,096 個項目的清單時，默默略過該工具呼叫的問題，以及在工具輸入含有非常大的 typed array 時凍結的問題，現在會拒絕這類輸入
+- 修正 Code Mode 在指令執行期間輸入訊息、並在 Claude 回覆前按下 Esc 時，該訊息沒有得到回應的問題；現在該訊息會開始新的回合，再按一次 Esc 即可停止
+- 修正 Code Mode 沒有告知 Claude 慢速指令已移到背景、導致其腳本輸出為空的問題，也沒有告知 `claude -p` 與 Agent SDK 中背景指令的時間限制
+- 修正 Code Mode 有時會為已被停止的指令等待數分鐘的問題
+- 修正在背景腳本的輸出送達後，Code Mode 中輸入的 slash command 內嵌 shell 指令不會執行的問題
+- 修正 Agent SDK 與 `claude -p` 中的 Code Mode session，在腳本執行時被停止後，還原時有時會遺失 Claude 最後一則回覆的問題
+- Remote Control：修正由桌面 app 或 VS Code 代管的 session 在 /compact 執行期間顯示為閒置的問題
+- 修正在 Claude Desktop 中，背景任務回報後，session 有時會失去「需要輸入」狀態的問題
+- 修正 Grep：`-o` 在沒有結尾換行的檔案末尾漏掉空匹配、`-o` 搭配多行模式在非 UTF-8 檔案中多出空行或行號錯誤，以及 `-A` 與 `-B` 在 `-C` 為零時被忽略的問題
+- 修正在 `keybindings.json` 中解除綁定和弦（chord）時，若寫成 `meta` 而綁定為 `alt`（或相反），第一個按鍵仍會等待第二個按鍵的問題
+- 修正將空的 session 移到背景時，有時會以「Couldn't load transcript from file」失敗的問題
+- 修正 OpenTelemetry 在每次啟動時，為帳號未啟用的內建 server 回報失敗的 `mcp_server_connection` 事件的問題
+- 修正在大型或緩慢的 git 儲存庫中，Bash 指令等待檔案 diff 時 Esc 無法停止它、導致下一則訊息被擋住的問題
+- 修正貼上以圖片檔名結尾的連結與相對路徑時，會延遲出現並吃掉緊接著按下的 Enter 的問題
+- 修正 `/mcp reconnect all` 與 `/mcp disable all` 會把帳號未啟用的內建 server 也算進去的問題
+- 修正在 mod 的 `turn.step` hook 等待期間中斷回合時，把「user-cancel」顯示為錯誤而非「Interrupted」的問題
+- 修正當另一個 session 正在儲存 `~/.claude.json` 時，它被誤報為已損毀的問題
+- 修正在 Claude 的允許或封鎖網域清單為空或含有重複項目時，網路搜尋因 API 錯誤而失敗的問題
+- 修正在 Code Mode 中還原已暫停的 workflow 時，因其他背景工作仍在執行而等待數分鐘的問題
+- 修正 Code Mode 中的 subagent 在腳本執行超過 10 分鐘時，以「Agent stalled」失敗並遺失其指令的問題
+- 改善 Windows 上的 `claude plugin marketplace add`：當其他程式（例如病毒掃描軟體）短暫佔用下載的檔案時，在某些情況下會等待並重試
+- Windows：改善部分公司電腦上的穩定性，先前 Claude Code 在啟動後不久可能無輸出就結束
+- 改善 computer use 的設定流程：螢幕錄製權限提示現在可以重新啟動 Claude Code 並接續聊天
+- 改善 computer use，在 Claude 實際使用它之前佔用較少的 context
+- 改善 proxy 或 gateway 切斷或損壞壓縮回應時的錯誤訊息：回合現在會以白話文字結束，而不是原始的「ZlibError fetching」文字
+- 改善 `/context`：全螢幕下輸出更精簡，讓總計在較矮的視窗中比較不會被捲出畫面，圖例（legend）也只標示一次單位
+- 改善在有大量近期 session 的機器上，`/usage` 的記憶體尖峰用量與速度
+- 改善 `/permissions`：會拒絕下次啟動時會被略過的規則（例如沒有工具名稱的 `rm -rf`），並顯示原因
+- 改善在 Code Mode 中還原 session 的行為：現在會事先告知 Claude，它先前的腳本變數已經不存在
+- 改善 Code Mode 中的 Claude：捨棄 worktree 變更前會先確認、發布 artifact 檔案前會先讀取，並且會更新既有的 artifact，而不是另外建立第二個
+- 改善 Code Mode 的工具搜尋：較長的 MCP 工具描述在放得下時會完整顯示，因為被截斷的描述可能導致錯誤的呼叫
+- Linux：改善 Ctrl+V 的訊息，當無法從剪貼簿讀取圖片時，會指出要安裝的套件（`wl-clipboard` 或 `xclip`）
+- 改善在有請求大小限制的 proxy 或 gateway 後方，長對話的復原行為，先前每則訊息與 `/compact` 都會以 413 失敗
+- 改善 Windows 上 6 個以上 CPU 的機器在大型本機資料夾中的 Glob 速度：資料夾現在以平行方式走訪，達到時間限制而停止的搜尋也會列出已找到的結果
+- 改善還原長對話時的記憶體用量
+- 改善啟動時搭配會列出大量工具的 MCP server 的記憶體用量
+- 改善 `claude -p` 與 SDK 代管 session 在對話開始時的記憶體用量
+- 更新 macOS 上的 computer use 以採用較新的安全規則，因此部分動作會被拒絕，輸入也可能變慢
+- 變更：在 Bedrock Mantle、Agent Platform 與 Foundry 上，移到 Sonnet 5 或 5.5 的終端機與 VS Code session，若未設定模式，會以 auto mode 啟動；將 `disableAutoMode` 設為 `"disable"` 即可停止
+- 變更：Google Cloud 的 Agent Platform 與 Microsoft Foundry 上的 `sonnet` 模型別名改為 Sonnet 5.5，Foundry 的 `opus` 別名改為 Opus 5.5；Amazon Bedrock 上的 `sonnet` 維持 Sonnet 4.5
+- 變更：Microsoft Foundry 的預設模型改為 Sonnet 5.5：請部署 `claude-sonnet-5-5`，或將 `ANTHROPIC_DEFAULT_SONNET_MODEL` 設為你已部署的模型
+- 變更：Google Cloud 的 Agent Platform 上的 `sonnet` 與背景請求改為讀取 `VERTEX_REGION_CLAUDE_5_5_SONNET`；若只設定 `4_5` 變數，則會改用 `CLOUD_ML_REGION` 或 `us-east5`
+- 變更：`--model default` 與選擇 Default 時，若該模型無法使用，會改為降級到較舊的模型，而不是以錯誤停止；在 auto mode 中，則只會降級到 auto mode 接受的模型
+- 變更 Microsoft Foundry：Claude Sonnet 4、Opus 4 與 Opus 4.1 現在視為已退役，因此降級會停在它們之上，若釘選（pin）到其中之一，會警告該模型已退役
+- 變更 Claude apps gateway 內建的模型清單：Sonnet 5.5 取代 Sonnet 4.5 成為第二個模型，在政策不允許 Opus 4.6 的情況下，Claude Desktop 會以它啟動
+- 變更：在未擷取 feature flag 的環境（例如雲端或關閉 telemetry 時），從 Opus 4.8 起，SDK 與 `claude -p` 的回合中途訊息會算作使用者的訊息；請將轉送的文字標記為 `isSynthetic: true`
+- 變更：在開啟 computer use 的 Mac 上，`computer-use` 成為保留的 skill 名稱：你自己同名的 skill 或指令將不再載入，啟動時會有通知提醒你改名
+- 變更：桌面 Code 分頁 session 預設的 OpenTelemetry `service.name` 改為 `claude-code-desktop`；請更新以 `claude-code` 為鍵的篩選條件，或設定 `OTEL_SERVICE_NAME` 以保留舊名稱
+- 變更：除非開啟回應記錄（`OTEL_LOG_ASSISTANT_RESPONSES=1`），否則 OpenTelemetry 的 `tool_input` 對於透過 SendUserMessage 或 Cowork 訊息工具送出的文字，只會顯示其長度
+- 自架 runner：變更 `CLAUDE_CODE_OAUTH_TOKEN`：其前綴現在除了 `oat01-` 之外也可能以 `oat02-` 結尾。請更新比對 `oat01-` 的 proxy 規則與 log 清理工具，並遮蔽整個值
+- 變更：在 macOS 與 Linux 上不帶參數執行 `claude self-hosted-runner setup` 時，會在 Claude 啟動前於終端機要求輸入環境金鑰，且貼上時會隱藏內容
+- 變更：Anthropic API 上的 Claude Desktop Code 分頁，當你自己的設定旁有 gateway 位址時，會忽略不以 `claude` 開頭的預設、side-request、別名與 subagent 模型 id
+- 變更：Anthropic API 上的 Claude Desktop Code 分頁，當你自己的設定旁有 gateway 位址時，會忽略小於 200K 的 `CLAUDE_CODE_AUTO_COMPACT_WINDOW`；請改用 `/autocompact`
+- 變更：對於從 Manual 或 Accept edits 進入的計畫，桌面 app Code 分頁與 VS Code 中的 plan mode，在沒有任何 auto mode 安全檢查能判斷某個指令時，會改為要求核准，而不是直接拒絕
+- 變更：在破壞性問題（例如從 agent 檢視中執行 `/clear`）上，PgUp 與 Home 會移到 No
+- 變更：終端機中的 `/feedback` 草稿會預設停在 Not now，其上方另有單獨送出報告、或連同 transcript 一起送出的選項列
+- 變更：點按模式（tap-mode）語音輸入會讓麥克風保持開啟，直到 60 秒沒有新的字詞或達 10 分鐘為止（原為 15 秒與 2 分鐘），然後保留文字不送出；下次點按會接續加入
+- 變更：點按模式語音輸入會在你送出 prompt 時停止，並在你編輯內容、有面板蓋住它，或連線或獨立錄音程式中斷時停止並說明原因
+- 變更：`/schedule`、權限提示與 `/loop` 的雲端提示，現在會說「cloud scheduled task」，而不是「routine」或「cloud schedule」；`/routines` 仍可使用
+- 變更：從 Claude 行動 app 或 claude.ai 切換模型時，若新模型沒有儲存的 effort 等級，會沿用你為前一個模型儲存的等級
+- 變更：當全螢幕頁尾右側有標籤時，mod 的 `PromptHint` hook 收到的 `hint` 會省略選取文字的提示
+- 變更：`awsCredentialExport` 現在會在 10 分鐘後逾時，而不是無限等待
+- [VSCode] 新增：在更多情況下，關閉提議的 diff 導致編輯未套用時會顯示通知，並停止對已回答 diff 的分割副本顯示 diff 通知
+- [VSCode] 新增：在側邊欄用 `/rewind` 還原對話而導致自我調速（self-paced）的 `/loop` 停止時，會顯示警告
+- [VSCode] 新增：在 Manage plugins 的各列中顯示已安裝的版本
+- [VSCode] 修正 Claude 程序在啟動時卡住，導致 Rewind 一直停在「Checking code changes…」的問題
+- [VSCode] 修正模型選擇器開啟後，方向鍵從錯誤的列開始的問題，以及用 `/model` 或命令選單開啟時，螢幕閱讀器沒有朗讀已反白的模型的問題
+- [VSCode] 修正 diff 檢視的「Copy deleted line」與「Copy changed line」複製到與所指名不同的行的問題，以及在靠近底部雙擊時會在未要求下複製的問題
+- [VSCode] 修正被封鎖的麥克風提示文字被截斷、Web Fetch 列中過長的網址跑出範圍、High Contrast 下用量條看起來是滿的，以及點擊 Thinking 列時它會跳走的問題
+- [VSCode] 修正在同一視窗中第二次 Logout 時，第一次仍在執行卻回報成功的問題，並在登出失敗的錯誤中新增 Show logs 按鈕
+- [VSCode] 修正當背景指令、agent、workflow 或 monitor 在 Claude 閒置時結束，聊天中沒有顯示通知的問題
+- [VSCode] 修正在 Windows 11 24H2 及更新版本上的 VS Code 1.101 與 1.102，於 NTFS 磁碟機上 fork 對話、開啟與儲存記憶，以及建立專案 output style 失敗的問題
+- [VSCode] 修正網站回傳錯誤，或重新導向未被跟隨時，Web Fetch 仍顯示帶成功圓點的「Fetched from」的問題
+- [VSCode] 修正在重新載入、還原或 fork 已壓縮的對話後，壓縮摘要被顯示成你自己的 prompt，並出現在 Rewind 與 prompt 歷史中的問題
+- [VSCode] 修正 Claude Code 使用者與受管理設定中的 `spinnerVerbs` 被忽略的問題
+- [VSCode] 修正來自 mod 的由右至左（right-to-left）文字，標點符號顯示在錯誤一側的問題，以及面板字型缺少製表字元（box-drawing characters）時，mod 的 band 或 pane 只填滿部分寬度的問題
+- [VSCode] 修正最後一個 Claude 分頁關閉後，空白且鎖定的編輯器窗格仍留在下一個檔案或 Claude 分頁旁的問題
+- [VSCode] 修正無法儲存的 session 重新命名會默默還原的問題，以及螢幕閱讀器聽不到 session 的狀態、目前開啟的是哪個 session、或哪些群組已收合的問題
+- [VSCode] 修正隱藏面板的通知沒有指出正在等待的 session、希伯來文與阿拉伯文的問題朗讀順序錯亂，以及 Claude 程序結束時被截斷的問題只顯示紅點的問題
+- [VSCode] 修正登入失敗卻沒有錯誤訊息，結果回到登入畫面卻什麼都沒顯示的問題，以及在該分頁重新登入後，驗證錯誤看起來仍然有效的問題
+- [VSCode] 修正選單在某些橫幅上方開啟時聊天內容會位移的問題，以及長 session 中 agent 的工具呼叫次數會縮水的問題；現在會顯示列出的呼叫數佔總數的多少
+- [VSCode] 修正大多數指向無副檔名檔案、資料夾，以及帶有行號與欄號的連結點了沒反應的問題
+- [VSCode] 修正重新開啟對話後，排隊的訊息與附加的檔案順序顯示相反的問題
+- [VSCode] 修正已儲存的結果沒有文字時，以錯誤結束的問題顯示「Something went wrong」的問題
+- [VSCode] 修正已遮蔽的思考（redacted thinking）顯示為「Unsupported content type」的問題
+- [VSCode] 修正訊息輸入框沒有為輸入法（IME）正在組字的字詞加上底線的問題
+- [VSCode] 修正按住 Up 鍵會用較早的 prompt 取代尚未送出的訊息，以及在叫回的 prompt 新增換行或被清除後，Down 無法把原訊息帶回來的問題
+- [VSCode] 修正用 Tab 補全的 `/model` 有時會切換模型的問題，以及在沒有任何東西執行時模型選擇器立刻關閉的問題
+- [VSCode] 改善開啟 Claude 面板與長 session 的時間、長回覆串流時的效能，以及在超大型工作區讀取診斷資訊的速度
+- [VSCode] 改善在純文字分頁中開啟的指令與單行輸出：現在會自動換行
+- [VSCode] 變更：語音輸入現在會在 60 秒沒有辨識到語音或達 10 分鐘後自動停止（原為 15 秒與 2 分鐘），讓麥克風可以開得更久
+- [VSCode] 變更：當麥克風停止傳送音訊或面板持續隱藏時，語音輸入會停止並說明原因
+
 ## 2.1.331
 - 新增在 Amazon Bedrock、Google Cloud 的 Agent Platform、Microsoft Foundry 和 Claude Platform on AWS 的終端機 session 中支援 Code Mode
 - 在 Claude apps gateway 新增 `oidc.groups_jsonpath`,可用 JSONPath(RFC 9535)的一小部分語法,從物件陣列中符合的項目讀取群組
